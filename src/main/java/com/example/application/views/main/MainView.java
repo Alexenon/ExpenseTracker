@@ -2,6 +2,7 @@ package com.example.application.views.main;
 
 import com.example.application.data.Expense;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextField;
@@ -13,25 +14,32 @@ import com.vaadin.flow.router.Route;
 @Route(value = "")
 public class MainView extends HorizontalLayout {
 
-    Grid<Expense> grid = new Grid<Expense>();
-    TextField filterText = new TextField();
+    Grid<Expense> grid = new Grid<>(Expense.class);
 
     public MainView() {
         configureGrid();
+
         add(getToolBar());
+        add(grid);
     }
 
     private Component getToolBar() {
+        TextField filterText = new TextField();
         filterText.setPlaceholder("Filter by name...");
         filterText.setClearButtonVisible(true);
         filterText.setValueChangeMode(ValueChangeMode.LAZY);
-        return null;
+
+        Button addBtn = new Button("Add");
+        final HorizontalLayout toolBar = new HorizontalLayout(filterText, addBtn);
+        toolBar.addClassName("toolbar");
+
+        return toolBar;
     }
 
     private void configureGrid() {
         grid.addClassName("expenses-grid");
         grid.setSizeFull();
-        grid.setColumns("Id", "Expense", "Amount", "Description", "Interval", "Date created");
+        grid.setColumns("name", "amount", "description", "expenseInterval", "date");
         grid.getColumns().forEach(c -> c.setAutoWidth(true));
     }
 
