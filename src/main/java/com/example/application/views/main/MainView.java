@@ -1,7 +1,7 @@
 package com.example.application.views.main;
 
-import com.example.application.entities.Expense;
-import com.example.application.services.ExpenseService;
+import com.example.application.model.Expense;
+import com.example.application.service.ExpenseService;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -51,7 +51,7 @@ public class MainView extends HorizontalLayout {
     private Component getGrid() {
         grid.addClassName("expenses-grid");
         grid.setSizeFull();
-        grid.setColumns("name", "amount", "description", "expenseInterval", "date");
+        grid.setColumns("name", "amount", "description", "timestamps", "date");
         grid.getColumns().forEach(c -> c.setAutoWidth(true));
 
         grid.addColumn(person -> createButton("Add", VaadinIcon.PLUS))

@@ -1,7 +1,7 @@
-package com.example.application.services;
+package com.example.application.service;
 
-import com.example.application.entities.Expense;
-import com.example.application.repositories.ExpenseRepository;
+import com.example.application.model.Expense;
+import com.example.application.repository.ExpenseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
