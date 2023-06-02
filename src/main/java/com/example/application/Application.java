@@ -10,7 +10,6 @@ import org.springframework.context.annotation.ComponentScan;
  * The entry point of the Spring Boot application
  */
 @SpringBootApplication
-@ComponentScan(basePackages = { "com.example.application.services", "com.example.application.views.main" })
 @Theme(value = "mytodo")
 public class Application implements AppShellConfigurator {
 

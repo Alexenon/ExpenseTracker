@@ -2,17 +2,19 @@ package com.example.application.services;
 
 import com.example.application.entities.Expense;
 import com.example.application.repositories.ExpenseRepository;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-@NoArgsConstructor
 public class ExpenseService {
 
-    ExpenseRepository repository;
+    @Autowired
+    private ExpenseRepository repository;
+
+    public ExpenseService() {
+    }
 
     public ExpenseService(ExpenseRepository repository) {
         this.repository = repository;

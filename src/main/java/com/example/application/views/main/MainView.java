@@ -4,6 +4,7 @@ import com.example.application.entities.Expense;
 import com.example.application.services.ExpenseService;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -39,6 +40,8 @@ public class MainView extends HorizontalLayout {
         filterText.addValueChangeListener(e -> updateGrid());
 
         Button addBtn = new Button("Add");
+        addBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
+
         final HorizontalLayout toolBar = new HorizontalLayout(filterText, addBtn);
         toolBar.addClassName("toolbar");
 
