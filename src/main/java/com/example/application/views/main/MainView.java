@@ -51,7 +51,7 @@ public class MainView extends HorizontalLayout {
     private Component getGrid() {
         grid.addClassName("expenses-grid");
         grid.setSizeFull();
-        grid.setColumns("name", "amount", "description", "timestamps", "date");
+        grid.setColumns("name", "amount", "description", "date", "timestamp");
         grid.getColumns().forEach(c -> c.setAutoWidth(true));
 
         grid.addColumn(person -> createButton("Add", VaadinIcon.PLUS))

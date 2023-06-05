@@ -7,8 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity
 @NoArgsConstructor
@@ -36,5 +34,11 @@ public class Expense {
     @Getter
     @Setter
     private Date date;
+
+    @ManyToOne
+    @JoinColumn(name = "timestamp_id")
+    @Getter
+    @Setter
+    private Timestamp timestamp;
 }
 

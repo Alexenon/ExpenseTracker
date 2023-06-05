@@ -1,13 +1,13 @@
 package com.example.application.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity
 @NoArgsConstructor
@@ -18,19 +18,9 @@ public class Timestamp {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Getter
     @Setter
-    private Long id;
+    private long id;
 
     @Getter
     @Setter
-    private String type;
-
-    /**
-     * Figure out what kind of constraint I need
-     * */
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name = "timestamp_id")
-    @Getter
-    @Setter
-    private Set<Timestamp> timestamps = new HashSet<>();
-
+    private String name;
 }
