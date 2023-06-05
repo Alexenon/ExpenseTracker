@@ -12,6 +12,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @Theme(value = "mytodo")
 public class Application implements AppShellConfigurator {
 
+    //https://www.youtube.com/watch?v=bxy2JgqqKDU&t=1428s
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
     }

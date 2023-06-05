@@ -1,28 +1,26 @@
-package com.example.application.data;
+package com.example.application.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import java.util.Date;
-
-@Data
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-public class Expense {
+public class Timestamp {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Getter
+    @Setter
     private long id;
-    private String name;
-    private double amount;
-    private String description;
-    private String expenseInterval;
-    private Date date;
-}
 
+    @Getter
+    @Setter
+    private String name;
+}
