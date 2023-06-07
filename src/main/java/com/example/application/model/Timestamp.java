@@ -23,4 +23,9 @@ public class Timestamp {
     @Getter
     @Setter
     private String name;
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }
