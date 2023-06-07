@@ -20,13 +20,18 @@ import java.util.List;
 @Route(value = "")
 public class MainView extends HorizontalLayout {
 
+    private final ExpenseService expenseService;
+
     TextField filterText = new TextField();
     Grid<Expense> grid = new Grid<>(Expense.class);
 
-    @Autowired
-    private ExpenseService expenseService;
-
     public MainView() {
+        this(null); // Delegate another constructor
+    }
+
+    @Autowired
+    public MainView(ExpenseService expenseService) {
+        this.expenseService = expenseService;
         add(
                 getToolBar(),
                 getGrid()
@@ -82,15 +87,9 @@ public class MainView extends HorizontalLayout {
     }
 
     private void updateGrid() {
-        if (expenseService == null) {
-            System.out.println("ExpenseService is null");
-        } else {
-            System.out.println("ExpenseService is not null");
-            List<Expense> allExpenses = expenseService.getAllExpenses();
-            System.out.println("Number of expenses: " + allExpenses.size());
-            grid.setItems(allExpenses);
-        }
+        List<Expense> allExpenses = expenseService.getAllExpenses();
+        grid.setItems(expenseService.getAllExpenses());
+        allExpenses.forEach(System.out::println);
     }
-
 
 }

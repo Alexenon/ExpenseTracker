@@ -40,5 +40,10 @@ public class Expense {
     @Getter
     @Setter
     private Timestamp timestamp;
+
+    @Override
+    public String toString() {
+        return String.format("%d, %s, %f, %s, %s, %s", id, name, amount, timestamp.getName(), description, date);
+    }
 }
 
