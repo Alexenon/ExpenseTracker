@@ -1,24 +1,22 @@
 package com.example.application.views.main;
 
 import com.example.application.model.Expense;
-import com.example.application.model.Timestamp;
 import com.example.application.service.ExpenseService;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.Date;
-import java.util.List;
 
 @PageTitle("Main")
 @Route(value = "")
@@ -26,12 +24,8 @@ public class MainView extends VerticalLayout {
 
     private final ExpenseService expenseService;
 
-    TextField filterText = new TextField();
-    Grid<Expense> grid = new Grid<>(Expense.class);
-
-    public MainView() {
-        this(null); // Delegate another constructor
-    }
+    private final TextField filterText = new TextField();
+    private final Grid<Expense> grid = new Grid<>(Expense.class);
 
     @Autowired
     public MainView(ExpenseService expenseService) {
@@ -60,33 +54,52 @@ public class MainView extends VerticalLayout {
     private Component getGrid() {
         grid.addClassName("expenses-grid");
         grid.setColumns("name", "amount", "description", "date", "timestamp");
+
+        // Edit
+        grid.addColumn(
+                new ComponentRenderer<>(Button::new, (button, expense) -> {
+                    button.addThemeVariants(ButtonVariant.LUMO_ICON,
+                            ButtonVariant.LUMO_TERTIARY);
+                    button.addClickListener(e -> System.out.println("Clicking on edit"));
+                    button.setIcon(new Icon(VaadinIcon.EDIT));
+                })).setHeader("Edit");
+
+        // Delete
+        grid.addColumn(
+                new ComponentRenderer<>(Button::new, (button, expense) -> {
+                    button.addThemeVariants(ButtonVariant.LUMO_ICON,
+                            ButtonVariant.LUMO_ERROR,
+                            ButtonVariant.LUMO_TERTIARY);
+                    button.addClickListener(e -> {
+                        ConfirmDialog dialog = getConfirmationDialog(expense.getName());
+                        dialog.open();
+                        dialog.addConfirmListener(l -> expenseService.deleteExpense(expense));
+                        updateGrid();
+                    });
+                    button.setIcon(new Icon(VaadinIcon.TRASH));
+                })).setHeader("Delete");
+
         grid.getColumns().forEach(c -> c.setAutoWidth(true));
 
-        grid.addColumn(person -> createButton("Add", VaadinIcon.PLUS))
-                .setHeader("Add")
-                .setResizable(false);
-
-        grid.addColumn(person -> createButton("Edit", VaadinIcon.EDIT))
-                .setHeader("Edit")
-                .setResizable(false);
-
-        grid.addColumn(person -> createButton("Remove", VaadinIcon.TRASH))
-                .setHeader("Remove")
-                .setResizable(false);
-
         updateGrid();
-
         return grid;
     }
 
-    private Button createButton(String text, VaadinIcon icon) {
-        return new Button(text, icon.create());
+    private ConfirmDialog getConfirmationDialog(String text) {
+        ConfirmDialog dialog = new ConfirmDialog();
+        dialog.setHeader("Deleting \"" + text + "\"?");
+        dialog.setText("Are you sure you want to permanently delete this item?");
+
+        dialog.setCancelable(true);
+        dialog.setConfirmText("Delete");
+        dialog.setConfirmButtonTheme("error primary");
+
+        return dialog;
     }
 
     private void updateGrid() {
-        List<Expense> allExpenses = expenseService.getAllExpenses();
+        System.out.println("Updating grid");
         grid.setItems(expenseService.getAllExpenses());
-        allExpenses.forEach(System.out::println);
     }
 
 }
