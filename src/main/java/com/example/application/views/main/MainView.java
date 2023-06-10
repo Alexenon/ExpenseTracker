@@ -18,8 +18,8 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@PageTitle("Main")
-@Route(value = "")
+@PageTitle("Expenses")
+@Route(value = "", layout = MainLayout.class)
 public class MainView extends VerticalLayout {
 
     private final ExpenseService expenseService;
@@ -55,7 +55,7 @@ public class MainView extends VerticalLayout {
         grid.addClassName("expenses-grid");
         grid.setColumns("name", "amount", "description", "date", "timestamp");
 
-        // Edit
+        // Edit Column
         grid.addColumn(
                 new ComponentRenderer<>(Button::new, (button, expense) -> {
                     button.addThemeVariants(ButtonVariant.LUMO_ICON,
@@ -64,7 +64,7 @@ public class MainView extends VerticalLayout {
                     button.setIcon(new Icon(VaadinIcon.EDIT));
                 })).setHeader("Edit");
 
-        // Delete
+        // Delete Column
         grid.addColumn(
                 new ComponentRenderer<>(Button::new, (button, expense) -> {
                     button.addThemeVariants(ButtonVariant.LUMO_ICON,
@@ -80,7 +80,6 @@ public class MainView extends VerticalLayout {
                 })).setHeader("Delete");
 
         grid.getColumns().forEach(c -> c.setAutoWidth(true));
-
         updateGrid();
         return grid;
     }

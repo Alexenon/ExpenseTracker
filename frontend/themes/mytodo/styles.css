@@ -1,0 +1,25 @@
+<!-- Header and Navbar -->
+
+#navbarTop {
+
+}
+
+#header {
+    background: aqua;
+}
+
+#navbar {
+    display: flex;
+    justify-content: space-between;
+    max-width: 400px;
+    margin: 0 auto;
+    background: #A0C5E8;
+    padding: 10px 0;
+}
+
+#navbar > a {
+    max-width: 400px;
+    height: 50px;
+    background: black;
+}
+
