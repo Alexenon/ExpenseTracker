@@ -14,7 +14,6 @@ public class MainLayout extends AppLayout {
         addFooter();
     }
 
-
     private void addHeader() {
         Text text = new Text("This is a header");
 

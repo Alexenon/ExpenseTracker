@@ -1,25 +1,20 @@
 package com.example.application.views.main;
 
 import com.example.application.service.ExpenseService;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.charts.Chart;
-import com.vaadin.flow.component.charts.model.ChartType;
-import com.vaadin.flow.component.charts.model.DataSeries;
-import com.vaadin.flow.component.charts.model.DataSeriesItem;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.component.dependency.StyleSheet;
-import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.shared.ui.LoadMode;
 import org.springframework.beans.factory.annotation.Autowired;
 
-
-/* https://codesandbox.io/s/mogry5?file=/index.js:0-988 */
 @PageTitle("Dashboard")
 @Route(value = "dashboard", layout = MainLayout.class)
-@JsModule("./themes/mytodo/components/dashboard.html")
+@JsModule(value = "./themes/mytodo/components/fillChart.js")
+@JavaScript("https://cdnjs.cloudflare.com/ajax/libs/echarts/4.6.0/echarts-en.min.js")
 public class DashboardView extends HorizontalLayout {
 
     private final ExpenseService expenseService;
@@ -28,8 +23,14 @@ public class DashboardView extends HorizontalLayout {
     public DashboardView(ExpenseService expenseService) {
         this.expenseService = expenseService;
         setDefaultVerticalComponentAlignment(Alignment.CENTER);
+
+        Div div = new Div();
+        div.setId("chart-pie");
+        div.setWidth("500px");
+        div.setHeight("500px");
+        add(div);
+
+        UI.getCurrent().getPage().executeJs("fillChartPie()");
     }
-
-
 
 }
