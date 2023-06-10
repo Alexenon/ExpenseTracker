@@ -5,9 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Formula;
 
 import java.text.SimpleDateFormat;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 @Entity
@@ -48,5 +48,6 @@ public class Expense {
         final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
         return String.format("%d, %s, %f, %s, %s, %s", id, name, amount, timestamp.getName(), description, dateFormatter.format(date));
     }
+
 }
 
