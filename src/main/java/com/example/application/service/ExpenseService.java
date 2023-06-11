@@ -29,7 +29,4 @@ public class ExpenseService {
         repository.delete(expense);
     }
 
-//    public List<Expense> searchExpenses(String value) {
-//        return repository.searchIgnoreCase(value);
-//    }
 }

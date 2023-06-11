@@ -157,6 +157,8 @@
   "wkt-parser": "1.3.3"
  },
  "bundleImports": [
+  "@vaadin/vaadin-themable-mixin",
+  "Frontend/themes/mytodo/components/dashboard.css",
   "@vaadin/grid/theme/lumo/vaadin-grid.js",
   "@vaadin/tooltip/theme/lumo/vaadin-tooltip.js",
   "@vaadin/grid/theme/lumo/vaadin-grid-column.js",
@@ -252,10 +254,11 @@
   "Frontend/generated/jar-resources/vaadin-map/mapConnector.js",
   "Frontend/generated/jar-resources/vaadin-time-picker/timepickerConnector.js",
   "Frontend/generated/jar-resources/virtualListConnector.js",
-  "Frontend/themes/pie_chart.js"
+  "Frontend/themes/mytodo/components/fillChart.js"
  ],
  "frontendHashes": {
-  "themes/pie_chart.js": "b63f4b17a81a12813394782f9207c1d5a05bc4e01b025178118cf0ba1d4d68c9",
+  "themes/mytodo/components/dashboard.css": "3b00adf9bf95aaaaff56857c6325f28dab7373bf496bbf9570ba40c54760b4c9",
+  "themes/mytodo/components/fillChart.js": "a1795d6c086d4662c9068d52fdcf12d2a4ccbb6e65e8522b73480444324f2fbf",
   "comboBoxConnector.js": "1d004c3dae9c76f8bcc68678abe1b8f7bdc8b456f5c9c4c7f190df8ed25d66cd",
   "contextMenuConnector.js": "25a200f8086461635ddd92316ebeb5a868294c8650a190efbae120edb1088f4f",
   "contextMenuTargetConnector.js": "870f67643988dd5618c247bd3c28d843f70aa026ee89f44c3c7556b5e70856af",
@@ -281,7 +284,7 @@
   "mytodo": "{\n  \"lumoImports\" : [ \"typography\", \"color\", \"spacing\", \"badge\", \"utility\" ]\n}"
  },
  "entryScripts": [
-  "VAADIN/build/indexhtml-14e01df5.js"
+  "VAADIN/build/indexhtml-70e2da42.js"
  ],
  "webComponents": [],
  "packageJsonHash": "e7f31c1be23da66c9632b284173867bf6f66fbbcedd9c79737ea06f38923e25c"
