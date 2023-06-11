@@ -1,24 +1,64 @@
-<!-- Header and Navbar -->
-
-#navbarTop {
-
+:root {
+    --header-background: rgb(255, 255, 255);
+    --color-black: rgb(51, 40, 40);
 }
 
-#header {
-    background: aqua;
+*{
+    margin: 0;
+    text-decoration: none !important;
+    padding: 0;
+    list-style-type: none;
+    outline: none;
+    font-family: 'Poppins', sans-serif;
 }
 
-#navbar {
+#header{
+    border-bottom: 2px solid var(--color-black);
+    background-color: var(--header-background);
+}
+
+#navbar{
     display: flex;
-    justify-content: space-between;
-    max-width: 400px;
-    margin: 0 auto;
-    background: #A0C5E8;
-    padding: 10px 0;
+    align-items: center;
+    padding: 30px 50px;
+    font-size: 16px;
 }
 
-#navbar > a {
-    max-width: 400px;
-    height: 50px;
+.logo{
+    margin-right: 25px;
 }
 
+.menu-inner{
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.menu-item {
+    position: relative;
+    color: var(--color-black) !important;
+}
+
+.menu-inner a::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    background: var(--color-black);
+    left: 0;
+    bottom: -4px;
+    transition: ease .40s;
+}
+
+.menu-inner a:hover::after {
+    width: 100%;
+}
+
+canvas {
+    top: 100px !important;
+    left: 30px !important;
+}
+
+#canvs1 {
+  width: 200px;
+}

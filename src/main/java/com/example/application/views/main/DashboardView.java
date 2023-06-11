@@ -36,6 +36,7 @@ public class DashboardView extends HorizontalLayout {
         chartPie.setHeight("500px");
 
         UI.getCurrent().getPage().executeJs("fillChartPie()");
+        UI.getCurrent().getPage().executeJs("showChartDetails('//div[@id=\"chart-pie\"]')");
 
         container.add(chartPie);
         add(container);
