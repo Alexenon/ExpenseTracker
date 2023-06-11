@@ -27,7 +27,7 @@ window.fillChartPie = function fillChartPie() {
         data: [
           {value: 15, name: 'Drama'},
           {value: 30, name: 'Scifi'},
-          {value: 16, name: 'Crime'},
+          {value: 16, name: 'Criminals'},
           {value: 3, name: 'Horror'}
         ],
         emphasis: {
@@ -51,3 +51,30 @@ window.fillChartPie = function fillChartPie() {
     myChart.setOption(option, true);
   }
 };
+
+window.showChartDetails = function showChartDetails(xpath) {
+  const chartElement = document.evaluate(
+    xpath + '//canvas',
+    document,
+    null,
+    XPathResult.FIRST_ORDERED_NODE_TYPE,
+    null
+  ).singleNodeValue;
+
+  const elementWithText = document.evaluate(
+      xpath + '//div[last()]',
+      document,
+      null,
+      XPathResult.FIRST_ORDERED_NODE_TYPE,
+      null
+  ).singleNodeValue;
+
+
+
+  if (chartElement && elementWithText) {
+    chartElement.addEventListener('click', function() {
+      console.log(elementWithText.textContent);
+    });
+  }
+};
+
