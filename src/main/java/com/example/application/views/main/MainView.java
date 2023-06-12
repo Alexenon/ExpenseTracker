@@ -18,8 +18,6 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.List;
-
 @PageTitle("Expenses")
 @Route(value = "", layout = MainLayout.class)
 public class MainView extends VerticalLayout {
@@ -33,6 +31,7 @@ public class MainView extends VerticalLayout {
     public MainView(ExpenseService expenseService) {
         this.expenseService = expenseService;
 
+        this.setClassName("page-content");
         add(
                 getToolBar(),
                 getGrid()
@@ -56,12 +55,7 @@ public class MainView extends VerticalLayout {
 
     private Component getGrid() {
         grid.addClassName("expenses-grid");
-
-        grid.addColumn(ExpenseDTO::getName).setHeader("Expense Name");
-        grid.addColumn(ExpenseDTO::getAmount).setHeader("Amount");
-        grid.addColumn(ExpenseDTO::getCategory).setHeader("Category");
-        grid.addColumn(ExpenseDTO::getDescription).setHeader("Description");
-        grid.addColumn(ExpenseDTO::getTimestamp).setHeader("Interval");
+        grid.setColumns("name", "category", "amount", "description", "timestamp");
 
         // Edit Column
         grid.addColumn(
@@ -93,13 +87,7 @@ public class MainView extends VerticalLayout {
     }
 
     private void updateGrid() {
-        System.out.println("Updating grid");
-        final List<ExpenseDTO> allExpenses = expenseService.getAllExpenses();
-        grid.getColumns().forEach(c -> {
-            allExpenses
-        });
-
-        grid.setItems(allExpenses);
+        grid.setItems(expenseService.getAllExpenses());
     }
 
     private ConfirmDialog getConfirmationDialog(String text) {

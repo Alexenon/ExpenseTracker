@@ -12,7 +12,7 @@ import java.util.List;
 public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 
     @Query(value = """
-            SELECT E.name, E.amount, C.name, E.description, T.name
+            SELECT E.name, E.amount, C.name as 'Category', E.description, T.name as 'Timestamp'
             FROM expense E
             INNER JOIN category C ON C.id = E.category_id
             INNER JOIN timestamp T ON T.id = E.timestamp_id
