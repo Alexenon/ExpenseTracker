@@ -11,12 +11,12 @@ import java.util.List;
 @Repository
 public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 
-    @Query("""
-            select e.name, e.amount, c.name, e.description, t.name
-            from Expense e
-            inner join e.category c
-            inner join e.timestamp t
-            """)
+    @Query(value = """
+            SELECT E.name, E.amount, C.name, E.description, T.name
+            FROM expense E
+            INNER JOIN category C ON C.id = E.category_id
+            INNER JOIN timestamp T ON T.id = E.timestamp_id
+            """, nativeQuery = true)
     List<ExpenseDTO> getAll();
 
 }

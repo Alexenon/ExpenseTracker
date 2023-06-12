@@ -18,6 +18,8 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.List;
+
 @PageTitle("Expenses")
 @Route(value = "", layout = MainLayout.class)
 public class MainView extends VerticalLayout {
@@ -30,6 +32,7 @@ public class MainView extends VerticalLayout {
     @Autowired
     public MainView(ExpenseService expenseService) {
         this.expenseService = expenseService;
+
         add(
                 getToolBar(),
                 getGrid()
@@ -53,7 +56,12 @@ public class MainView extends VerticalLayout {
 
     private Component getGrid() {
         grid.addClassName("expenses-grid");
-        grid.setColumns("name", "amount", "category", "description", "timestamp");
+
+        grid.addColumn(ExpenseDTO::getName).setHeader("Expense Name");
+        grid.addColumn(ExpenseDTO::getAmount).setHeader("Amount");
+        grid.addColumn(ExpenseDTO::getCategory).setHeader("Category");
+        grid.addColumn(ExpenseDTO::getDescription).setHeader("Description");
+        grid.addColumn(ExpenseDTO::getTimestamp).setHeader("Interval");
 
         // Edit Column
         grid.addColumn(
@@ -71,7 +79,7 @@ public class MainView extends VerticalLayout {
                             ButtonVariant.LUMO_ERROR,
                             ButtonVariant.LUMO_TERTIARY);
                     button.addClickListener(e -> {
-                        ConfirmDialog dialog = getConfirmationDialog(expense.getExpenseName());
+                        ConfirmDialog dialog = getConfirmationDialog(expense.getName());
                         dialog.open();
 //                        dialog.addConfirmListener(l -> expenseService.deleteExpense(expense));
                         updateGrid();
@@ -84,6 +92,16 @@ public class MainView extends VerticalLayout {
         return grid;
     }
 
+    private void updateGrid() {
+        System.out.println("Updating grid");
+        final List<ExpenseDTO> allExpenses = expenseService.getAllExpenses();
+        grid.getColumns().forEach(c -> {
+            allExpenses
+        });
+
+        grid.setItems(allExpenses);
+    }
+
     private ConfirmDialog getConfirmationDialog(String text) {
         ConfirmDialog dialog = new ConfirmDialog();
         dialog.setHeader("Deleting \"" + text + "\"?");
@@ -94,11 +112,6 @@ public class MainView extends VerticalLayout {
         dialog.setConfirmButtonTheme("error primary");
 
         return dialog;
-    }
-
-    private void updateGrid() {
-        System.out.println("Updating grid");
-        grid.setItems(expenseService.getAllExpenses());
     }
 
 }
