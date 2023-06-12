@@ -1,6 +1,6 @@
 package com.example.application.views.main;
 
-import com.example.application.model.Expense;
+import com.example.application.model.ExpenseDTO;
 import com.example.application.service.ExpenseService;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
@@ -25,7 +25,7 @@ public class MainView extends VerticalLayout {
     private final ExpenseService expenseService;
 
     private final TextField filterText = new TextField();
-    private final Grid<Expense> grid = new Grid<>(Expense.class);
+    private final Grid<ExpenseDTO> grid = new Grid<>(ExpenseDTO.class);
 
     @Autowired
     public MainView(ExpenseService expenseService) {
@@ -53,7 +53,7 @@ public class MainView extends VerticalLayout {
 
     private Component getGrid() {
         grid.addClassName("expenses-grid");
-        grid.setColumns("name", "amount", "description", "date", "timestamp");
+        grid.setColumns("name", "amount", "category", "description", "timestamp");
 
         // Edit Column
         grid.addColumn(
@@ -71,9 +71,9 @@ public class MainView extends VerticalLayout {
                             ButtonVariant.LUMO_ERROR,
                             ButtonVariant.LUMO_TERTIARY);
                     button.addClickListener(e -> {
-                        ConfirmDialog dialog = getConfirmationDialog(expense.getName());
+                        ConfirmDialog dialog = getConfirmationDialog(expense.getExpenseName());
                         dialog.open();
-                        dialog.addConfirmListener(l -> expenseService.deleteExpense(expense));
+//                        dialog.addConfirmListener(l -> expenseService.deleteExpense(expense));
                         updateGrid();
                     });
                     button.setIcon(new Icon(VaadinIcon.TRASH));

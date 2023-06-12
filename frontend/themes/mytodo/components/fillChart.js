@@ -21,13 +21,13 @@ window.fillChartPie = function fillChartPie() {
       {
         name: "Expenses by category",
         type: 'pie',
-        radius: '75%',
+        radius: '60%',
         center: ['50%', '50%'],
         selectedMode: 'single',
         data: [
           {value: 15, name: 'Drama'},
           {value: 30, name: 'Scifi'},
-          {value: 16, name: 'Crime'},
+          {value: 16, name: 'Criminals'},
           {value: 3, name: 'Horror'}
         ],
         emphasis: {
@@ -51,3 +51,51 @@ window.fillChartPie = function fillChartPie() {
     myChart.setOption(option, true);
   }
 };
+
+window.showChartDetails = function showChartDetails(xpath) {
+  const chartElement = document.evaluate(
+    xpath + '//canvas',
+    document,
+    null,
+    XPathResult.FIRST_ORDERED_NODE_TYPE,
+    null
+  ).singleNodeValue;
+
+  const elementWithText = document.evaluate(
+      xpath + '//div[last()]',
+      document,
+      null,
+      XPathResult.FIRST_ORDERED_NODE_TYPE,
+      null
+  ).singleNodeValue;
+
+
+
+  if (chartElement && elementWithText) {
+    chartElement.addEventListener('click', function() {
+      console.log(elementWithText.textContent);
+    });
+  }
+};
+
+function getJsonData(url) {
+  return fetch(url)
+    .then(response => response.json())
+    .then(jsonData => jsonData)
+    .catch(error => {
+      console.error('Error fetching JSON:', error);
+    });
+}
+
+window.printMe = function printMe(url) {
+    getJsonData('http://localhost:8080/api/expense/all')
+      .then(data => {
+        console.log('JSON data:', data);
+
+        // Rest of code
+
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+}

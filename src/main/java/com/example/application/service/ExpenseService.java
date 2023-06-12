@@ -1,6 +1,7 @@
 package com.example.application.service;
 
 import com.example.application.model.Expense;
+import com.example.application.model.ExpenseDTO;
 import com.example.application.repository.ExpenseRepository;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -17,8 +18,8 @@ public class ExpenseService {
     @Autowired
     private ExpenseRepository repository;
 
-    public List<Expense> getAllExpenses() {
-        return repository.findAll();
+    public List<ExpenseDTO> getAllExpenses() {
+        return repository.getAll();
     }
 
     public Expense saveExpense(Expense expense) {
@@ -29,7 +30,4 @@ public class ExpenseService {
         repository.delete(expense);
     }
 
-//    public List<Expense> searchExpenses(String value) {
-//        return repository.searchIgnoreCase(value);
-//    }
 }

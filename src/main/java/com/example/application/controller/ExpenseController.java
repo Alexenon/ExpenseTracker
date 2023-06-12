@@ -1,6 +1,7 @@
 package com.example.application.controller;
 
 import com.example.application.model.Expense;
+import com.example.application.model.ExpenseDTO;
 import com.example.application.service.ExpenseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -15,7 +16,7 @@ public class ExpenseController {
     ExpenseService expenseService;
 
     @GetMapping("/all")
-    public List<Expense> getAllExpenses() {
+    public List<ExpenseDTO> getAllExpenses() {
         return expenseService.getAllExpenses();
     }
 
