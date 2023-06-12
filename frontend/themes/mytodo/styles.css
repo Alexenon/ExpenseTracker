@@ -5,7 +5,6 @@
 
 *{
     margin: 0;
-    text-decoration: none !important;
     padding: 0;
     list-style-type: none;
     outline: none;
@@ -36,6 +35,7 @@
 
 .menu-item {
     position: relative;
+    text-decoration: none !important;
     color: var(--color-black) !important;
 }
 
@@ -57,8 +57,4 @@
 canvas {
     top: 100px !important;
     left: 30px !important;
-}
-
-#canvs1 {
-  width: 200px;
 }

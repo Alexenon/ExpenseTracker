@@ -21,7 +21,7 @@ window.fillChartPie = function fillChartPie() {
       {
         name: "Expenses by category",
         type: 'pie',
-        radius: '75%',
+        radius: '60%',
         center: ['50%', '50%'],
         selectedMode: 'single',
         data: [
@@ -78,3 +78,24 @@ window.showChartDetails = function showChartDetails(xpath) {
   }
 };
 
+function getJsonData(url) {
+  return fetch(url)
+    .then(response => response.json())
+    .then(jsonData => jsonData)
+    .catch(error => {
+      console.error('Error fetching JSON:', error);
+    });
+}
+
+window.printMe = function printMe(url) {
+    getJsonData('http://localhost:8080/api/expense/all')
+      .then(data => {
+        console.log('JSON data:', data);
+
+        // Rest of code
+
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+}
