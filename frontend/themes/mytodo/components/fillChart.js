@@ -1,3 +1,18 @@
+//const jsonArray = [
+//  ["Food and Drinks", 3],
+//  ["Fuel", 3],
+//  ["Distractions", 4]
+//];
+//
+//const data = jsonArray.map(item => {
+//  return {
+//    value: item[1],
+//    name: item[0]
+//  };
+//});
+
+
+
 window.fillChartPie = function fillChartPie() {
   var dom = document.getElementById("chart-pie");
   var myChart = echarts.init(dom);

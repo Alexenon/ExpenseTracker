@@ -30,7 +30,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
             WHERE E.date >= DATE_FORMAT(CURDATE(), '%Y-%m-01')
                 AND E.date <= LAST_DAY(CURDATE());
             """, nativeQuery = true)
-    List<ExpenseDTO> getExpensesCurrentMonth();
+    List<ExpenseDTO> findExpensesCurrentMonth();
 
     @Query(value = """
         SELECT E.id, E.name, E.amount, C.name AS 'Category',
@@ -40,7 +40,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
         INNER JOIN timestamp T ON T.id = E.timestamp_id
         WHERE YEAR(E.date) = YEAR(CURDATE());
         """, nativeQuery = true)
-    List<ExpenseDTO> getExpensesCurrentYear();
+    List<ExpenseDTO> findExpensesCurrentYear();
 
     @Query(value = """
         SELECT E.id, E.name, E.amount, C.name AS 'Category',
@@ -50,7 +50,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
         INNER JOIN timestamp T ON T.id = E.timestamp_id
         WHERE MONTH(E.date) = :month
         """, nativeQuery = true)
-    List<ExpenseDTO> getExpensesMonth(@Param("month") int month);
+    List<ExpenseDTO> findExpensesMonth(@Param("month") int month);
 
     @Query(value = """
         SELECT E.id, E.name, E.amount, C.name AS 'Category',
@@ -61,5 +61,13 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
         WHERE C.name LIKE CONCAT('%', :categoryName, '%')
         """, nativeQuery = true)
     List<ExpenseDTO> findByCategory(@Param("categoryName") String categoryName);
+
+    @Query(value = """
+        SELECT C.name, COUNT(E.id) as 'total times'
+        FROM expense E
+        INNER JOIN category C ON C.id = E.category_id
+        GROUP BY C.name
+        """, nativeQuery = true)
+    List<Object[]> findGroupedExpensesByCategory();
 
 }
