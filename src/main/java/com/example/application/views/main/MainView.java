@@ -30,6 +30,8 @@ public class MainView extends VerticalLayout {
     @Autowired
     public MainView(ExpenseService expenseService) {
         this.expenseService = expenseService;
+
+        this.setClassName("page-content");
         add(
                 getToolBar(),
                 getGrid()
@@ -53,7 +55,7 @@ public class MainView extends VerticalLayout {
 
     private Component getGrid() {
         grid.addClassName("expenses-grid");
-        grid.setColumns("name", "amount", "category", "description", "timestamp");
+        grid.setColumns("name", "category", "amount", "description", "timestamp");
 
         // Edit Column
         grid.addColumn(
@@ -71,7 +73,7 @@ public class MainView extends VerticalLayout {
                             ButtonVariant.LUMO_ERROR,
                             ButtonVariant.LUMO_TERTIARY);
                     button.addClickListener(e -> {
-                        ConfirmDialog dialog = getConfirmationDialog(expense.getExpenseName());
+                        ConfirmDialog dialog = getConfirmationDialog(expense.getName());
                         dialog.open();
 //                        dialog.addConfirmListener(l -> expenseService.deleteExpense(expense));
                         updateGrid();
@@ -84,6 +86,10 @@ public class MainView extends VerticalLayout {
         return grid;
     }
 
+    private void updateGrid() {
+        grid.setItems(expenseService.getAllExpenses());
+    }
+
     private ConfirmDialog getConfirmationDialog(String text) {
         ConfirmDialog dialog = new ConfirmDialog();
         dialog.setHeader("Deleting \"" + text + "\"?");
@@ -94,11 +100,6 @@ public class MainView extends VerticalLayout {
         dialog.setConfirmButtonTheme("error primary");
 
         return dialog;
-    }
-
-    private void updateGrid() {
-        System.out.println("Updating grid");
-        grid.setItems(expenseService.getAllExpenses());
     }
 
 }

@@ -99,3 +99,20 @@ window.printMe = function printMe(url) {
         console.error('Error:', error);
       });
 }
+
+/**
+ * Retrieves a parameter from a formatted string using a formatter pattern.
+ *
+ * @param {string} string - The formatted string.
+ * @param {string} formatter - The formatter pattern.
+ * @param {number} paramIndex - The index of the parameter to retrieve.
+ * @returns {string|null} The parameter value or null if not found.
+ */
+function getParamFormatter(string, formatter, paramIndex) {
+    const params = formatter.match(/\w+/g);
+    const escapeRegex = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const formatterParts = formatter.split(/\{[^}]+\}/g);
+    const values = string.split(new RegExp(formatterParts.map(escapeRegex).join("(.+)")));
+
+    return values?.[paramIndex]?.trim();
+}
