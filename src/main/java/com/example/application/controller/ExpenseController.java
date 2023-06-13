@@ -38,7 +38,7 @@ public class ExpenseController {
     }
 
     @GetMapping("/{categoryName}")
-    public List<Expense> getExpensesByCategory(@PathVariable String categoryName) {
+    public List<ExpenseDTO> getExpensesByCategory(@PathVariable String categoryName) {
         return expenseService.getExpeneseByCategory(categoryName);
     }
 

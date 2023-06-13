@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Entity
 @NoArgsConstructor
@@ -34,7 +34,7 @@ public class Expense {
 
     @Getter
     @Setter
-    private Date date;
+    private LocalDateTime date;
 
     @ManyToOne
     @JoinColumn(name = "timestamp_id")
@@ -50,7 +50,7 @@ public class Expense {
 
     @Override
     public String toString() {
-        final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+        final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         return String.format("%d, %s, %f, %s, %s, %s, %s",
                 id, name, amount, timestamp.getName(),
                 category.getName(), description, dateFormatter.format(date));

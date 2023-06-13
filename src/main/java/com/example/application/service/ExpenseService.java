@@ -8,10 +8,6 @@ import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Service
@@ -34,17 +30,20 @@ public class ExpenseService {
         repository.delete(expense);
     }
 
-    public void deleteExpenseById(Integer expenseId) {
-
+    public void deleteExpenseById(long expenseId) {
+        repository.deleteById(expenseId);
     }
 
-    public List<Expense> getExpeneseByCategory(String categoryName) {
-        return repository.findAll();
+    public List<ExpenseDTO> getExpeneseByCategory(String categoryName) {
+        return repository.findByCategory(categoryName);
     }
 
     public List<ExpenseDTO> getExpensesCurrentMonth() {
         return repository.getExpensesCurrentMonth();
     }
 
+    public List<ExpenseDTO> getExpensesByMonth(int month) {
+        return repository.getExpensesMonth(month);
+    }
 
 }
