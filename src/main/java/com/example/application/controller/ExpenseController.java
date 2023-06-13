@@ -31,4 +31,15 @@ public class ExpenseController {
         return "The expense was deleted succesfully";
     }
 
+    @DeleteMapping("/delete/{expenseId}")
+    public String deleteExpenseById(@PathVariable Integer expenseId) {
+        expenseService.deleteExpenseById(expenseId);
+        return "Expense with id=" + expenseId + " had been deleted";
+    }
+
+    @GetMapping("/{categoryName}")
+    public List<Expense> getExpensesByCategory(@PathVariable String categoryName) {
+        return expenseService.getExpeneseByCategory(categoryName);
+    }
+
 }

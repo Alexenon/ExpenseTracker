@@ -25,10 +25,10 @@ window.fillChartPie = function fillChartPie() {
         center: ['50%', '50%'],
         selectedMode: 'single',
         data: [
-          {value: 15, name: 'Drama'},
-          {value: 30, name: 'Scifi'},
-          {value: 16, name: 'Criminals'},
-          {value: 3, name: 'Horror'}
+          {value: 4, name: 'Food and Drinks'},
+          {value: 4, name: 'Fuel'},
+          {value: 6, name: 'Distractions'},
+          {value: 3, name: 'Other'}
         ],
         emphasis: {
           itemStyle: {
