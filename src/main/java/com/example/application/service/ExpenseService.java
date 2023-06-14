@@ -30,4 +30,24 @@ public class ExpenseService {
         repository.delete(expense);
     }
 
+    public void deleteExpenseById(long expenseId) {
+        repository.deleteById(expenseId);
+    }
+
+    public List<ExpenseDTO> getExpeneseByCategory(String categoryName) {
+        return repository.findByCategory(categoryName);
+    }
+
+    public List<ExpenseDTO> getExpensesCurrentMonth() {
+        return repository.findExpensesCurrentMonth();
+    }
+
+    public List<ExpenseDTO> getExpensesByMonth(int month) {
+        return repository.findExpensesMonth(month);
+    }
+
+    public List<Object[]> getGroupedExpensesByCategory() {
+        return repository.findGroupedExpensesByCategory();
+    }
+
 }

@@ -32,12 +32,12 @@ public class DashboardView extends HorizontalLayout {
 
         Div chartPie = new Div();
         chartPie.setId("chart-pie");
-        chartPie.setWidth("500px");
+        chartPie.setWidth("700px");
         chartPie.setHeight("500px");
 
         UI.getCurrent().getPage().executeJs("fillChartPie()");
         UI.getCurrent().getPage().executeJs("showChartDetails('//div[@id=\"chart-pie\"]')");
-        UI.getCurrent().getPage().executeJs("printMe('http://localhost:8080/api/getAll')");
+        UI.getCurrent().getPage().executeJs("printMe('http://localhost:8080/api/expense/all')");
 
         container.add(chartPie);
         add(container);

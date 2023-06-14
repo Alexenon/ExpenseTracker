@@ -6,5 +6,3 @@
 |______/_/\_| .__/ \___|_| |_|___/\___|___/    |_|_|  \__,_|\___|_|\_\___|_|
              | |
              |_|
-
-//http://patorjk.com/software/taag/#p=display&h=3&f=Big&t=Expenses%20Tracker
