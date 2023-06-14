@@ -59,6 +59,7 @@
 }
 
 canvas {
+    /* width: 700px, height: 500px; */
     top: 100px !important;
     left: 30px !important;
 }
