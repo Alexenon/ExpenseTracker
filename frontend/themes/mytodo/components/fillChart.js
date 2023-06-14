@@ -16,7 +16,6 @@ function getParamFormatter(string, pattern, paramIndex) {
 }
 
 
-
 window.printMe = function printMe(url) {
     getJsonData(url)
       .then(data => {
@@ -35,79 +34,74 @@ window.printMe = function printMe(url) {
  * Makes a GET request to the specified URL and returns a JSON object.
  *
  * @param {string} url - The URL to fetch the JSON data from.
- * @returns {Promise<Object|null>} - A promise that resolves to the JSON object, or null if there's an error.
+ * @returns {Object|null} - A JSON object from the provided URL, or null if there's an error.
  */
-function getJsonData(url) {
-  return fetch(url)
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Failed to fetch data');
-      }
-      return response.json();
-    })
-    .catch(error => {
-      console.error('Error fetching JSON:', error);
-      return null;
-    });
+async function getJsonData(url) {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Failed to fetch data');
+    }
+    const jsonData = await response.json();
+    return jsonData;
+  } catch (error) {
+    console.error('Error fetching JSON:', error);
+    return null;
+  }
 }
 
 
-
-window.fillChartPie = function fillChartPie() {
+window.fillChartPie = async function fillChartPie() {
   var dom = document.getElementById('chart-pie');
   var myChart = echarts.init(dom);
+  var jsonObject = await getJsonData('http://localhost:8080/api/expense/grouped');
 
-  getJsonData('http://localhost:8080/api/expense/grouped')
-    .then(data => {
-      var option = {
-        title: {
-          text: 'Expenses Chart',
-          left: 'center'
-        },
-        tooltip: {
-          trigger: 'item',
-          formatter: '{a} <br/>{b} : {c} ({d}%)'
-        },
-        legend: {
-          bottom: 10,
-          left: 'center',
-          data: data.map(item => item[0])
-        },
-        series: [
-          {
-            name: 'Expenses by category',
-            type: 'pie',
-            radius: '60%',
-            center: ['50%', '50%'],
-            selectedMode: 'single',
-            data: data.map(item => {
-              return { name: item[0], value: item[1] };
-            }),
-            emphasis: {
-              itemStyle: {
-                shadowBlur: 10,
-                shadowOffsetX: 0,
-                shadowColor: 'rgba(0, 0, 0, 0.5)'
-              }
-            },
-            label: {
-              normal: {
-                formatter: '{b} : {c}',
-                position: 'outside'
-              }
-            }
+  var option = {
+    title: {
+      text: 'Expenses Chart',
+      left: 'center'
+    },
+    tooltip: {
+      trigger: 'item',
+      formatter: '{a} <br/>{b} : {c} ({d}%)'
+    },
+    legend: {
+      bottom: 10,
+      left: 'center',
+      data: jsonObject.map(item => item[0])
+    },
+    series: [
+      {
+        name: 'Expenses by category',
+        type: 'pie',
+        radius: '60%',
+        center: ['50%', '50%'],
+        selectedMode: 'single',
+        data: jsonObject.map(item => {
+          return { name: item[0], value: item[1] };
+        }),
+        emphasis: {
+          itemStyle: {
+            shadowBlur: 10,
+            shadowOffsetX: 0,
+            shadowColor: 'rgba(0, 0, 0, 0.5)'
           }
-        ]
-      };
-
-      if (option && typeof option === 'object') {
-        myChart.setOption(option, true);
+        },
+        label: {
+          normal: {
+            formatter: '{b} : {c}',
+            position: 'outside'
+          }
+        }
       }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-    });
+    ]
+  };
+
+  if (option && typeof option === 'object') {
+    myChart.setOption(option, true);
+  }
 };
+
 
 /**
  * This function take the information displayed on element from pie chart
