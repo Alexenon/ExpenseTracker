@@ -44,6 +44,13 @@ public class ExpenseController {
         return expenseService.getExpeneseByCategory(categoryName);
     }
 
+    /**
+     * Get expenses by month by this link "https://localhost:8080/api/expense/get?month=6"
+     *
+     * @param month The month parameter specifying the month to retrieve expenses for. If not provided,
+     *              the current month will be used.
+     * @return A list of ExpenseDTO objects representing the expenses for the specified month.
+     */
     @GetMapping("/get")
     public List<ExpenseDTO> getExpensesByMonth(
             @RequestParam(value = "month", required = false) Integer month
