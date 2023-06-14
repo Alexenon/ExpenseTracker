@@ -16,6 +16,21 @@ function getParamFormatter(string, pattern, paramIndex) {
 }
 
 
+
+window.printMe = function printMe(url) {
+    getJsonData(url)
+      .then(data => {
+        console.log('JSON data:', data);
+
+        // Rest of code
+
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+}
+
+
 /**
  * Makes a GET request to the specified URL and returns a JSON object.
  *
@@ -37,74 +52,62 @@ function getJsonData(url) {
 }
 
 
-window.printMe = function printMe(url) {
-    getJsonData(url)
-      .then(data => {
-        console.log('JSON data:', data);
-
-        // Rest of code
-
-      })
-      .catch(error => {
-        console.error('Error:', error);
-      });
-}
-
 
 window.fillChartPie = function fillChartPie() {
-  var dom = document.getElementById("chart-pie");
+  var dom = document.getElementById('chart-pie');
   var myChart = echarts.init(dom);
-  var app = {};
 
-  var option = {
-    title: {
-      text: 'Expenses Chart',
-      left: 'center'
-    },
-    tooltip: {
-      trigger: 'item',
-      formatter: '{a} <br/>{b} : {c} ({d}%)'
-    },
-    legend: {
-      bottom: 10,
-      left: 'center',
-      data: ['Drama', 'Scifi', 'Crime', 'Horror']
-    },
-    series: [
-      {
-        name: "Expenses by category",
-        type: 'pie',
-        radius: '60%',
-        center: ['50%', '50%'],
-        selectedMode: 'single',
-        data: [
-          {value: 4, name: 'Food and Drinks'},
-          {value: 4, name: 'Fuel'},
-          {value: 6, name: 'Distractions'},
-          {value: 3, name: 'Other'}
-        ],
-        emphasis: {
-          itemStyle: {
-            shadowBlur: 10,
-            shadowOffsetX: 0,
-            shadowColor: 'rgba(0, 0, 0, 0.5)'
-          }
+  getJsonData('http://localhost:8080/api/expense/grouped')
+    .then(data => {
+      var option = {
+        title: {
+          text: 'Expenses Chart',
+          left: 'center'
         },
-        label: {
-          normal: {
-            formatter: '{b} : {c}',
-            position: 'outside'
-          }
+        tooltip: {
+          trigger: 'item',
+          formatter: '{a} <br/>{b} : {c} ({d}%)'
         },
+        legend: {
+          bottom: 10,
+          left: 'center',
+          data: data.map(item => item[0])
+        },
+        series: [
+          {
+            name: 'Expenses by category',
+            type: 'pie',
+            radius: '60%',
+            center: ['50%', '50%'],
+            selectedMode: 'single',
+            data: data.map(item => {
+              return { name: item[0], value: item[1] };
+            }),
+            emphasis: {
+              itemStyle: {
+                shadowBlur: 10,
+                shadowOffsetX: 0,
+                shadowColor: 'rgba(0, 0, 0, 0.5)'
+              }
+            },
+            label: {
+              normal: {
+                formatter: '{b} : {c}',
+                position: 'outside'
+              }
+            }
+          }
+        ]
+      };
+
+      if (option && typeof option === 'object') {
+        myChart.setOption(option, true);
       }
-    ]
-  };
-
-  if (option && typeof option === "object") {
-    myChart.setOption(option, true);
-  }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+    });
 };
-
 
 /**
  * This function take the information displayed on element from pie chart
