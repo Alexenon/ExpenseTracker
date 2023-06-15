@@ -66,6 +66,14 @@ public class ExpenseController {
                 () -> LocalDate.now().getMonthValue()));
     }
 
+    @GetMapping("/getByYear")
+    public List<ExpenseDTO> getExpensesByYear(
+            @RequestParam(value = "yearParam", required = false) Integer year
+    ) {
+        return expenseService.getExpensesByYear(Objects.requireNonNullElseGet(year,
+                () -> LocalDate.now().getYear()));
+    }
+
     @GetMapping("/grouped")
     public List<Object[]> getExpensesGroupedByCategory() {
         return expenseService.getGroupedExpensesByCategory();

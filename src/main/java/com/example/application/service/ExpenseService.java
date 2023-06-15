@@ -47,7 +47,11 @@ public class ExpenseService {
     }
 
     public List<ExpenseDTO> getExpensesByMonth(int month) {
-        return repository.findExpensesMonth(month);
+        return repository.findExpensesPerMonth(month);
+    }
+
+    public List<ExpenseDTO> getExpensesByYear(int year) {
+        return repository.findExpensesPerYear(year);
     }
 
     public List<Object[]> getGroupedExpensesByCategory() {

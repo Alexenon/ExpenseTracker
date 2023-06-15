@@ -48,9 +48,19 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
         FROM expense E
         INNER JOIN category C ON C.id = E.category_id
         INNER JOIN timestamp T ON T.id = E.timestamp_id
+        WHERE YEAR(E.date) = YEAR(:yearParam);
+        """, nativeQuery = true)
+    List<ExpenseDTO> findExpensesPerYear(@Param("yearParam") int year);
+
+    @Query(value = """
+        SELECT E.id, E.name, E.amount, C.name AS 'Category',
+            E.description, T.name AS 'Timestamp', E.date
+        FROM expense E
+        INNER JOIN category C ON C.id = E.category_id
+        INNER JOIN timestamp T ON T.id = E.timestamp_id
         WHERE MONTH(E.date) = :month
         """, nativeQuery = true)
-    List<ExpenseDTO> findExpensesMonth(@Param("month") int month);
+    List<ExpenseDTO> findExpensesPerMonth(@Param("month") int month);
 
     @Query(value = """
         SELECT E.id, E.name, E.amount, C.name AS 'Category',

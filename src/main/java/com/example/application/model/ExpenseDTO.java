@@ -23,8 +23,4 @@ public interface ExpenseDTO {
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     LocalDateTime getDate();
 
-    default String formatDate(LocalDateTime dateTime) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-        return dateTime.format(formatter);
-    }
 }

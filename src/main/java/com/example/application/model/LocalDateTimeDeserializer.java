@@ -19,7 +19,7 @@ public class LocalDateTimeDeserializer extends JsonDeserializer<LocalDateTime> {
         return LocalDateTime.parse(dateTimeString, formatter);
     }
 
-    public DateTimeFormatter getFormatter() {
+    public static DateTimeFormatter getFormatter() {
         return formatter;
     }
 }

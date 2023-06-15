@@ -10,6 +10,7 @@ import lombok.Setter;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Entity
 @NoArgsConstructor
@@ -54,10 +55,10 @@ public class Expense {
 
     @Override
     public String toString() {
-        final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        DateTimeFormatter dateFormat = LocalDateTimeDeserializer.getFormatter();
         return String.format("%d, %s, %f, %s, %s, %s, %s",
                 id, name, amount, timestamp.getName(),
-                category.getName(), description, dateFormatter.format(date));
+                category.getName(), description, dateFormat.format(date));
     }
 
 }
