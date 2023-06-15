@@ -36,7 +36,7 @@ window.printMe = function printMe(url) {
  * @param {string} url - The URL to fetch the JSON data from.
  * @returns {Object|null} - A JSON object from the provided URL, or null if there's an error.
  */
-async function getJsonData(url) {
+window.getJsonData = async function getJsonData(url) {
   try {
     const response = await fetch(url);
     if (!response.ok) {
@@ -76,7 +76,7 @@ window.fillChartPie = async function fillChartPie() {
     },
     series: [
       {
-        name: 'Expenses by category',
+        name: 'Expenses by category:',
         type: 'pie',
         radius: '60%',
         center: ['50%', '50%'],
@@ -104,6 +104,11 @@ window.fillChartPie = async function fillChartPie() {
   if (option && typeof option === 'object') {
     myChart.setOption(option, true);
   }
+
+  showChartDetails('//div[@id=\"chart-pie\"]');
+
+  var xc = getElementByXPath('//div[@id=\"chart-pie\"]', '//div[last()]');
+  console.log(xc.textContent);
 };
 
 
@@ -111,7 +116,7 @@ window.fillChartPie = async function fillChartPie() {
  * This function take the information displayed on element from pie chart
  * that users clicks, and displays more information using expense.id
  */
-window.showChartDetails = function showChartDetails(xpath) {
+function showChartDetails(xpath) {
   const chartElement = document.evaluate(
     xpath + '//canvas',
     document,
@@ -130,7 +135,20 @@ window.showChartDetails = function showChartDetails(xpath) {
 
   if (chartElement && elementWithText) {
     chartElement.addEventListener('click', function() {
-      console.log(elementWithText.textContent);
+      const pattern = '{a}: {b} : {c} ({d}%)';
+      const text = elementWithText.textContent;
+      var expenseName = getParamFormatter(text, pattern, 2);
+      console.log(expenseName);
     });
   }
 };
+
+function getElementByXPath(xpath, childXpath) {
+  return document.evaluate(
+      xpath + childXpath,
+      document,
+      null,
+      XPathResult.FIRST_ORDERED_NODE_TYPE,
+      null
+  ).singleNodeValue;
+}
