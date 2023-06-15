@@ -1,5 +1,7 @@
 package com.example.application.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -34,6 +36,8 @@ public class Expense {
 
     @Getter
     @Setter
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime date;
 
     @ManyToOne
@@ -50,7 +54,7 @@ public class Expense {
 
     @Override
     public String toString() {
-        final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         return String.format("%d, %s, %f, %s, %s, %s, %s",
                 id, name, amount, timestamp.getName(),
                 category.getName(), description, dateFormatter.format(date));

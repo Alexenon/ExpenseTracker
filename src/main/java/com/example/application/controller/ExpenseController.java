@@ -3,6 +3,7 @@ package com.example.application.controller;
 import com.example.application.model.Expense;
 import com.example.application.model.ExpenseDTO;
 import com.example.application.service.ExpenseService;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,7 +28,7 @@ public class ExpenseController {
         return expenseService.saveExpense(expense);
     }
 
-    @PostMapping("/delete")
+    @DeleteMapping("/delete")
     public String deleteExpense(@RequestBody Expense expense) {
         expenseService.deleteExpense(expense);
         return "The expense was deleted succesfully";
@@ -37,6 +38,12 @@ public class ExpenseController {
     public String deleteExpenseById(@PathVariable Integer expenseId) {
         expenseService.deleteExpenseById(expenseId);
         return "Expense with id=" + expenseId + " had been deleted";
+    }
+
+    @DeleteMapping("/delete/all")
+    public String deleteExpenseById() {
+        expenseService.deleteAllExpanses();
+        return "All expanses have been deleted";
     }
 
     @GetMapping("/{categoryName}")
@@ -62,11 +69,6 @@ public class ExpenseController {
     @GetMapping("/grouped")
     public List<Object[]> getExpensesGroupedByCategory() {
         return expenseService.getGroupedExpensesByCategory();
-    }
-
-    @GetMapping("/test")
-    public List<ExpenseDTO> test() {
-        return expenseService.getExpensesCurrentMonth();
     }
 
 }

@@ -34,6 +34,10 @@ public class ExpenseService {
         repository.deleteById(expenseId);
     }
 
+    public void deleteAllExpanses() {
+        repository.deleteAll();
+    }
+
     public List<ExpenseDTO> getExpeneseByCategory(String categoryName) {
         return repository.findByCategory(categoryName);
     }
