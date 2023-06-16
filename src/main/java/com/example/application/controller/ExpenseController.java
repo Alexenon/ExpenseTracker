@@ -3,7 +3,6 @@ package com.example.application.controller;
 import com.example.application.model.Expense;
 import com.example.application.model.ExpenseDTO;
 import com.example.application.service.ExpenseService;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,6 +25,12 @@ public class ExpenseController {
     @PostMapping("/add")
     public Expense addExpense(@RequestBody Expense expense) {
         return expenseService.saveExpense(expense);
+    }
+
+    @PutMapping
+    public Expense updateExpense(@RequestBody Expense expense) {
+        expenseService.updateExpense(expense);
+        return expense;
     }
 
     @DeleteMapping("/delete")
@@ -77,6 +82,12 @@ public class ExpenseController {
     @GetMapping("/grouped")
     public List<Object[]> getExpensesGroupedByCategory() {
         return expenseService.getGroupedExpensesByCategory();
+    }
+
+    @PostMapping
+    public String addExpenses(@RequestBody List<Expense> expenseList) {
+        expenseService.saveExpenses(expenseList);
+        return "All expanses have been added";
     }
 
 }
