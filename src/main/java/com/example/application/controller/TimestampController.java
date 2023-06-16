@@ -3,10 +3,7 @@ package com.example.application.controller;
 import com.example.application.model.Timestamp;
 import com.example.application.repository.TimestampRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -22,15 +19,15 @@ public class TimestampController {
         return repository.findAll();
     }
 
-    @GetMapping("/add")
-    public String addTimestamp(Timestamp timestamp) {
+    @PostMapping("/add")
+    public String addTimestamp(@RequestBody Timestamp timestamp) {
         repository.save(timestamp);
         return "Timestamp was added succesfully";
     }
 
-    @GetMapping("/delete/{id}")
+    @DeleteMapping("/delete/{id}")
     public String deleteTimestamp(@PathVariable Long id) {
         repository.deleteById(id);
-        return "Timestamp was added succesfully";
+        return "Timestamp was deleted succesfully";
     }
 }

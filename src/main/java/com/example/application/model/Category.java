@@ -1,5 +1,6 @@
 package com.example.application.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -22,6 +23,7 @@ public class Category {
 
     @Getter
     @Setter
+    @JsonProperty(required = true)
     private String name;
 
     @Override
