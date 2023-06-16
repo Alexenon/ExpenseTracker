@@ -8,7 +8,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -51,7 +50,7 @@ public class Expense {
     @JoinColumn(name = "category_id")
     @Getter
     @Setter
-    private Timestamp category;
+    private Category category;
 
     @Override
     public String toString() {
