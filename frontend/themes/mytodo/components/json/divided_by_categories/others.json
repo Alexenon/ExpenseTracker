@@ -1,0 +1,38 @@
+[
+  {
+    "name": "Fuel",
+    "id": 1,
+    "timestamp": "WEEKLY",
+    "date": "2023-06-03 12:00",
+    "description": "Fill the car's tank with fuel",
+    "category": "Others",
+    "amount": 200.0
+  },
+  {
+    "name": "Headset",
+    "id": 5,
+    "timestamp": "ONCE",
+    "date": "2023-06-03 12:00",
+    "description": "",
+    "category": "Others",
+    "amount": 20.0
+  },
+  {
+    "name": "Oil & Filter Change",
+    "id": 7,
+    "timestamp": "WEEKLY",
+    "date": "2023-06-01 12:00",
+    "description": "Changing Oil and Filter",
+    "category": "Others",
+    "amount": 2500.0
+  },
+  {
+    "name": "Gym Subscription",
+    "id": 11,
+    "timestamp": "YEARLY",
+    "date": "2023-06-20 15:30",
+    "description": "Renewed gym membership",
+    "category": "Others",
+    "amount": 1000.0
+  }
+]

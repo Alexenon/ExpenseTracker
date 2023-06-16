@@ -1,0 +1,11 @@
+[
+  {
+    "name": "Movie Ticket",
+    "id": 10,
+    "timestamp": "ONCE",
+    "date": "2023-06-10 18:30",
+    "description": "Watching a movie",
+    "category": "Distractions",
+    "amount": 150.0
+  }
+]

@@ -27,7 +27,13 @@ public class ExpenseController {
         return expenseService.saveExpense(expense);
     }
 
-    @PostMapping("/delete")
+    @PutMapping
+    public Expense updateExpense(@RequestBody Expense expense) {
+        expenseService.updateExpense(expense);
+        return expense;
+    }
+
+    @DeleteMapping("/delete")
     public String deleteExpense(@RequestBody Expense expense) {
         expenseService.deleteExpense(expense);
         return "The expense was deleted succesfully";
@@ -37,6 +43,12 @@ public class ExpenseController {
     public String deleteExpenseById(@PathVariable Integer expenseId) {
         expenseService.deleteExpenseById(expenseId);
         return "Expense with id=" + expenseId + " had been deleted";
+    }
+
+    @DeleteMapping("/delete/all")
+    public String deleteExpenseById() {
+        expenseService.deleteAllExpanses();
+        return "All expanses have been deleted";
     }
 
     @GetMapping("/{categoryName}")
@@ -59,14 +71,23 @@ public class ExpenseController {
                 () -> LocalDate.now().getMonthValue()));
     }
 
+    @GetMapping("/getByYear")
+    public List<ExpenseDTO> getExpensesByYear(
+            @RequestParam(value = "yearParam", required = false) Integer year
+    ) {
+        return expenseService.getExpensesByYear(Objects.requireNonNullElseGet(year,
+                () -> LocalDate.now().getYear()));
+    }
+
     @GetMapping("/grouped")
     public List<Object[]> getExpensesGroupedByCategory() {
         return expenseService.getGroupedExpensesByCategory();
     }
 
-    @GetMapping("/test")
-    public List<ExpenseDTO> test() {
-        return expenseService.getExpensesCurrentMonth();
+    @PostMapping
+    public String addExpenses(@RequestBody List<Expense> expenseList) {
+        expenseService.saveExpenses(expenseList);
+        return "All expanses have been added";
     }
 
 }

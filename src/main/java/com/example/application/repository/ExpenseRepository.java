@@ -27,47 +27,36 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
             FROM expense E
             INNER JOIN category C ON C.id = E.category_id
             INNER JOIN timestamp T ON T.id = E.timestamp_id
-            WHERE E.date >= DATE_FORMAT(CURDATE(), '%Y-%m-01')
-                AND E.date <= LAST_DAY(CURDATE());
+            WHERE MONTH(E.date) = :month
             """, nativeQuery = true)
-    List<ExpenseDTO> findExpensesCurrentMonth();
+    List<ExpenseDTO> findExpensesPerMonth(@Param("month") int month);
 
     @Query(value = """
-        SELECT E.id, E.name, E.amount, C.name AS 'Category',
-            E.description, T.name AS 'Timestamp', E.date
-        FROM expense E
-        INNER JOIN category C ON C.id = E.category_id
-        INNER JOIN timestamp T ON T.id = E.timestamp_id
-        WHERE YEAR(E.date) = YEAR(CURDATE());
-        """, nativeQuery = true)
-    List<ExpenseDTO> findExpensesCurrentYear();
+            SELECT E.id, E.name, E.amount, C.name AS 'Category',
+                E.description, T.name AS 'Timestamp', E.date
+            FROM expense E
+            INNER JOIN category C ON C.id = E.category_id
+            INNER JOIN timestamp T ON T.id = E.timestamp_id
+            WHERE YEAR(E.date) = :year
+            """, nativeQuery = true)
+    List<ExpenseDTO> findExpensesPerYear(@Param("year") int year);
 
     @Query(value = """
-        SELECT E.id, E.name, E.amount, C.name AS 'Category',
-            E.description, T.name AS 'Timestamp', E.date
-        FROM expense E
-        INNER JOIN category C ON C.id = E.category_id
-        INNER JOIN timestamp T ON T.id = E.timestamp_id
-        WHERE MONTH(E.date) = :month
-        """, nativeQuery = true)
-    List<ExpenseDTO> findExpensesMonth(@Param("month") int month);
-
-    @Query(value = """
-        SELECT E.id, E.name, E.amount, C.name AS 'Category',
-            E.description, T.name AS 'Timestamp', E.date
-        FROM expense E
-        INNER JOIN category C ON C.id = E.category_id
-        INNER JOIN timestamp T ON T.id = E.timestamp_id
-        WHERE C.name LIKE CONCAT('%', :categoryName, '%')
-        """, nativeQuery = true)
+            SELECT E.id, E.name, E.amount, C.name AS 'Category',
+                E.description, T.name AS 'Timestamp', E.date
+            FROM expense E
+            INNER JOIN category C ON C.id = E.category_id
+            INNER JOIN timestamp T ON T.id = E.timestamp_id
+            WHERE C.name LIKE CONCAT('%', :categoryName, '%')
+            """, nativeQuery = true)
     List<ExpenseDTO> findByCategory(@Param("categoryName") String categoryName);
 
     @Query(value = """
-        SELECT C.name, COUNT(E.id) as 'total times'
-        FROM expense E
-        INNER JOIN category C ON C.id = E.category_id
-        GROUP BY C.name
-        """, nativeQuery = true)
+            SELECT C.name, COUNT(E.id) as 'total times'
+            FROM expense E
+            INNER JOIN category C ON C.id = E.category_id
+            GROUP BY C.name
+            """, nativeQuery = true)
     List<Object[]> findGroupedExpensesByCategory();
 
 }

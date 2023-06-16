@@ -1,0 +1,29 @@
+[
+  {
+    "name": "Donner Kebab",
+    "id": 3,
+    "timestamp": "WEEKLY",
+    "date": "2023-06-03 12:00",
+    "description": "Tipical food",
+    "category": "Food and Drinks",
+    "amount": 50.0
+  },
+  {
+    "name": "Coca Cola",
+    "id": 4,
+    "timestamp": "WEEKLY",
+    "date": "2023-06-03 12:00",
+    "description": "Tipical drink",
+    "category": "Food and Drinks",
+    "amount": 20.0
+  },
+  {
+    "name": "Coffee",
+    "id": 8,
+    "timestamp": "DAILY",
+    "date": "2023-06-02 09:30",
+    "description": "Morning coffee",
+    "category": "Food and Drinks",
+    "amount": 50.0
+  }
+]
