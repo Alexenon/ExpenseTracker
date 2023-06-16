@@ -19,7 +19,7 @@ public interface ExpenseDTO {
 
     String getTimestamp();
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     LocalDateTime getDate();
 
