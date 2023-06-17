@@ -27,6 +27,11 @@ public class ExpenseController {
         return expenseService.saveExpense(expense);
     }
 
+    @PostMapping("/save")
+    public Expense saveExpense(@RequestBody ExpenseRequest expenseRequest) {
+        return expenseService.saveExpense(expense);
+    }
+
     @PutMapping
     public Expense updateExpense(@RequestBody Expense expense) {
         expenseService.updateExpense(expense);
