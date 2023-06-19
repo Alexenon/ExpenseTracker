@@ -1,12 +1,10 @@
 package com.example.application.views.main;
 
-import com.example.application.model.Expense;
 import com.example.application.model.ExpenseDTO;
 import com.example.application.service.ExpenseService;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.charts.events.ClickEvent;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.icon.Icon;
@@ -19,8 +17,6 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.List;
 
 @PageTitle("Expenses")
 @Route(value = "", layout = MainLayout.class)
@@ -82,7 +78,7 @@ public class MainView extends VerticalLayout {
                     button.addClickListener(e -> {
                         ConfirmDialog dialog = getConfirmationDialog(expense.getName());
                         dialog.open();
-//                        dialog.addConfirmListener(l -> expenseService.deleteExpense(expense));
+                        dialog.addConfirmListener(l -> expenseService.deleteExpenseById(expense.getId()));
                         updateGrid();
                     });
                     button.setIcon(new Icon(VaadinIcon.TRASH));
