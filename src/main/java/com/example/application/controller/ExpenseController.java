@@ -100,15 +100,20 @@ public class ExpenseController {
 
     @GetMapping("/getByYear")
     public List<ExpenseDTO> getExpensesByYear(
-            @RequestParam(value = "yearParam", required = false) Integer year
+            @RequestParam(value = "year", required = false) Integer year
     ) {
         return expenseService.getExpensesByYear(Objects.requireNonNullElseGet(year,
                 () -> LocalDate.now().getYear()));
     }
 
     @GetMapping("/grouped")
-    public List<Object[]> getExpensesGroupedByCategory() {
-        return expenseService.getGroupedExpensesByCategory();
+    public List<Object[]> getExpensesGroupedByCategory(
+            @RequestParam(value = "month", required = false) Integer month
+    ) {
+        if (month == null) {
+            month = LocalDate.now().getMonthValue();
+        }
+        return expenseService.getGroupedExpensesByMonth(month);
     }
 
     @PostMapping

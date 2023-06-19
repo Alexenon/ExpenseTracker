@@ -52,14 +52,6 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
     List<ExpenseDTO> findByCategory(@Param("categoryName") String categoryName);
 
     @Query(value = """
-            SELECT C.name, COUNT(E.id) as 'total times'
-            FROM expense E
-            INNER JOIN category C ON C.id = E.category_id
-            GROUP BY C.name
-            """, nativeQuery = true)
-    List<Object[]> findGroupedExpensesByCategory();
-
-    @Query(value = """
         SELECT C.name, SUM(
             CASE
                 WHEN T.name = 'DAILY' THEN DAY(LAST_DAY(CURRENT_DATE))
@@ -87,9 +79,10 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
             FROM expense E
             INNER JOIN category C ON C.id = E.category_id
             INNER JOIN timestamp T ON T.id = E.timestamp_id
+            WHERE MONTH(E.date) = :month
             GROUP BY C.name
             """, nativeQuery = true)
-    List<Object[]> findGroupedCategoriesWithTotalSums();
+    List<Object[]> findGroupedCategoriesWithTotalSumsByMonth(@Param("month") int month);
 
 
 }

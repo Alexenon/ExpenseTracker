@@ -64,8 +64,8 @@ public class ExpenseService {
         return repository.findExpensesPerYear(year);
     }
 
-    public List<Object[]> getGroupedExpensesByCategory() {
-        return repository.findGroupedCategoriesWithTotalSums();
+    public List<Object[]> getGroupedExpensesByMonth(int month) {
+        return repository.findGroupedCategoriesWithTotalSumsByMonth(month);
     }
 
     public void saveExpenses(List<Expense> expenseList) {
