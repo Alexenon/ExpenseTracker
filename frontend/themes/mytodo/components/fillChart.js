@@ -67,7 +67,7 @@ window.fillChartPie = async function fillChartPie() {
     },
     tooltip: {
       trigger: 'item',
-      formatter: '{a} <br/>{b} : {c} ({d}%)'
+      formatter: '{b} : {d}%'
     },
     legend: {
       bottom: 10,
@@ -93,7 +93,7 @@ window.fillChartPie = async function fillChartPie() {
         },
         label: {
           normal: {
-            formatter: '{b} : {c}',
+            formatter: '{b} : ${c}',
             position: 'outside'
           }
         }
@@ -135,9 +135,9 @@ function showChartDetails(xpath) {
 
   if (chartElement && elementWithText) {
     chartElement.addEventListener('click', function() {
-      const pattern = '{a}: {b} : {c} ({d}%)';
+      const pattern = '{b} : {d}%';
       const text = elementWithText.textContent;
-      var expenseName = getParamFormatter(text, pattern, 2);
+      var expenseName = getParamFormatter(text, pattern, 1);
       console.log(expenseName);
     });
   }

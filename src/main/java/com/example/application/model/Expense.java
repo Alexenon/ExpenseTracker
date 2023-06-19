@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -37,8 +38,7 @@ public class Expense {
     @Getter
     @Setter
     @JsonFormat(pattern = "yyyy-MM-dd")
-    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
-    private LocalDateTime date;
+    private LocalDate date;
 
     @ManyToOne
     @JoinColumn(name = "timestamp_id")
@@ -54,7 +54,7 @@ public class Expense {
 
     @Override
     public String toString() {
-        DateTimeFormatter dateFormat = LocalDateTimeDeserializer.getFormatter();
+        DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         return String.format("%d, %s, %f, %s, %s, %s, %s",
                 id, name, amount, timestamp.getName(),
                 category.getName(), description, dateFormat.format(date));

@@ -1,8 +1,9 @@
 package com.example.application.controller;
 
-import com.example.application.model.Expense;
-import com.example.application.model.ExpenseDTO;
+import com.example.application.model.*;
+import com.example.application.service.CategoryService;
 import com.example.application.service.ExpenseService;
+import com.example.application.service.TimestampService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,6 +18,12 @@ public class ExpenseController {
     @Autowired
     ExpenseService expenseService;
 
+    @Autowired
+    TimestampService timestampService;
+
+    @Autowired
+    CategoryService categoryService;
+
     @GetMapping("/all")
     public List<ExpenseDTO> getAllExpenses() {
         return expenseService.getAllExpenses();
@@ -29,6 +36,21 @@ public class ExpenseController {
 
     @PostMapping("/save")
     public Expense saveExpense(@RequestBody ExpenseRequest expenseRequest) {
+        Expense expense = new Expense();
+
+        expense.setName(expenseRequest.getName());
+        expense.setAmount(expenseRequest.getAmount());
+        expense.setDate(expenseRequest.getDate());
+        expense.setDescription(expenseRequest.getDescription());
+
+        String timestampName = expenseRequest.getTimestamp();
+        Timestamp timestamp = timestampService.getTimestampByName(timestampName);
+        expense.setTimestamp(timestamp);
+
+        String categoryName = expenseRequest.getCategory();
+        Category category = categoryService.getCategoryByName(categoryName);
+        expense.setCategory(category);
+
         return expenseService.saveExpense(expense);
     }
 
@@ -78,15 +100,20 @@ public class ExpenseController {
 
     @GetMapping("/getByYear")
     public List<ExpenseDTO> getExpensesByYear(
-            @RequestParam(value = "yearParam", required = false) Integer year
+            @RequestParam(value = "year", required = false) Integer year
     ) {
         return expenseService.getExpensesByYear(Objects.requireNonNullElseGet(year,
                 () -> LocalDate.now().getYear()));
     }
 
     @GetMapping("/grouped")
-    public List<Object[]> getExpensesGroupedByCategory() {
-        return expenseService.getGroupedExpensesByCategory();
+    public List<Object[]> getExpensesGroupedByCategory(
+            @RequestParam(value = "month", required = false) Integer month
+    ) {
+        if (month == null) {
+            month = LocalDate.now().getMonthValue();
+        }
+        return expenseService.getGroupedExpensesByMonth(month);
     }
 
     @PostMapping

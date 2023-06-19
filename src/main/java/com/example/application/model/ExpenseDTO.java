@@ -1,9 +1,8 @@
 package com.example.application.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 public interface ExpenseDTO {
     long getId();
@@ -19,7 +18,6 @@ public interface ExpenseDTO {
     String getTimestamp();
 
     @JsonFormat(pattern = "yyyy-MM-dd")
-    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
-    LocalDateTime getDate();
+    LocalDate getDate();
 
 }

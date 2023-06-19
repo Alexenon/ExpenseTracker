@@ -3,7 +3,7 @@
     "name": "Mobile Payment",
     "id": 2,
     "timestamp": "MONTHLY",
-    "date": "2023-06-03 12:00",
+    "date": "2023-06-03",
     "description": "Monthly payment for internet and minutes",
     "category": "Services",
     "amount": 200.0
@@ -12,7 +12,7 @@
     "name": "Netflix Subscription",
     "id": 6,
     "timestamp": "WEEKLY",
-    "date": "2023-06-01 12:00",
+    "date": "2023-06-01",
     "description": "",
     "category": "Services",
     "amount": 200.0
@@ -21,7 +21,7 @@
     "name": "Car Wash",
     "id": 9,
     "timestamp": "WEEKLY",
-    "date": "2023-06-05 14:00",
+    "date": "2023-06-05",
     "description": "Cleaning the car",
     "category": "Services",
     "amount": 200.0
@@ -30,9 +30,18 @@
     "name": "Haircut",
     "id": 12,
     "timestamp": "MONTHLY",
-    "date": "2023-06-16 14:00",
+    "date": "2023-06-16",
     "description": "Got a haircut at the salon",
     "category": "Services",
     "amount": 30.0
+  },
+  {
+    "name": "Gym Subscription",
+    "id": 15,
+    "timestamp": "MONTHLY",
+    "date": "2023-06-01",
+    "description": "Renewed gym membership",
+    "category": "Services",
+    "amount": 150.0
   }
 ]

@@ -3,9 +3,18 @@
     "name": "Movie Ticket",
     "id": 10,
     "timestamp": "ONCE",
-    "date": "2023-06-10 18:30",
+    "date": "2023-06-10",
     "description": "Watching a movie",
     "category": "Distractions",
     "amount": 150.0
+  },
+  {
+    "name": "Travel in Russia",
+    "id": 14,
+    "timestamp": "ONCE",
+    "date": "2023-06-25",
+    "description": "A small travel to Russia",
+    "category": "Distractions",
+    "amount": 1200.0
   }
 ]
