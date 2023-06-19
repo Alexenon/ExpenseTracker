@@ -1,18 +1,9 @@
 [
   {
-    "name": "Fuel",
-    "id": 1,
-    "timestamp": "WEEKLY",
-    "date": "2023-06-03 12:00",
-    "description": "Fill the car's tank with fuel",
-    "category": "Others",
-    "amount": 200.0
-  },
-  {
     "name": "Headset",
     "id": 5,
     "timestamp": "ONCE",
-    "date": "2023-06-03 12:00",
+    "date": "2023-06-03",
     "description": "",
     "category": "Others",
     "amount": 20.0
@@ -21,7 +12,7 @@
     "name": "Oil & Filter Change",
     "id": 7,
     "timestamp": "WEEKLY",
-    "date": "2023-06-01 12:00",
+    "date": "2023-06-01",
     "description": "Changing Oil and Filter",
     "category": "Others",
     "amount": 2500.0
@@ -30,7 +21,7 @@
     "name": "Gym Subscription",
     "id": 11,
     "timestamp": "YEARLY",
-    "date": "2023-06-20 15:30",
+    "date": "2023-06-20",
     "description": "Renewed gym membership",
     "category": "Others",
     "amount": 1000.0
@@ -39,16 +30,25 @@
     "name": "Movie Ticket",
     "id": 10,
     "timestamp": "ONCE",
-    "date": "2023-06-10 18:30",
+    "date": "2023-06-10",
     "description": "Watching a movie",
     "category": "Distractions",
     "amount": 150.0
   },
   {
+    "name": "Travel in Russia",
+    "id": 14,
+    "timestamp": "ONCE",
+    "date": "2023-06-25",
+    "description": "A small travel to Russia",
+    "category": "Distractions",
+    "amount": 1200.0
+  },
+  {
     "name": "Mobile Payment",
     "id": 2,
     "timestamp": "MONTHLY",
-    "date": "2023-06-03 12:00",
+    "date": "2023-06-03",
     "description": "Monthly payment for internet and minutes",
     "category": "Services",
     "amount": 200.0
@@ -57,7 +57,7 @@
     "name": "Netflix Subscription",
     "id": 6,
     "timestamp": "WEEKLY",
-    "date": "2023-06-01 12:00",
+    "date": "2023-06-01",
     "description": "",
     "category": "Services",
     "amount": 200.0
@@ -66,7 +66,7 @@
     "name": "Car Wash",
     "id": 9,
     "timestamp": "WEEKLY",
-    "date": "2023-06-05 14:00",
+    "date": "2023-06-05",
     "description": "Cleaning the car",
     "category": "Services",
     "amount": 200.0
@@ -75,16 +75,25 @@
     "name": "Haircut",
     "id": 12,
     "timestamp": "MONTHLY",
-    "date": "2023-06-16 14:00",
+    "date": "2023-06-16",
     "description": "Got a haircut at the salon",
     "category": "Services",
     "amount": 30.0
   },
   {
+    "name": "Gym Subscription",
+    "id": 15,
+    "timestamp": "MONTHLY",
+    "date": "2023-06-01",
+    "description": "Renewed gym membership",
+    "category": "Services",
+    "amount": 150.0
+  },
+  {
     "name": "Donner Kebab",
     "id": 3,
     "timestamp": "WEEKLY",
-    "date": "2023-06-03 12:00",
+    "date": "2023-06-03",
     "description": "Tipical food",
     "category": "Food and Drinks",
     "amount": 50.0
@@ -93,7 +102,7 @@
     "name": "Coca Cola",
     "id": 4,
     "timestamp": "WEEKLY",
-    "date": "2023-06-03 12:00",
+    "date": "2023-06-03",
     "description": "Tipical drink",
     "category": "Food and Drinks",
     "amount": 20.0
@@ -102,7 +111,7 @@
     "name": "Coffee",
     "id": 8,
     "timestamp": "DAILY",
-    "date": "2023-06-02 09:30",
+    "date": "2023-06-02",
     "description": "Morning coffee",
     "category": "Food and Drinks",
     "amount": 50.0

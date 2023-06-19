@@ -50,8 +50,6 @@ public class MainLayout extends AppLayout {
         HorizontalLayout footer = new HorizontalLayout(text);
         footer.setWidth("100%");
         footer.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
-
-        // Missing method to add footer like for header
     }
 
 }
