@@ -65,7 +65,7 @@ public class ExpenseService {
     }
 
     public List<Object[]> getGroupedExpensesByCategory() {
-        return repository.findGroupedExpensesByCategory();
+        return repository.findGroupedCategoriesWithTotalSums();
     }
 
     public void saveExpenses(List<Expense> expenseList) {

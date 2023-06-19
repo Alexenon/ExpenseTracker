@@ -59,4 +59,37 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
             """, nativeQuery = true)
     List<Object[]> findGroupedExpensesByCategory();
 
+    @Query(value = """
+        SELECT C.name, SUM(
+            CASE
+                WHEN T.name = 'DAILY' THEN DAY(LAST_DAY(CURRENT_DATE))
+                WHEN T.name = 'WEEKLY' THEN WEEK(CURRENT_DATE)
+                WHEN T.name = 'MONTHLY' THEN 1
+                ELSE 1
+            END
+        ) as 'total times'
+        FROM expense E
+        INNER JOIN category C ON C.id = E.category_id
+        INNER JOIN timestamp T ON T.id = E.timestamp_id
+        GROUP BY C.name
+        """, nativeQuery = true)
+    List<Object[]> find();
+
+    @Query(value = """
+            SELECT C.name, SUM(
+                CASE
+                    WHEN T.name = 'DAILY' THEN E.amount * DAY(LAST_DAY(CURRENT_DATE))
+                    WHEN T.name = 'WEEKLY' THEN E.amount * WEEK(CURRENT_DATE)
+                    WHEN T.name = 'MONTHLY' THEN E.amount
+                    ELSE E.amount
+                END
+            ) as 'total spent'
+            FROM expense E
+            INNER JOIN category C ON C.id = E.category_id
+            INNER JOIN timestamp T ON T.id = E.timestamp_id
+            GROUP BY C.name
+            """, nativeQuery = true)
+    List<Object[]> findGroupedCategoriesWithTotalSums();
+
+
 }
