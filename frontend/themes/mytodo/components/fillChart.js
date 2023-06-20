@@ -93,7 +93,7 @@ window.fillChartPie = async function fillChartPie() {
         },
         label: {
           normal: {
-            formatter: '{b} : ${c}',
+            formatter: '{b} : {c} MDL',
             position: 'outside'
           }
         }

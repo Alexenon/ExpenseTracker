@@ -1,15 +1,17 @@
 package com.example.application.controller;
 
-import com.example.application.model.*;
-import com.example.application.service.CategoryService;
+import com.example.application.model.Expense;
+import com.example.application.model.ExpenseConvertor;
+import com.example.application.model.ExpenseDTO;
+import com.example.application.model.ExpenseRequest;
 import com.example.application.service.ExpenseService;
-import com.example.application.service.TimestampService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/expense")
@@ -19,10 +21,7 @@ public class ExpenseController {
     ExpenseService expenseService;
 
     @Autowired
-    TimestampService timestampService;
-
-    @Autowired
-    CategoryService categoryService;
+    ExpenseConvertor expenseConvertor;
 
     @GetMapping("/all")
     public List<ExpenseDTO> getAllExpenses() {
@@ -36,25 +35,11 @@ public class ExpenseController {
 
     @PostMapping("/save")
     public Expense saveExpense(@RequestBody ExpenseRequest expenseRequest) {
-        Expense expense = new Expense();
-
-        expense.setName(expenseRequest.getName());
-        expense.setAmount(expenseRequest.getAmount());
-        expense.setDate(expenseRequest.getDate());
-        expense.setDescription(expenseRequest.getDescription());
-
-        String timestampName = expenseRequest.getTimestamp();
-        Timestamp timestamp = timestampService.getTimestampByName(timestampName);
-        expense.setTimestamp(timestamp);
-
-        String categoryName = expenseRequest.getCategory();
-        Category category = categoryService.getCategoryByName(categoryName);
-        expense.setCategory(category);
-
+        Expense expense = expenseConvertor.convertToExpense(expenseRequest);
         return expenseService.saveExpense(expense);
     }
 
-    @PutMapping
+    @PutMapping("/update")
     public Expense updateExpense(@RequestBody Expense expense) {
         expenseService.updateExpense(expense);
         return expense;
@@ -116,9 +101,13 @@ public class ExpenseController {
         return expenseService.getGroupedExpensesByMonth(month);
     }
 
-    @PostMapping
-    public String addExpenses(@RequestBody List<Expense> expenseList) {
-        expenseService.saveExpenses(expenseList);
+    @PostMapping("/addAll")
+    public String addExpenses(@RequestBody List<ExpenseRequest> expenseList) {
+        List<Expense> expenses = expenseList.stream()
+                .map(expenseConvertor::convertToExpense)
+                .collect(Collectors.toList());
+
+        expenseService.saveExpenses(expenses);
         return "All expanses have been added";
     }
 
