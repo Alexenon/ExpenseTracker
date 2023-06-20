@@ -1,14 +1,14 @@
 package com.example.application.controller;
 
-import com.example.application.model.*;
-import com.example.application.service.CategoryService;
+import com.example.application.model.Expense;
+import com.example.application.model.ExpenseConvertor;
+import com.example.application.model.ExpenseDTO;
+import com.example.application.model.ExpenseRequest;
 import com.example.application.service.ExpenseService;
-import com.example.application.service.TimestampService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -39,7 +39,7 @@ public class ExpenseController {
         return expenseService.saveExpense(expense);
     }
 
-    @PutMapping
+    @PutMapping("/update")
     public Expense updateExpense(@RequestBody Expense expense) {
         expenseService.updateExpense(expense);
         return expense;

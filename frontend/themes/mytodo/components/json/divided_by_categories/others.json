@@ -1,29 +1,20 @@
 [
   {
     "name": "Headset",
-    "id": 5,
+    "id": 104,
     "timestamp": "ONCE",
     "date": "2023-06-03",
-    "description": "",
-    "category": "Others",
-    "amount": 20.0
+    "description": "Bought a new headset",
+    "amount": 600.0,
+    "category": "Others"
   },
   {
     "name": "Oil & Filter Change",
-    "id": 7,
-    "timestamp": "WEEKLY",
+    "id": 105,
+    "timestamp": "YEARLY",
     "date": "2023-06-01",
     "description": "Changing Oil and Filter",
-    "category": "Others",
-    "amount": 2500.0
-  },
-  {
-    "name": "Gym Subscription",
-    "id": 11,
-    "timestamp": "YEARLY",
-    "date": "2023-06-20",
-    "description": "Renewed gym membership",
-    "category": "Others",
-    "amount": 1000.0
+    "amount": 2500.0,
+    "category": "Others"
   }
 ]

@@ -1,20 +1,20 @@
 [
   {
-    "name": "Movie Ticket",
-    "id": 10,
-    "timestamp": "ONCE",
-    "date": "2023-06-10",
-    "description": "Watching a movie",
-    "category": "Distractions",
-    "amount": 150.0
-  },
-  {
     "name": "Travel in Russia",
-    "id": 14,
+    "id": 106,
     "timestamp": "ONCE",
     "date": "2023-06-25",
     "description": "A small travel to Russia",
-    "category": "Distractions",
-    "amount": 1200.0
+    "amount": 1200.0,
+    "category": "Distractions"
+  },
+  {
+    "name": "Movie Ticket",
+    "id": 107,
+    "timestamp": "ONCE",
+    "date": "2023-06-10",
+    "description": "Watching a movie",
+    "amount": 150.0,
+    "category": "Distractions"
   }
 ]

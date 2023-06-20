@@ -1,47 +1,56 @@
 [
   {
     "name": "Mobile Payment",
-    "id": 2,
+    "id": 108,
     "timestamp": "MONTHLY",
     "date": "2023-06-03",
     "description": "Monthly payment for internet and minutes",
-    "category": "Services",
-    "amount": 200.0
+    "amount": 200.0,
+    "category": "Services"
   },
   {
     "name": "Netflix Subscription",
-    "id": 6,
-    "timestamp": "WEEKLY",
+    "id": 109,
+    "timestamp": "MONTHLY",
     "date": "2023-06-01",
     "description": "",
-    "category": "Services",
-    "amount": 200.0
+    "amount": 200.0,
+    "category": "Services"
   },
   {
     "name": "Car Wash",
-    "id": 9,
+    "id": 110,
     "timestamp": "WEEKLY",
     "date": "2023-06-05",
     "description": "Cleaning the car",
-    "category": "Services",
-    "amount": 200.0
+    "amount": 200.0,
+    "category": "Services"
   },
   {
     "name": "Haircut",
-    "id": 12,
+    "id": 111,
     "timestamp": "MONTHLY",
     "date": "2023-06-16",
     "description": "Got a haircut at the salon",
-    "category": "Services",
-    "amount": 30.0
+    "amount": 60.0,
+    "category": "Services"
   },
   {
     "name": "Gym Subscription",
-    "id": 15,
+    "id": 112,
     "timestamp": "MONTHLY",
     "date": "2023-06-01",
     "description": "Renewed gym membership",
-    "category": "Services",
-    "amount": 150.0
+    "amount": 450.0,
+    "category": "Services"
+  },
+  {
+    "name": "Mobile Payment",
+    "id": 113,
+    "timestamp": "MONTHLY",
+    "date": "2023-06-01",
+    "description": "Monthly payment for internet and minutes",
+    "amount": 200.0,
+    "category": "Services"
   }
 ]
