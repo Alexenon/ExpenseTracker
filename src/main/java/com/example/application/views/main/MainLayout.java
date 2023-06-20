@@ -44,7 +44,7 @@ public class MainLayout extends AppLayout {
         final RouterLink statistics = new RouterLink("Statistics", DashboardView.class);
         final RouterLink contact = new RouterLink("Contact", DashboardView.class);
 
-        List<Component> listOfRoutes = List.of(home, dashboard);
+        List<Component> listOfRoutes = List.of(home, dashboard, statistics, contact);
         listOfRoutes.forEach(e -> e.setClassName("menu-item"));
         innerMenu.add(listOfRoutes);
 

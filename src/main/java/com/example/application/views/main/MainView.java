@@ -6,11 +6,14 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
@@ -103,6 +106,38 @@ public class MainView extends VerticalLayout {
         dialog.setConfirmButtonTheme("error primary");
 
         return dialog;
+    }
+
+    private Dialog getAddExpenseDialog() {
+        Dialog dialog = new Dialog();
+        dialog.setHeaderTitle("New Expense");
+
+        VerticalLayout dialogLayout = createDialogLayout();
+        dialog.add(dialogLayout);
+
+        Button saveButton = new Button("Add", e -> dialog.close());
+        saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        Button cancelButton = new Button("Cancel", e -> dialog.close());
+
+        dialog.getFooter().add(cancelButton);
+        dialog.getFooter().add(saveButton);
+        return dialog;
+    }
+
+    private VerticalLayout createDialogLayout() {
+        TextField nameField = new TextField("Expense Name");
+        TextArea descriptionField = new TextArea("Description");
+        TextField amountField = new TextField("Amount");
+        TextField intervalField = new TextField("Interval");
+        TextField date = new TextField("Date");
+
+        VerticalLayout dialogLayout = new VerticalLayout(nameField, descriptionField, amountField, date, intervalField);
+        dialogLayout.setPadding(false);
+        dialogLayout.setSpacing(false);
+        dialogLayout.setAlignItems(FlexComponent.Alignment.STRETCH);
+        dialogLayout.getStyle().set("width", "18rem").set("max-width", "100%");
+
+        return dialogLayout;
     }
 
 }
