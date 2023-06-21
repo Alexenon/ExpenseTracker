@@ -47,6 +47,11 @@ public class AddExpenseDialog extends Dialog {
         intervalField.setItems("ONCE", "DAILY", "WEEKLY", "MONTHLY", "YEARLY");
         intervalField.setHelperText("Select the interval this expense will be triggered");
         amountField.setSuffixComponent(new Span("MDL"));
+
+        DatePicker.DatePickerI18n singleFormatI18n = new DatePicker.DatePickerI18n();
+        singleFormatI18n.setDateFormat("yyyy-MM-dd");
+        dateField.setHelperText("Format: YYYY-MM-DD");
+        dateField.setI18n(singleFormatI18n);
         dateField.setValue(LocalDate.now());
 
         saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
@@ -71,6 +76,13 @@ public class AddExpenseDialog extends Dialog {
             clickListener.onComponentEvent(event);
             this.close();
         });
+    }
+
+    public boolean isFilledCorrectly() {
+        return !nameField.isEmpty() &&
+                !intervalField.isEmpty() &&
+                !amountField.isEmpty() &&
+                amountField.getValue() > 0;
     }
     
     public String getNameValue() {
