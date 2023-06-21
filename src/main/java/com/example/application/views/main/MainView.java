@@ -50,13 +50,7 @@ public class MainView extends VerticalLayout {
         addBtn.addClickListener(event -> {
             AddExpenseDialog dialog = new AddExpenseDialog();
             dialog.open();
-            dialog.handleSaveButtonClick(e -> {
-                if (dialog.isFilledCorrectly()) {
-                    System.out.println("Saved");
-                } else {
-                    System.out.println("Missing information");
-                }
-            });
+            dialog.saveExpenseFromForm(expenseService);
         });
 
         final HorizontalLayout toolBar = new HorizontalLayout(filterText, addBtn);

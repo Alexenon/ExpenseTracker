@@ -1,8 +1,10 @@
 package com.example.application.views.main.components;
 
-import com.vaadin.flow.component.ClickEvent;
+import com.example.application.model.Expense;
+import com.example.application.model.ExpenseConvertor;
+import com.example.application.model.ExpenseRequest;
+import com.example.application.service.ExpenseService;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -40,10 +42,12 @@ public class AddExpenseDialog extends Dialog {
 
     private void addStyleToElements() {
         nameField.setRequired(true);
+        nameField.setErrorMessage("Please fill this field");
         amountField.setRequired(true);
+        amountField.setErrorMessage("Please fill this field");
         intervalField.setRequired(true);
+        intervalField.setErrorMessage("Please fill this field");
 
-        intervalField.setAllowCustomValue(true);
         intervalField.setItems("ONCE", "DAILY", "WEEKLY", "MONTHLY", "YEARLY");
         intervalField.setHelperText("Select the interval this expense will be triggered");
         amountField.setSuffixComponent(new Span("MDL"));
@@ -71,10 +75,20 @@ public class AddExpenseDialog extends Dialog {
         return dialogLayout;
     }
 
-    public void handleSaveButtonClick(ComponentEventListener<ClickEvent<Button>> clickListener) {
+    public void saveExpenseFromForm(ExpenseService expenseService) {
         saveButton.addClickListener(event -> {
-            clickListener.onComponentEvent(event);
-            this.close();
+            if (isFilledCorrectly()) {
+                ExpenseRequest expenseRequest = new ExpenseRequest();
+                expenseRequest.setName(nameField.getValue());
+                expenseRequest.setAmount(amountField.getValue());
+                expenseRequest.setDate(dateField.getValue());
+                expenseRequest.setDescription(descriptionField.getValue());
+                expenseRequest.setTimestamp(intervalField.getValue());
+
+                Expense expense = new ExpenseConvertor().convertToExpense(expenseRequest);
+                expenseService.saveExpense(expense);
+                this.close();
+            }
         });
     }
 
@@ -83,26 +97,6 @@ public class AddExpenseDialog extends Dialog {
                 !intervalField.isEmpty() &&
                 !amountField.isEmpty() &&
                 amountField.getValue() > 0;
-    }
-    
-    public String getNameValue() {
-        return nameField.getValue();
-    }
-
-    public double getAmountValue() {
-        return amountField.getValue();
-    }
-
-    public LocalDate getDateValue() {
-        return dateField.getValue();
-    }
-    
-    public String getDescriptionValue() {
-        return descriptionField.getValue();
-    }
-    
-    public String getIntervalValue() {
-        return intervalField.getValue();
     }
 
 }
