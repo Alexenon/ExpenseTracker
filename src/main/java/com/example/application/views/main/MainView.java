@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Route(value = "", layout = MainLayout.class)
 public class MainView extends VerticalLayout {
 
+    @Autowired
     private final ExpenseService expenseService;
 
     private final TextField filterText = new TextField();
@@ -50,7 +51,7 @@ public class MainView extends VerticalLayout {
         addBtn.addClickListener(event -> {
             AddExpenseDialog dialog = new AddExpenseDialog();
             dialog.open();
-            dialog.saveExpenseFromForm(expenseService);
+            dialog.saveExpenseUsingForm(expenseService);
         });
 
         final HorizontalLayout toolBar = new HorizontalLayout(filterText, addBtn);

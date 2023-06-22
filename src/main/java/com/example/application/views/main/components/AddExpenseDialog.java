@@ -12,6 +12,8 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.NumberField;
@@ -75,7 +77,7 @@ public class AddExpenseDialog extends Dialog {
         return dialogLayout;
     }
 
-    public void saveExpenseFromForm(ExpenseService expenseService) {
+    public void saveExpenseUsingForm(ExpenseService expenseService) {
         saveButton.addClickListener(event -> {
             if (isFilledCorrectly()) {
                 ExpenseRequest expenseRequest = new ExpenseRequest();
@@ -87,6 +89,7 @@ public class AddExpenseDialog extends Dialog {
 
                 Expense expense = new ExpenseConvertor().convertToExpense(expenseRequest);
                 expenseService.saveExpense(expense);
+                showSuccesfullNotification();
                 this.close();
             }
         });
@@ -97,6 +100,13 @@ public class AddExpenseDialog extends Dialog {
                 !intervalField.isEmpty() &&
                 !amountField.isEmpty() &&
                 amountField.getValue() > 0;
+    }
+
+    private void showSuccesfullNotification() {
+        Notification notification = Notification.show("Expenses submitted!");
+        notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+        notification.setPosition(Notification.Position.TOP_CENTER);
+        notification.setDuration(5000);
     }
 
 }
