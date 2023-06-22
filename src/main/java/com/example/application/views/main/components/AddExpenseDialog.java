@@ -3,7 +3,9 @@ package com.example.application.views.main.components;
 import com.example.application.model.Expense;
 import com.example.application.model.ExpenseConvertor;
 import com.example.application.model.ExpenseRequest;
+import com.example.application.service.CategoryService;
 import com.example.application.service.ExpenseService;
+import com.example.application.service.TimestampService;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
@@ -19,22 +21,30 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
 import java.util.Arrays;
 
 public class AddExpenseDialog extends Dialog {
 
+    private final TimestampService timestampService;
+    private final CategoryService categoryService;
+
     private final TextField nameField = new TextField("Expense Name");
     private final TextArea descriptionField = new TextArea("Description");
     private final NumberField amountField = new NumberField("Amount");
-    private final ComboBox<String> intervalField = new ComboBox<>("Interval");
+    private final ComboBox<String> intervalField = new ComboBox<>("Interval"); // Select -> element
+    private final ComboBox<String> categoryField = new ComboBox<>("Category"); // Combobox -> element
     private final DatePicker dateField = new DatePicker("Date");
 
     private final Button saveButton = new Button("Add");
     private final Button cancelButton = new Button("Cancel");
 
-    public AddExpenseDialog() {
+    public AddExpenseDialog(TimestampService timestampService, CategoryService categoryService) {
+        this.timestampService = timestampService;
+        this.categoryService = categoryService;
+
         this.setHeaderTitle("Add New Expense");
         add(createDialogLayout());
         addStyleToElements();
@@ -87,6 +97,7 @@ public class AddExpenseDialog extends Dialog {
                 expenseRequest.setDescription(descriptionField.getValue());
                 expenseRequest.setTimestamp(intervalField.getValue());
 
+                ExpenseConvertor expenseConvertor = new ExpenseConvertor(timestampService, categoryService);
                 Expense expense = new ExpenseConvertor().convertToExpense(expenseRequest);
                 expenseService.saveExpense(expense);
                 showSuccesfullNotification();
@@ -107,6 +118,7 @@ public class AddExpenseDialog extends Dialog {
         notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
         notification.setPosition(Notification.Position.TOP_CENTER);
         notification.setDuration(5000);
+        notification.open();
     }
 
 }
