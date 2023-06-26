@@ -19,6 +19,7 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextArea;
@@ -38,8 +39,8 @@ public class AddExpenseDialog extends Dialog {
     private final TextField nameField = new TextField("Expense Name");
     private final TextArea descriptionField = new TextArea("Description");
     private final NumberField amountField = new NumberField("Amount");
-    private final ComboBox<String> intervalField = new ComboBox<>("Interval"); // Select -> element
-    private final ComboBox<String> categoryField = new ComboBox<>("Category"); // Combobox -> element
+    private final Select<String> intervalField = new Select<>();
+    private final ComboBox<String> categoryField = new ComboBox<>("Category");
     private final DatePicker dateField = new DatePicker("Date");
 
     private final Button saveButton = new Button("Add");
@@ -55,16 +56,13 @@ public class AddExpenseDialog extends Dialog {
         this.getFooter().add(cancelButton, saveButton);
     }
 
-    private void setupRequiredComponents() {
+    private void addStyleToElements() {
         Arrays.stream(requiredComponents).forEach(component -> {
             ((HasValue<?, ?>) component).setRequiredIndicatorVisible(true);
             ((HasValidationProperties) component).setErrorMessage("Please fill this field");
         });
-    }
 
-    private void addStyleToElements() {
-        setupRequiredComponents();
-
+        intervalField.setLabel("Interval");
         intervalField.setItems("ONCE", "DAILY", "WEEKLY", "MONTHLY", "YEARLY");
         intervalField.setHelperText("Select the interval this expense will be triggered");
         categoryField.setItems("Others", "Services", "Food and Drinks", "Distractions");
