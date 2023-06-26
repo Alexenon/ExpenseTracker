@@ -23,14 +23,17 @@ import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class AddExpenseDialog extends Dialog {
+
+    private static final Logger logger = LoggerFactory.getLogger(AddExpenseDialog.class);
 
     private final TextField nameField = new TextField("Expense Name");
     private final TextArea descriptionField = new TextArea("Description");
@@ -50,6 +53,13 @@ public class AddExpenseDialog extends Dialog {
         addStyleToElements();
 
         this.getFooter().add(cancelButton, saveButton);
+    }
+
+    private void setupRequiredComponents() {
+        Arrays.stream(requiredComponents).forEach(component -> {
+            ((HasValue<?, ?>) component).setRequiredIndicatorVisible(true);
+            ((HasValidationProperties) component).setErrorMessage("Please fill this field");
+        });
     }
 
     private void addStyleToElements() {
@@ -85,8 +95,10 @@ public class AddExpenseDialog extends Dialog {
     }
 
     public void saveExpenseUsingForm(ExpenseService expenseService, TimestampService timestampService, CategoryService categoryService) {
+        logger.info("Clicking on " + saveButton.getText() + " button");
         saveButton.addClickListener(event -> {
             if (isFilledCorrectly()) {
+                logger.info("Saving expense using data provided inside `Add New Expense` form");
                 ExpenseRequest expenseRequest = new ExpenseRequest();
                 expenseRequest.setName(nameField.getValue());
                 expenseRequest.setAmount(amountField.getValue());
@@ -101,13 +113,18 @@ public class AddExpenseDialog extends Dialog {
                 showSuccesfullNotification();
                 this.close();
             } else {
-                System.out.println("Implement wrong message");
+                logger.warn("Trying to submit form without all required fields to be filled");
             }
         });
     }
 
+    private List<Component> getListOfEmptyComponents() {
+        return Arrays.stream(requiredComponents)
+                .filter(component -> ((HasValue<?, ?>) component).isEmpty())
+                .collect(Collectors.toList());
+    }
+
     public boolean isFilledCorrectly() {
-        System.out.println(getListOfEmptyComponents());
         return getListOfEmptyComponents().isEmpty();
     }
 
@@ -117,19 +134,6 @@ public class AddExpenseDialog extends Dialog {
         notification.setPosition(Notification.Position.TOP_CENTER);
         notification.setDuration(5000);
         notification.open();
-    }
-
-    private void setupRequiredComponents() {
-        Arrays.stream(requiredComponents).forEach(component -> {
-            ((HasValue<?, ?>) component).setRequiredIndicatorVisible(true);
-            ((HasValidationProperties) component).setErrorMessage("Please fill this field");
-        });
-    }
-
-    private List<Component> getListOfEmptyComponents() {
-        return Arrays.stream(requiredComponents)
-                .filter(component -> ((HasValue<?, ?>) component).isEmpty())
-                .collect(Collectors.toList());
     }
 
 }

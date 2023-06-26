@@ -1,5 +1,6 @@
 package com.example.application.views.main;
 
+import com.example.application.model.CustomErrorHandler;
 import com.example.application.model.ExpenseDTO;
 import com.example.application.service.CategoryService;
 import com.example.application.service.ExpenseService;
@@ -19,6 +20,7 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.VaadinSession;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @PageTitle("Expenses")
