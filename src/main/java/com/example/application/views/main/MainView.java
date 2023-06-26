@@ -1,7 +1,9 @@
 package com.example.application.views.main;
 
 import com.example.application.model.ExpenseDTO;
+import com.example.application.service.CategoryService;
 import com.example.application.service.ExpenseService;
+import com.example.application.service.TimestampService;
 import com.example.application.views.main.components.AddExpenseDialog;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
@@ -26,12 +28,20 @@ public class MainView extends VerticalLayout {
     @Autowired
     private final ExpenseService expenseService;
 
+    @Autowired
+    private final TimestampService timestampService;
+
+    @Autowired
+    private final CategoryService categoryService;
+
     private final TextField filterText = new TextField();
     private final Grid<ExpenseDTO> grid = new Grid<>(ExpenseDTO.class);
 
     @Autowired
-    public MainView(ExpenseService expenseService) {
+    public MainView(ExpenseService expenseService, TimestampService timestampService, CategoryService categoryService) {
         this.expenseService = expenseService;
+        this.timestampService = timestampService;
+        this.categoryService = categoryService;
 
         this.setClassName("page-content");
         add(
@@ -51,7 +61,7 @@ public class MainView extends VerticalLayout {
         addBtn.addClickListener(event -> {
             AddExpenseDialog dialog = new AddExpenseDialog();
             dialog.open();
-            dialog.saveExpenseUsingForm(expenseService);
+            dialog.saveExpenseUsingForm(expenseService, timestampService, categoryService);
         });
 
         final HorizontalLayout toolBar = new HorizontalLayout(filterText, addBtn);

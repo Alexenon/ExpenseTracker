@@ -7,6 +7,7 @@ import com.example.application.service.CategoryService;
 import com.example.application.service.ExpenseService;
 import com.example.application.service.TimestampService;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -18,18 +19,18 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class AddExpenseDialog extends Dialog {
-
-    private final TimestampService timestampService;
-    private final CategoryService categoryService;
 
     private final TextField nameField = new TextField("Expense Name");
     private final TextArea descriptionField = new TextArea("Description");
@@ -41,10 +42,9 @@ public class AddExpenseDialog extends Dialog {
     private final Button saveButton = new Button("Add");
     private final Button cancelButton = new Button("Cancel");
 
-    public AddExpenseDialog(TimestampService timestampService, CategoryService categoryService) {
-        this.timestampService = timestampService;
-        this.categoryService = categoryService;
+    private final Component[] requiredComponents = {nameField, amountField, categoryField, intervalField};
 
+    public AddExpenseDialog() {
         this.setHeaderTitle("Add New Expense");
         add(createDialogLayout());
         addStyleToElements();
@@ -53,15 +53,12 @@ public class AddExpenseDialog extends Dialog {
     }
 
     private void addStyleToElements() {
-        nameField.setRequired(true);
-        nameField.setErrorMessage("Please fill this field");
-        amountField.setRequired(true);
-        amountField.setErrorMessage("Please fill this field");
-        intervalField.setRequired(true);
-        intervalField.setErrorMessage("Please fill this field");
+        setupRequiredComponents();
 
         intervalField.setItems("ONCE", "DAILY", "WEEKLY", "MONTHLY", "YEARLY");
         intervalField.setHelperText("Select the interval this expense will be triggered");
+        categoryField.setItems("Others", "Services", "Food and Drinks", "Distractions");
+        categoryField.setHelperText("Select the category which fits this expense");
         amountField.setSuffixComponent(new Span("MDL"));
 
         DatePicker.DatePickerI18n singleFormatI18n = new DatePicker.DatePickerI18n();
@@ -76,7 +73,7 @@ public class AddExpenseDialog extends Dialog {
     }
 
     private VerticalLayout createDialogLayout() {
-        Component[] components = {nameField, descriptionField, amountField, dateField, intervalField};
+        Component[] components = {nameField, descriptionField, amountField, categoryField, dateField, intervalField};
         VerticalLayout dialogLayout = new VerticalLayout(components);
         dialogLayout.setPadding(false);
         dialogLayout.setSpacing(false);
@@ -87,7 +84,7 @@ public class AddExpenseDialog extends Dialog {
         return dialogLayout;
     }
 
-    public void saveExpenseUsingForm(ExpenseService expenseService) {
+    public void saveExpenseUsingForm(ExpenseService expenseService, TimestampService timestampService, CategoryService categoryService) {
         saveButton.addClickListener(event -> {
             if (isFilledCorrectly()) {
                 ExpenseRequest expenseRequest = new ExpenseRequest();
@@ -98,19 +95,20 @@ public class AddExpenseDialog extends Dialog {
                 expenseRequest.setTimestamp(intervalField.getValue());
 
                 ExpenseConvertor expenseConvertor = new ExpenseConvertor(timestampService, categoryService);
-                Expense expense = new ExpenseConvertor().convertToExpense(expenseRequest);
-                expenseService.saveExpense(expense);
+                Expense expense = expenseConvertor.convertToExpense(expenseRequest);
+                final Expense saveExpense = expenseService.saveExpense(expense);
+                System.out.println(saveExpense);
                 showSuccesfullNotification();
                 this.close();
+            } else {
+                System.out.println("Implement wrong message");
             }
         });
     }
 
     public boolean isFilledCorrectly() {
-        return !nameField.isEmpty() &&
-                !intervalField.isEmpty() &&
-                !amountField.isEmpty() &&
-                amountField.getValue() > 0;
+        System.out.println(getListOfEmptyComponents());
+        return getListOfEmptyComponents().isEmpty();
     }
 
     private void showSuccesfullNotification() {
@@ -119,6 +117,19 @@ public class AddExpenseDialog extends Dialog {
         notification.setPosition(Notification.Position.TOP_CENTER);
         notification.setDuration(5000);
         notification.open();
+    }
+
+    private void setupRequiredComponents() {
+        Arrays.stream(requiredComponents).forEach(component -> {
+            ((HasValue<?, ?>) component).setRequiredIndicatorVisible(true);
+            ((HasValidationProperties) component).setErrorMessage("Please fill this field");
+        });
+    }
+
+    private List<Component> getListOfEmptyComponents() {
+        return Arrays.stream(requiredComponents)
+                .filter(component -> ((HasValue<?, ?>) component).isEmpty())
+                .collect(Collectors.toList());
     }
 
 }
