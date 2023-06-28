@@ -7,7 +7,6 @@ import com.example.application.service.CategoryService;
 import com.example.application.service.ExpenseService;
 import com.example.application.service.TimestampService;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -20,17 +19,15 @@ import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
-import com.vaadin.flow.component.shared.HasValidationProperties;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Binder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class AddExpenseDialog extends Dialog {
 
@@ -46,8 +43,6 @@ public class AddExpenseDialog extends Dialog {
     private final Button saveButton = new Button("Add");
     private final Button cancelButton = new Button("Cancel");
 
-    private final Component[] requiredComponents = {nameField, amountField, categoryField, intervalField};
-
     public AddExpenseDialog() {
         this.setHeaderTitle("Add New Expense");
         add(createDialogLayout());
@@ -57,11 +52,6 @@ public class AddExpenseDialog extends Dialog {
     }
 
     private void addStyleToElements() {
-        Arrays.stream(requiredComponents).forEach(component -> {
-            ((HasValue<?, ?>) component).setRequiredIndicatorVisible(true);
-            ((HasValidationProperties) component).setErrorMessage("Please fill this field");
-        });
-
         intervalField.setLabel("Interval");
         intervalField.setItems("ONCE", "DAILY", "WEEKLY", "MONTHLY", "YEARLY");
         intervalField.setHelperText("Select the interval this expense will be triggered");
@@ -95,19 +85,9 @@ public class AddExpenseDialog extends Dialog {
     public void saveExpenseUsingForm(ExpenseService expenseService, TimestampService timestampService, CategoryService categoryService) {
         logger.info("Clicking on " + saveButton.getText() + " button");
         saveButton.addClickListener(event -> {
-            if (isFilledCorrectly()) {
+            final Binder<ExpenseRequest> binder = getBinderForValidation();
+            if (binder.validate().isOk()) {
                 logger.info("Saving expense using data provided inside `Add New Expense` form");
-                ExpenseRequest expenseRequest = new ExpenseRequest();
-                expenseRequest.setName(nameField.getValue());
-                expenseRequest.setAmount(amountField.getValue());
-                expenseRequest.setDate(dateField.getValue());
-                expenseRequest.setDescription(descriptionField.getValue());
-                expenseRequest.setTimestamp(intervalField.getValue());
-
-                ExpenseConvertor expenseConvertor = new ExpenseConvertor(timestampService, categoryService);
-                Expense expense = expenseConvertor.convertToExpense(expenseRequest);
-                final Expense saveExpense = expenseService.saveExpense(expense);
-                System.out.println(saveExpense);
                 showSuccesfullNotification();
                 this.close();
             } else {
@@ -116,22 +96,42 @@ public class AddExpenseDialog extends Dialog {
         });
     }
 
-    private List<Component> getListOfEmptyComponents() {
-        return Arrays.stream(requiredComponents)
-                .filter(component -> ((HasValue<?, ?>) component).isEmpty())
-                .collect(Collectors.toList());
-    }
-
-    public boolean isFilledCorrectly() {
-        return getListOfEmptyComponents().isEmpty();
-    }
-
     private void showSuccesfullNotification() {
         Notification notification = Notification.show("Expenses submitted!");
         notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
         notification.setPosition(Notification.Position.TOP_CENTER);
         notification.setDuration(5000);
         notification.open();
+    }
+
+    private Binder<ExpenseRequest> getBinderForValidation() {
+        Binder<ExpenseRequest> binder = new Binder<>();
+        binder.setBean(new ExpenseRequest());
+
+        binder.forField(nameField)
+                .asRequired("Please fill this field")
+                .withValidator(name -> name.length() >= 3, "Name must contain at least 3 characters")
+                .bind(ExpenseRequest::getName, ExpenseRequest::setName);
+
+        binder.forField(amountField)
+                .asRequired("Please fill this field")
+                .withValidator(amount -> amount >= 0, "Amount should be greater or equal to 0")
+                .bind(ExpenseRequest::getAmount, ExpenseRequest::setAmount);
+
+        binder.forField(categoryField)
+                .asRequired("Please fill this field")
+                .bind(ExpenseRequest::getCategory, ExpenseRequest::setCategory);
+
+        binder.forField(intervalField)
+                .asRequired("Please fill this field")
+                .bind(ExpenseRequest::getTimestamp, ExpenseRequest::setTimestamp);
+
+
+        // Optional fields without any validation
+//        binder.bind(dateField, ExpenseRequest::getDate, ExpenseRequest::setDate);
+//        binder.bind(descriptionField, ExpenseRequest::getDescription, ExpenseRequest::setDescription);
+
+        return binder;
     }
 
 }
