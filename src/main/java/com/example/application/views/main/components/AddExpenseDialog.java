@@ -1,8 +1,6 @@
 package com.example.application.views.main.components;
 
-import com.example.application.model.Expense;
-import com.example.application.model.ExpenseConvertor;
-import com.example.application.model.ExpenseRequest;
+import com.example.application.model.*;
 import com.example.application.service.CategoryService;
 import com.example.application.service.ExpenseService;
 import com.example.application.service.TimestampService;
@@ -28,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.List;
 
 public class AddExpenseDialog extends Dialog {
 
@@ -44,7 +43,8 @@ public class AddExpenseDialog extends Dialog {
     private final ComboBox<String> categoryField = new ComboBox<>("Category");
     private final DatePicker dateField = new DatePicker("Date");
 
-    public AddExpenseDialog(ExpenseService expenseService, TimestampService timestampService, CategoryService categoryService) {
+    public AddExpenseDialog(ExpenseService expenseService,
+                            TimestampService timestampService, CategoryService categoryService) {
         this.expenseService = expenseService;
         this.timestampService = timestampService;
         this.categoryService = categoryService;
@@ -67,11 +67,13 @@ public class AddExpenseDialog extends Dialog {
 
     private void addStyleToElements() {
         Binder<ExpenseRequest> binder = getBinderForValidation();
+        List<String> timestampNames = timestampService.getAllTimestamps().stream().map(Timestamp::getName).toList();
+        List<String> categoryNames = categoryService.getAllCategories().stream().map(Category::getName).toList();
 
         intervalField.setLabel("Interval");
-        intervalField.setItems("ONCE", "DAILY", "WEEKLY", "MONTHLY", "YEARLY");
+        intervalField.setItems(timestampNames);
         intervalField.setHelperText("Select the interval this expense will be triggered");
-        categoryField.setItems("Others", "Services", "Food and Drinks", "Distractions");
+        categoryField.setItems(categoryNames);
         categoryField.setHelperText("Select the category which fits this expense");
         amountField.setSuffixComponent(new Span("MDL"));
 
@@ -105,6 +107,8 @@ public class AddExpenseDialog extends Dialog {
             logger.info("Exiting `Add New Expense` form");
             this.close();
         });
+
+        // Adding buttons to footer of modal form
         this.getFooter().add(cancelButton, saveButton);
     }
 
@@ -139,7 +143,7 @@ public class AddExpenseDialog extends Dialog {
     }
 
     private void showSuccesfullNotification() {
-        Notification notification = Notification.show("Expenses submitted!");
+        Notification notification = Notification.show("Expense submitted succesfully!");
         notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
         notification.setPosition(Notification.Position.TOP_CENTER);
         notification.setDuration(5000);
@@ -147,7 +151,7 @@ public class AddExpenseDialog extends Dialog {
     }
 
     private void showErrorNotification() {
-        Notification notification = Notification.show("An error occured when submiting form happened");
+        Notification notification = Notification.show("An error occured after submiting form");
         notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
         notification.setPosition(Notification.Position.TOP_CENTER);
         notification.setDuration(5000);
