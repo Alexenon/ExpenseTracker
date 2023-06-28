@@ -1,6 +1,5 @@
 package com.example.application.views.main;
 
-import com.example.application.model.CustomErrorHandler;
 import com.example.application.model.ExpenseDTO;
 import com.example.application.service.CategoryService;
 import com.example.application.service.ExpenseService;
@@ -20,7 +19,6 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.server.VaadinSession;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @PageTitle("Expenses")
@@ -61,9 +59,8 @@ public class MainView extends VerticalLayout {
         Button addBtn = new Button("Add");
         addBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
         addBtn.addClickListener(event -> {
-            AddExpenseDialog dialog = new AddExpenseDialog();
+            AddExpenseDialog dialog = new AddExpenseDialog(expenseService, timestampService, categoryService);
             dialog.open();
-            dialog.saveExpenseUsingForm(expenseService, timestampService, categoryService);
         });
 
         final HorizontalLayout toolBar = new HorizontalLayout(filterText, addBtn);

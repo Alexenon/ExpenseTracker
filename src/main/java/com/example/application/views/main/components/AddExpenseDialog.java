@@ -33,6 +33,10 @@ public class AddExpenseDialog extends Dialog {
 
     private static final Logger logger = LoggerFactory.getLogger(AddExpenseDialog.class);
 
+    private final ExpenseService expenseService;
+    private final TimestampService timestampService;
+    private final CategoryService categoryService;
+
     private final TextField nameField = new TextField("Expense Name");
     private final TextArea descriptionField = new TextArea("Description");
     private final NumberField amountField = new NumberField("Amount");
@@ -40,34 +44,13 @@ public class AddExpenseDialog extends Dialog {
     private final ComboBox<String> categoryField = new ComboBox<>("Category");
     private final DatePicker dateField = new DatePicker("Date");
 
-    private final Button saveButton = new Button("Add");
-    private final Button cancelButton = new Button("Cancel");
-
-    public AddExpenseDialog() {
-        this.setHeaderTitle("Add New Expense");
+    public AddExpenseDialog(ExpenseService expenseService, TimestampService timestampService, CategoryService categoryService) {
+        this.expenseService = expenseService;
+        this.timestampService = timestampService;
+        this.categoryService = categoryService;
+        setHeaderTitle("Add New Expense");
         add(createDialogLayout());
         addStyleToElements();
-
-        this.getFooter().add(cancelButton, saveButton);
-    }
-
-    private void addStyleToElements() {
-        intervalField.setLabel("Interval");
-        intervalField.setItems("ONCE", "DAILY", "WEEKLY", "MONTHLY", "YEARLY");
-        intervalField.setHelperText("Select the interval this expense will be triggered");
-        categoryField.setItems("Others", "Services", "Food and Drinks", "Distractions");
-        categoryField.setHelperText("Select the category which fits this expense");
-        amountField.setSuffixComponent(new Span("MDL"));
-
-        DatePicker.DatePickerI18n singleFormatI18n = new DatePicker.DatePickerI18n();
-        singleFormatI18n.setDateFormat("yyyy-MM-dd");
-        dateField.setHelperText("Format: YYYY-MM-DD");
-        dateField.setI18n(singleFormatI18n);
-        dateField.setValue(LocalDate.now());
-
-        saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        cancelButton.addClickShortcut(Key.ESCAPE);
-        cancelButton.addClickListener(e -> this.close());
     }
 
     private VerticalLayout createDialogLayout() {
@@ -82,26 +65,47 @@ public class AddExpenseDialog extends Dialog {
         return dialogLayout;
     }
 
-    public void saveExpenseUsingForm(ExpenseService expenseService, TimestampService timestampService, CategoryService categoryService) {
-        logger.info("Clicking on " + saveButton.getText() + " button");
+    private void addStyleToElements() {
+        Binder<ExpenseRequest> binder = getBinderForValidation();
+
+        intervalField.setLabel("Interval");
+        intervalField.setItems("ONCE", "DAILY", "WEEKLY", "MONTHLY", "YEARLY");
+        intervalField.setHelperText("Select the interval this expense will be triggered");
+        categoryField.setItems("Others", "Services", "Food and Drinks", "Distractions");
+        categoryField.setHelperText("Select the category which fits this expense");
+        amountField.setSuffixComponent(new Span("MDL"));
+
+        DatePicker.DatePickerI18n singleFormatI18n = new DatePicker.DatePickerI18n();
+        singleFormatI18n.setDateFormat("yyyy-MM-dd");
+        dateField.setHelperText("Format: YYYY-MM-DD");
+        dateField.setI18n(singleFormatI18n);
+        dateField.setValue(LocalDate.now());
+
+        Button saveButton = new Button("Add");
+        saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         saveButton.addClickListener(event -> {
-            final Binder<ExpenseRequest> binder = getBinderForValidation();
+            logger.info("Clicking on Save button inside `Add New Expense` form");
             if (binder.validate().isOk()) {
                 logger.info("Saving expense using data provided inside `Add New Expense` form");
+                ExpenseConvertor convertor = new ExpenseConvertor(timestampService, categoryService);
+                ExpenseRequest expenseRequest = binder.getBean();
+                Expense expense = convertor.convertToExpense(expenseRequest);
+                expenseService.saveExpense(expense);
                 showSuccesfullNotification();
                 this.close();
             } else {
-                logger.warn("Trying to submit form without all required fields to be filled");
+                logger.warn("Submiting `Add New Expense` form with validation errors");
+                showErrorNotification();
             }
         });
-    }
 
-    private void showSuccesfullNotification() {
-        Notification notification = Notification.show("Expenses submitted!");
-        notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-        notification.setPosition(Notification.Position.TOP_CENTER);
-        notification.setDuration(5000);
-        notification.open();
+        Button cancelButton = new Button("Cancel");
+        cancelButton.addClickShortcut(Key.ESCAPE);
+        cancelButton.addClickListener(e -> {
+            logger.info("Exiting `Add New Expense` form");
+            this.close();
+        });
+        this.getFooter().add(cancelButton, saveButton);
     }
 
     private Binder<ExpenseRequest> getBinderForValidation() {
@@ -128,10 +132,26 @@ public class AddExpenseDialog extends Dialog {
 
 
         // Optional fields without any validation
-//        binder.bind(dateField, ExpenseRequest::getDate, ExpenseRequest::setDate);
-//        binder.bind(descriptionField, ExpenseRequest::getDescription, ExpenseRequest::setDescription);
+        binder.bind(dateField, ExpenseRequest::getDate, ExpenseRequest::setDate);
+        binder.bind(descriptionField, ExpenseRequest::getDescription, ExpenseRequest::setDescription);
 
         return binder;
+    }
+
+    private void showSuccesfullNotification() {
+        Notification notification = Notification.show("Expenses submitted!");
+        notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+        notification.setPosition(Notification.Position.TOP_CENTER);
+        notification.setDuration(5000);
+        notification.open();
+    }
+
+    private void showErrorNotification() {
+        Notification notification = Notification.show("An error occured when submiting form happened");
+        notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+        notification.setPosition(Notification.Position.TOP_CENTER);
+        notification.setDuration(5000);
+        notification.open();
     }
 
 }
