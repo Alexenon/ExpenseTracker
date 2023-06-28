@@ -62,3 +62,8 @@ canvas {
     top: 100px !important;
     left: 30px !important;
 }
+
+.margin-end {
+     margin-left: auto;
+     margin-right: 20px;
+}

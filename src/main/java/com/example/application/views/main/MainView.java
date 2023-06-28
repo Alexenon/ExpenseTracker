@@ -1,7 +1,10 @@
 package com.example.application.views.main;
 
 import com.example.application.model.ExpenseDTO;
+import com.example.application.service.CategoryService;
 import com.example.application.service.ExpenseService;
+import com.example.application.service.TimestampService;
+import com.example.application.views.main.components.AddExpenseDialog;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -22,14 +25,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Route(value = "", layout = MainLayout.class)
 public class MainView extends VerticalLayout {
 
+    @Autowired
     private final ExpenseService expenseService;
+
+    @Autowired
+    private final TimestampService timestampService;
+
+    @Autowired
+    private final CategoryService categoryService;
 
     private final TextField filterText = new TextField();
     private final Grid<ExpenseDTO> grid = new Grid<>(ExpenseDTO.class);
 
     @Autowired
-    public MainView(ExpenseService expenseService) {
+    public MainView(ExpenseService expenseService, TimestampService timestampService, CategoryService categoryService) {
         this.expenseService = expenseService;
+        this.timestampService = timestampService;
+        this.categoryService = categoryService;
 
         this.setClassName("page-content");
         add(
@@ -47,7 +59,8 @@ public class MainView extends VerticalLayout {
         Button addBtn = new Button("Add");
         addBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
         addBtn.addClickListener(event -> {
-            /* Add some functionality */
+            AddExpenseDialog dialog = new AddExpenseDialog(expenseService, timestampService, categoryService);
+            dialog.open();
         });
 
         final HorizontalLayout toolBar = new HorizontalLayout(filterText, addBtn);
@@ -104,6 +117,7 @@ public class MainView extends VerticalLayout {
 
         return dialog;
     }
+
 
 }
 

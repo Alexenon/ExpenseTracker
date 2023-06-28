@@ -1,15 +1,14 @@
 package com.example.application.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 @Entity
@@ -23,6 +22,7 @@ public class Expense {
     @Setter
     private long id;
 
+    @NotNull
     @Getter
     @Setter
     private String name;
@@ -40,12 +40,14 @@ public class Expense {
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate date;
 
+    @NotNull
     @ManyToOne
     @JoinColumn(name = "timestamp_id")
     @Getter
     @Setter
     private Timestamp timestamp;
 
+    @NotNull
     @ManyToOne
     @JoinColumn(name = "category_id")
     @Getter
