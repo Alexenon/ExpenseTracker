@@ -12,7 +12,7 @@ import com.vaadin.flow.router.Route;
 @Route(value = "login", layout = MainLayout.class)
 public class LoginView extends VerticalLayout implements BeforeEnterObserver {
 
-    private final LoginForm login = new LoginForm();
+    private final LoginForm loginForm = new LoginForm();
 
     public LoginView(){
         addClassName("login-view");
@@ -20,9 +20,9 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
         setAlignItems(Alignment.CENTER);
         setJustifyContentMode(JustifyContentMode.CENTER);
 
-        login.setAction("login");
+        loginForm.setAction("login");
 
-        add(new H1("Vaadin CRM"), login);
+        add(new H1("Vaadin CRM"), loginForm);
     }
 
     @Override
@@ -31,7 +31,7 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
                 .getQueryParameters()
                 .getParameters()
                 .containsKey("error")) {
-            login.setError(true);
+            loginForm.setError(true);
         }
     }
 }
