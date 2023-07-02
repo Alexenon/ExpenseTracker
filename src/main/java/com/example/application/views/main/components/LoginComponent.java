@@ -3,12 +3,12 @@ package com.example.application.views.main.components;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.login.LoginForm;
 
-public class LoginRichContent extends Div {
+public class LoginComponent extends Div {
 
-    public LoginRichContent() {
+    public LoginComponent() {
         addClassName("login-rich-content");
 
-        LoginForm loginForm = new LoginForm();
+        com.vaadin.flow.component.login.LoginForm loginForm = new LoginForm();
         loginForm.getElement().getThemeList().add("dark");
         add(loginForm);
         loginForm.getElement().setAttribute("no-autofocus", "");

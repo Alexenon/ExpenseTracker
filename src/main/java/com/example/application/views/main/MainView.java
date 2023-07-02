@@ -5,7 +5,7 @@ import com.example.application.service.CategoryService;
 import com.example.application.service.ExpenseService;
 import com.example.application.service.TimestampService;
 import com.example.application.views.main.components.AddExpenseDialog;
-import com.example.application.views.main.components.LoginRichContent;
+import com.example.application.views.main.components.LoginComponent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -47,8 +47,7 @@ public class MainView extends VerticalLayout {
         this.setClassName("page-content");
         add(
                 getToolBar(),
-                getGrid(),
-                new LoginRichContent()
+                getGrid()
         );
     }
 
