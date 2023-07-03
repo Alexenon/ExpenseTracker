@@ -5,7 +5,7 @@ import com.example.application.service.CategoryService;
 import com.example.application.service.ExpenseService;
 import com.example.application.service.TimestampService;
 import com.example.application.views.main.components.AddExpenseDialog;
-import com.example.application.views.main.components.LoginComponent;
+import com.example.application.views.main.layouts.MainLayout;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -22,6 +22,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.springframework.beans.factory.annotation.Autowired;
 
+//@PermitAll
 @PageTitle("Expenses")
 @Route(value = "", layout = MainLayout.class)
 public class MainView extends VerticalLayout {

@@ -1,5 +1,7 @@
-package com.example.application.views.main;
+package com.example.application.views.main.layouts;
 
+import com.example.application.views.main.DashboardView;
+import com.example.application.views.main.MainView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.applayout.AppLayout;

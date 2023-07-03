@@ -6,12 +6,18 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+import org.springframework.context.annotation.ComponentScan;
 
 /**
  * The entry point of the Spring Boot application
  */
 @SpringBootApplication
 @Theme(value = "mytodo")
+@ComponentScan(basePackages = {
+        "com.example.application",
+        "com.example.application.security",
+        "com.example.application.service"
+})
 public class Application extends SpringBootServletInitializer implements AppShellConfigurator {
 
     public static void main(String[] args) {

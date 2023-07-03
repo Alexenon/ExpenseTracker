@@ -1,6 +1,7 @@
 package com.example.application.views.main;
 
 import com.example.application.service.ExpenseService;
+import com.example.application.views.main.layouts.MainLayout;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.UI;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
+//@PermitAll
 @PageTitle("Dashboard")
 @Route(value = "dashboard", layout = MainLayout.class)
 @JsModule(value = "./themes/mytodo/components/fillChart.js")
@@ -55,7 +57,5 @@ public class DashboardView extends HorizontalLayout {
         }
         return null;
     }
-
-
 
 }
