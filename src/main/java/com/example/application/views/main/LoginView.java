@@ -8,8 +8,9 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 
-//@AnonymousAllowed
+@AnonymousAllowed
 @PageTitle("Login")
 @Route(value = "login", layout = MainLayout.class)
 public class LoginView extends VerticalLayout implements BeforeEnterObserver {
