@@ -255,7 +255,7 @@
   "Frontend/themes/mytodo/components/fillChart.js"
  ],
  "frontendHashes": {
-  "themes/mytodo/components/fillChart.js": "378603c1b05b5c3f72a929fe1df9f434b916d85386e117b3686e3d3e888397be",
+  "themes/mytodo/components/fillChart.js": "28e05fed8698c90913385f10a13098c147cb5697c91382e420ecef34a5d966ee",
   "comboBoxConnector.js": "1d004c3dae9c76f8bcc68678abe1b8f7bdc8b456f5c9c4c7f190df8ed25d66cd",
   "contextMenuConnector.js": "25a200f8086461635ddd92316ebeb5a868294c8650a190efbae120edb1088f4f",
   "contextMenuTargetConnector.js": "870f67643988dd5618c247bd3c28d843f70aa026ee89f44c3c7556b5e70856af",
@@ -281,7 +281,7 @@
   "mytodo": "{\n  \"lumoImports\" : [ \"typography\", \"color\", \"spacing\", \"badge\", \"utility\" ]\n}"
  },
  "entryScripts": [
-  "VAADIN/build/indexhtml-adc0605f.js"
+  "VAADIN/build/indexhtml-33263cc2.js"
  ],
  "webComponents": [],
  "packageJsonHash": "e7f31c1be23da66c9632b284173867bf6f66fbbcedd9c79737ea06f38923e25c"

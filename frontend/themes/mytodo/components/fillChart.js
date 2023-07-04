@@ -59,6 +59,7 @@ window.fillChartPie = async function fillChartPie() {
   const dom = document.getElementById('chart-pie');
   const myChart = echarts.init(dom);
   const jsonObject = await getJsonData('http://localhost:8080/api/expense/grouped');
+//  const jsonObject = await getJsonData('http://localhost:8080/api/expense/grouped?month=6');
 
   var option = {
     title: {
@@ -72,6 +73,9 @@ window.fillChartPie = async function fillChartPie() {
     legend: {
       bottom: 10,
       left: 'center',
+      // Think about this
+//    left: 'left',
+//    orient: 'vertical',
       data: jsonObject.map(item => item[0])
     },
     series: [
@@ -81,6 +85,10 @@ window.fillChartPie = async function fillChartPie() {
         radius: '60%',
         center: ['50%', '50%'],
         selectedMode: 'single',
+        itemStyle: {
+          borderWidth: 0,
+          borderColor: '#000000'
+        },
         data: jsonObject.map(item => {
           return { name: item[0], value: item[1] };
         }),
@@ -90,6 +98,11 @@ window.fillChartPie = async function fillChartPie() {
             shadowOffsetX: 0,
             shadowColor: 'rgba(0, 0, 0, 0.5)'
           }
+        },
+        showEmptyCircle: true,
+        emptyCircleStyle: {
+            opacity: 1,
+            color: 'lightgray'
         },
         label: {
           normal: {
@@ -102,10 +115,10 @@ window.fillChartPie = async function fillChartPie() {
   };
 
   if (jsonObject.length === 0) {
-    option.series[0].data = [{ name: null, value: 0 }];
-    option.series[0].label.normal.show = false;
-    option.series[0].color=["#FF8C00"];
-    option.tooltip.formatter = '{c}';
+    option.series[0].data = [{ name: "Empty", value: 0 }];
+    option.series[0].itemStyle.borderWidth = 1;
+    option.series[0].color = ["#d3d3d3"];
+    option.tooltip.formatter = '{c} MDL';
   }
 
   /* https://github.com/apache/echarts/issues/3264
