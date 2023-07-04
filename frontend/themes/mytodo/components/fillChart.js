@@ -101,6 +101,27 @@ window.fillChartPie = async function fillChartPie() {
     ]
   };
 
+  if (jsonObject.length === 0) {
+    option.series[0].data = [{ name: null, value: 0 }];
+    option.series[0].label.normal.show = false;
+    option.series[0].color=["#FF8C00"];
+    option.tooltip.formatter = '{c}';
+  }
+
+  /* https://github.com/apache/echarts/issues/3264
+
+    itemStyle: {
+        normal: {
+            borderColor: '#fff',
+            borderWidth: '0'
+        },
+        emphasis: {
+            borderColor: '#fff',
+            borderWidth: '0'
+        }
+    },
+  */
+
   if (option && typeof option === 'object') {
     myChart.setOption(option, true);
   }

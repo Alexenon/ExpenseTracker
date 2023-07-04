@@ -1,9 +1,7 @@
 package com.example.application.controller;
 
-import com.example.application.model.Expense;
-import com.example.application.model.ExpenseConvertor;
-import com.example.application.model.ExpenseDTO;
-import com.example.application.model.ExpenseRequest;
+import com.example.application.model.*;
+import com.example.application.service.CategoryService;
 import com.example.application.service.ExpenseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +17,9 @@ public class ExpenseController {
 
     @Autowired
     ExpenseService expenseService;
+
+    @Autowired
+    CategoryService categoryService;
 
     @Autowired
     ExpenseConvertor expenseConvertor;
@@ -98,8 +99,18 @@ public class ExpenseController {
         if (month == null) {
             month = LocalDate.now().getMonthValue();
         }
-        return expenseService.getGroupedExpensesByMonth(month);
-    }
+
+        List<Object[]> expensesByMonth = expenseService.getGroupedExpensesByMonth(month);
+
+//        if (expensesByMonth.isEmpty()) {
+//            List<Category> allCategories = categoryService.getAllCategories();
+//            allCategories.stream().map(Category::getName).forEach(n -> {
+//                expensesByMonth.add(new Object[]{"Current month", 0});
+//            });
+//        }
+
+        return expensesByMonth;
+}
 
     @PostMapping("/addAll")
     public String addExpenses(@RequestBody List<ExpenseRequest> expenseList) {
