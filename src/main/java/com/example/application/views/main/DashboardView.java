@@ -17,7 +17,7 @@ import java.util.List;
 @PageTitle("Dashboard")
 @Route(value = "dashboard", layout = MainLayout.class)
 @JsModule(value = "./themes/mytodo/components/fillChart.js")
-@JavaScript("https://cdnjs.cloudflare.com/ajax/libs/echarts/4.6.0/echarts-en.min.js")
+@JavaScript("https://fastly.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js")
 public class DashboardView extends HorizontalLayout {
 
     private final ExpenseService expenseService;

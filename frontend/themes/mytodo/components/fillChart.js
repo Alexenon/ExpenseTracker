@@ -58,91 +58,63 @@ window.getJsonData = async function getJsonData(url) {
 window.fillChartPie = async function fillChartPie() {
   const dom = document.getElementById('chart-pie');
   const myChart = echarts.init(dom);
-  const jsonObject = await getJsonData('http://localhost:8080/api/expense/grouped');
-//  const jsonObject = await getJsonData('http://localhost:8080/api/expense/grouped?month=6');
+//  const jsonObject = await getJsonData('http://localhost:8080/api/expense/grouped');
+  const jsonObject = await getJsonData('http://localhost:8080/api/expense/grouped?month=6');
 
-  var option = {
-    title: {
-      text: 'Expenses Chart',
-      left: 'center'
-    },
-    tooltip: {
-      trigger: 'item',
-      formatter: '{b} : {d}%'
-    },
-    legend: {
-      bottom: 10,
-      left: 'center',
-      // Think about this
-//    left: 'left',
-//    orient: 'vertical',
-      data: jsonObject.map(item => item[0])
-    },
-    series: [
-      {
-        name: 'Expenses by category:',
-        type: 'pie',
-        radius: '60%',
-        center: ['50%', '50%'],
-        selectedMode: 'single',
-        itemStyle: {
-          borderWidth: 0,
-          borderColor: '#000000'
-        },
-        data: jsonObject.map(item => {
-          return { name: item[0], value: item[1] };
-        }),
-        emphasis: {
-          itemStyle: {
-            shadowBlur: 10,
-            shadowOffsetX: 0,
-            shadowColor: 'rgba(0, 0, 0, 0.5)'
-          }
-        },
-        showEmptyCircle: true,
-        emptyCircleStyle: {
-            opacity: 1,
-            color: 'lightgray'
-        },
-        label: {
-          normal: {
-            formatter: '{b} : {c} MDL',
-            position: 'outside'
+    var option = {
+      title: {
+        text: 'Expenses Chart',
+        subtext: 'Click on legend to remove a category',
+        left: 'center'
+      },
+      tooltip: {
+        trigger: 'item',
+//        formatter: '{b} -> {c} : {d} MDL'
+      },
+      legend: {
+        orient: 'vertical',
+        left: 'left',
+//        borderRadius: 3,
+//        borderWidth: 2,
+//        padding: 10,
+//        itemGap: 10,
+//        itemWidth: 25,
+//        itemHeight: 14,
+      },
+      series: [
+        {
+          name: 'Access From',
+          type: 'pie',
+          selectedMode: 'single',
+          radius: '50%',
+            data: jsonObject.map(item => {
+              return { name: item[0], value: item[1] };
+            }),
+          emphasis: {
+            itemStyle: {
+              shadowBlur: 10,
+              shadowOffsetX: 0,
+              shadowColor: 'rgba(0, 0, 0, 0.5)'
+            }
           }
         }
-      }
-    ]
-  };
+      ]
+    };
 
+  // Setting chart style when chart is empty
   if (jsonObject.length === 0) {
+    option.legend.show = false;
+    option.tooltip.formatter = '0 MDL';
+    option.series[0].color = 'lightgray';
     option.series[0].data = [{ name: "Empty", value: 0 }];
-    option.series[0].itemStyle.borderWidth = 1;
-    option.series[0].color = ["#d3d3d3"];
-    option.tooltip.formatter = '{c} MDL';
   }
 
-  /* https://github.com/apache/echarts/issues/3264
-
-    itemStyle: {
-        normal: {
-            borderColor: '#fff',
-            borderWidth: '0'
-        },
-        emphasis: {
-            borderColor: '#fff',
-            borderWidth: '0'
-        }
-    },
-  */
-
-  if (option && typeof option === 'object') {
-    myChart.setOption(option, true);
-  }
-
+  option && myChart.setOption(option);
   showChartDetails('//div[@id=\"chart-pie\"]');
 
-  var xc = getElementByXPath('//div[@id=\"chart-pie\"]', '//div[last()]');
-  console.log(xc.textContent);
+// UNDER DEVELOPMENT
+//  var xc = getElementByXPath('//div[@id=\"chart-pie\"]', '//div[last()]');
+//  console.log(xc.textContent);
 };
 
 
