@@ -1,12 +1,17 @@
 package com.example.application.controller;
 
-import com.example.application.model.*;
+import com.example.application.model.Expense;
+import com.example.application.model.ExpenseConvertor;
+import com.example.application.model.ExpenseDTO;
+import com.example.application.model.ExpenseRequest;
 import com.example.application.service.CategoryService;
 import com.example.application.service.ExpenseService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -92,25 +97,28 @@ public class ExpenseController {
                 () -> LocalDate.now().getYear()));
     }
 
+    // TODO: Think about way to handle different dates
     @GetMapping("/grouped")
     public List<Object[]> getExpensesGroupedByCategory(
             @RequestParam(value = "month", required = false) Integer month
     ) {
-        if (month == null) {
+        if (month == null || month < 1 || month > 12) {
             month = LocalDate.now().getMonthValue();
         }
 
-        List<Object[]> expensesByMonth = expenseService.getGroupedExpensesByMonth(month);
+        return expenseService.getGroupedExpensesByMonth(month);
+    }
 
-//        if (expensesByMonth.isEmpty()) {
-//            List<Category> allCategories = categoryService.getAllCategories();
-//            allCategories.stream().map(Category::getName).forEach(n -> {
-//                expensesByMonth.add(new Object[]{"Current month", 0});
-//            });
-//        }
+    @GetMapping("/test")
+    public List<Object[]> getExpensesGroupedByCategory(
+            @RequestParam(value = "date", required = false) @DateTimeFormat(pattern = "yyyy-MM") YearMonth date
+    ) {
+        if (date == null) {
+            date = YearMonth.now();
+        }
 
-        return expensesByMonth;
-}
+        return expenseService.getMonthlyGroupedExpenses(date);
+    }
 
     @PostMapping("/addAll")
     public String addExpenses(@RequestBody List<ExpenseRequest> expenseList) {
