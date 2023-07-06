@@ -69,17 +69,20 @@ window.fillChartPie = async function fillChartPie() {
       },
       tooltip: {
         trigger: 'item',
-//        formatter: '{b} -> {c} : {d} MDL'
+        formatter(params) {
+          return `${params.marker}${params.name}: <b>${params.value} MDL</b> (${params.percent}%)`;
+        }
       },
       legend: {
         orient: 'vertical',
         left: 'left',
-//        borderRadius: 3,
-//        borderWidth: 2,
-//        padding: 10,
-//        itemGap: 10,
-//        itemWidth: 25,
-//        itemHeight: 14,
+        // This can be removed
+        borderRadius: 3,
+        borderWidth: 2,
+        padding: 10,
+        itemGap: 10,
+        itemWidth: 25,
+        itemHeight: 14,
       },
       series: [
         {
@@ -141,7 +144,7 @@ function showChartDetails(xpath) {
 
   if (chartElement && elementWithText) {
     chartElement.addEventListener('click', function() {
-      const pattern = '{b} : {d}%';
+      const pattern = '{name}: {value} MDL ({percent}%)';
       const text = elementWithText.textContent;
       var expenseName = getParamFormatter(text, pattern, 1);
       console.log(expenseName);

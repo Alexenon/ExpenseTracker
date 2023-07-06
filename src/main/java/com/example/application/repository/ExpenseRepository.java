@@ -84,5 +84,4 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
             """, nativeQuery = true)
     List<Object[]> findGroupedCategoriesWithTotalSumsByMonth(@Param("month") int month);
 
-
 }
