@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.YearMonth;
 import java.util.List;
 
 @Repository
@@ -53,102 +52,40 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
     List<ExpenseDTO> findByCategory(@Param("categoryName") String categoryName);
 
     @Query(value = """
-        SELECT C.name, SUM(
-            CASE
-                WHEN T.name = 'DAILY' THEN DAY(LAST_DAY(CURRENT_DATE))
-                WHEN T.name = 'WEEKLY' THEN WEEK(CURRENT_DATE)
-                WHEN T.name = 'MONTHLY' THEN 1
-                ELSE 1
-            END
-        ) as 'total times'
-        FROM expense E
-        INNER JOIN category C ON C.id = E.category_id
-        INNER JOIN timestamp T ON T.id = E.timestamp_id
-        GROUP BY C.name
-        """, nativeQuery = true)
+            SELECT C.name, SUM(
+                CASE
+                    WHEN T.name = 'DAILY' THEN DAY(LAST_DAY(CURRENT_DATE))
+                    WHEN T.name = 'WEEKLY' THEN WEEK(CURRENT_DATE)
+                    WHEN T.name = 'MONTHLY' THEN 1
+                    ELSE 1
+                END
+            ) as 'total times'
+            FROM expense E
+            INNER JOIN category C ON C.id = E.category_id
+            INNER JOIN timestamp T ON T.id = E.timestamp_id
+            GROUP BY C.name
+            """, nativeQuery = true)
     List<Object[]> find();
 
     @Query(value = """
             SELECT C.name, SUM(
                 CASE
-                    WHEN T.name = 'DAILY' THEN E.amount * DAY(LAST_DAY(CURRENT_DATE))
-                    WHEN T.name = 'WEEKLY' THEN E.amount * WEEK(CURRENT_DATE)
+                    WHEN T.name = 'DAILY' THEN E.amount * DAY(LAST_DAY(month_date))
+                    WHEN T.name = 'WEEKLY' THEN E.amount * FLOOR(DAY(LAST_DAY(month_date)) / 7)
                     WHEN T.name = 'MONTHLY' THEN E.amount
                     ELSE E.amount
                 END
-            ) as 'total spent'
-            FROM expense E
+            ) as totalSpent
+            FROM (
+                SELECT E.*, DATE_FORMAT(CONCAT(?1, '-', ?2, '-01'), '%Y-%m-%d') AS month_date
+                FROM expense E
+                WHERE E.date <= LAST_DAY(CONCAT(?1, '-', ?2, '-01'))
+            ) AS E
             INNER JOIN category C ON C.id = E.category_id
             INNER JOIN timestamp T ON T.id = E.timestamp_id
-            WHERE MONTH(E.date) = :month
+            WHERE E.expiry_date IS NULL OR E.expiry_date > month_date
             GROUP BY C.name
             """, nativeQuery = true)
-    List<Object[]> findGroupedCategoriesWithTotalSumsByMonth(@Param("month") int month);
+    List<Object[]> findMonthlyCategoriesTotalSum(int year, int month);
 
-
-    @Query(value = """
-            SELECT C.name, SUM(
-                CASE
-                    WHEN T.name = 'DAILY' THEN E.amount * DAY(LAST_DAY(:date))
-                    WHEN T.name = 'WEEKLY' THEN E.amount * WEEK(:date)
-                    WHEN T.name = 'MONTHLY' THEN E.amount
-                    ELSE E.amount
-                END
-            ) as 'total spent'
-            FROM expense E
-            INNER JOIN category C ON C.id = E.category_id
-            INNER JOIN timestamp T ON T.id = E.timestamp_id
-            GROUP BY C.name
-            """, nativeQuery = true)
-    List<Object[]> findGroupedCategoriesWithTotalSumsByMonth(@Param("date") YearMonth date);
 }
-
-
-/*
-
-SELECT C.name, SUM(
-    CASE
-        WHEN T.name = 'DAILY' THEN E.amount * nrDays(month)
-        WHEN T.name = 'WEEKLY' THEN E.amount * nrWeeks(month)
-        WHEN T.name = 'MONTHLY' THEN E.amount * 1
-        WHEN T.name = 'ONCE'  THEN (
-            SELECT SUM(E2.amount)
-            FROM expense E2
-            INNER JOIN timestamp T2 ON T2.id = E2.timestamp_id
-            WHERE E2.category_id = E.category_id
-                AND T2.name = 'ONCE'
-                AND MONTH(E2.date) = :month
-        )
-        ELSE E.amount
-    END
-) as 'total spent'
-FROM expense E
-INNER JOIN category C ON C.id = E.category_id
-INNER JOIN timestamp T ON T.id = E.timestamp_id
-WHERE MONTH(E.date) = :month
-GROUP BY C.name
-
-
-SELECT C.name, SUM(
-    CASE
-        WHEN T.name = 'DAILY' THEN E.amount * 30
-        WHEN T.name = 'WEEKLY' THEN E.amount * 4
-        WHEN T.name = 'MONTHLY' THEN E.amount * 1
-        WHEN T.name = 'ONCE'  THEN (
-            SELECT SUM(E2.amount)
-            FROM expense E2
-            INNER JOIN timestamp T2 ON T2.id = E2.timestamp_id
-            WHERE E2.category_id = E.category_id
-                AND T2.name = 'ONCE'
-                AND MONTH(E2.date) = :month
-        )
-        ELSE E.amount
-    END
-) as 'total spent'
-FROM expense E
-INNER JOIN category C ON C.id = E.category_id
-INNER JOIN timestamp T ON T.id = E.timestamp_id
-WHERE MONTH(E.date) = :month
-GROUP BY C.name
-
- */

@@ -26,6 +26,10 @@ public class ExpenseService {
         return repository.save(expense);
     }
 
+    public void saveExpenses(List<Expense> expenseList) {
+        repository.saveAll(expenseList);
+    }
+
     public void updateExpense(Expense expense) {
         Expense expenseToUpdate = repository.findById(expense.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Expense not found"));
@@ -64,12 +68,8 @@ public class ExpenseService {
         return repository.findExpensesPerYear(year);
     }
 
-    public List<Object[]> getGroupedExpensesByMonth(int month) {
-        return repository.findGroupedCategoriesWithTotalSumsByMonth(month);
-    }
-
-    public void saveExpenses(List<Expense> expenseList) {
-        repository.saveAll(expenseList);
+    public List<Object[]> getMonthlyCategoriesTotalSum(int year, int month) {
+        return repository.findMonthlyCategoriesTotalSum(year, month);
     }
 
 }
