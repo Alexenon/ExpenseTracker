@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.YearMonth;
 import java.util.List;
 
 @Service
@@ -34,7 +33,7 @@ public class ExpenseService {
         expenseToUpdate.setName(expense.getName());
         expenseToUpdate.setAmount(expense.getAmount());
         expenseToUpdate.setDescription(expense.getDescription());
-        expenseToUpdate.setDate(expense.getDate());
+        expenseToUpdate.setDate(expense.getExpiryDate());
         expenseToUpdate.setTimestamp(expense.getTimestamp());
         expenseToUpdate.setCategory(expense.getCategory());
 
@@ -67,10 +66,6 @@ public class ExpenseService {
 
     public List<Object[]> getGroupedExpensesByMonth(int month) {
         return repository.findGroupedCategoriesWithTotalSumsByMonth(month);
-    }
-
-    public List<Object[]> getMonthlyGroupedExpenses(YearMonth date) {
-        return repository.findGroupedCategoriesWithTotalSumsByMonth(date);
     }
 
     public void saveExpenses(List<Expense> expenseList) {

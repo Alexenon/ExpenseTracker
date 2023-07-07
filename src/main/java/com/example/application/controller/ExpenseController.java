@@ -117,7 +117,7 @@ public class ExpenseController {
             date = YearMonth.now();
         }
 
-        return expenseService.getMonthlyGroupedExpenses(date);
+        return null;
     }
 
     @PostMapping("/addAll")
