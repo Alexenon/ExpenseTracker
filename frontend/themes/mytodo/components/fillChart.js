@@ -58,51 +58,50 @@ window.getJsonData = async function getJsonData(url) {
 window.fillChartPie = async function fillChartPie() {
   const dom = document.getElementById('chart-pie');
   const myChart = echarts.init(dom);
-//  const jsonObject = await getJsonData('http://localhost:8080/api/expense/grouped');
-  const jsonObject = await getJsonData('http://localhost:8080/api/expense/grouped?month=6');
+  const jsonObject = await getJsonData('http://localhost:8080/api/expense/grouped');
 
-    var option = {
-      title: {
-        text: 'Expenses Chart',
-        subtext: 'Click on legend to remove a category',
-        left: 'center'
-      },
-      tooltip: {
-        trigger: 'item',
-        formatter(params) {
-          return `${params.marker}${params.name}: <b>${params.value} MDL</b> (${params.percent}%)`;
-        }
-      },
-      legend: {
-        orient: 'vertical',
-        left: 'left',
-        // This can be removed
-        borderRadius: 3,
-        borderWidth: 2,
-        padding: 10,
-        itemGap: 10,
-        itemWidth: 25,
-        itemHeight: 14,
-      },
-      series: [
-        {
-          name: 'Access From',
-          type: 'pie',
-          selectedMode: 'single',
-          radius: '50%',
-            data: jsonObject.map(item => {
-              return { name: item[0], value: item[1] };
-            }),
-          emphasis: {
-            itemStyle: {
-              shadowBlur: 10,
-              shadowOffsetX: 0,
-              shadowColor: 'rgba(0, 0, 0, 0.5)'
-            }
+  var option = {
+    title: {
+      text: 'Expenses Chart',
+      subtext: 'Click on legend to remove a category',
+      left: 'center'
+    },
+    tooltip: {
+      trigger: 'item',
+      formatter(params) {
+        return `${params.marker}${params.name}: <b>${params.value} MDL</b> (${params.percent}%)`;
+      }
+    },
+    legend: {
+      orient: 'vertical',
+      left: 'left',
+      // This can be removed
+      borderRadius: 3,
+      borderWidth: 2,
+      padding: 10,
+      itemGap: 10,
+      itemWidth: 25,
+      itemHeight: 14,
+    },
+    series: [
+      {
+        name: 'Access From',
+        type: 'pie',
+        selectedMode: 'single',
+        radius: '50%',
+        data: jsonObject.map(item => {
+          return { name: item[0], value: item[1] };
+        }),
+        emphasis: {
+          itemStyle: {
+            shadowBlur: 10,
+            shadowOffsetX: 0,
+            shadowColor: 'rgba(0, 0, 0, 0.5)'
           }
         }
-      ]
-    };
+      }
+    ]
+  };
 
   // Setting chart style when chart is empty
   if (jsonObject.length === 0) {
