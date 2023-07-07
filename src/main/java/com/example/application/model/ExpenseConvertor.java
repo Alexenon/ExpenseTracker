@@ -24,6 +24,7 @@ public class ExpenseConvertor {
         expense.setName(expenseRequest.getName());
         expense.setAmount(expenseRequest.getAmount());
         expense.setDate(expenseRequest.getDate());
+        expense.setExpiryDate(expenseRequest.getExpiryDate());
         expense.setDescription(expenseRequest.getDescription());
 
         String timestampName = expenseRequest.getTimestamp();

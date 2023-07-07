@@ -74,7 +74,7 @@ public class MainView extends VerticalLayout {
 
     private Component getGrid() {
         grid.addClassName("expenses-grid");
-        grid.setColumns("name", "category", "amount", "description", "timestamp");
+        grid.setColumns("name", "category", "amount", "timestamp");
 
         // Edit Column
         grid.addColumn(
@@ -120,7 +120,6 @@ public class MainView extends VerticalLayout {
 
         return dialog;
     }
-
 
 }
 
