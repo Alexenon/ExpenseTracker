@@ -20,4 +20,7 @@ public interface ExpenseDTO {
     @JsonFormat(pattern = "yyyy-MM-dd")
     LocalDate getDate();
 
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    LocalDate getExpityDate();
+
 }

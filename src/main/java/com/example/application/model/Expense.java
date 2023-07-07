@@ -40,6 +40,11 @@ public class Expense {
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate date;
 
+    @Getter
+    @Setter
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate expiryDate;
+
     @NotNull
     @ManyToOne
     @JoinColumn(name = "timestamp_id")
@@ -57,9 +62,11 @@ public class Expense {
     @Override
     public String toString() {
         DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        return String.format("%d, %s, %f, %s, %s, %s, %s",
-                id, name, amount, timestamp.getName(),
-                category.getName(), description, dateFormat.format(date));
+        return String.format(
+                "%d, %s, %f, %s, %s, %s, %s, %s",
+                id, name, amount, timestamp.getName(), category.getName(),
+                dateFormat.format(date), description, dateFormat.format(expiryDate)
+        );
     }
 
 }
