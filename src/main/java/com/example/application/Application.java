@@ -13,6 +13,7 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 @Theme(value = "mytodo")
 public class Application extends SpringBootServletInitializer implements AppShellConfigurator {
 
+    // https://github.com/FlameXander/security-jwt
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
     }
