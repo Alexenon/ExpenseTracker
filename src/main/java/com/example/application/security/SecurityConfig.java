@@ -16,6 +16,11 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @EnableWebSecurity
 public class SecurityConfig extends VaadinWebSecurity {
 
+    private static final String LOGIN_URL = "/login";
+    private static final String LOGIN_PROCESSING_URL = "/login";
+    private static final String LOGIN_FAILURE_URL = "/login?error";
+    private static final String LOGOUT_SUCCESS_URL = "/login";
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests()

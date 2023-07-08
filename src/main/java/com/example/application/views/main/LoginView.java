@@ -1,6 +1,7 @@
 package com.example.application.views.main;
 
 import com.example.application.views.main.layouts.MainLayout;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.login.LoginForm;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -24,6 +25,7 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
         setJustifyContentMode(JustifyContentMode.CENTER);
 
         loginForm.setAction("login");
+        loginForm.addLoginListener(e -> UI.getCurrent().navigate(MainView.class));
 
         add(new H1("Test Login"), loginForm);
     }
