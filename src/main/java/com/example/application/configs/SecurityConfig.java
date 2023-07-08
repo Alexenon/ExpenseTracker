@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -15,9 +15,10 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 
 @EnableWebSecurity
+@EnableMethodSecurity
 @RequiredArgsConstructor
-@EnableGlobalMethodSecurity(securedEnabled = true)
 public class SecurityConfig {
+
     private static final String LOGIN_URL = "/login";
     private static final String LOGOUT_SUCCESS_URL = "/login";
     private static final String LOGIN_PROCESSING_URL = "/login";
@@ -30,9 +31,9 @@ public class SecurityConfig {
         http
                 .csrf().disable()
                 .cors().disable()
-                .authorizeRequests()
-                .antMatchers("/secured").authenticated()
-                .antMatchers("/admin").hasRole("ADMIN")
+                .authorizeHttpRequests()
+                .requestMatchers("/secured").authenticated()
+                .requestMatchers("/admin").hasRole("ADMIN")
                 .anyRequest().permitAll()
                 .and()
                 .formLogin().loginPage(LOGIN_URL).permitAll()
