@@ -1,7 +1,11 @@
-package com.example.application.model;
+package com.example.application.utils;
 
-import com.example.application.service.CategoryService;
-import com.example.application.service.TimestampService;
+import com.example.application.entities.Expense;
+import com.example.application.entities.Timestamp;
+import com.example.application.entities.Category;
+import com.example.application.dtos.ExpenseRequest;
+import com.example.application.services.CategoryService;
+import com.example.application.services.TimestampService;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;

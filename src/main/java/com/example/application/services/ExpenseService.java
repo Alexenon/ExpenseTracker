@@ -1,8 +1,8 @@
-package com.example.application.service;
+package com.example.application.services;
 
-import com.example.application.model.Expense;
-import com.example.application.model.ExpenseDTO;
-import com.example.application.repository.ExpenseRepository;
+import com.example.application.entities.Expense;
+import com.example.application.dtos.ExpenseDTO;
+import com.example.application.repositories.ExpenseRepository;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;

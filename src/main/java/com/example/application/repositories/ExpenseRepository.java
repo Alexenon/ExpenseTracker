@@ -1,7 +1,7 @@
-package com.example.application.repository;
+package com.example.application.repositories;
 
-import com.example.application.model.Expense;
-import com.example.application.model.ExpenseDTO;
+import com.example.application.entities.Expense;
+import com.example.application.dtos.ExpenseDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

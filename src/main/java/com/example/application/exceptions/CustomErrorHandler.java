@@ -1,4 +1,4 @@
-package com.example.application.model;
+package com.example.application.exceptions;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.notification.Notification;

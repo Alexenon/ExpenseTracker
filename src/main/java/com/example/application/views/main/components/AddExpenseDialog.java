@@ -1,9 +1,13 @@
 package com.example.application.views.main.components;
 
-import com.example.application.model.*;
-import com.example.application.service.CategoryService;
-import com.example.application.service.ExpenseService;
-import com.example.application.service.TimestampService;
+import com.example.application.entities.Category;
+import com.example.application.entities.Expense;
+import com.example.application.dtos.ExpenseRequest;
+import com.example.application.entities.Timestamp;
+import com.example.application.services.CategoryService;
+import com.example.application.services.ExpenseService;
+import com.example.application.services.TimestampService;
+import com.example.application.utils.ExpenseConvertor;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
