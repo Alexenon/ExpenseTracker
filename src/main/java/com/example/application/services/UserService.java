@@ -6,7 +6,6 @@ import com.example.application.exceptions.UserAlreadyExistException;
 import com.example.application.repositories.RoleRepository;
 import com.example.application.repositories.UserRepository;
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,17 +18,21 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
 public class UserService implements UserDetailsService {
 
-    private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private RoleRepository roleRepository;
+
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    public void setPasswordEncoder(PasswordEncoder password){
-        this.passwordEncoder = password;
+    public UserService(PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
     }
+
 
     public Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(username);
