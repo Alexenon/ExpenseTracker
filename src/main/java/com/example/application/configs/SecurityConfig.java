@@ -1,11 +1,9 @@
 package com.example.application.configs;
 
 import com.example.application.services.UserService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -13,12 +11,12 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 
-@Order(1)
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -29,15 +27,11 @@ public class SecurityConfig {
     private static final String LOGIN_PROCESSING_URL = "/login";
     private static final String LOGIN_FAILURE_URL = "/login?error";
 
+    @Autowired
     private UserService userService;
 
-    public SecurityConfig(UserService userService) {
-        this.userService = userService;
-    }
-
-    public void setUserService(UserService userService) {
-        this.userService = userService;
-    }
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -45,16 +39,25 @@ public class SecurityConfig {
                 .csrf().disable()
                 .cors().disable()
                 .authorizeHttpRequests(auth -> {
-                    auth.requestMatchers("/api").permitAll();
+                    auth.requestMatchers("/VAADIN/**", "/PUSH/**", "/UIDL/**").permitAll();
+                    auth.requestMatchers("/vaadinServlet/UIDL/**").permitAll();
+                    auth.requestMatchers("/vaadinServlet/HEARTBEAT/**").permitAll();
+                    auth.requestMatchers("/resources/**").permitAll();
+                    auth.requestMatchers("/login").permitAll();
+                    auth.requestMatchers("/api/**").authenticated();
                     auth.requestMatchers("/secured").authenticated();
                     auth.requestMatchers("/admin").hasRole("ADMIN");
-                    auth.anyRequest().authenticated();
+//                    auth.anyRequest().authenticated();
                 })
-                .formLogin().loginPage(LOGIN_URL).permitAll()
-                .loginProcessingUrl(LOGIN_PROCESSING_URL)
-                .failureUrl(LOGIN_FAILURE_URL)
-                .and().logout().logoutSuccessUrl(LOGOUT_SUCCESS_URL)
-                .and()
+                .formLogin(loginForm -> {
+                    loginForm.loginPage(LOGIN_URL);
+                    loginForm.loginProcessingUrl(LOGIN_PROCESSING_URL);
+                    // loginForm.successForwardUrl(LOGIN_SUCCESS_URL);
+                    loginForm.failureUrl(LOGIN_FAILURE_URL);
+                })
+                .logout(logout -> logout.logoutSuccessUrl(LOGOUT_SUCCESS_URL))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .rememberMe().disable()
                 .exceptionHandling()
                 .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
         //.and().addFilterBefore()...
@@ -63,17 +66,25 @@ public class SecurityConfig {
     }
 
     @Bean
-    public DaoAuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
-        daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
-        daoAuthenticationProvider.setUserDetailsService(userService);
-        return daoAuthenticationProvider;
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return (web) -> web.ignoring()
+                .requestMatchers("/resources/**")
+                .requestMatchers("/VAADIN/**")
+                .requestMatchers("/PUSH/**")
+                .requestMatchers("/UIDL/**")
+                .requestMatchers("/dev-bundle/**")
+                .requestMatchers("/vaadinServlet/**")
+                .requestMatchers("/chromewebdata/**")
+                .requestMatchers("/images/**")
+                .requestMatchers("/icons/**");
     }
 
-    // TODO: https://stackoverflow.com/questions/73140192/the-dependencies-of-some-of-the-beans-in-the-application-context-form-a-cycle-er
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+    public DaoAuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
+        daoAuthenticationProvider.setPasswordEncoder(passwordEncoder);
+        daoAuthenticationProvider.setUserDetailsService(userService);
+        return daoAuthenticationProvider;
     }
 
     @Bean
