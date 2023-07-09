@@ -1,16 +1,18 @@
 package com.example.application.services;
 
-import com.example.application.entities.Role;
+import com.example.application.dtos.RegistrationUserDTO;
 import com.example.application.entities.User;
 import com.example.application.exceptions.UserAlreadyExistException;
 import com.example.application.repositories.RoleRepository;
 import com.example.application.repositories.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,11 +20,16 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@SuppressWarnings("ClassCanBeRecord")
 public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    public void setPasswordEncoder(PasswordEncoder password){
+        this.passwordEncoder = password;
+    }
 
     public Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(username);
@@ -41,13 +48,16 @@ public class UserService implements UserDetailsService {
         );
     }
 
-    public void createNewUser(User user) {
-        if(userRepository.findByUsername(user.getUsername()).isPresent()) {
+    public User createNewUser(RegistrationUserDTO registrationUserDto) {
+        if (userRepository.findByUsername(registrationUserDto.getUsername()).isPresent()) {
             throw new UserAlreadyExistException();
         }
 
-        Role role_user = roleRepository.findByName("ROLE_USER").orElseThrow();
-        user.setRoles(List.of(role_user));
-        userRepository.save(user);
+        User user = new User();
+        user.setUsername(registrationUserDto.getUsername());
+        user.setEmail(registrationUserDto.getEmail());
+        user.setPassword(passwordEncoder.encode(registrationUserDto.getPassword()));
+        user.setRoles(List.of(roleRepository.findByName("ROLE_USER").orElseThrow()));
+        return userRepository.save(user);
     }
 }
