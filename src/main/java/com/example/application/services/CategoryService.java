@@ -1,7 +1,7 @@
-package com.example.application.service;
+package com.example.application.services;
 
-import com.example.application.model.Category;
-import com.example.application.repository.CategoryRepository;
+import com.example.application.entities.Category;
+import com.example.application.repositories.CategoryRepository;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;

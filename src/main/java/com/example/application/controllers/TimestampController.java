@@ -1,7 +1,7 @@
-package com.example.application.controller;
+package com.example.application.controllers;
 
-import com.example.application.model.Timestamp;
-import com.example.application.repository.TimestampRepository;
+import com.example.application.entities.Timestamp;
+import com.example.application.repositories.TimestampRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

@@ -1,10 +1,11 @@
-package com.example.application.controller;
+package com.example.application.controllers;
 
-import com.example.application.model.Expense;
-import com.example.application.model.ExpenseConvertor;
-import com.example.application.model.ExpenseDTO;
-import com.example.application.model.ExpenseRequest;
-import com.example.application.service.ExpenseService;
+import com.example.application.entities.Expense;
+import com.example.application.utils.ExpenseConvertor;
+import com.example.application.dtos.ExpenseDTO;
+import com.example.application.dtos.ExpenseRequest;
+import com.example.application.services.CategoryService;
+import com.example.application.services.ExpenseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,6 +22,9 @@ public class ExpenseController {
     ExpenseService expenseService;
 
     @Autowired
+    CategoryService categoryService;
+
+    @Autowired
     ExpenseConvertor expenseConvertor;
 
     @GetMapping("/all")
@@ -31,6 +35,16 @@ public class ExpenseController {
     @PostMapping("/add")
     public Expense addExpense(@RequestBody Expense expense) {
         return expenseService.saveExpense(expense);
+    }
+
+    @PostMapping("/addAll")
+    public String addExpenses(@RequestBody List<ExpenseRequest> expenseList) {
+        List<Expense> expenses = expenseList.stream()
+                .map(expenseConvertor::convertToExpense)
+                .collect(Collectors.toList());
+
+        expenseService.saveExpenses(expenses);
+        return "All expanses have been added";
     }
 
     @PostMapping("/save")
@@ -92,23 +106,19 @@ public class ExpenseController {
     }
 
     @GetMapping("/grouped")
-    public List<Object[]> getExpensesGroupedByCategory(
+    public List<Object[]> getExpensesTotalSumGroupedByCategory(
+            @RequestParam(value = "year", required = false) Integer year,
             @RequestParam(value = "month", required = false) Integer month
     ) {
-        if (month == null) {
+        if (year == null) {
+            year = LocalDate.now().getYear();
+        }
+
+        if (month == null || month < 1 || month > 12) {
             month = LocalDate.now().getMonthValue();
         }
-        return expenseService.getGroupedExpensesByMonth(month);
-    }
 
-    @PostMapping("/addAll")
-    public String addExpenses(@RequestBody List<ExpenseRequest> expenseList) {
-        List<Expense> expenses = expenseList.stream()
-                .map(expenseConvertor::convertToExpense)
-                .collect(Collectors.toList());
-
-        expenseService.saveExpenses(expenses);
-        return "All expanses have been added";
+        return expenseService.getMonthlyCategoriesTotalSum(year, month);
     }
 
 }

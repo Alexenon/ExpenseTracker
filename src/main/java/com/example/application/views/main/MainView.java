@@ -1,9 +1,9 @@
 package com.example.application.views.main;
 
-import com.example.application.model.ExpenseDTO;
-import com.example.application.service.CategoryService;
-import com.example.application.service.ExpenseService;
-import com.example.application.service.TimestampService;
+import com.example.application.dtos.ExpenseDTO;
+import com.example.application.services.CategoryService;
+import com.example.application.services.ExpenseService;
+import com.example.application.services.TimestampService;
 import com.example.application.views.main.components.AddExpenseDialog;
 import com.example.application.views.main.layouts.MainLayout;
 import com.vaadin.flow.component.Component;
@@ -20,9 +20,10 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 
-//@PermitAll
+@PermitAll
 @PageTitle("Expenses")
 @Route(value = "", layout = MainLayout.class)
 public class MainView extends VerticalLayout {
@@ -73,7 +74,7 @@ public class MainView extends VerticalLayout {
 
     private Component getGrid() {
         grid.addClassName("expenses-grid");
-        grid.setColumns("name", "category", "amount", "description", "timestamp");
+        grid.setColumns("name", "category", "amount", "timestamp");
 
         // Edit Column
         grid.addColumn(
@@ -119,7 +120,6 @@ public class MainView extends VerticalLayout {
 
         return dialog;
     }
-
 
 }
 

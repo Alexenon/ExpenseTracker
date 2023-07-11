@@ -1,6 +1,6 @@
-package com.example.application.repository;
+package com.example.application.repositories;
 
-import com.example.application.model.Timestamp;
+import com.example.application.entities.Timestamp;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

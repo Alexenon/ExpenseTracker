@@ -1,7 +1,7 @@
-package com.example.application.service;
+package com.example.application.services;
 
-import com.example.application.model.Timestamp;
-import com.example.application.repository.TimestampRepository;
+import com.example.application.entities.Timestamp;
+import com.example.application.repositories.TimestampRepository;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,7 +1,7 @@
-package com.example.application.controller;
+package com.example.application.controllers;
 
-import com.example.application.model.Category;
-import com.example.application.repository.CategoryRepository;
+import com.example.application.entities.Category;
+import com.example.application.repositories.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

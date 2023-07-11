@@ -63,24 +63,32 @@ window.fillChartPie = async function fillChartPie() {
   var option = {
     title: {
       text: 'Expenses Chart',
+      subtext: 'Click on legend to remove a category',
       left: 'center'
     },
     tooltip: {
       trigger: 'item',
-      formatter: '{b} : {d}%'
+      formatter(params) {
+        return `${params.marker}${params.name}: <b>${params.value} MDL</b> (${params.percent}%)`;
+      }
     },
     legend: {
-      bottom: 10,
-      left: 'center',
-      data: jsonObject.map(item => item[0])
+      orient: 'vertical',
+      left: 'left',
+      // This can be removed
+      borderRadius: 3,
+      borderWidth: 2,
+      padding: 10,
+      itemGap: 10,
+      itemWidth: 25,
+      itemHeight: 14,
     },
     series: [
       {
-        name: 'Expenses by category:',
+        name: 'Access From',
         type: 'pie',
-        radius: '60%',
-        center: ['50%', '50%'],
         selectedMode: 'single',
+        radius: '50%',
         data: jsonObject.map(item => {
           return { name: item[0], value: item[1] };
         }),
@@ -90,25 +98,25 @@ window.fillChartPie = async function fillChartPie() {
             shadowOffsetX: 0,
             shadowColor: 'rgba(0, 0, 0, 0.5)'
           }
-        },
-        label: {
-          normal: {
-            formatter: '{b} : {c} MDL',
-            position: 'outside'
-          }
         }
       }
     ]
   };
 
-  if (option && typeof option === 'object') {
-    myChart.setOption(option, true);
+  // Setting chart style when chart is empty
+  if (jsonObject.length === 0) {
+    option.legend.show = false;
+    option.tooltip.formatter = '0 MDL';
+    option.series[0].color = 'lightgray';
+    option.series[0].data = [{ name: "Empty", value: 0 }];
   }
 
+  option && myChart.setOption(option);
   showChartDetails('//div[@id=\"chart-pie\"]');
 
-  var xc = getElementByXPath('//div[@id=\"chart-pie\"]', '//div[last()]');
-  console.log(xc.textContent);
+// UNDER DEVELOPMENT
+//  var xc = getElementByXPath('//div[@id=\"chart-pie\"]', '//div[last()]');
+//  console.log(xc.textContent);
 };
 
 
@@ -135,7 +143,7 @@ function showChartDetails(xpath) {
 
   if (chartElement && elementWithText) {
     chartElement.addEventListener('click', function() {
-      const pattern = '{b} : {d}%';
+      const pattern = '{name}: {value} MDL ({percent}%)';
       const text = elementWithText.textContent;
       var expenseName = getParamFormatter(text, pattern, 1);
       console.log(expenseName);

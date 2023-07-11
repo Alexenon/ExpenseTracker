@@ -1,4 +1,4 @@
-package com.example.application.model;
+package com.example.application.dtos;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -19,5 +19,8 @@ public interface ExpenseDTO {
 
     @JsonFormat(pattern = "yyyy-MM-dd")
     LocalDate getDate();
+
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    LocalDate getExpityDate();
 
 }
