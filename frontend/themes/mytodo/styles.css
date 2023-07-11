@@ -68,19 +68,11 @@ canvas {
      margin-right: 20px;
 }
 
-.login-rich-content {
-  background-image: url("../../../src/main/resources/images/earth.jpg");
-  background-position: center;
-  background-size: cover;
-  display: flex;
-  height: 500px;
+[part='form-title'] {
+  display: none;
 }
-.login-rich-content vaadin-login-form {
-  align-items: center;
-  display: flex;
-  max-width: 300px;
-}
-.login-rich-content vaadin-login-form-wrapper {
-  background-image: none;
+
+.login-form > label {
+  margin-top: 20px;
 }
 

@@ -3,7 +3,6 @@ package com.example.application.configs;
 import com.example.application.services.UserService;
 import com.example.application.views.main.LoginView;
 import com.vaadin.flow.spring.security.VaadinWebSecurity;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
@@ -27,11 +26,13 @@ public class SecurityConfig extends VaadinWebSecurity {
     private static final String LOGIN_FAILURE_URL = "/login?error";
     private static final String DENIED_PAGE_URL = "/404";
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    public SecurityConfig(UserService userService, PasswordEncoder passwordEncoder) {
+        this.userService = userService;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
