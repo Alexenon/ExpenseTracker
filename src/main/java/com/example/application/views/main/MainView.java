@@ -5,6 +5,7 @@ import com.example.application.services.CategoryService;
 import com.example.application.services.ExpenseService;
 import com.example.application.services.TimestampService;
 import com.example.application.views.main.components.AddExpenseDialog;
+import com.example.application.views.main.layouts.MainLayout;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;

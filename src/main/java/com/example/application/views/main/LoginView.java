@@ -1,6 +1,6 @@
 package com.example.application.views.main;
 
-import com.vaadin.flow.component.UI;
+import com.example.application.views.main.layouts.MainLayout;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.login.LoginForm;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
