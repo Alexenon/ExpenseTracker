@@ -1,6 +1,7 @@
 package com.example.application.views.main;
 
-import com.example.application.service.ExpenseService;
+import com.example.application.services.ExpenseService;
+import com.example.application.views.main.layouts.MainLayout;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.UI;
@@ -10,10 +11,14 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.json.JsonParseException;
 
 import java.util.List;
+import java.util.Optional;
 
+@PermitAll
 @PageTitle("Dashboard")
 @Route(value = "dashboard", layout = MainLayout.class)
 @JsModule(value = "./themes/mytodo/components/fillChart.js")
@@ -22,8 +27,7 @@ public class DashboardView extends HorizontalLayout {
 
     private final ExpenseService expenseService;
 
-    @Autowired
-    public DashboardView(ExpenseService expenseService) {
+    public DashboardView(@Autowired ExpenseService expenseService) {
         this.expenseService = expenseService;
         setDefaultVerticalComponentAlignment(Alignment.CENTER);
 
@@ -43,19 +47,18 @@ public class DashboardView extends HorizontalLayout {
     }
 
     public String getPieChartData() {
-        return convertToJson(expenseService.getAllExpenses());
+        return convertToJson(expenseService.getAllExpenses())
+                .orElseThrow(JsonParseException::new);
     }
 
-    private <T> String convertToJson(List<T> list) {
+    private <T> Optional<String> convertToJson(List<T> list) {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            return objectMapper.writeValueAsString(list);
+            return Optional.of(objectMapper.writeValueAsString(list));
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
-        return null;
+        return Optional.empty();
     }
-
-
 
 }

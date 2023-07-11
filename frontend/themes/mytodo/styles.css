@@ -67,3 +67,12 @@ canvas {
      margin-left: auto;
      margin-right: 20px;
 }
+
+[part='form-title'] {
+  display: none;
+}
+
+.login-form > label {
+  margin-top: 20px;
+}
+

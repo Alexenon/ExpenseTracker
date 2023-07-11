@@ -1,8 +1,8 @@
 package com.example.application.views.main.components;
 
+import com.example.application.dtos.ExpenseRequest;
 import com.example.application.entities.Category;
 import com.example.application.entities.Expense;
-import com.example.application.dtos.ExpenseRequest;
 import com.example.application.entities.Timestamp;
 import com.example.application.services.CategoryService;
 import com.example.application.services.ExpenseService;
@@ -32,10 +32,11 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
-public class AddExpenseDialog extends Dialog {
+public class EditExpenseDialog extends Dialog {
 
-    private static final Logger logger = LoggerFactory.getLogger(AddExpenseDialog.class);
+    private static final Logger logger = LoggerFactory.getLogger(EditExpenseDialog.class);
 
+    private final Expense expense;
     private final ExpenseService expenseService;
     private final TimestampService timestampService;
     private final CategoryService categoryService;
@@ -47,12 +48,13 @@ public class AddExpenseDialog extends Dialog {
     private final ComboBox<String> categoryField = new ComboBox<>("Category");
     private final DatePicker dateField = new DatePicker("Date");
 
-    public AddExpenseDialog(ExpenseService expenseService,
-                            TimestampService timestampService, CategoryService categoryService) {
+    public EditExpenseDialog(Expense expense, ExpenseService expenseService,
+                             TimestampService timestampService, CategoryService categoryService) {
+        this.expense = expense;
         this.expenseService = expenseService;
         this.timestampService = timestampService;
         this.categoryService = categoryService;
-        setHeaderTitle("Add New Expense");
+        setHeaderTitle("Edit Expense");
         add(createDialogLayout());
         addStyleToElements();
     }
@@ -86,6 +88,11 @@ public class AddExpenseDialog extends Dialog {
         dateField.setHelperText("Format: YYYY-MM-DD");
         dateField.setI18n(singleFormatI18n);
         dateField.setValue(LocalDate.now());
+
+        nameField.setValue(expense.getName());
+        descriptionField.setValue(expense.getDescription());
+        nameField.setValue(expense.getName());
+        nameField.setValue(expense.getName());
 
         Button saveButton = new Button("Add");
         saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
