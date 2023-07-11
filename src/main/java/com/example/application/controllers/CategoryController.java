@@ -2,7 +2,6 @@ package com.example.application.controllers;
 
 import com.example.application.entities.Category;
 import com.example.application.repositories.CategoryRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,8 +10,11 @@ import java.util.List;
 @RequestMapping("/api/category")
 public class CategoryController {
     
-    @Autowired
-    CategoryRepository repository;
+    private final CategoryRepository repository;
+
+    public CategoryController(CategoryRepository repository) {
+        this.repository = repository;
+    }
 
     @GetMapping("/all")
     public List<Category> getAllCategorys() {

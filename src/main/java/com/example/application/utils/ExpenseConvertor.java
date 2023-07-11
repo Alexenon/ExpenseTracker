@@ -1,26 +1,23 @@
 package com.example.application.utils;
 
+import com.example.application.dtos.ExpenseRequest;
+import com.example.application.entities.Category;
 import com.example.application.entities.Expense;
 import com.example.application.entities.Timestamp;
-import com.example.application.entities.Category;
-import com.example.application.dtos.ExpenseRequest;
 import com.example.application.services.CategoryService;
 import com.example.application.services.TimestampService;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-@NoArgsConstructor
-@AllArgsConstructor
 public class ExpenseConvertor {
+    
+    private final TimestampService timestampService;
+    private final CategoryService categoryService;
 
-    @Autowired
-    private TimestampService timestampService;
-
-    @Autowired
-    private CategoryService categoryService;
+    public ExpenseConvertor(TimestampService timestampService, CategoryService categoryService) {
+        this.timestampService = timestampService;
+        this.categoryService = categoryService;
+    }
 
     public Expense convertToExpense(ExpenseRequest expenseRequest) {
         Expense expense = new Expense();

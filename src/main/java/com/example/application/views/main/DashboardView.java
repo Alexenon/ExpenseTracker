@@ -13,8 +13,10 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.json.JsonParseException;
 
 import java.util.List;
+import java.util.Optional;
 
 @PermitAll
 @PageTitle("Dashboard")
@@ -25,8 +27,7 @@ public class DashboardView extends HorizontalLayout {
 
     private final ExpenseService expenseService;
 
-    @Autowired
-    public DashboardView(ExpenseService expenseService) {
+    public DashboardView(@Autowired ExpenseService expenseService) {
         this.expenseService = expenseService;
         setDefaultVerticalComponentAlignment(Alignment.CENTER);
 
@@ -46,17 +47,18 @@ public class DashboardView extends HorizontalLayout {
     }
 
     public String getPieChartData() {
-        return convertToJson(expenseService.getAllExpenses());
+        return convertToJson(expenseService.getAllExpenses())
+                .orElseThrow(JsonParseException::new);
     }
 
-    private <T> String convertToJson(List<T> list) {
+    private <T> Optional<String> convertToJson(List<T> list) {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            return objectMapper.writeValueAsString(list);
+            return Optional.of(objectMapper.writeValueAsString(list));
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
-        return null;
+        return Optional.empty();
     }
 
 }

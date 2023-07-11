@@ -21,26 +21,19 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
-import org.springframework.beans.factory.annotation.Autowired;
 
 @PermitAll
 @PageTitle("Expenses")
 @Route(value = "", layout = MainLayout.class)
 public class MainView extends VerticalLayout {
 
-    @Autowired
     private final ExpenseService expenseService;
-
-    @Autowired
     private final TimestampService timestampService;
-
-    @Autowired
     private final CategoryService categoryService;
 
     private final TextField filterText = new TextField();
     private final Grid<ExpenseDTO> grid = new Grid<>(ExpenseDTO.class);
 
-    @Autowired
     public MainView(ExpenseService expenseService, TimestampService timestampService, CategoryService categoryService) {
         this.expenseService = expenseService;
         this.timestampService = timestampService;
