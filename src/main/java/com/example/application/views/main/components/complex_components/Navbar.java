@@ -2,6 +2,7 @@ package com.example.application.views.main.components.complex_components;
 
 import com.example.application.views.main.DashboardView;
 import com.example.application.views.main.ExpensesView;
+import com.example.application.views.main.HomeView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.html.Div;
@@ -30,6 +31,7 @@ public class Navbar extends Div {
     private void addStyle() {
         getRoutes().forEach(e -> e.setClassName("menu-item"));
         logo.addClassNames("logo");
+        logo.addClickListener(e -> getUI().ifPresent(ui -> ui.navigate(HomeView.class)));
     }
 
     public List<Component> getRoutes() {

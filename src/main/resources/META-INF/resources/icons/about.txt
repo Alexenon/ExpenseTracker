@@ -1,0 +1,6 @@
+This favicon was generated using the following font:
+
+- Font Title: Metal Mania
+- Font Author: Copyright (c) 2012 by Open Window (dathanboardman@gmail.com) with Reseved Font Name "Metal Mania"
+- Font Source: http://fonts.gstatic.com/s/metalmania/v22/RWmMoKWb4e8kqMfBUdPFJeXCg6UKDXlq.ttf
+- Font License: SIL Open Font License, 1.1 (http://scripts.sil.org/OFL))
