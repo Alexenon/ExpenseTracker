@@ -7,6 +7,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -41,6 +42,9 @@ public class MainLayout extends AppLayout {
         Icon personIcon = new Icon(VaadinIcon.USER);
         personIcon.addClassName("margin-end");
 
+        Image logo = new Image("images/logo_with_color.svg", "Logo image");
+        logo.addClassName("logo");
+
         final RouterLink homeLink = new RouterLink("Home", HomeView.class);
         final RouterLink expensesLink = new RouterLink("Expenses", ExpensesView.class);
         final RouterLink dashboardLink = new RouterLink("Dashboard", DashboardView.class);
@@ -50,7 +54,7 @@ public class MainLayout extends AppLayout {
         listOfRoutes.forEach(e -> e.setClassName("menu-item"));
         innerMenu.add(listOfRoutes);
 
-        navbar.add(text, innerMenu);
+        navbar.add(logo, innerMenu);
         header.add(navbar, personIcon);
         addToNavbar(header);
     }
