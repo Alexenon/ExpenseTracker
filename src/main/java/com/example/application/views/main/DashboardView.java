@@ -1,6 +1,7 @@
 package com.example.application.views.main;
 
 import com.example.application.service.ExpenseService;
+import com.example.application.views.main.layouts.MainLayout;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.UI;

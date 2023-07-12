@@ -5,6 +5,7 @@ import com.example.application.service.CategoryService;
 import com.example.application.service.ExpenseService;
 import com.example.application.service.TimestampService;
 import com.example.application.views.main.components.AddExpenseDialog;
+import com.example.application.views.main.layouts.MainLayout;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -19,26 +20,19 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import org.springframework.beans.factory.annotation.Autowired;
 
 @PageTitle("Expenses")
-@Route(value = "", layout = MainLayout.class)
-public class MainView extends VerticalLayout {
+@Route(value = "expenses", layout = MainLayout.class)
+public class ExpensesView extends VerticalLayout {
 
-    @Autowired
     private final ExpenseService expenseService;
-
-    @Autowired
     private final TimestampService timestampService;
-
-    @Autowired
     private final CategoryService categoryService;
 
     private final TextField filterText = new TextField();
     private final Grid<ExpenseDTO> grid = new Grid<>(ExpenseDTO.class);
 
-    @Autowired
-    public MainView(ExpenseService expenseService, TimestampService timestampService, CategoryService categoryService) {
+    public ExpensesView(ExpenseService expenseService, TimestampService timestampService, CategoryService categoryService) {
         this.expenseService = expenseService;
         this.timestampService = timestampService;
         this.categoryService = categoryService;

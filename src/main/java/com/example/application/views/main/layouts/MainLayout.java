@@ -1,12 +1,15 @@
-package com.example.application.views.main;
+package com.example.application.views.main.layouts;
 
+import com.example.application.views.main.DashboardView;
+import com.example.application.views.main.ExpensesView;
+import com.example.application.views.main.HomeView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.icon.IconFactory;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -39,16 +42,19 @@ public class MainLayout extends AppLayout {
         Icon personIcon = new Icon(VaadinIcon.USER);
         personIcon.addClassName("margin-end");
 
-        final RouterLink home = new RouterLink("Home", MainView.class);
-        final RouterLink dashboard = new RouterLink("Dashboard", DashboardView.class);
-        final RouterLink statistics = new RouterLink("Statistics", DashboardView.class);
-        final RouterLink contact = new RouterLink("Contact", DashboardView.class);
+        Image logo = new Image("images/logo_with_color.svg", "Logo image");
+        logo.addClassName("logo");
 
-        List<Component> listOfRoutes = List.of(home, dashboard, statistics, contact);
+        final RouterLink homeLink = new RouterLink("Home", HomeView.class);
+        final RouterLink expensesLink = new RouterLink("Expenses", ExpensesView.class);
+        final RouterLink dashboardLink = new RouterLink("Dashboard", DashboardView.class);
+        final RouterLink contactLink = new RouterLink("Contact", DashboardView.class);
+
+        List<Component> listOfRoutes = List.of(homeLink, expensesLink, dashboardLink, contactLink);
         listOfRoutes.forEach(e -> e.setClassName("menu-item"));
         innerMenu.add(listOfRoutes);
 
-        navbar.add(text, innerMenu);
+        navbar.add(logo, innerMenu);
         header.add(navbar, personIcon);
         addToNavbar(header);
     }

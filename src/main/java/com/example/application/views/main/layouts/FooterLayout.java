@@ -1,4 +1,4 @@
-package com.example.application.views.main;
+package com.example.application.views.main.layouts;
 
 import com.vaadin.flow.component.HasElement;
 import com.vaadin.flow.component.Text;
