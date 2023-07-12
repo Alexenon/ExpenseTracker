@@ -42,7 +42,7 @@ public class MainLayout extends AppLayout {
         Icon personIcon = new Icon(VaadinIcon.USER);
         personIcon.addClassName("margin-end");
 
-        Image logo = new Image("test/logo_adobe_express.svg", "Logo image");
+        Image logo = new Image("images/logo_with_color.svg", "Logo image");
         logo.addClassName("logo");
 
         final RouterLink homeLink = new RouterLink("Home", HomeView.class);
