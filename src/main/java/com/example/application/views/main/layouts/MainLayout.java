@@ -10,7 +10,7 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
-@CssImport("./resources/my-styles/header_style.css")
+@CssImport("./resources/css/header_style.css")
 public class MainLayout extends AppLayout {
 
     public MainLayout() {
@@ -21,7 +21,7 @@ public class MainLayout extends AppLayout {
     private void addHeader() {
         Header header = new Header();
         header.setId("header");
-        header.setSizeFull();
+        header.setWidth("100%");
 
         Navbar navbar = new Navbar();
         Icon personIcon = new Icon(VaadinIcon.USER);
