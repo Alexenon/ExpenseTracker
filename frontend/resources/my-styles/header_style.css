@@ -1,17 +1,4 @@
-:root {
-    --header-background: rgb(255, 255, 255);
-    --color-black: rgb(51, 40, 40);
-}
-
-*{
-    margin: 0;
-    padding: 0;
-    list-style-type: none;
-    outline: none;
-    font-family: 'Poppins', sans-serif;
-}
-
-#header{
+header{
     border-bottom: 2px solid var(--color-black);
     background-color: var(--header-background);
 }
@@ -55,18 +42,4 @@ navbar{
 
 .menu-inner a:hover::after {
     width: 100%;
-}
-
-.page-content{
-    margin-top: 100px;
-}
-
-canvas {
-    top: 100px !important;
-    left: 30px !important;
-}
-
-.margin-end {
-     margin-left: auto;
-     margin-right: 20px;
 }
