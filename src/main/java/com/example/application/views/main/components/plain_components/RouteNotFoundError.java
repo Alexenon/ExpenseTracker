@@ -15,9 +15,8 @@ public class RouteNotFoundError extends Div implements HasErrorParameter<NotFoun
     private final ErrorContainer errorContainer;
 
     public RouteNotFoundError() {
-        addClassNames("page-404");
+        addClassNames("page-error", "page-404");
         errorContainer = new ErrorContainer();
-
         add(errorContainer);
     }
 

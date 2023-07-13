@@ -1,3 +1,9 @@
+.page-error {
+     background-repeat: no-repeat;
+     height: 100vh;
+     width: 100vw;
+}
+
 .page-403 {
      background-image: url("./../src/main/resources/META-INF/resources/images/404.webp");
 }
