@@ -4,12 +4,14 @@ import com.example.application.views.main.HomeView;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Paragraph;
 
 @Tag(Tag.DIV)
+@CssImport("./error-page.css")
 public class ErrorContainer extends Div {
 
     private final H2 errorTitle;
@@ -25,10 +27,6 @@ public class ErrorContainer extends Div {
         errorMessage = new Paragraph("p");
         errorMessage.setText("Something went wrong");
         // We can't seem to find the page you are looking for.
-
-        image = new Image("images/logo_with_color.svg", "Error image");
-        image.addClassNames("error-image");
-
 
         Button goHomeBtn = new Button("Go Home");
         goHomeBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
