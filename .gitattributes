@@ -1,1 +1,9 @@
- *.* linguist-language=Java
+*.java linguist-detectable=true
+*.html linguist-detectable=true
+*.js linguist-detectable=true
+*.css linguist-detectable=true
+
+
+
+# Ignore all JavaScript files recursively in this directory and its subdirectories
+/src/main/dev-bundle/webapp/VAADIN/build/*.js linguist-vendored=false
