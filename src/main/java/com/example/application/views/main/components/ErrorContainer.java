@@ -16,7 +16,7 @@ public class ErrorContainer extends Div {
 
     private final H2 errorTitle;
     private final Paragraph errorMessage;
-    private Image image;
+    private final Image image;
 
     public ErrorContainer() {
         setClassName("error-container");
@@ -26,13 +26,14 @@ public class ErrorContainer extends Div {
 
         errorMessage = new Paragraph("p");
         errorMessage.setText("Something went wrong");
-        // We can't seem to find the page you are looking for.
+
+        image = new Image("./images/404.webp", "Error Image");
 
         Button goHomeBtn = new Button("Go Home");
         goHomeBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         goHomeBtn.addClickListener(event -> getUI().ifPresent(ui -> ui.navigate(HomeView.class)));
 
-        add(errorTitle, errorMessage, goHomeBtn);
+        add(errorTitle, errorMessage, image, goHomeBtn);
     }
 
     public void setErrorTitle(String title) {
@@ -43,8 +44,8 @@ public class ErrorContainer extends Div {
         errorMessage.setText(message);
     }
 
-    public void setImage(Image image) {
-        this.image = image;
+    public void setImageSource(String src) {
+        image.setSrc(src);
     }
 
 }
