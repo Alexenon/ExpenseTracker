@@ -51,10 +51,11 @@ public class ExpensesView extends VerticalLayout {
         filterText.addValueChangeListener(e -> updateGrid());
 
         Button addBtn = new Button("Add");
-        addBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
+        addBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         addBtn.addClickListener(event -> {
             AddExpenseDialog dialog = new AddExpenseDialog(expenseService, timestampService, categoryService);
             dialog.open();
+            dialog.addClickOnSaveBtnListener(grid -> updateGrid());
         });
 
         final HorizontalLayout toolBar = new HorizontalLayout(filterText, addBtn);
@@ -74,7 +75,8 @@ public class ExpensesView extends VerticalLayout {
                             ButtonVariant.LUMO_TERTIARY);
                     button.addClickListener(e -> System.out.println("Clicking on edit"));
                     button.setIcon(new Icon(VaadinIcon.EDIT));
-                })).setHeader("Edit");
+                })
+        ).setHeader("Edit");
 
         // Delete Column
         grid.addColumn(
@@ -85,14 +87,18 @@ public class ExpensesView extends VerticalLayout {
                     button.addClickListener(e -> {
                         ConfirmDialog dialog = getConfirmationDialog(expense.getName());
                         dialog.open();
-                        dialog.addConfirmListener(l -> expenseService.deleteExpenseById(expense.getId()));
-                        updateGrid();
+                        dialog.addConfirmListener(l -> {
+                            expenseService.deleteExpenseById(expense.getId());
+                            updateGrid();
+                        });
                     });
                     button.setIcon(new Icon(VaadinIcon.TRASH));
-                })).setHeader("Delete");
+                })
+        ).setHeader("Delete");
 
         grid.getColumns().forEach(c -> c.setAutoWidth(true));
         updateGrid();
+
         return grid;
     }
 
