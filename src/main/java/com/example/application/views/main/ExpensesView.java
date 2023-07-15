@@ -74,7 +74,8 @@ public class ExpensesView extends VerticalLayout {
                             ButtonVariant.LUMO_TERTIARY);
                     button.addClickListener(e -> System.out.println("Clicking on edit"));
                     button.setIcon(new Icon(VaadinIcon.EDIT));
-                })).setHeader("Edit");
+                })
+        ).setHeader("Edit");
 
         // Delete Column
         grid.addColumn(
@@ -85,14 +86,18 @@ public class ExpensesView extends VerticalLayout {
                     button.addClickListener(e -> {
                         ConfirmDialog dialog = getConfirmationDialog(expense.getName());
                         dialog.open();
-                        dialog.addConfirmListener(l -> expenseService.deleteExpenseById(expense.getId()));
-                        updateGrid();
+                        dialog.addConfirmListener(l -> {
+                            expenseService.deleteExpenseById(expense.getId());
+                            updateGrid();
+                        });
                     });
                     button.setIcon(new Icon(VaadinIcon.TRASH));
-                })).setHeader("Delete");
+                })
+        ).setHeader("Delete");
 
         grid.getColumns().forEach(c -> c.setAutoWidth(true));
         updateGrid();
+
         return grid;
     }
 
