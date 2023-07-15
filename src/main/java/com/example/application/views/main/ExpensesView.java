@@ -21,6 +21,9 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+
 @PageTitle("Expenses")
 @Route(value = "expenses", layout = MainLayout.class)
 public class ExpensesView extends VerticalLayout {
@@ -51,11 +54,34 @@ public class ExpensesView extends VerticalLayout {
         filterText.addValueChangeListener(e -> updateGrid());
 
         Button addBtn = new Button("Add");
-        addBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
+        addBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         addBtn.addClickListener(event -> {
             AddExpenseDialog dialog = new AddExpenseDialog(expenseService, timestampService, categoryService);
             dialog.open();
+            dialog.addOnSaveListener(grid -> updateGrid());
         });
+
+
+
+
+//            dialog.addOnSaveListener(e -> {
+//                if (dialog.isValid()) {
+//                    dialog.saveDataProvided();
+//                    dialog.close();
+//                    dialog.showSuccesfullNotification();
+//                    updateGrid();
+//                } else {
+//                    dialog.showErrorNotification();
+//                }
+//
+//                Supplier<Runnable> runnableSupplier = () -> this::updateGrid;
+//                Consumer<?> consumer = grid -> updateGrid();
+//
+//
+//                dialog.addOnSaveListener(() -> this::updateGrid);
+//            });
+
+
 
         final HorizontalLayout toolBar = new HorizontalLayout(filterText, addBtn);
         toolBar.addClassName("toolbar");
