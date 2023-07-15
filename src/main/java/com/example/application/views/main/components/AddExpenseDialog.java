@@ -22,7 +22,6 @@ import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
-import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +29,6 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 public class AddExpenseDialog extends Dialog {
 
@@ -39,6 +37,7 @@ public class AddExpenseDialog extends Dialog {
     private final ExpenseService expenseService;
     private final TimestampService timestampService;
     private final CategoryService categoryService;
+    private final Binder<ExpenseRequest> binder;
 
     private final TextField nameField = new TextField("Expense Name");
     private final TextArea descriptionField = new TextArea("Description");
@@ -46,11 +45,8 @@ public class AddExpenseDialog extends Dialog {
     private final Select<String> intervalField = new Select<>();
     private final ComboBox<String> categoryField = new ComboBox<>("Category");
     private final DatePicker dateField = new DatePicker("Date");
-
-    Button saveButton = new Button("Save");
-
-    @Getter
-    private final Binder<ExpenseRequest> binder;
+    private final Button saveButton = new Button("Save");
+    private final Button cancelButton = new Button("Cancel");
 
     public AddExpenseDialog(ExpenseService expenseService, TimestampService timestampService, CategoryService categoryService) {
         this.expenseService = expenseService;
@@ -96,43 +92,16 @@ public class AddExpenseDialog extends Dialog {
         dateField.setI18n(singleFormatI18n);
         dateField.setValue(LocalDate.now());
 
-        this.getFooter()
-                .add(
-                        getCancelButton(),
-                        saveButton
-//                        getSaveButton()
-                );
-    }
-
-    private Button getCancelButton() {
-        Button cancelButton = new Button("Cancel");
         cancelButton.addClickShortcut(Key.ESCAPE);
         cancelButton.addClickListener(e -> {
             logger.info("Exiting `Add New Expense` form");
             this.close();
         });
-        return cancelButton;
-    }
 
-    private Button getSaveButton() {
-        Button saveButton = new Button("Save");
         saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
-        saveButton.addClickListener(event -> {
-            logger.info("Clicking on Save button inside `Add New Expense` form");
-            if (binder.validate().isOk()) {
-                logger.info("Saving expense using data provided inside `Add New Expense` form");
-                ExpenseConvertor convertor = new ExpenseConvertor(timestampService, categoryService);
-                ExpenseRequest expenseRequest = binder.getBean();
-                Expense expense = convertor.convertToExpense(expenseRequest);
-                expenseService.saveExpense(expense);
-                showSuccesfullNotification();
-                this.close();
-            } else {
-                logger.warn("Submiting `Add New Expense` form with validation errors");
-                showErrorNotification();
-            }
-        });
-        return saveButton;
+        saveButton.addClickListener(e -> defaultOnClickSaveListener());
+
+        this.getFooter().add(cancelButton, saveButton);
     }
 
     private void setupBinder() {
@@ -161,7 +130,7 @@ public class AddExpenseDialog extends Dialog {
         binder.bind(descriptionField, ExpenseRequest::getDescription, ExpenseRequest::setDescription);
     }
 
-    public void showSuccesfullNotification() {
+    private void showSuccesfullNotification() {
         Notification notification = Notification.show("Expense submitted succesfully!");
         notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
         notification.setPosition(Notification.Position.TOP_CENTER);
@@ -169,7 +138,7 @@ public class AddExpenseDialog extends Dialog {
         notification.open();
     }
 
-    public void showErrorNotification() {
+    private void showErrorNotification() {
         Notification notification = Notification.show("An error occured after submiting form");
         notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
         notification.setPosition(Notification.Position.TOP_CENTER);
@@ -177,54 +146,25 @@ public class AddExpenseDialog extends Dialog {
         notification.open();
     }
 
-    public boolean isValid() {
-        return binder.validate().isOk();
+    private void defaultOnClickSaveListener() {
+        logger.info("Clicking on Save button inside `Add New Expense` form");
+        if (binder.validate().isOk()) {
+            logger.info("Saving expense using data provided inside `Add New Expense` form");
+            ExpenseConvertor convertor = new ExpenseConvertor(timestampService, categoryService);
+            ExpenseRequest expenseRequest = binder.getBean();
+            Expense expense = convertor.convertToExpense(expenseRequest);
+            expenseService.saveExpense(expense);
+            showSuccesfullNotification();
+            this.close();
+        } else {
+            logger.warn("Submiting `Add New Expense` form with validation errors");
+            showErrorNotification();
+        }
     }
 
-    public void saveDataProvided() {
-        ExpenseConvertor convertor = new ExpenseConvertor(timestampService, categoryService);
-        ExpenseRequest expenseRequest = binder.getBean();
-        Expense expense = convertor.convertToExpense(expenseRequest);
-        expenseService.saveExpense(expense);
-        this.close();
+    public void addClickOnSaveBtnListener(Consumer<ExpensesView> listener) {
+        logger.info("Added additional listener for Save Button");
+        saveButton.addClickListener(e -> listener.accept(null));
     }
-
-//    public void addOnSaveListener(ComponentEventListener<ClickEvent<Button>> listener) {
-//        saveButton.addClickListener(listener);
-//    }
-
-
-    public void addOnSaveListener(Supplier<Runnable>  s) {
-        saveButton.addClickListener(buttonClickEvent -> {
-            s.get().run();
-           // ...
-        });
-    }
-
-    public void addOnSaveListener(Consumer<ExpensesView> listener) {
-        saveButton.addClickListener(buttonClickEvent -> {
-            logger.info("Clicking on Save button inside `Add New Expense` form");
-            if (binder.validate().isOk()) {
-                logger.info("Saving expense using data provided inside `Add New Expense` form");
-                ExpenseConvertor convertor = new ExpenseConvertor(timestampService, categoryService);
-                ExpenseRequest expenseRequest = binder.getBean();
-                Expense expense = convertor.convertToExpense(expenseRequest);
-                expenseService.saveExpense(expense);
-                showSuccesfullNotification();
-                this.close();
-                listener.accept(null);
-            } else {
-                logger.warn("Submiting `Add New Expense` form with validation errors");
-                showErrorNotification();
-            }
-        });
-    }
-
-
-
-
-
-
-
 
 }
