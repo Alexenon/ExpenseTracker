@@ -10,6 +10,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
+import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -20,6 +21,7 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @PageTitle("Expenses")
 @Route(value = "expenses", layout = MainLayout.class)
@@ -28,14 +30,20 @@ public class ExpensesView extends VerticalLayout {
     private final ExpenseService expenseService;
     private final TimestampService timestampService;
     private final CategoryService categoryService;
+    private final DatePicker.DatePickerI18n singleFormatI18n;
 
     private final TextField filterText = new TextField();
     private final Grid<ExpenseDTO> grid = new Grid<>(ExpenseDTO.class);
 
-    public ExpensesView(ExpenseService expenseService, TimestampService timestampService, CategoryService categoryService) {
+    @Autowired
+    public ExpensesView(ExpenseService expenseService,
+                        TimestampService timestampService,
+                        CategoryService categoryService,
+                        DatePicker.DatePickerI18n singleFormatI18n) {
         this.expenseService = expenseService;
         this.timestampService = timestampService;
         this.categoryService = categoryService;
+        this.singleFormatI18n = singleFormatI18n;
 
         this.setClassName("page-content");
         add(
@@ -53,7 +61,7 @@ public class ExpensesView extends VerticalLayout {
         Button addBtn = new Button("Add");
         addBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         addBtn.addClickListener(event -> {
-            AddExpenseDialog dialog = new AddExpenseDialog(expenseService, timestampService, categoryService);
+            AddExpenseDialog dialog = new AddExpenseDialog(expenseService, timestampService, categoryService, singleFormatI18n);
             dialog.open();
             dialog.addClickSaveBtnListener(grid -> updateGrid());
         });
