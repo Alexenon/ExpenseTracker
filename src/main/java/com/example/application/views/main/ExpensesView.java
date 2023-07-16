@@ -55,7 +55,7 @@ public class ExpensesView extends VerticalLayout {
         addBtn.addClickListener(event -> {
             AddExpenseDialog dialog = new AddExpenseDialog(expenseService, timestampService, categoryService);
             dialog.open();
-            dialog.addClickOnSaveBtnListener(grid -> updateGrid());
+            dialog.addClickSaveBtnListener(grid -> updateGrid());
         });
 
         final HorizontalLayout toolBar = new HorizontalLayout(filterText, addBtn);

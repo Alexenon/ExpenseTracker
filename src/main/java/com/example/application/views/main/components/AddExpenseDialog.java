@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 public class AddExpenseDialog extends Dialog {
@@ -44,7 +45,8 @@ public class AddExpenseDialog extends Dialog {
     private final NumberField amountField = new NumberField("Amount");
     private final Select<String> intervalField = new Select<>();
     private final ComboBox<String> categoryField = new ComboBox<>("Category");
-    private final DatePicker dateField = new DatePicker("Date");
+    private final DatePicker startDateField = new DatePicker("Start Date");
+    private final DatePicker expiryField = new DatePicker("Expiry Date");
     private final Button saveButton = new Button("Save");
     private final Button cancelButton = new Button("Cancel");
 
@@ -64,7 +66,7 @@ public class AddExpenseDialog extends Dialog {
     }
 
     private VerticalLayout createDialogLayout() {
-        Component[] components = {nameField, descriptionField, amountField, categoryField, dateField, intervalField};
+        Component[] components = {nameField, descriptionField, amountField, categoryField, startDateField, intervalField, expiryField};
         VerticalLayout dialogLayout = new VerticalLayout(components);
         dialogLayout.setPadding(false);
         dialogLayout.setSpacing(false);
@@ -82,15 +84,21 @@ public class AddExpenseDialog extends Dialog {
         intervalField.setLabel("Interval");
         intervalField.setItems(timestampNames);
         intervalField.setHelperText("Select the interval this expense will be triggered");
+        intervalField.addValueChangeListener(e -> expiryField.setEnabled(Objects.equals(e.getValue(), "ONCE")));
+
         categoryField.setItems(categoryNames);
         categoryField.setHelperText("Select the category which fits this expense");
         amountField.setSuffixComponent(new Span("MDL"));
 
         DatePicker.DatePickerI18n singleFormatI18n = new DatePicker.DatePickerI18n();
         singleFormatI18n.setDateFormat("yyyy-MM-dd");
-        dateField.setHelperText("Format: YYYY-MM-DD");
-        dateField.setI18n(singleFormatI18n);
-        dateField.setValue(LocalDate.now());
+        startDateField.setHelperText("Format: YYYY-MM-DD");
+        startDateField.setI18n(singleFormatI18n);
+        startDateField.setValue(LocalDate.now());
+
+        expiryField.setEnabled(false); // Expiry date initial is disabled
+        expiryField.setTooltipText("Select expire date");
+        expiryField.setPlaceholder("Optional: Select when this expense will expire");
 
         cancelButton.addClickShortcut(Key.ESCAPE);
         cancelButton.addClickListener(e -> {
@@ -99,7 +107,7 @@ public class AddExpenseDialog extends Dialog {
         });
 
         saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
-        saveButton.addClickListener(e -> defaultOnClickSaveListener());
+        saveButton.addClickListener(e -> defaultClickSaveBtnListener());
 
         this.getFooter().add(cancelButton, saveButton);
     }
@@ -124,9 +132,12 @@ public class AddExpenseDialog extends Dialog {
                 .asRequired("Please fill this field")
                 .bind(ExpenseRequest::getTimestamp, ExpenseRequest::setTimestamp);
 
+        binder.forField(expiryField)
+                .withValidator(expireDate -> expireDate.isAfter(startDateField.getValue()), "Expire date should be after start date")
+                .bind(ExpenseRequest::getExpiryDate, ExpenseRequest::setExpiryDate);
 
         // Optional fields without any validation
-        binder.bind(dateField, ExpenseRequest::getDate, ExpenseRequest::setDate);
+        binder.bind(startDateField, ExpenseRequest::getDate, ExpenseRequest::setDate);
         binder.bind(descriptionField, ExpenseRequest::getDescription, ExpenseRequest::setDescription);
     }
 
@@ -146,7 +157,7 @@ public class AddExpenseDialog extends Dialog {
         notification.open();
     }
 
-    private void defaultOnClickSaveListener() {
+    private void defaultClickSaveBtnListener() {
         logger.info("Clicking on Save button inside `Add New Expense` form");
         if (binder.validate().isOk()) {
             logger.info("Saving expense using data provided inside `Add New Expense` form");
@@ -162,7 +173,7 @@ public class AddExpenseDialog extends Dialog {
         }
     }
 
-    public void addClickOnSaveBtnListener(Consumer<ExpensesView> listener) {
+    public void addClickSaveBtnListener(Consumer<ExpensesView> listener) {
         logger.info("Added additional listener for Save Button");
         saveButton.addClickListener(e -> listener.accept(null));
     }
