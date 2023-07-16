@@ -19,16 +19,21 @@ public class MainLayout extends AppLayout {
     }
 
     private void addHeader() {
+        addToNavbar(getHeader());
+    }
+
+    private Header getHeader() {
         Header header = new Header();
         header.setId("header");
-        header.setWidth("100%");
+
+        Icon personIcon = new Icon(VaadinIcon.USER);
+        personIcon.addClassName("user-icon");
 
         Navbar navbar = new Navbar();
-        Icon personIcon = new Icon(VaadinIcon.USER);
-        personIcon.addClassName("margin-end");
+        navbar.add(personIcon);
+        header.add(navbar);
 
-        header.add(navbar, personIcon);
-        addToNavbar(header);
+        return header;
     }
 
     private void addFooter() {
