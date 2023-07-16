@@ -14,28 +14,31 @@ import java.util.List;
 @Tag("navbar")
 public class Navbar extends Div {
 
-    private final Image logo = new Image("images/logo_with_color.svg", "Logo image");
+    private final Image logoImage = new Image("images/logo-white-background.png", "Logo image");
     private final RouterLink expensesLink = new RouterLink("Expenses", ExpensesView.class);
     private final RouterLink dashboardLink = new RouterLink("Dashboard", DashboardView.class);
     private final RouterLink contactLink = new RouterLink("Contact", DashboardView.class);
 
     public Navbar() {
-        Div navbarLayout = new Div();
-        navbarLayout.addClassName("menu-inner");
-        navbarLayout.add(getRoutes());
-        add(navbarLayout);
+        Div innerMenu = new Div();
+        innerMenu.addClassName("menu-inner");
+        innerMenu.add(getRoutes());
 
+        Div menu = new Div(innerMenu);
+        menu.setClassName("menu");
+
+        add(menu);
         addStyle();
     }
 
     private void addStyle() {
         getRoutes().forEach(e -> e.setClassName("menu-item"));
-        logo.addClassNames("logo");
-        logo.addClickListener(e -> getUI().ifPresent(ui -> ui.navigate(HomeView.class)));
+        logoImage.addClassNames("logo");
+        logoImage.addClickListener(e -> getUI().ifPresent(ui -> ui.navigate(HomeView.class)));
     }
 
     public List<Component> getRoutes() {
-        return List.of(logo, expensesLink, dashboardLink, contactLink);
+        return List.of(logoImage, expensesLink, dashboardLink, contactLink);
     }
 
 }
