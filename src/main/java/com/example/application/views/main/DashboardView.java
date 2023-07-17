@@ -13,7 +13,7 @@ import com.vaadin.flow.router.Route;
 
 @PageTitle("Dashboard")
 @Route(value = "dashboard", layout = MainLayout.class)
-@JsModule("./resources/js/fillChart.js")
+@JsModule("./themes/light_theme/components/javascript/fillChart.js")
 @JavaScript("https://fastly.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js")
 public class DashboardView extends Main {
 
