@@ -143,7 +143,7 @@ public class EditExpenseDialog extends Dialog {
 
         cancelButton.addClickShortcut(Key.ESCAPE);
         cancelButton.addClickListener(e -> {
-            logger.info("Exiting `Edit Expense` form");
+            logger.info("Exited `Edit Expense` form");
             this.close();
         });
 
@@ -164,9 +164,9 @@ public class EditExpenseDialog extends Dialog {
     }
 
     private void defaultClickSaveBtnListener() {
-        logger.info("Clicking on Save button inside `Edit Expense` form");
+        logger.info("Clicked on Save button inside `Edit Expense` form");
         if (binder.validate().isOk()) {
-            logger.info("Saving expense using data provided inside `Edit Expense` form");
+            logger.info("Saved expense using data provided inside `Edit Expense` form");
             ExpenseConvertor convertor = new ExpenseConvertor(timestampService, categoryService);
             ExpenseRequest expenseRequest = binder.getBean();
             Expense expense = convertor.convertToExpense(expenseRequest);
@@ -176,7 +176,7 @@ public class EditExpenseDialog extends Dialog {
             showSuccesfullNotification();
             this.close();
         } else {
-            logger.warn("Submiting `Edit Expense` form with validation errors");
+            logger.warn("Submited `Edit Expense` form with validation errors");
             showErrorNotification();
         }
     }
@@ -201,4 +201,9 @@ public class EditExpenseDialog extends Dialog {
         notification.open();
     }
 
+    @Override
+    public void open() {
+        super.open();
+        logger.info("Opened `Edit Expense` form");
+    }
 }

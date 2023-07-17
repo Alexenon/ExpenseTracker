@@ -142,7 +142,7 @@ public class AddExpenseDialog extends Dialog {
 
         cancelButton.addClickShortcut(Key.ESCAPE);
         cancelButton.addClickListener(e -> {
-            logger.info("Exiting `Add New Expense` form");
+            logger.info("Exited `Add New Expense` form");
             this.close();
         });
 
@@ -153,9 +153,9 @@ public class AddExpenseDialog extends Dialog {
     }
 
     private void defaultClickSaveBtnListener() {
-        logger.info("Clicking on Save button inside `Add New Expense` form");
+        logger.info("Clicked on Save button inside `Add New Expense` form");
         if (binder.validate().isOk()) {
-            logger.info("Saving expense using data provided inside `Add New Expense` form");
+            logger.info("Saved expense using data provided inside `Add New Expense` form");
             ExpenseConvertor convertor = new ExpenseConvertor(timestampService, categoryService);
             ExpenseRequest expenseRequest = binder.getBean();
             Expense expense = convertor.convertToExpense(expenseRequest);
@@ -188,4 +188,9 @@ public class AddExpenseDialog extends Dialog {
         notification.open();
     }
 
+    @Override
+    public void open() {
+        super.open();
+        logger.info("Opened `Add New Expense` form");
+    }
 }

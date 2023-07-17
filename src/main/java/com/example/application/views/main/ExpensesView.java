@@ -22,11 +22,15 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @PageTitle("Expenses")
 @Route(value = "expenses", layout = MainLayout.class)
 public class ExpensesView extends VerticalLayout {
+
+    private static final Logger logger = LoggerFactory.getLogger(ExpensesView.class);
 
     private final ExpenseService expenseService;
     private final TimestampService timestampService;
@@ -51,6 +55,7 @@ public class ExpensesView extends VerticalLayout {
                 getToolBar(),
                 getGrid()
         );
+        logger.info("Expenses Page accessed");
     }
 
     private Component getToolBar() {
@@ -62,6 +67,7 @@ public class ExpensesView extends VerticalLayout {
         Button addBtn = new Button("Add");
         addBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         addBtn.addClickListener(event -> {
+            logger.info("Clicked on Add button");
             AddExpenseDialog dialog = new AddExpenseDialog(expenseService, timestampService, categoryService, singleFormatI18n);
             dialog.open();
             dialog.addClickSaveBtnListener(grid -> updateGrid());
@@ -84,6 +90,7 @@ public class ExpensesView extends VerticalLayout {
                             ButtonVariant.LUMO_TERTIARY);
                     button.setIcon(new Icon(VaadinIcon.EDIT));
                     button.addClickListener(e -> {
+                        logger.info("Clicked on Edit button for expense {}", expense.getName());
                         EditExpenseDialog dialog = new EditExpenseDialog(
                                 expense,
                                 expenseService,
@@ -104,9 +111,11 @@ public class ExpensesView extends VerticalLayout {
                             ButtonVariant.LUMO_ERROR,
                             ButtonVariant.LUMO_TERTIARY);
                     button.addClickListener(e -> {
+                        logger.info("Clicked on Delete button for expense {}", expense.getName());
                         ConfirmDialog dialog = getConfirmationDialog(expense.getName());
                         dialog.open();
                         dialog.addConfirmListener(l -> {
+                            logger.info("Deleted expense {}", expense.getName());
                             expenseService.deleteExpenseById(expense.getId());
                             updateGrid();
                         });
@@ -122,6 +131,7 @@ public class ExpensesView extends VerticalLayout {
     }
 
     private void updateGrid() {
+        logger.info("Updated Expense Table");
         grid.setItems(expenseService.getAllExpenses());
     }
 
