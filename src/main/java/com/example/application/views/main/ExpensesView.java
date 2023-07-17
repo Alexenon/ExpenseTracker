@@ -5,6 +5,7 @@ import com.example.application.service.CategoryService;
 import com.example.application.service.ExpenseService;
 import com.example.application.service.TimestampService;
 import com.example.application.views.main.components.AddExpenseDialog;
+import com.example.application.views.main.components.EditExpenseDialog;
 import com.example.application.views.main.layouts.MainLayout;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
@@ -81,8 +82,18 @@ public class ExpensesView extends VerticalLayout {
                 new ComponentRenderer<>(Button::new, (button, expense) -> {
                     button.addThemeVariants(ButtonVariant.LUMO_ICON,
                             ButtonVariant.LUMO_TERTIARY);
-                    button.addClickListener(e -> System.out.println("Clicking on edit"));
                     button.setIcon(new Icon(VaadinIcon.EDIT));
+                    button.addClickListener(e -> {
+                        EditExpenseDialog dialog = new EditExpenseDialog(
+                                expense,
+                                expenseService,
+                                timestampService,
+                                categoryService,
+                                singleFormatI18n
+                        );
+                        dialog.open();
+                        dialog.addClickSaveBtnListener(grid -> updateGrid());
+                    });
                 })
         ).setHeader("Edit");
 
