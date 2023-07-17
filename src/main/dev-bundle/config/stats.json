@@ -257,8 +257,8 @@
   "Frontend/resources/js/fillChart.js"
  ],
  "frontendHashes": {
-  "style.css": "ef231866d8c7aa564d5966c838b2fe4cbae616f80349bb3863d8a0b3a3bdf77c",
-  "resources/css/header_style.css": "57d336ffa9fdf425d2f2d7a7ac0b6c3793ba2b124682b3c8dba99ec0df9f91cc",
+  "style.css": "320135035f8ae2ed86faeaaab8a4ca53484c9af061267efaffe2b45bf6437475",
+  "resources/css/header_style.css": "87ce835dc2c6edf41cfe65e1b325c0d6d15051ee906cc2dc519b83db75495fec",
   "resources/js/fillChart.js": "a82906103767ce525537635d9d76dae6e4de194a4035a0c23bea0015fb94f914",
   "comboBoxConnector.js": "1d004c3dae9c76f8bcc68678abe1b8f7bdc8b456f5c9c4c7f190df8ed25d66cd",
   "contextMenuConnector.js": "25a200f8086461635ddd92316ebeb5a868294c8650a190efbae120edb1088f4f",
@@ -283,7 +283,7 @@
  },
  "themeJsonContents": {},
  "entryScripts": [
-  "VAADIN/build/indexhtml-b28c7d4f.js"
+  "VAADIN/build/indexhtml-e58bfaae.js"
  ],
  "webComponents": [],
  "packageJsonHash": "e7f31c1be23da66c9632b284173867bf6f66fbbcedd9c79737ea06f38923e25c"

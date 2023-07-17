@@ -13,10 +13,10 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
@@ -28,7 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 @PageTitle("Expenses")
 @Route(value = "expenses", layout = MainLayout.class)
-public class ExpensesView extends VerticalLayout {
+public class ExpensesView extends Main {
 
     private static final Logger logger = LoggerFactory.getLogger(ExpensesView.class);
 
@@ -50,7 +50,7 @@ public class ExpensesView extends VerticalLayout {
         this.categoryService = categoryService;
         this.singleFormatI18n = singleFormatI18n;
 
-        this.setClassName("page-content");
+        addClassName("page-content");
         add(
                 getToolBar(),
                 getGrid()
@@ -137,7 +137,7 @@ public class ExpensesView extends VerticalLayout {
 
     private ConfirmDialog getConfirmationDialog(String text) {
         ConfirmDialog dialog = new ConfirmDialog();
-        dialog.setHeader("Deleting \"" + text + "\"?");
+        dialog.setHeader("Delete this expense '" + text + "`");
         dialog.setText("Are you sure you want to permanently delete this item?");
 
         dialog.setCancelable(true);

@@ -7,7 +7,7 @@ header {
     width: 100%;
 }
 
-navbar {
+.navbar {
     display: flex;
     align-items: center;
     padding: 1.6rem 3rem;

@@ -29,15 +29,12 @@ img {
 }
 
 .page-content {
-    margin-top: 100px;
+    margin-top: 80px;
 }
 
-canvas {
-    top: 100px !important;
-    left: 30px !important;
-}
-
-.margin-end {
-     margin-left: auto;
-     margin-right: 20px;
+#chart-pie {
+    width: 700px;
+    height: 500px;
+    margin-top: 20px;
+    margin-left: 20px;
 }
