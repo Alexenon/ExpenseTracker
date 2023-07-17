@@ -1,16 +1,14 @@
 package com.example.application.views.main.layouts;
 
-import com.example.application.views.main.components.complex_components.Navbar;
+import com.example.application.views.main.components.complex_components.NavigationBar;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.applayout.AppLayout;
-import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Header;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
-@CssImport("./resources/css/header_style.css")
 public class MainLayout extends AppLayout {
 
     public MainLayout() {
@@ -29,7 +27,7 @@ public class MainLayout extends AppLayout {
         Icon personIcon = new Icon(VaadinIcon.USER);
         personIcon.addClassName("user-icon");
 
-        Navbar navbar = new Navbar();
+        NavigationBar navbar = new NavigationBar();
         navbar.add(personIcon);
         header.add(navbar);
 
