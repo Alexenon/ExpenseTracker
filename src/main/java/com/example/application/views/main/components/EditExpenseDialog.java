@@ -26,17 +26,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-public class AddExpenseDialog extends Dialog {
+public class EditExpenseDialog extends Dialog {
 
-    private static final Logger logger = LoggerFactory.getLogger(AddExpenseDialog.class);
+    private static final Logger logger = LoggerFactory.getLogger(EditExpenseDialog.class);
 
+    private final ExpenseDTO expenseDTO;
     private final ExpenseService expenseService;
     private final TimestampService timestampService;
     private final CategoryService categoryService;
@@ -55,20 +54,23 @@ public class AddExpenseDialog extends Dialog {
     private final Button cancelButton = new Button("Cancel");
 
     @Autowired
-    public AddExpenseDialog(ExpenseService expenseService,
-                            TimestampService timestampService,
-                            CategoryService categoryService,
-                            DatePicker.DatePickerI18n singleFormatI18n) {
+    public EditExpenseDialog(ExpenseDTO expense,
+                             ExpenseService expenseService,
+                             TimestampService timestampService,
+                             CategoryService categoryService,
+                             DatePicker.DatePickerI18n singleFormatI18n) {
+        this.expenseDTO = expense;
         this.expenseService = expenseService;
         this.timestampService = timestampService;
         this.categoryService = categoryService;
         this.singleFormatI18n = singleFormatI18n;
 
-        setHeaderTitle("Add New Expense");
+        setHeaderTitle("Edit Expense");
         add(createDialogLayout());
         binder = new Binder<>();
         setupBinder();
         addStyleToElements();
+        fillFieldsWithValues();
     }
 
     private VerticalLayout createDialogLayout() {
@@ -132,7 +134,6 @@ public class AddExpenseDialog extends Dialog {
 
         startDateField.setI18n(singleFormatI18n);
         startDateField.setHelperText("Format: YYYY-MM-DD");
-        startDateField.setValue(LocalDate.now(ZoneId.systemDefault()));
 
         expiryField.setEnabled(false); // Expiry date field initial is disabled
         expiryField.setI18n(singleFormatI18n);
@@ -142,7 +143,7 @@ public class AddExpenseDialog extends Dialog {
 
         cancelButton.addClickShortcut(Key.ESCAPE);
         cancelButton.addClickListener(e -> {
-            logger.info("Exited `Add New Expense` form");
+            logger.info("Exited `Edit Expense` form");
             this.close();
         });
 
@@ -152,18 +153,30 @@ public class AddExpenseDialog extends Dialog {
         this.getFooter().add(cancelButton, saveButton);
     }
 
+    private void fillFieldsWithValues() {
+        nameField.setValue(expenseDTO.getName());
+        descriptionField.setValue(expenseDTO.getDescription());
+        amountField.setValue(expenseDTO.getAmount());
+        categoryField.setValue(expenseDTO.getCategory());
+        startDateField.setValue(expenseDTO.getDate());
+        intervalField.setValue(expenseDTO.getTimestamp());
+        expiryField.setValue(expenseDTO.getExpireDate());
+    }
+
     private void defaultClickSaveBtnListener() {
-        logger.info("Clicked on Save button inside `Add New Expense` form");
+        logger.info("Clicked on Save button inside `Edit Expense` form");
         if (binder.validate().isOk()) {
-            logger.info("Saved expense using data provided inside `Add New Expense` form");
+            logger.info("Saved expense using data provided inside `Edit Expense` form");
             ExpenseConvertor convertor = new ExpenseConvertor(timestampService, categoryService);
             ExpenseRequest expenseRequest = binder.getBean();
             Expense expense = convertor.convertToExpense(expenseRequest);
+            expense.setId(expenseDTO.getId()); // updating
+
             expenseService.saveExpense(expense);
             showSuccesfullNotification();
             this.close();
         } else {
-            logger.warn("Submiting `Add New Expense` form with validation errors");
+            logger.warn("Submited `Edit Expense` form with validation errors");
             showErrorNotification();
         }
     }
@@ -181,7 +194,7 @@ public class AddExpenseDialog extends Dialog {
     }
 
     private void showErrorNotification() {
-        Notification notification = Notification.show("An error occured while submiting Add New Expense form");
+        Notification notification = Notification.show("An error occured while submiting `Edit Expense` form");
         notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
         notification.setPosition(Notification.Position.TOP_CENTER);
         notification.setDuration(5000);
@@ -191,6 +204,6 @@ public class AddExpenseDialog extends Dialog {
     @Override
     public void open() {
         super.open();
-        logger.info("Opened `Add New Expense` form");
+        logger.info("Opened `Edit Expense` form");
     }
 }

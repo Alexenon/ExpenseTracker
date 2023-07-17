@@ -5,11 +5,13 @@ import com.example.application.service.CategoryService;
 import com.example.application.service.ExpenseService;
 import com.example.application.service.TimestampService;
 import com.example.application.views.main.components.AddExpenseDialog;
+import com.example.application.views.main.components.EditExpenseDialog;
 import com.example.application.views.main.layouts.MainLayout;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
+import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -20,28 +22,40 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @PageTitle("Expenses")
 @Route(value = "expenses", layout = MainLayout.class)
 public class ExpensesView extends VerticalLayout {
 
+    private static final Logger logger = LoggerFactory.getLogger(ExpensesView.class);
+
     private final ExpenseService expenseService;
     private final TimestampService timestampService;
     private final CategoryService categoryService;
+    private final DatePicker.DatePickerI18n singleFormatI18n;
 
     private final TextField filterText = new TextField();
     private final Grid<ExpenseDTO> grid = new Grid<>(ExpenseDTO.class);
 
-    public ExpensesView(ExpenseService expenseService, TimestampService timestampService, CategoryService categoryService) {
+    @Autowired
+    public ExpensesView(ExpenseService expenseService,
+                        TimestampService timestampService,
+                        CategoryService categoryService,
+                        DatePicker.DatePickerI18n singleFormatI18n) {
         this.expenseService = expenseService;
         this.timestampService = timestampService;
         this.categoryService = categoryService;
+        this.singleFormatI18n = singleFormatI18n;
 
         this.setClassName("page-content");
         add(
                 getToolBar(),
                 getGrid()
         );
+        logger.info("Expenses Page accessed");
     }
 
     private Component getToolBar() {
@@ -53,9 +67,10 @@ public class ExpensesView extends VerticalLayout {
         Button addBtn = new Button("Add");
         addBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         addBtn.addClickListener(event -> {
-            AddExpenseDialog dialog = new AddExpenseDialog(expenseService, timestampService, categoryService);
+            logger.info("Clicked on Add button");
+            AddExpenseDialog dialog = new AddExpenseDialog(expenseService, timestampService, categoryService, singleFormatI18n);
             dialog.open();
-            dialog.addClickOnSaveBtnListener(grid -> updateGrid());
+            dialog.addClickSaveBtnListener(grid -> updateGrid());
         });
 
         final HorizontalLayout toolBar = new HorizontalLayout(filterText, addBtn);
@@ -73,8 +88,19 @@ public class ExpensesView extends VerticalLayout {
                 new ComponentRenderer<>(Button::new, (button, expense) -> {
                     button.addThemeVariants(ButtonVariant.LUMO_ICON,
                             ButtonVariant.LUMO_TERTIARY);
-                    button.addClickListener(e -> System.out.println("Clicking on edit"));
                     button.setIcon(new Icon(VaadinIcon.EDIT));
+                    button.addClickListener(e -> {
+                        logger.info("Clicked on Edit button for expense {}", expense.getName());
+                        EditExpenseDialog dialog = new EditExpenseDialog(
+                                expense,
+                                expenseService,
+                                timestampService,
+                                categoryService,
+                                singleFormatI18n
+                        );
+                        dialog.open();
+                        dialog.addClickSaveBtnListener(grid -> updateGrid());
+                    });
                 })
         ).setHeader("Edit");
 
@@ -85,9 +111,11 @@ public class ExpensesView extends VerticalLayout {
                             ButtonVariant.LUMO_ERROR,
                             ButtonVariant.LUMO_TERTIARY);
                     button.addClickListener(e -> {
+                        logger.info("Clicked on Delete button for expense {}", expense.getName());
                         ConfirmDialog dialog = getConfirmationDialog(expense.getName());
                         dialog.open();
                         dialog.addConfirmListener(l -> {
+                            logger.info("Deleted expense {}", expense.getName());
                             expenseService.deleteExpenseById(expense.getId());
                             updateGrid();
                         });
@@ -103,6 +131,7 @@ public class ExpensesView extends VerticalLayout {
     }
 
     private void updateGrid() {
+        logger.info("Updated Expense Table");
         grid.setItems(expenseService.getAllExpenses());
     }
 
