@@ -13,12 +13,16 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfig extends VaadinWebSecurity {
+public class SecurityConfiguration extends VaadinWebSecurity {
 
     private static final String LOGIN_URL = "/login";
     private static final String LOGOUT_SUCCESS_URL = "/login";
@@ -29,7 +33,7 @@ public class SecurityConfig extends VaadinWebSecurity {
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
 
-    public SecurityConfig(UserService userService, PasswordEncoder passwordEncoder) {
+    public SecurityConfiguration(UserService userService, PasswordEncoder passwordEncoder) {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
     }
@@ -38,8 +42,10 @@ public class SecurityConfig extends VaadinWebSecurity {
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> {
-                    auth.requestMatchers("/login").permitAll();
+                    auth.requestMatchers("/login", "/register").permitAll();
                     auth.requestMatchers("/public/**").permitAll();
+                    auth.requestMatchers("/icons/**").permitAll();
+                    auth.requestMatchers("/images/**").permitAll();
                     auth.requestMatchers("/api/**").authenticated();
                     auth.requestMatchers("/private/**").authenticated();
                     auth.requestMatchers("/admin/**").hasRole("ADMIN");
@@ -50,7 +56,7 @@ public class SecurityConfig extends VaadinWebSecurity {
                     loginForm.failureUrl(LOGIN_FAILURE_URL);
                 })
                 .logout(logout -> logout.logoutSuccessUrl(LOGOUT_SUCCESS_URL))
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+//                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(e -> {
                     e.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
                     e.accessDeniedPage(DENIED_PAGE_URL);
@@ -78,4 +84,18 @@ public class SecurityConfig extends VaadinWebSecurity {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
+    @Bean
+    public UserDetailsManager userDetailsService() {
+        UserDetails user = User.withUsername("user")
+                        .password("{noop}user")
+                        .roles("USER")
+                        .build();
+
+        UserDetails admin = User.withUsername("admin")
+                        .password("{noop}admin")
+                        .roles("ADMIN")
+                        .build();
+
+        return new InMemoryUserDetailsManager(user, admin);
+    }
 }
