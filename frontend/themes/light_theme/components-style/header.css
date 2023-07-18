@@ -1,0 +1,60 @@
+header {
+    border-bottom: 2px solid var(--color-black);
+    background-color: var(--header-background);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+}
+
+.navbar {
+    display: flex;
+    align-items: center;
+    padding: 1.6rem 3rem;
+    font-size: 1rem;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    margin-right: 1.6rem;
+    width: 200px;
+}
+
+.menu {
+    width: 100%;
+}
+
+.menu-inner {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.menu-item {
+    position: relative;
+    color: var(--color-black);
+}
+
+.menu-item:where(:any-link):hover {
+    text-decoration: none !important;
+}
+
+.menu-inner a::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    background: var(--color-black);
+    left: 0;
+    bottom: -4px;
+    transition: ease .40s;
+}
+
+.menu-inner a:hover::after {
+    width: 100%;
+}
+
+.user-icon {
+    font-size: 1.2rem;
+}

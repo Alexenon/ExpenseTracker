@@ -1,0 +1,42 @@
+@import 'components-style/header.css';
+
+:root {
+    --header-background: rgb(255, 255, 255);
+    --color-black: rgb(51, 40, 40);
+    --table-background: rgb(220, 214, 211);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+    outline: none;
+    border: none;
+    text-decoration: none;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+a,
+button {
+    color: inherit;
+    cursor: pointer;
+}
+
+img {
+    display: block;
+    cursor: pointer;
+    max-width: 100%;
+    height: auto;
+}
+
+.page-content {
+    margin-top: 80px;
+}
+
+#chart-pie {
+    width: 700px;
+    height: 500px;
+    margin-top: 20px;
+    margin-left: 20px;
+}
