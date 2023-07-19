@@ -29,19 +29,28 @@ public class UserService implements UserDetailsService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public Optional<User> findByUsername(String username) {
-        return userRepository.findByUsername(username);
+    public Optional<User> findByUsernameIgnoreCase(String username) {
+        return userRepository.findByUsernameIgnoreCase(username);
     }
 
-    public Optional<User> findByEmail(String email) {
-        return userRepository.findByEmail(email);
+    public Optional<User> findByEmailIgnoreCase(String email) {
+        return userRepository.findByEmailIgnoreCase(email);
+    }
+
+    public Optional<User> findByUsernameOrEmailIgnoreCase(String usernameOrEmail) {
+        Optional<User> userByUsername = userRepository.findByUsernameIgnoreCase(usernameOrEmail);
+        if (userByUsername.isPresent()) {
+            return userByUsername;
+        } else {
+            return userRepository.findByEmailIgnoreCase(usernameOrEmail);
+        }
     }
 
     @Override
     @Transactional
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException(username + " not found."));
+    public UserDetails loadUserByUsername(String usernameOrEmail) throws UsernameNotFoundException {
+        User user = findByUsernameOrEmailIgnoreCase(usernameOrEmail)
+                .orElseThrow(() -> new UsernameNotFoundException(usernameOrEmail + " not found."));
 
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
@@ -51,8 +60,8 @@ public class UserService implements UserDetailsService {
     }
 
     public User createNewUser(RegistrationUserDTO registrationUserDto) {
-        if (userRepository.findByUsername(registrationUserDto.getUsername()).isPresent()) {
-            throw new UserAlreadyExistException();
+        if (findByUsernameIgnoreCase(registrationUserDto.getUsername()).isPresent()) {
+            throw new UserAlreadyExistException("There is already a user with this username");
         }
 
         User user = new User();
@@ -64,12 +73,17 @@ public class UserService implements UserDetailsService {
     }
 
     public User createNewUser(User user) {
-        if (userRepository.findByUsername(user.getUsername()).isPresent()) {
-            throw new UserAlreadyExistException();
+        if (findByUsernameIgnoreCase(user.getUsername()).isPresent()) {
+            throw new UserAlreadyExistException("There is already a user with this username");
+        }
+        if (findByEmailIgnoreCase(user.getEmail()).isPresent()) {
+            throw new UserAlreadyExistException("There is already a user with this email");
         }
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setRoles(List.of(roleRepository.findByName("ROLE_USER").orElseThrow()));
+        user.setEmail(user.getEmail().toLowerCase());
+
         return userRepository.save(user);
     }
 }

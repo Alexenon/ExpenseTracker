@@ -1,10 +1,8 @@
 package com.example.application.exceptions;
 
-public class UserAlreadyExistException extends RuntimeException {
+import org.springframework.security.core.AuthenticationException;
 
-    public UserAlreadyExistException() {
-        super("There is already a user with this username");
-    }
+public class UserAlreadyExistException extends AuthenticationException {
 
     public UserAlreadyExistException(String message) {
         super(message);

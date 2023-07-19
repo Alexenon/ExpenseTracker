@@ -13,7 +13,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -58,7 +57,7 @@ public class SecurityConfiguration extends VaadinWebSecurity {
                     loginForm.failureUrl(LOGIN_FAILURE_URL);
                 })
                 .logout(logout -> logout.logoutSuccessUrl(LOGOUT_SUCCESS_URL))
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+//                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(e -> {
                     e.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
                     e.accessDeniedPage(DENIED_PAGE_URL);
@@ -84,20 +83,5 @@ public class SecurityConfiguration extends VaadinWebSecurity {
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
-    }
-
-    @Bean
-    public UserDetailsManager userDetailsService() {
-        UserDetails user = User.withUsername("user")
-                        .password("{noop}user")
-                        .roles("USER")
-                        .build();
-
-        UserDetails admin = User.withUsername("admin")
-                        .password("{noop}admin")
-                        .roles("ADMIN")
-                        .build();
-
-        return new InMemoryUserDetailsManager(user, admin);
     }
 }
