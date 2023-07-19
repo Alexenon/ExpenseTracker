@@ -1,4 +1,4 @@
-package com.example.application.model;
+package com.example.application.exceptions;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.notification.Notification;
@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class CustomErrorHandler extends DefaultErrorHandler {
-
     private static final Logger logger = LoggerFactory.getLogger(CustomErrorHandler.class);
 
     public void error(ErrorEvent errorEvent) {

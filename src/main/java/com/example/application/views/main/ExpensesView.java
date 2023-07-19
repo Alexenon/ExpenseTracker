@@ -1,9 +1,9 @@
 package com.example.application.views.main;
 
-import com.example.application.model.ExpenseDTO;
-import com.example.application.service.CategoryService;
-import com.example.application.service.ExpenseService;
-import com.example.application.service.TimestampService;
+import com.example.application.dtos.ExpenseDTO;
+import com.example.application.services.CategoryService;
+import com.example.application.services.ExpenseService;
+import com.example.application.services.TimestampService;
 import com.example.application.views.main.components.AddExpenseDialog;
 import com.example.application.views.main.components.EditExpenseDialog;
 import com.example.application.views.main.layouts.MainLayout;
@@ -22,10 +22,12 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import jakarta.annotation.security.PermitAll;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+@PermitAll
 @PageTitle("Expenses")
 @Route(value = "expenses", layout = MainLayout.class)
 public class ExpensesView extends Main {

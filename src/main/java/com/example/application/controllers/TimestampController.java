@@ -1,8 +1,7 @@
-package com.example.application.controller;
+package com.example.application.controllers;
 
-import com.example.application.model.Timestamp;
-import com.example.application.repository.TimestampRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.application.entities.Timestamp;
+import com.example.application.repositories.TimestampRepository;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,8 +10,11 @@ import java.util.List;
 @RequestMapping("/api/timestamp")
 public class TimestampController {
 
-    @Autowired
-    TimestampRepository repository;
+    private final TimestampRepository repository;
+
+    public TimestampController(TimestampRepository repository) {
+        this.repository = repository;
+    }
 
     @GetMapping("/all")
     public List<Timestamp> getAllTimestamps() {

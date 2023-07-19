@@ -1,22 +1,20 @@
-package com.example.application.service;
+package com.example.application.services;
 
-import com.example.application.model.Expense;
-import com.example.application.model.ExpenseDTO;
-import com.example.application.repository.ExpenseRepository;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.application.dtos.ExpenseDTO;
+import com.example.application.entities.Expense;
+import com.example.application.repositories.ExpenseRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-@NoArgsConstructor
-@AllArgsConstructor
 public class ExpenseService {
 
-    @Autowired
-    private ExpenseRepository repository;
+    private final ExpenseRepository repository;
+
+    public ExpenseService(ExpenseRepository repository) {
+        this.repository = repository;
+    }
 
     public List<ExpenseDTO> getAllExpenses() {
         return repository.getAll();

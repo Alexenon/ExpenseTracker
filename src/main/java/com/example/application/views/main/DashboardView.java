@@ -1,5 +1,9 @@
 package com.example.application.views.main;
 
+import com.example.application.services.ExpenseService;
+import com.example.application.views.main.layouts.MainLayout;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.example.application.views.main.layouts.MainLayout;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JavaScript;
@@ -10,7 +14,14 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import jakarta.annotation.security.PermitAll;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.json.JsonParseException;
 
+import java.util.List;
+import java.util.Optional;
+
+@PermitAll
 @PageTitle("Dashboard")
 @Route(value = "dashboard", layout = MainLayout.class)
 @JsModule("./themes/light_theme/components/javascript/fillChart.js")

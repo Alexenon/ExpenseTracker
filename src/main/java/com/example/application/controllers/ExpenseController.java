@@ -1,12 +1,10 @@
-package com.example.application.controller;
+package com.example.application.controllers;
 
-import com.example.application.model.Expense;
-import com.example.application.model.ExpenseConvertor;
-import com.example.application.model.ExpenseDTO;
-import com.example.application.model.ExpenseRequest;
-import com.example.application.service.CategoryService;
-import com.example.application.service.ExpenseService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.application.dtos.ExpenseDTO;
+import com.example.application.dtos.ExpenseRequest;
+import com.example.application.entities.Expense;
+import com.example.application.services.ExpenseService;
+import com.example.application.utils.ExpenseConvertor;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -18,14 +16,13 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/expense")
 public class ExpenseController {
 
-    @Autowired
-    ExpenseService expenseService;
+    private final ExpenseService expenseService;
+    private final ExpenseConvertor expenseConvertor;
 
-    @Autowired
-    CategoryService categoryService;
-
-    @Autowired
-    ExpenseConvertor expenseConvertor;
+    public ExpenseController(ExpenseService expenseService, ExpenseConvertor expenseConvertor) {
+        this.expenseService = expenseService;
+        this.expenseConvertor = expenseConvertor;
+    }
 
     @GetMapping("/all")
     public List<ExpenseDTO> getAllExpenses() {
