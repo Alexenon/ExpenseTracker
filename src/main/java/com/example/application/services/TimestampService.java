@@ -1,5 +1,6 @@
 package com.example.application.services;
 
+import com.example.application.dtos.Timestamps;
 import com.example.application.entities.Timestamp;
 import com.example.application.repositories.TimestampRepository;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,11 @@ public class TimestampService {
     }
 
     public Timestamp getTimestampByName(String name) {
+        return repository.getByName(name);
+    }
+
+    public Timestamp getTimestamp(Timestamps timestamp) {
+        String name = timestamp.name().replace("_", " ");
         return repository.getByName(name);
     }
 
