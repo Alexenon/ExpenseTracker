@@ -1,10 +1,7 @@
 package com.example.application.views.main;
 
 import com.example.application.dtos.ExpenseDTO;
-import com.example.application.services.CategoryService;
-import com.example.application.services.ExpenseService;
-import com.example.application.services.TimestampService;
-import com.example.application.services.UserService;
+import com.example.application.services.*;
 import com.example.application.views.main.components.AddExpenseDialog;
 import com.example.application.views.main.components.EditExpenseDialog;
 import com.example.application.views.main.layouts.MainLayout;
@@ -28,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+// TODO: Check task 'AddExpenseDialog'
 @PermitAll
 @PageTitle("Expenses")
 @Route(value = "expenses", layout = MainLayout.class)
@@ -40,6 +38,7 @@ public class ExpensesView extends Main {
     private final TimestampService timestampService;
     private final CategoryService categoryService;
     private final DatePicker.DatePickerI18n singleFormatI18n;
+    private final SecurityService securityService;
 
     private final TextField filterText = new TextField();
     private final Grid<ExpenseDTO> grid = new Grid<>(ExpenseDTO.class);
@@ -49,13 +48,14 @@ public class ExpensesView extends Main {
                         ExpenseService expenseService,
                         TimestampService timestampService,
                         CategoryService categoryService,
-                        DatePicker.DatePickerI18n singleFormatI18n) {
+                        DatePicker.DatePickerI18n singleFormatI18n,
+                        SecurityService securityService) {
         this.userService = userService;
         this.expenseService = expenseService;
         this.timestampService = timestampService;
         this.categoryService = categoryService;
         this.singleFormatI18n = singleFormatI18n;
-
+        this.securityService = securityService;
         addClassName("page-content");
         add(
                 getToolBar(),
@@ -137,9 +137,12 @@ public class ExpensesView extends Main {
         return grid;
     }
 
+    // TODO: Add to
     private void updateGrid() {
         logger.info("Updated Expense Table");
-        grid.setItems(expenseService.getAllExpenses());
+        String username = securityService.getAuthenticatedUser().getUsername();
+        System.out.println("Logged with user " + username);
+        grid.setItems(expenseService.getAllExpensesByUser(username));
     }
 
     private ConfirmDialog getConfirmationDialog(String text) {
