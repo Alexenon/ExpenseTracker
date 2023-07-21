@@ -23,4 +23,5 @@ public interface ExpenseDTO {
     @JsonFormat(pattern = "yyyy-MM-dd")
     LocalDate getExpireDate();
 
+    String getUser();
 }

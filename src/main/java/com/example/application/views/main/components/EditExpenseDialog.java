@@ -8,6 +8,7 @@ import com.example.application.entities.Timestamp;
 import com.example.application.services.CategoryService;
 import com.example.application.services.ExpenseService;
 import com.example.application.services.TimestampService;
+import com.example.application.services.UserService;
 import com.example.application.utils.ExpenseConvertor;
 import com.example.application.views.main.ExpensesView;
 import com.vaadin.flow.component.Component;
@@ -36,11 +37,14 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+
+//TODO: Check task for 'AddExpenseDialog'
 public class EditExpenseDialog extends Dialog {
 
     private static final Logger logger = LoggerFactory.getLogger(EditExpenseDialog.class);
 
     private final ExpenseDTO expenseDTO;
+    private final UserService userService;
     private final ExpenseService expenseService;
     private final TimestampService timestampService;
     private final CategoryService categoryService;
@@ -60,11 +64,13 @@ public class EditExpenseDialog extends Dialog {
 
     @Autowired
     public EditExpenseDialog(ExpenseDTO expense,
+                             UserService userService,
                              ExpenseService expenseService,
                              TimestampService timestampService,
                              CategoryService categoryService,
                              DatePicker.DatePickerI18n singleFormatI18n) {
         this.expenseDTO = expense;
+        this.userService = userService;
         this.expenseService = expenseService;
         this.timestampService = timestampService;
         this.categoryService = categoryService;
@@ -104,11 +110,11 @@ public class EditExpenseDialog extends Dialog {
 
         binder.forField(categoryField)
                 .asRequired("Please fill this field")
-                .bind(ExpenseRequest::getCategory, ExpenseRequest::setCategory);
+                .bind(ExpenseRequest::getCategoryName, ExpenseRequest::setCategoryName);
 
         binder.forField(intervalField)
                 .asRequired("Please fill this field")
-                .bind(ExpenseRequest::getTimestamp, ExpenseRequest::setTimestamp);
+                .bind(ExpenseRequest::getTimestampName, ExpenseRequest::setTimestampName);
 
         binder.forField(startDateField)
                 .asRequired("Please fill this field")
@@ -172,7 +178,7 @@ public class EditExpenseDialog extends Dialog {
         logger.info("Clicked on Save button inside `Edit Expense` form");
         if (binder.validate().isOk()) {
             logger.info("Saved expense using data provided inside `Edit Expense` form");
-            ExpenseConvertor convertor = new ExpenseConvertor(timestampService, categoryService);
+            ExpenseConvertor convertor = new ExpenseConvertor(userService, timestampService, categoryService);
             ExpenseRequest expenseRequest = binder.getBean();
             Expense expense = convertor.convertToExpense(expenseRequest);
             expense.setId(expenseDTO.getId()); // updating

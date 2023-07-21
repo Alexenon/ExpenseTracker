@@ -4,6 +4,7 @@ import com.example.application.dtos.ExpenseDTO;
 import com.example.application.services.CategoryService;
 import com.example.application.services.ExpenseService;
 import com.example.application.services.TimestampService;
+import com.example.application.services.UserService;
 import com.example.application.views.main.components.AddExpenseDialog;
 import com.example.application.views.main.components.EditExpenseDialog;
 import com.example.application.views.main.layouts.MainLayout;
@@ -34,6 +35,7 @@ public class ExpensesView extends Main {
 
     private static final Logger logger = LoggerFactory.getLogger(ExpensesView.class);
 
+    private final UserService userService;
     private final ExpenseService expenseService;
     private final TimestampService timestampService;
     private final CategoryService categoryService;
@@ -43,10 +45,12 @@ public class ExpensesView extends Main {
     private final Grid<ExpenseDTO> grid = new Grid<>(ExpenseDTO.class);
 
     @Autowired
-    public ExpensesView(ExpenseService expenseService,
+    public ExpensesView(UserService userService,
+                        ExpenseService expenseService,
                         TimestampService timestampService,
                         CategoryService categoryService,
                         DatePicker.DatePickerI18n singleFormatI18n) {
+        this.userService = userService;
         this.expenseService = expenseService;
         this.timestampService = timestampService;
         this.categoryService = categoryService;
@@ -70,7 +74,7 @@ public class ExpensesView extends Main {
         addBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         addBtn.addClickListener(event -> {
             logger.info("Clicked on Add button");
-            AddExpenseDialog dialog = new AddExpenseDialog(expenseService, timestampService, categoryService, singleFormatI18n);
+            AddExpenseDialog dialog = new AddExpenseDialog(userService, expenseService, timestampService, categoryService, singleFormatI18n);
             dialog.open();
             dialog.addClickSaveBtnListener(grid -> updateGrid());
         });
@@ -95,6 +99,7 @@ public class ExpensesView extends Main {
                         logger.info("Clicked on Edit button for expense {}", expense.getName());
                         EditExpenseDialog dialog = new EditExpenseDialog(
                                 expense,
+                                userService,
                                 expenseService,
                                 timestampService,
                                 categoryService,
