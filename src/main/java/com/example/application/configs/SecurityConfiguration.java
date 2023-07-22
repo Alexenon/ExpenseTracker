@@ -12,7 +12,6 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 
@@ -21,9 +20,9 @@ import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 public class SecurityConfiguration extends VaadinWebSecurity {
 
     private static final String LOGIN_URL = "/login";
-    private static final String LOGOUT_SUCCESS_URL = "/login";
     private static final String LOGIN_PROCESSING_URL = "/login";
     private static final String LOGIN_FAILURE_URL = "/login?error";
+    private static final String LOGOUT_SUCCESS_URL = "/";
     private static final String DENIED_PAGE_URL = "/404";
 
     private final UserService userService;
@@ -37,7 +36,7 @@ public class SecurityConfiguration extends VaadinWebSecurity {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable)
+                .csrf().disable()
                 .authorizeHttpRequests(auth -> {
                     auth.requestMatchers("/login", "/register").permitAll();
                     auth.requestMatchers("/public/**").permitAll();
@@ -53,7 +52,6 @@ public class SecurityConfiguration extends VaadinWebSecurity {
                     loginForm.failureUrl(LOGIN_FAILURE_URL);
                 })
                 .logout(logout -> logout.logoutSuccessUrl(LOGOUT_SUCCESS_URL))
-//                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(e -> {
                     e.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
                     e.accessDeniedPage(DENIED_PAGE_URL);

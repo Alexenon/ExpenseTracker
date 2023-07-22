@@ -5,5 +5,10 @@ public enum Categories {
     Services,
     Transport,
     Distractions,
-    Others,
+    Others;
+
+    @Override
+    public String toString() {
+        return super.toString().replace("_", " ");
+    }
 }

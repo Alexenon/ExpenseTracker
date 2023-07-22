@@ -1,7 +1,9 @@
 package com.example.application.views.main;
 
 import com.example.application.dtos.ExpenseDTO;
-import com.example.application.services.*;
+import com.example.application.services.ExpenseService;
+import com.example.application.services.SecurityService;
+import com.example.application.utils.ExpenseConvertor;
 import com.example.application.views.main.components.AddExpenseDialog;
 import com.example.application.views.main.components.EditExpenseDialog;
 import com.example.application.views.main.layouts.MainLayout;
@@ -25,7 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-// TODO: Check task 'AddExpenseDialog'
 @PermitAll
 @PageTitle("Expenses")
 @Route(value = "expenses", layout = MainLayout.class)
@@ -33,29 +34,24 @@ public class ExpensesView extends Main {
 
     private static final Logger logger = LoggerFactory.getLogger(ExpensesView.class);
 
-    private final UserService userService;
     private final ExpenseService expenseService;
-    private final TimestampService timestampService;
-    private final CategoryService categoryService;
-    private final DatePicker.DatePickerI18n singleFormatI18n;
     private final SecurityService securityService;
+    private final ExpenseConvertor expenseConvertor;
+    private final DatePicker.DatePickerI18n singleFormatI18n;
 
     private final TextField filterText = new TextField();
     private final Grid<ExpenseDTO> grid = new Grid<>(ExpenseDTO.class);
 
     @Autowired
-    public ExpensesView(UserService userService,
-                        ExpenseService expenseService,
-                        TimestampService timestampService,
-                        CategoryService categoryService,
-                        DatePicker.DatePickerI18n singleFormatI18n,
-                        SecurityService securityService) {
-        this.userService = userService;
+    public ExpensesView(
+            ExpenseService expenseService,
+            SecurityService securityService,
+            ExpenseConvertor expenseConvertor,
+            DatePicker.DatePickerI18n singleFormatI18n) {
         this.expenseService = expenseService;
-        this.timestampService = timestampService;
-        this.categoryService = categoryService;
-        this.singleFormatI18n = singleFormatI18n;
         this.securityService = securityService;
+        this.expenseConvertor = expenseConvertor;
+        this.singleFormatI18n = singleFormatI18n;
         addClassName("page-content");
         add(
                 getToolBar(),
@@ -74,7 +70,7 @@ public class ExpensesView extends Main {
         addBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         addBtn.addClickListener(event -> {
             logger.info("Clicked on Add button");
-            AddExpenseDialog dialog = new AddExpenseDialog(userService, expenseService, timestampService, categoryService, singleFormatI18n);
+            AddExpenseDialog dialog = new AddExpenseDialog(expenseService, expenseConvertor, singleFormatI18n);
             dialog.open();
             dialog.addClickSaveBtnListener(grid -> updateGrid());
         });
@@ -99,10 +95,8 @@ public class ExpensesView extends Main {
                         logger.info("Clicked on Edit button for expense {}", expense.getName());
                         EditExpenseDialog dialog = new EditExpenseDialog(
                                 expense,
-                                userService,
                                 expenseService,
-                                timestampService,
-                                categoryService,
+                                expenseConvertor,
                                 singleFormatI18n
                         );
                         dialog.open();
@@ -141,7 +135,6 @@ public class ExpensesView extends Main {
     private void updateGrid() {
         logger.info("Updated Expense Table");
         String username = securityService.getAuthenticatedUser().getUsername();
-        System.out.println("Logged with user " + username);
         grid.setItems(expenseService.getAllExpensesByUser(username));
     }
 
