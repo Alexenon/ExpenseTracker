@@ -57,7 +57,7 @@ public class RegistrationView extends Main {
                 showSuccesfullNotification();
                 UI.getCurrent().navigate(LoginView.class);
             } else {
-                logger.warn("Submited Registration Form with validation errors");
+                logger.warn("Submitted Registration Form with validation errors");
                 showErrorNotification();
             }
         });

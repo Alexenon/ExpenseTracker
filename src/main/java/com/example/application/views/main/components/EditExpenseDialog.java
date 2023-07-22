@@ -166,22 +166,24 @@ public class EditExpenseDialog extends Dialog {
     private void defaultClickSaveBtnListener() {
         logger.info("Clicked on Save button inside `Edit Expense` form");
         if (binder.validate().isOk()) {
-            logger.info("Saved expense using data provided inside `Edit Expense` form");
-            ExpenseRequest expenseRequest = binder.getBean();
-            Expense expense = expenseConvertor.convertToExpense(expenseRequest);
-            expense.setId(expenseDTO.getId()); // updating
-
-            expenseService.saveExpense(expense);
+            logger.info("Updated the expense using data provided inside `Edit Expense` form");
+            expenseService.saveExpense(getExpenseFromBinder());
             showSuccesfullNotification();
             this.close();
         } else {
-            logger.warn("Submited `Edit Expense` form with validation errors");
+            logger.warn("Submitted `Edit Expense` form with validation errors");
             showErrorNotification();
         }
     }
 
     public void addClickSaveBtnListener(Consumer<ExpensesView> listener) {
         saveButton.addClickListener(e -> listener.accept(null));
+    }
+
+    private Expense getExpenseFromBinder() {
+        Expense expense = expenseConvertor.convertToExpense(binder.getBean());
+        expense.setId(expenseDTO.getId()); // Set id to replace existing expense with this one
+        return expense;
     }
 
     private void showSuccesfullNotification() {

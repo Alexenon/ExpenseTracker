@@ -155,9 +155,7 @@ public class AddExpenseDialog extends Dialog {
         logger.info("Clicked on Save button inside `Add New Expense` form");
         if (binder.validate().isOk()) {
             logger.info("Saved expense using data provided inside `Add New Expense` form");
-            ExpenseRequest expenseRequest = binder.getBean();
-            Expense expense = expenseConvertor.convertToExpense(expenseRequest);
-            expenseService.saveExpense(expense);
+            expenseService.saveExpense(getExpenseFromBinder());
             showSuccesfullNotification();
             this.close();
         } else {
@@ -168,6 +166,10 @@ public class AddExpenseDialog extends Dialog {
 
     public void addClickSaveBtnListener(Consumer<ExpensesView> listener) {
         saveButton.addClickListener(e -> listener.accept(null));
+    }
+
+    private Expense getExpenseFromBinder() {
+        return expenseConvertor.convertToExpense(binder.getBean());
     }
 
     private void showSuccesfullNotification() {

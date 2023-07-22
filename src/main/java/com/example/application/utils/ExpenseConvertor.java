@@ -6,11 +6,14 @@ import com.example.application.entities.Expense;
 import com.example.application.entities.Timestamp;
 import com.example.application.entities.User;
 import com.example.application.services.CategoryService;
+import com.example.application.services.SecurityService;
 import com.example.application.services.TimestampService;
 import com.example.application.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
+
+import java.util.Objects;
 
 @Component
 @RequiredArgsConstructor
@@ -19,6 +22,7 @@ public class ExpenseConvertor {
     private final UserService userService;
     private final TimestampService timestampService;
     private final CategoryService categoryService;
+    private final SecurityService securityService;
 
     public Expense convertToExpense(ExpenseRequest expenseRequest) {
         Expense expense = new Expense();
@@ -37,7 +41,9 @@ public class ExpenseConvertor {
         Category category = categoryService.getCategoryByName(categoryName);
         expense.setCategory(category);
 
-        String userEmailOrUsername = expenseRequest.getUserEmailOrUsername();
+        String userEmailOrUsername = Objects.requireNonNullElse(expenseRequest.getUserEmailOrUsername(),
+                securityService.getAuthenticatedUser().getUsername());
+
         User user = userService.findByUsernameOrEmailIgnoreCase(userEmailOrUsername)
                 .orElseThrow(() -> new UsernameNotFoundException("User with such username or email not found!"));
         expense.setUser(user);
