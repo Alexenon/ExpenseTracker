@@ -1,5 +1,6 @@
 package com.example.application.services;
 
+import com.example.application.dtos.Categories;
 import com.example.application.entities.Category;
 import com.example.application.repositories.CategoryRepository;
 import org.springframework.stereotype.Service;
@@ -22,4 +23,9 @@ public class CategoryService {
     public Category getCategoryByName(String name) {
         return repository.getByName(name);
     }
+
+    public Category getCategory(Categories category) {
+        return repository.getByName(category.name());
+    }
+
 }

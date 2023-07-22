@@ -104,6 +104,7 @@ public class ExpenseController {
 
     @GetMapping("/grouped")
     public List<Object[]> getExpensesTotalSumGroupedByCategory(
+            @RequestParam(value = "user") String userEmailOrUsername,
             @RequestParam(value = "year", required = false) Integer year,
             @RequestParam(value = "month", required = false) Integer month
     ) {
@@ -115,7 +116,7 @@ public class ExpenseController {
             month = LocalDate.now().getMonthValue();
         }
 
-        return expenseService.getMonthlyCategoriesTotalSum(year, month);
+        return expenseService.getMonthlyCategoriesTotalSum(userEmailOrUsername, year, month);
     }
 
 }

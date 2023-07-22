@@ -20,6 +20,10 @@ public class ExpenseService {
         return repository.getAll();
     }
 
+    public List<ExpenseDTO> getAllExpensesByUser(String userEmailOrUsername) {
+        return repository.getAll(userEmailOrUsername);
+    }
+
     public Expense saveExpense(Expense expense) {
         return repository.save(expense);
     }
@@ -66,8 +70,8 @@ public class ExpenseService {
         return repository.findExpensesPerYear(year);
     }
 
-    public List<Object[]> getMonthlyCategoriesTotalSum(int year, int month) {
-        return repository.findMonthlyCategoriesTotalSum(year, month);
+    public List<Object[]> getMonthlyCategoriesTotalSum(String userEmailOrUsername, int year, int month) {
+        return repository.findMonthlyCategoriesTotalSum(userEmailOrUsername, year, month);
     }
 
 }

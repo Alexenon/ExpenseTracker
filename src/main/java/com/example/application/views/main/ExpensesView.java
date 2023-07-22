@@ -1,9 +1,9 @@
 package com.example.application.views.main;
 
 import com.example.application.dtos.ExpenseDTO;
-import com.example.application.services.CategoryService;
 import com.example.application.services.ExpenseService;
-import com.example.application.services.TimestampService;
+import com.example.application.services.SecurityService;
+import com.example.application.utils.ExpenseConvertor;
 import com.example.application.views.main.components.AddExpenseDialog;
 import com.example.application.views.main.components.EditExpenseDialog;
 import com.example.application.views.main.layouts.MainLayout;
@@ -35,23 +35,23 @@ public class ExpensesView extends Main {
     private static final Logger logger = LoggerFactory.getLogger(ExpensesView.class);
 
     private final ExpenseService expenseService;
-    private final TimestampService timestampService;
-    private final CategoryService categoryService;
+    private final SecurityService securityService;
+    private final ExpenseConvertor expenseConvertor;
     private final DatePicker.DatePickerI18n singleFormatI18n;
 
     private final TextField filterText = new TextField();
     private final Grid<ExpenseDTO> grid = new Grid<>(ExpenseDTO.class);
 
     @Autowired
-    public ExpensesView(ExpenseService expenseService,
-                        TimestampService timestampService,
-                        CategoryService categoryService,
-                        DatePicker.DatePickerI18n singleFormatI18n) {
+    public ExpensesView(
+            ExpenseService expenseService,
+            SecurityService securityService,
+            ExpenseConvertor expenseConvertor,
+            DatePicker.DatePickerI18n singleFormatI18n) {
         this.expenseService = expenseService;
-        this.timestampService = timestampService;
-        this.categoryService = categoryService;
+        this.securityService = securityService;
+        this.expenseConvertor = expenseConvertor;
         this.singleFormatI18n = singleFormatI18n;
-
         addClassName("page-content");
         add(
                 getToolBar(),
@@ -70,7 +70,7 @@ public class ExpensesView extends Main {
         addBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         addBtn.addClickListener(event -> {
             logger.info("Clicked on Add button");
-            AddExpenseDialog dialog = new AddExpenseDialog(expenseService, timestampService, categoryService, singleFormatI18n);
+            AddExpenseDialog dialog = new AddExpenseDialog(expenseService, expenseConvertor, singleFormatI18n);
             dialog.open();
             dialog.addClickSaveBtnListener(grid -> updateGrid());
         });
@@ -96,8 +96,7 @@ public class ExpensesView extends Main {
                         EditExpenseDialog dialog = new EditExpenseDialog(
                                 expense,
                                 expenseService,
-                                timestampService,
-                                categoryService,
+                                expenseConvertor,
                                 singleFormatI18n
                         );
                         dialog.open();
@@ -132,9 +131,11 @@ public class ExpensesView extends Main {
         return grid;
     }
 
+    // TODO: Add to
     private void updateGrid() {
         logger.info("Updated Expense Table");
-        grid.setItems(expenseService.getAllExpenses());
+        String username = securityService.getAuthenticatedUser().getUsername();
+        grid.setItems(expenseService.getAllExpensesByUser(username));
     }
 
     private ConfirmDialog getConfirmationDialog(String text) {

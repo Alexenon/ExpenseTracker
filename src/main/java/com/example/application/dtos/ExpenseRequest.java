@@ -20,7 +20,9 @@ public class ExpenseRequest {
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate expiryDate;
 
-    private String timestamp;
+    private String timestampName;
 
-    private String category;
+    private String categoryName;
+
+    private String userEmailOrUsername;
 }

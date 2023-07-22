@@ -59,13 +59,20 @@ public class Expense {
     @Setter
     private Category category;
 
+    @NotNull
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    @Getter
+    @Setter
+    private User user;
+
     @Override
     public String toString() {
         DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         return String.format(
-                "%d, %s, %f, %s, %s, %s, %s, %s",
+                "%d, %s, %f, %s, %s, %s, %s, %s %s",
                 id, name, amount, timestamp.getName(), category.getName(),
-                dateFormat.format(date), description, dateFormat.format(expiryDate)
+                dateFormat.format(date), description, dateFormat.format(expiryDate), user.getUsername()
         );
     }
 

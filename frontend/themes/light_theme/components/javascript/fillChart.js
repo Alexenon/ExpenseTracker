@@ -55,10 +55,12 @@ window.getJsonData = async function getJsonData(url) {
  * Updates the pie chart with id = 'chart-pie'
  * with json data from http response on provided URL
  */
-window.fillChartPie = async function fillChartPie() {
+window.fillChartPie = async function fillChartPie(url) {
+  const jsonObject = await getJsonData(url);
   const dom = document.getElementById('chart-pie');
   const myChart = echarts.init(dom);
-  const jsonObject = await getJsonData('http://localhost:8080/api/expense/grouped');
+
+  const urlTest = 'http://localhost:8080/api/expense/grouped?user=' + 'alex'
 
   var option = {
     title: {

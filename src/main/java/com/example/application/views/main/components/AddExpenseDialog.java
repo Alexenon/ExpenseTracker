@@ -1,12 +1,10 @@
 package com.example.application.views.main.components;
 
+import com.example.application.dtos.Categories;
 import com.example.application.dtos.ExpenseRequest;
-import com.example.application.entities.Category;
+import com.example.application.dtos.Timestamps;
 import com.example.application.entities.Expense;
-import com.example.application.entities.Timestamp;
-import com.example.application.services.CategoryService;
 import com.example.application.services.ExpenseService;
-import com.example.application.services.TimestampService;
 import com.example.application.utils.ExpenseConvertor;
 import com.example.application.views.main.ExpensesView;
 import com.vaadin.flow.component.Component;
@@ -42,11 +40,8 @@ public class AddExpenseDialog extends Dialog {
     private static final Logger logger = LoggerFactory.getLogger(AddExpenseDialog.class);
 
     private final ExpenseService expenseService;
-    private final TimestampService timestampService;
-    private final CategoryService categoryService;
+    private final ExpenseConvertor expenseConvertor;
     private final DatePicker.DatePickerI18n singleFormatI18n;
-
-    private final Binder<ExpenseRequest> binder;
 
     private final TextField nameField = new TextField("Expense Name");
     private final TextArea descriptionField = new TextArea("Description");
@@ -58,20 +53,19 @@ public class AddExpenseDialog extends Dialog {
     private final Button saveButton = new Button("Save");
     private final Button cancelButton = new Button("Cancel");
 
+    private Binder<ExpenseRequest> binder;
+
     @Autowired
     public AddExpenseDialog(ExpenseService expenseService,
-                            TimestampService timestampService,
-                            CategoryService categoryService,
+                            ExpenseConvertor expenseConvertor,
                             DatePicker.DatePickerI18n singleFormatI18n) {
         this.expenseService = expenseService;
-        this.timestampService = timestampService;
-        this.categoryService = categoryService;
+        this.expenseConvertor = expenseConvertor;
         this.singleFormatI18n = singleFormatI18n;
 
         setHeaderTitle("Add New Expense");
+        initBinder();
         add(createDialogLayout());
-        binder = new Binder<>();
-        setupBinder();
         addStyleToElements();
     }
 
@@ -87,7 +81,8 @@ public class AddExpenseDialog extends Dialog {
         return dialogLayout;
     }
 
-    private void setupBinder() {
+    private void initBinder() {
+        binder = new Binder<>(ExpenseRequest.class);
         binder.setBean(new ExpenseRequest());
         binder.forField(nameField)
                 .asRequired("Please fill this field")
@@ -101,11 +96,11 @@ public class AddExpenseDialog extends Dialog {
 
         binder.forField(categoryField)
                 .asRequired("Please fill this field")
-                .bind(ExpenseRequest::getCategory, ExpenseRequest::setCategory);
+                .bind(ExpenseRequest::getCategoryName, ExpenseRequest::setCategoryName);
 
         binder.forField(intervalField)
                 .asRequired("Please fill this field")
-                .bind(ExpenseRequest::getTimestamp, ExpenseRequest::setTimestamp);
+                .bind(ExpenseRequest::getTimestampName, ExpenseRequest::setTimestampName);
 
         binder.forField(startDateField)
                 .asRequired("Please fill this field")
@@ -122,8 +117,8 @@ public class AddExpenseDialog extends Dialog {
     }
 
     private void addStyleToElements() {
-        List<String> timestampNames = timestampService.getAllTimestamps().stream().map(Timestamp::getName).toList();
-        List<String> categoryNames = categoryService.getAllCategories().stream().map(Category::getName).toList();
+        List<String> timestampNames = Arrays.stream(Timestamps.values()).map(Timestamps::toString).toList();
+        List<String> categoryNames = Arrays.stream(Categories.values()).map(Categories::toString).toList();
 
         intervalField.setLabel("Interval");
         intervalField.setItems(timestampNames);
@@ -160,10 +155,7 @@ public class AddExpenseDialog extends Dialog {
         logger.info("Clicked on Save button inside `Add New Expense` form");
         if (binder.validate().isOk()) {
             logger.info("Saved expense using data provided inside `Add New Expense` form");
-            ExpenseConvertor convertor = new ExpenseConvertor(timestampService, categoryService);
-            ExpenseRequest expenseRequest = binder.getBean();
-            Expense expense = convertor.convertToExpense(expenseRequest);
-            expenseService.saveExpense(expense);
+            expenseService.saveExpense(getExpenseFromBinder());
             showSuccesfullNotification();
             this.close();
         } else {
@@ -174,6 +166,10 @@ public class AddExpenseDialog extends Dialog {
 
     public void addClickSaveBtnListener(Consumer<ExpensesView> listener) {
         saveButton.addClickListener(e -> listener.accept(null));
+    }
+
+    private Expense getExpenseFromBinder() {
+        return expenseConvertor.convertToExpense(binder.getBean());
     }
 
     private void showSuccesfullNotification() {
