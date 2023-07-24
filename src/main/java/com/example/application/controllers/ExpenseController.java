@@ -5,6 +5,7 @@ import com.example.application.dtos.ExpenseRequest;
 import com.example.application.entities.Expense;
 import com.example.application.services.ExpenseService;
 import com.example.application.utils.ExpenseConvertor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -14,15 +15,11 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/expense")
+@RequiredArgsConstructor
 public class ExpenseController {
 
     private final ExpenseService expenseService;
     private final ExpenseConvertor expenseConvertor;
-
-    public ExpenseController(ExpenseService expenseService, ExpenseConvertor expenseConvertor) {
-        this.expenseService = expenseService;
-        this.expenseConvertor = expenseConvertor;
-    }
 
     @GetMapping("/all")
     public List<ExpenseDTO> getAllExpenses() {

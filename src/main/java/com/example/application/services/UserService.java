@@ -2,7 +2,7 @@ package com.example.application.services;
 
 import com.example.application.dtos.RegistrationUserDTO;
 import com.example.application.entities.User;
-import com.example.application.exceptions.UserAlreadyExistException;
+import com.example.application.exceptions.UserExistException;
 import com.example.application.repositories.RoleRepository;
 import com.example.application.repositories.UserRepository;
 import jakarta.transaction.Transactional;
@@ -61,7 +61,7 @@ public class UserService implements UserDetailsService {
 
     public User createNewUser(RegistrationUserDTO registrationUserDto) {
         if (findByUsernameIgnoreCase(registrationUserDto.getUsername()).isPresent()) {
-            throw new UserAlreadyExistException("There is already a user with this username");
+            throw new UserExistException("There is already a user with this username");
         }
 
         User user = new User();
@@ -74,10 +74,10 @@ public class UserService implements UserDetailsService {
 
     public User createNewUser(User user) {
         if (findByUsernameIgnoreCase(user.getUsername()).isPresent()) {
-            throw new UserAlreadyExistException("There is already a user with this username");
+            throw new UserExistException("There is already a user with this username");
         }
         if (findByEmailIgnoreCase(user.getEmail()).isPresent()) {
-            throw new UserAlreadyExistException("There is already a user with this email");
+            throw new UserExistException("There is already a user with this email");
         }
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));

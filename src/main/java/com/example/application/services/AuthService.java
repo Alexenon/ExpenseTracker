@@ -3,8 +3,9 @@ package com.example.application.services;
 import com.example.application.dtos.JwtRequest;
 import com.example.application.dtos.JwtResponse;
 import com.example.application.entities.User;
-import com.example.application.exceptions.UserAlreadyExistException;
+import com.example.application.exceptions.UserExistException;
 import com.example.application.utils.JwtTokenUtils;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,12 +40,14 @@ public class AuthService {
         return ResponseEntity.ok(new JwtResponse(token));
     }
 
-    public ResponseEntity<?> createNewUser(@RequestBody User user) {
+    public ResponseEntity<?> createNewUser(@Valid @RequestBody User user) {
         try {
-            return ResponseEntity.ok(user);
-        } catch (UserAlreadyExistException e) {
+            user = userService.createNewUser(user);
+        } catch (UserExistException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
+
+        return ResponseEntity.ok(user);
     }
 
 
