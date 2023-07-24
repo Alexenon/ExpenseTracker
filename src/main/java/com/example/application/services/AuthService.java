@@ -3,7 +3,7 @@ package com.example.application.services;
 import com.example.application.dtos.JwtRequest;
 import com.example.application.dtos.JwtResponse;
 import com.example.application.entities.User;
-import com.example.application.exceptions.AppError;
+import com.example.application.exceptions.UserAlreadyExistException;
 import com.example.application.utils.JwtTokenUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -31,10 +31,7 @@ public class AuthService {
             );
             authenticationManager.authenticate(authToken);
         } catch (BadCredentialsException e) {
-            return new ResponseEntity<>(
-                    new AppError(HttpStatus.UNAUTHORIZED.value(), "Wrong username or password"),
-                    HttpStatus.UNAUTHORIZED
-            );
+            return new ResponseEntity<>("Wrong username or password", HttpStatus.BAD_REQUEST);
         }
 
         UserDetails userDetails = userService.loadUserByUsername(authRequest.getUsername());
@@ -43,17 +40,12 @@ public class AuthService {
     }
 
     public ResponseEntity<?> createNewUser(@RequestBody User user) {
-        if (userService.findByUsernameIgnoreCase(user.getUsername()).isPresent()) {
-            return new ResponseEntity<>(
-                    new AppError(HttpStatus.BAD_REQUEST.value(), "There is already an user with such username"),
-                    HttpStatus.BAD_REQUEST
-            );
+        try {
+            return ResponseEntity.ok(user);
+        } catch (UserAlreadyExistException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
-
-        return ResponseEntity.ok(user);
     }
-
-
 
 
 }
