@@ -13,6 +13,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+// TODO: Use logged user to retrieve data,
+//  because this controller is ussed only by logged user
+
+
 @RestController
 @RequestMapping("/api/expense")
 @RequiredArgsConstructor

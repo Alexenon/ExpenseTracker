@@ -3,7 +3,6 @@ package com.example.application.controllers;
 import com.example.application.exceptions.UserExistException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -23,12 +22,13 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(getBody(request, e, HttpStatus.NOT_FOUND), HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler({
-            UserExistException.class,
-            UsernameNotFoundException.class,
-            BadCredentialsException.class
-    })
-    public ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException e, WebRequest request) {
+//    @ExceptionHandler({
+//            UserExistException.class,
+//            UsernameNotFoundException.class,
+//            BadCredentialsException.class
+//    })
+    @ExceptionHandler(UserExistException.class)
+    public ResponseEntity<Object> handleExceptionsBadRequest(MethodArgumentNotValidException e, WebRequest request) {
         return new ResponseEntity<>(getBody(request, e, HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
     }
 

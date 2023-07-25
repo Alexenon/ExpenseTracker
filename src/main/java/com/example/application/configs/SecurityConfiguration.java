@@ -44,7 +44,7 @@ public class SecurityConfiguration extends VaadinWebSecurity {
                     auth.requestMatchers("/images/**").permitAll();
                     auth.requestMatchers("/api/**").authenticated();
                     auth.requestMatchers("/private/**").authenticated();
-                    auth.requestMatchers("/admin/**").hasRole("ADMIN");
+                    auth.requestMatchers("/admin/**").hasAnyRole("ADMIN", "SUPER_ADMIN");
                 })
                 .formLogin(loginForm -> {
                     loginForm.loginPage(LOGIN_URL);
@@ -55,7 +55,8 @@ public class SecurityConfiguration extends VaadinWebSecurity {
                 .exceptionHandling(e -> {
                     e.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
                     e.accessDeniedPage(DENIED_PAGE_URL);
-                });
+                })
+                .httpBasic();
 
         super.configure(http);
         setLoginView(http, LoginView.class);
