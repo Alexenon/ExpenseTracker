@@ -22,6 +22,11 @@ public class UserController {
         userService.createNewUser(registrationUserDTO);
     }
 
+    @PostMapping("/plus")
+    public void createNewUser2(@Valid @RequestBody RegistrationUserDTO registrationUserDTO) {
+        userService.createNewUser2(registrationUserDTO);
+    }
+
     @PostMapping("/save")
     public void createNewUser(@Valid @RequestBody User user) {
         userService.createNewUser(user);

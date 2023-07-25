@@ -41,13 +41,8 @@ public class AuthService {
     }
 
     public ResponseEntity<?> createNewUser(@Valid @RequestBody User user) {
-        try {
-            user = userService.createNewUser(user);
-        } catch (UserExistException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
-
-        return ResponseEntity.ok(user);
+        User newUser = userService.createNewUser(user);
+        return ResponseEntity.ok(newUser);
     }
 
 
