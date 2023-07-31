@@ -1,8 +1,6 @@
 package com.example.application.configs;
 
 import com.example.application.services.UserService;
-import com.example.application.views.main.LoginView;
-import com.vaadin.flow.spring.security.VaadinWebSecurity;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
@@ -10,14 +8,14 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfiguration extends VaadinWebSecurity {
+public class ApiSecurityConfiguration {
 
     private static final String LOGIN_URL = "/login";
     private static final String LOGIN_PROCESSING_URL = "/login";
@@ -28,23 +26,18 @@ public class SecurityConfiguration extends VaadinWebSecurity {
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
 
-    public SecurityConfiguration(UserService userService, PasswordEncoder passwordEncoder) {
+    public ApiSecurityConfiguration(UserService userService, PasswordEncoder passwordEncoder) {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
     }
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        return http
                 .csrf().disable()
                 .authorizeHttpRequests(auth -> {
-                    auth.requestMatchers("/login", "/register").permitAll();
-                    auth.requestMatchers("/public/**").permitAll();
-                    auth.requestMatchers("/icons/**").permitAll();
-                    auth.requestMatchers("/images/**").permitAll();
                     auth.requestMatchers("/api/**").authenticated();
-                    auth.requestMatchers("/private/**").authenticated();
-                    auth.requestMatchers("/admin/**").hasRole("ADMIN");
+                    auth.anyRequest().permitAll();
                 })
                 .formLogin(loginForm -> {
                     loginForm.loginPage(LOGIN_URL);
@@ -55,15 +48,8 @@ public class SecurityConfiguration extends VaadinWebSecurity {
                 .exceptionHandling(e -> {
                     e.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
                     e.accessDeniedPage(DENIED_PAGE_URL);
-                });
-
-        super.configure(http);
-        setLoginView(http, LoginView.class);
-    }
-
-    @Override
-    public void configure(WebSecurity web) throws Exception {
-        super.configure(web);
+                })
+                .build();
     }
 
     @Bean
@@ -75,7 +61,8 @@ public class SecurityConfiguration extends VaadinWebSecurity {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfiguration) throws Exception {
+        return authConfiguration.getAuthenticationManager();
     }
+
 }
