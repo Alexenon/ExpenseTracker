@@ -142,6 +142,7 @@
   "@vaadin/vaadin-usage-statistics": "2.1.2",
   "@vaadin/vertical-layout": "24.0.3",
   "@vaadin/virtual-list": "24.0.3",
+  "construct-style-sheets-polyfill": "3.1.0",
   "cookieconsent": "3.1.1",
   "date-fns": "2.29.3",
   "highcharts": "9.2.2",
@@ -255,9 +256,10 @@
   "Frontend/generated/jar-resources/vaadin-map/mapConnector.js",
   "Frontend/generated/jar-resources/vaadin-time-picker/timepickerConnector.js",
   "Frontend/generated/jar-resources/virtualListConnector.js",
-  "Frontend/resources/js/fillChart.js"
+  "Frontend/themes/light_theme/components/javascript/fillChart.js"
  ],
  "frontendHashes": {
+  "themes/light_theme/components/javascript/fillChart.js": "b5a00cd87f902d0cae77bcfdca0117d207d6edd8ab979925f9eb72e682257aff",
   "style.css": "aea5ab4467be73fde149b6d7b58723d69758e96c1716e6b72b1a9e74b8eb56a8",
   "error-page.css": "5cfdfb2412ab6310ef17083e9b4b03ef5c0fc28b64841b08d5d5f89629543f8c",
   "resources/css/header_style.css": "71313bfd2d21f65f5e60bc8ca0737b389c9127b96c14a0e24669a9efc8fa9e1e",
@@ -283,9 +285,11 @@
   "vaadin-time-picker/timepickerConnector.js": "68889ce9748478f71bf1620d488abbbd588f8047618ac558315d9b0b689e75e8",
   "virtualListConnector.js": "e89f6bc6f5cd4765c863ae12721371ebff9079d163679e3989368fb7f74e5e61"
  },
- "themeJsonContents": {},
+ "themeJsonContents": {
+  "light_theme": "{\n  \"lumoImports\" : [ \"typography\", \"color\", \"spacing\", \"badge\", \"utility\" ]\n}"
+ },
  "entryScripts": [
-  "VAADIN/build/indexhtml-33754462.js"
+  "VAADIN/build/indexhtml-dfa3da81.js"
  ],
  "webComponents": [],
  "packageJsonHash": "e7f31c1be23da66c9632b284173867bf6f66fbbcedd9c79737ea06f38923e25c"
