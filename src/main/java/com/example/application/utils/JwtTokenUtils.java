@@ -46,8 +46,11 @@ public class JwtTokenUtils {
         return getAllClaimsFromToken(token).getSubject();
     }
 
-    public List<?> getRoles(String token) {
-        return getAllClaimsFromToken(token).get("roles", List.class);
+    public List<String> getRoles(String token) {
+        List<?> roles = getAllClaimsFromToken(token).get("roles", List.class);
+        return roles.stream()
+                .map(Object::toString)
+                .collect(Collectors.toList());
     }
 
     private Claims getAllClaimsFromToken(String token) {

@@ -2,14 +2,22 @@ package com.example.application.configs;
 
 import com.example.application.views.main.LoginView;
 import com.vaadin.flow.spring.security.VaadinWebSecurity;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.oauth2.jose.jws.JwsAlgorithms;
+
+import javax.crypto.spec.SecretKeySpec;
+import java.util.Base64;
 
 @Configuration
 @EnableWebSecurity
 public class VaadinSecurityConfiguration extends VaadinWebSecurity {
+
+    @Value("${jwt.secret}")
+    private String jwtSecret;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -25,6 +33,9 @@ public class VaadinSecurityConfiguration extends VaadinWebSecurity {
 
         super.configure(http);
         setLoginView(http, LoginView.class);
+
+        SecretKeySpec secretKey = new SecretKeySpec(Base64.getDecoder().decode(jwtSecret), JwsAlgorithms.HS256);
+        setStatelessAuthentication(http, secretKey, "com.example.application");
     }
 
     @Override
