@@ -34,6 +34,7 @@ header {
 .menu-item {
     position: relative;
     color: var(--color-black);
+    user-select: none;
 }
 
 .menu-item:where(:any-link):hover {
