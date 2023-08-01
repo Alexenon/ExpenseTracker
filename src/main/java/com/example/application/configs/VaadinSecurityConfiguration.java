@@ -10,6 +10,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.oauth2.jose.jws.JwsAlgorithms;
 
 import javax.crypto.spec.SecretKeySpec;
+import java.time.Duration;
 import java.util.Base64;
 
 @Configuration
@@ -19,12 +20,16 @@ public class VaadinSecurityConfiguration extends VaadinWebSecurity {
     @Value("${jwt.secret}")
     private String jwtSecret;
 
+    @Value ("${jwt.lifetime}")
+    private Duration jwtLifetime;
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .csrf().disable()
                 .authorizeHttpRequests(auth -> {
                     auth.requestMatchers("/login").permitAll();
+                    auth.requestMatchers("/test-login").permitAll();
                     auth.requestMatchers("/register").permitAll();
                     auth.requestMatchers("/public/**").permitAll();
                     auth.requestMatchers("/icons/**").permitAll();
@@ -35,7 +40,7 @@ public class VaadinSecurityConfiguration extends VaadinWebSecurity {
         setLoginView(http, LoginView.class);
 
         SecretKeySpec secretKey = new SecretKeySpec(Base64.getDecoder().decode(jwtSecret), JwsAlgorithms.HS256);
-        setStatelessAuthentication(http, secretKey, "com.example.application");
+        setStatelessAuthentication(http, secretKey, "com.example.application", jwtLifetime.toMillis());
     }
 
     @Override
