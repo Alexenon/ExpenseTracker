@@ -11,7 +11,6 @@ import jakarta.annotation.security.PermitAll;
 
 @PermitAll
 @PageTitle("Yearly expenses")
-@JsModule("./themes/light_theme/components/javascript/fillChart.js")
 @JsModule("./themes/light_theme/components/javascript/test.js")
 @Route(value = "yearly", layout = MainLayout.class)
 public class YearyExpensesView extends Main {

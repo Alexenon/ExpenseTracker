@@ -220,8 +220,8 @@
   "Frontend/themes/light_theme/components/javascript/test.js"
  ],
  "frontendHashes": {
-  "themes/light_theme/components/javascript/fillChart.js": "b958f15f8d5efaf559fb1c106445b40e9dff3d3b1e0e523faecd248c91d434bb",
-  "themes/light_theme/components/javascript/test.js": "ed4ef79954ab47198f17eceab35d17f4907c979961d61254bdc75137157a607b",
+  "themes/light_theme/components/javascript/fillChart.js": "4e111be7f20cb81596191ee6d964834a18093ad426ecdb9f67854dce2e293582",
+  "themes/light_theme/components/javascript/test.js": "bcee8fe9f7f853244951e393ba745ad1eb40d64f635d3ab1d4e13cc1ffd5f42a",
   "comboBoxConnector.js": "1d004c3dae9c76f8bcc68678abe1b8f7bdc8b456f5c9c4c7f190df8ed25d66cd",
   "contextMenuConnector.js": "25a200f8086461635ddd92316ebeb5a868294c8650a190efbae120edb1088f4f",
   "contextMenuTargetConnector.js": "870f67643988dd5618c247bd3c28d843f70aa026ee89f44c3c7556b5e70856af",
@@ -244,7 +244,7 @@
   "light_theme": "{\n  \"lumoImports\" : [ \"typography\", \"color\", \"spacing\", \"badge\", \"utility\" ]\n}"
  },
  "entryScripts": [
-  "VAADIN/build/indexhtml-a1adbe06.js"
+  "VAADIN/build/indexhtml-56d16e7e.js"
  ],
  "webComponents": [],
  "packageJsonHash": "a89b689ec344ccdc7b126a3605399c2171141918d2911a0efd1d21aa157c62b8"

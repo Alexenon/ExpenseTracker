@@ -165,6 +165,6 @@ function getElementByXPath(xpath, childXpath) {
   ).singleNodeValue;
 }
 
-window.greet = function greet(name) {
+export function greet(name) {
   console.log(`Hello, ${name}!`);
 }
