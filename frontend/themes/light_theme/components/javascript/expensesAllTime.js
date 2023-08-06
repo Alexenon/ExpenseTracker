@@ -5,6 +5,8 @@
 
 // DEMO CLASS
 
+// https://echarts.apache.org/examples/en/editor.html?c=line-gradient
+
 option = {
   dataset: {
     source: [

@@ -164,3 +164,7 @@ function getElementByXPath(xpath, childXpath) {
       null
   ).singleNodeValue;
 }
+
+window.greet = function greet(name) {
+  console.log(`Hello, ${name}!`);
+}
