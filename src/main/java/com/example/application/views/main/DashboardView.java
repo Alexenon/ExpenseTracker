@@ -15,7 +15,7 @@ import jakarta.annotation.security.PermitAll;
 @PermitAll
 @PageTitle("Dashboard")
 @Route(value = "dashboard", layout = MainLayout.class)
-@JsModule("./themes/light_theme/components/javascript/fillChart.js")
+@JsModule("./themes/light_theme/components/javascript/fillPieChart.js")
 @JavaScript("https://fastly.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js")
 public class DashboardView extends Main {
 
@@ -32,8 +32,8 @@ public class DashboardView extends Main {
         chartPie.setId("chart-pie");
 
         /* TODO: Fix fillPieChart URL */
-        UI.getCurrent().getPage().executeJs("fillChartPie('http://localhost:8080/api/expense/grouped?user=test')");
-        UI.getCurrent().getPage().executeJs("printMe('http://localhost:8080/api/expense/all')");
+        UI.getCurrent().getPage().executeJs("fillPie('http://localhost:8080/api/expense/grouped?user=coin')");
+        UI.getCurrent().getPage().executeJs("printData('http://localhost:8080/api/expense/all')");
 
         container.add(chartPie);
         add(container);
