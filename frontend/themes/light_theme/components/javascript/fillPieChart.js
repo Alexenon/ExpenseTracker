@@ -37,9 +37,22 @@ window.fillPie = async function fillPie(url) {
     },
     tooltip: {
       trigger: 'item',
+      className: 'tooltip',
       formatter(params) {
         // TODO: Upgrade this formatter to have DOM elements with classes
-        return `${params.marker}${params.name}: <b>${params.value} MDL</b> <div class="triangle"> (${params.percent}%) </div>`;
+//        return `${params.marker}${params.name}: ${params.value} MDL ${params.percent}%`;
+//        return `${params.marker}${params.name}: <b>${params.value} MDL</b> <p class="percent">(${params.percent}%) </p>`;
+
+            // FIXME: tooltip-category is not working!
+            return `
+                <div class="tooltip-content">
+                    ${params.marker}
+                    <p class="tooltip-category">${params.name}</p>
+                    <p class="tooltip-value">${params.value}</p>
+                    <p class="tooltip-currency">MDL</p>
+                    <div class="tooltip-percent">${params.percent}%</div>
+                </div>
+            `
       }
     },
     legend: {

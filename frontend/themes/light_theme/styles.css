@@ -41,3 +41,32 @@ img {
     margin-top: 20px;
     margin-left: 20px;
 }
+
+.tooltip-content {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.tooltip-value,
+.tooltip-currency {
+    font-weight: bold;
+}
+
+.tooltip-category::after {
+    content: ":";
+}
+
+.tooltip-percent {
+    color: #fff;
+    background-color: #4C5058;
+    padding: 3px 4px;
+    border-radius: 5px;
+}
+
+.tooltip-category,
+.tooltip-value,
+.tooltip-currency,
+.tooltip-percent {
+    margin-right: 5px;
+}
