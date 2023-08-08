@@ -11,12 +11,10 @@ const patternTooltip = '{name}: {value} MDL ({percent}%)';
  */
 function showChartDetails() {
     var chartElement = getElementByXPath(chartXpath + '//canvas');
-    var chartTextElement = getElementByXPath(chartXpath + '//div[last()]');
-
     chartElement.addEventListener('click', function() {
-        var text = chartTextElement.textContent;
-        var expenseName = getParamFormatter(text, patternTooltip, 1);
-        console.log(expenseName);
+        var elem = document.getElementById('selected-category');
+        var text = elem.textContent;
+        console.log(text);
     });
 }
 
@@ -39,20 +37,15 @@ window.fillPie = async function fillPie(url) {
       trigger: 'item',
       className: 'tooltip',
       formatter(params) {
-        // TODO: Upgrade this formatter to have DOM elements with classes
-//        return `${params.marker}${params.name}: ${params.value} MDL ${params.percent}%`;
-//        return `${params.marker}${params.name}: <b>${params.value} MDL</b> <p class="percent">(${params.percent}%) </p>`;
-
-            // FIXME: tooltip-category is not working!
-            return `
-                <div class="tooltip-content">
-                    ${params.marker}
-                    <p class="tooltip-category">${params.name}</p>
-                    <p class="tooltip-value">${params.value}</p>
-                    <p class="tooltip-currency">MDL</p>
-                    <div class="tooltip-percent">${params.percent}%</div>
-                </div>
-            `
+        return `
+            <div class="tooltip-content">
+                ${params.marker}
+                <p id="selected-category" class="tooltip-category">${params.name}</p>
+                <p class="tooltip-value">${params.value}</p>
+                <p class="tooltip-currency">MDL</p>
+                <div class="tooltip-percent">${params.percent}%</div>
+            </div>
+        `
       }
     },
     legend: {
