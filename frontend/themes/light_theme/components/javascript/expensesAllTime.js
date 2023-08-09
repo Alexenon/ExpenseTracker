@@ -1,11 +1,9 @@
-// https://echarts.apache.org/examples/en/editor.html?c=dataset-series-layout-by
 // https://echarts.apache.org/examples/en/editor.html?c=dataset-encode0
-// https://echarts.apache.org/examples/en/editor.html?c=dataset-link
 // https://echarts.apache.org/examples/en/editor.html?c=calendar-vertical
+// https://echarts.apache.org/examples/en/editor.html?c=line-gradient
+// https://echarts.apache.org/examples/en/editor.html?c=dataset-series-layout-by
 
 // DEMO CLASS
-
-// https://echarts.apache.org/examples/en/editor.html?c=line-gradient
 
 option = {
   dataset: {
@@ -29,8 +27,8 @@ option = {
     orient: 'horizontal',
     left: 'center',
     min: 0,
-    max: 100000,
-    text: ['High Score', 'Low Score'],
+    max: 100000, // TODO: map to max value from data[]
+    text: ['High Score', 'Low Score'], // TODO: Change text for min and max values
     dimension: 0,
     inRange: {
       color: ['#65B581', '#FFCE34', '#FD665F']
@@ -42,7 +40,27 @@ option = {
       encode: {
         x: 'amount',
         y: 'product'
+      },
+      // TODO: Add CURRENCY sign for tooltip and label
+      endLine: {
+        show: true,
+        formatter: '$'
+      },
+      // showBackground: true,
+      emphasis: {
+        label: {
+          show: true,
+          distance: 10,
+          fontStyle: 'oblique',
+          fontWeight: 'bolder',
+          fontFamily: 'Courier New',
+          fontSize: 25,
+          position: 'right'
+        }
       }
     }
   ]
 };
+
+
+

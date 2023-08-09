@@ -35,7 +35,7 @@ window.fillPie = async function fillPie(url) {
     },
     tooltip: {
       trigger: 'item',
-      className: 'tooltip',
+      className: 'chart-tooltip',
       formatter(params) {
         return `
             <div class="tooltip-content">
@@ -89,6 +89,13 @@ window.fillPie = async function fillPie(url) {
 
   option && myChart.setOption(option);
   showChartDetails();
+
+  // LISTENER FOR CLICKING ON SERIES PIE
+  myChart.on('click', 'series.pie', function (params) {
+//      console.log(params.data.name);
+    console.log(params);
+  });
+
 };
 
 // Printing data from getJsonData
