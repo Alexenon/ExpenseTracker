@@ -216,11 +216,13 @@
   "Frontend/generated/jar-resources/vaadin-grid-flow-selection-column.js",
   "Frontend/generated/jar-resources/vaadin-time-picker/timepickerConnector.js",
   "Frontend/generated/jar-resources/virtualListConnector.js",
+  "Frontend/themes/light_theme/components/javascript/expensesAllTime.js",
   "Frontend/themes/light_theme/components/javascript/fillPieChart.js"
  ],
  "frontendHashes": {
+  "themes/light_theme/components/javascript/expensesAllTime.js": "c7312285f216cdce04d77876de93e27fc2cb124b285e8eb9bb07e02c2c29d3cc",
   "themes/light_theme/components/javascript/utils.js": "1129730be2854be705af7ee57fa497c5fbc89a974689876ac40599bec1094d22",
-  "themes/light_theme/components/javascript/fillPieChart.js": "430e2c39481caecd4c82f567a9e9a63d608b16949678af9e3ecd60ad34664f1c",
+  "themes/light_theme/components/javascript/fillPieChart.js": "61e481e8866a330d874d1be0c9de7ae21c3d1ac20c24be8dddc204306a0ea876",
   "comboBoxConnector.js": "1d004c3dae9c76f8bcc68678abe1b8f7bdc8b456f5c9c4c7f190df8ed25d66cd",
   "contextMenuConnector.js": "25a200f8086461635ddd92316ebeb5a868294c8650a190efbae120edb1088f4f",
   "contextMenuTargetConnector.js": "870f67643988dd5618c247bd3c28d843f70aa026ee89f44c3c7556b5e70856af",
@@ -243,7 +245,7 @@
   "light_theme": "{\n  \"lumoImports\" : [ \"typography\", \"color\", \"spacing\", \"badge\", \"utility\" ]\n}"
  },
  "entryScripts": [
-  "VAADIN/build/indexhtml-45686f41.js"
+  "VAADIN/build/indexhtml-31e31f97.js"
  ],
  "webComponents": [],
  "packageJsonHash": "a89b689ec344ccdc7b126a3605399c2171141918d2911a0efd1d21aa157c62b8"

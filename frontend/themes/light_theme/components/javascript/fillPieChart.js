@@ -88,12 +88,13 @@ window.fillPie = async function fillPie(url) {
   }
 
   option && myChart.setOption(option);
+  window.addEventListener('resize', myChart.resize);
   showChartDetails();
 
   // LISTENER FOR CLICKING ON SERIES PIE
   myChart.on('click', 'series.pie', function (params) {
-//      console.log(params.data.name);
     console.log(params);
+    // console.log(params.data.name);
   });
 
 };
