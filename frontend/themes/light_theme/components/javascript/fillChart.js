@@ -60,7 +60,9 @@ window.fillChartPie = async function fillChartPie(url) {
   const dom = document.getElementById('chart-pie');
   const myChart = echarts.init(dom);
 
-  const urlTest = 'http://localhost:8080/api/expense/grouped?user=' + 'alex'
+  // DESIGN IDEAS FOR CHARTS
+  // https://echarts.apache.org/examples/en/editor.html?c=pie-nest - Black border
+  // https://echarts.apache.org/examples/en/editor.html?c=bar-nest - White border
 
   var option = {
     title: {
