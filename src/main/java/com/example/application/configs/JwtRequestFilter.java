@@ -24,6 +24,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class JwtRequestFilter extends OncePerRequestFilter {
 
+    /*
+    * TODO: Refactor doFilterInternal method
+    * */
+
     private final JwtTokenUtils jwtTokenUtils;
 
     @Override

@@ -3,7 +3,6 @@ package com.example.application.services;
 import com.example.application.dtos.JwtRequest;
 import com.example.application.dtos.JwtResponse;
 import com.example.application.entities.User;
-import com.example.application.exceptions.UserExistException;
 import com.example.application.utils.JwtTokenUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +18,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
+
+    /*
+     * TODO: Add this class implementation, which will be used for API
+     * */
 
     private final UserService userService;
     private final JwtTokenUtils jwtTokenUtils;
