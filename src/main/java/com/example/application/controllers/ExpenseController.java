@@ -5,6 +5,7 @@ import com.example.application.dtos.ExpenseRequest;
 import com.example.application.entities.Expense;
 import com.example.application.services.ExpenseService;
 import com.example.application.utils.ExpenseConvertor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -12,17 +13,17 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+// TODO: Use logged user to retrieve data,
+//  because this controller is ussed only by logged user
+
+
 @RestController
 @RequestMapping("/api/expense")
+@RequiredArgsConstructor
 public class ExpenseController {
 
     private final ExpenseService expenseService;
     private final ExpenseConvertor expenseConvertor;
-
-    public ExpenseController(ExpenseService expenseService, ExpenseConvertor expenseConvertor) {
-        this.expenseService = expenseService;
-        this.expenseConvertor = expenseConvertor;
-    }
 
     @GetMapping("/all")
     public List<ExpenseDTO> getAllExpenses() {
@@ -48,6 +49,13 @@ public class ExpenseController {
     public Expense saveExpense(@RequestBody ExpenseRequest expenseRequest) {
         Expense expense = expenseConvertor.convertToExpense(expenseRequest);
         return expenseService.saveExpense(expense);
+    }
+
+    @PostMapping("/post")
+    public String test(@RequestBody String s) {
+        System.out.println("We got to this method");
+        System.out.println("s = " + s);
+        return s;
     }
 
     @PutMapping("/update")
