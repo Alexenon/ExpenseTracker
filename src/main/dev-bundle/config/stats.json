@@ -14,6 +14,7 @@
   "@vaadin/component-base": "24.0.3",
   "@vaadin/confirm-dialog": "24.0.3",
   "@vaadin/context-menu": "24.0.3",
+  "@vaadin/cookie-consent": "24.0.3",
   "@vaadin/custom-field": "24.0.3",
   "@vaadin/date-picker": "24.0.3",
   "@vaadin/date-time-picker": "24.0.3",
@@ -81,6 +82,7 @@
   "@vaadin/component-base": "24.0.3",
   "@vaadin/confirm-dialog": "24.0.3",
   "@vaadin/context-menu": "24.0.3",
+  "@vaadin/cookie-consent": "24.0.3",
   "@vaadin/custom-field": "24.0.3",
   "@vaadin/date-picker": "24.0.3",
   "@vaadin/date-time-picker": "24.0.3",
@@ -128,6 +130,7 @@
   "@vaadin/vertical-layout": "24.0.3",
   "@vaadin/virtual-list": "24.0.3",
   "construct-style-sheets-polyfill": "3.1.0",
+  "cookieconsent": "3.1.1",
   "date-fns": "2.29.3",
   "lit-element": "3.3.2",
   "lit-html": "2.7.4",
@@ -150,6 +153,7 @@
   "@vaadin/common-frontend/ConnectionIndicator.js",
   "@vaadin/confirm-dialog/theme/lumo/vaadin-confirm-dialog.js",
   "@vaadin/context-menu/theme/lumo/vaadin-context-menu.js",
+  "@vaadin/cookie-consent/theme/lumo/vaadin-cookie-consent.js",
   "@vaadin/custom-field/theme/lumo/vaadin-custom-field.js",
   "@vaadin/date-picker/theme/lumo/vaadin-date-picker.js",
   "@vaadin/date-time-picker/theme/lumo/vaadin-date-time-picker.js",
@@ -202,6 +206,7 @@
   "Frontend/generated/jar-resources/comboBoxConnector.js",
   "Frontend/generated/jar-resources/contextMenuConnector.js",
   "Frontend/generated/jar-resources/contextMenuTargetConnector.js",
+  "Frontend/generated/jar-resources/cookieConsentConnector.js",
   "Frontend/generated/jar-resources/datepickerConnector.js",
   "Frontend/generated/jar-resources/dndConnector-es6.js",
   "Frontend/generated/jar-resources/flow-component-renderer.js",
@@ -220,12 +225,13 @@
   "Frontend/themes/light_theme/components/javascript/fillPieChart.js"
  ],
  "frontendHashes": {
-  "themes/light_theme/components/javascript/expensesAllTime.js": "c7312285f216cdce04d77876de93e27fc2cb124b285e8eb9bb07e02c2c29d3cc",
+  "themes/light_theme/components/javascript/expensesAllTime.js": "587887778fe287f94ac7bbf17fdb1b137153a01658bc83e6748fcffa10a66546",
   "themes/light_theme/components/javascript/utils.js": "1129730be2854be705af7ee57fa497c5fbc89a974689876ac40599bec1094d22",
-  "themes/light_theme/components/javascript/fillPieChart.js": "61e481e8866a330d874d1be0c9de7ae21c3d1ac20c24be8dddc204306a0ea876",
+  "themes/light_theme/components/javascript/fillPieChart.js": "e2f3953ced48ab22e9b521c28404fa11627c4d998e95ad5845adc14af04335a8",
   "comboBoxConnector.js": "1d004c3dae9c76f8bcc68678abe1b8f7bdc8b456f5c9c4c7f190df8ed25d66cd",
   "contextMenuConnector.js": "25a200f8086461635ddd92316ebeb5a868294c8650a190efbae120edb1088f4f",
   "contextMenuTargetConnector.js": "870f67643988dd5618c247bd3c28d843f70aa026ee89f44c3c7556b5e70856af",
+  "cookieConsentConnector.js": "cc362ee370ce0a48d6c0f6882a5faf7fefbda89ea7ac9f483b7b4d65eab9cdf5",
   "datepickerConnector.js": "84d25236e1e478c2e181a7881464ad75228a30ccd99d60f78186f0804b6a4a37",
   "dndConnector-es6.js": "d1923b7ec5655346bc130c7ce477d69eb3776417ddc942dd7f69fee1188e0ddf",
   "flow-component-renderer.js": "f45de3d78e4719c2eb7aa09b48ec758e1e44e171cd4ad545ac9e33c3623dcfb1",
@@ -245,8 +251,8 @@
   "light_theme": "{\n  \"lumoImports\" : [ \"typography\", \"color\", \"spacing\", \"badge\", \"utility\" ]\n}"
  },
  "entryScripts": [
-  "VAADIN/build/indexhtml-31e31f97.js"
+  "VAADIN/build/indexhtml-ba136c33.js"
  ],
  "webComponents": [],
- "packageJsonHash": "a89b689ec344ccdc7b126a3605399c2171141918d2911a0efd1d21aa157c62b8"
+ "packageJsonHash": "17d6095dc29cf737557e4724e812983a811492361419032daa73bcbbe413592c"
 }
