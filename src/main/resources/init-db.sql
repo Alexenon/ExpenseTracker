@@ -14,7 +14,7 @@ BEGIN
     SET currentMonth = MONTH(CURRENT_DATE);
 
     IF paramMonth = currentMonth THEN
-        SET days = DAY(dateParam);
+        SET days = DAY(NOW());
     ELSEIF paramMonth < currentMonth THEN
         SET days = DAY(LAST_DAY(dateParam));
     ELSE
