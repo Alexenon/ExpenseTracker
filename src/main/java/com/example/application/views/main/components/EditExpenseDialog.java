@@ -107,7 +107,7 @@ public class EditExpenseDialog extends Dialog {
 
         binder.forField(startDateField)
                 .asRequired("Please fill this field")
-                .bind(ExpenseRequest::getDate, ExpenseRequest::setDate);
+                .bind(ExpenseRequest::getStartDate, ExpenseRequest::setStartDate);
 
         binder.forField(expiryField)
                 .withValidator(
@@ -158,7 +158,7 @@ public class EditExpenseDialog extends Dialog {
         descriptionField.setValue(expenseDTO.getDescription());
         amountField.setValue(expenseDTO.getAmount());
         categoryField.setValue(expenseDTO.getCategory());
-        startDateField.setValue(expenseDTO.getDate());
+        startDateField.setValue(expenseDTO.getStartDate());
         intervalField.setValue(expenseDTO.getTimestamp());
         expiryField.setValue(expenseDTO.getExpireDate());
     }

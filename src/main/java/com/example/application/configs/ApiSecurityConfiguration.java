@@ -35,7 +35,7 @@ public class ApiSecurityConfiguration {
         return http
                 .csrf().disable()
                 .authorizeHttpRequests(auth -> {
-                    auth.requestMatchers("/api/**").authenticated();
+//                    auth.requestMatchers("/api/**").authenticated();
                     auth.anyRequest().permitAll();
                 })
                 .formLogin(loginForm -> {

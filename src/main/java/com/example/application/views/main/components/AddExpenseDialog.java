@@ -104,7 +104,7 @@ public class AddExpenseDialog extends Dialog {
 
         binder.forField(startDateField)
                 .asRequired("Please fill this field")
-                .bind(ExpenseRequest::getDate, ExpenseRequest::setDate);
+                .bind(ExpenseRequest::getStartDate, ExpenseRequest::setStartDate);
 
         binder.forField(expiryField)
                 .withValidator(
