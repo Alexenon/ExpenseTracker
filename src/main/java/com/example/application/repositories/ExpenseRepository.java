@@ -22,6 +22,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
     List<ExpenseDTO> getAll();
 
 
+    // TODO: LIKE is not best decision
     @Query(value = """
             SELECT E.id, E.name, E.amount, C.name as 'Category',
                 E.description, T.name as 'Timestamp', E.start_date
