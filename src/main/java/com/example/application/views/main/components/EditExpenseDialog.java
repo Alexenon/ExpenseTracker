@@ -182,7 +182,7 @@ public class EditExpenseDialog extends Dialog {
 
     private Expense getExpenseFromBinder() {
         Expense expense = expenseConvertor.convertToExpense(binder.getBean());
-        expense.setId(expenseDTO.getId()); // Set id to replace existing expense with this one
+        expense.setId(expenseDTO.getId()); // ID is set for replacing existing expense with this one
         return expense;
     }
 

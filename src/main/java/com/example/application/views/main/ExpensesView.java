@@ -131,7 +131,6 @@ public class ExpensesView extends Main {
         return grid;
     }
 
-    // TODO: Add to
     private void updateGrid() {
         logger.info("Updated Expense Table");
         String username = securityService.getAuthenticatedUser().getUsername();

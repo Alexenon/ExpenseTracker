@@ -21,10 +21,9 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
             """, nativeQuery = true)
     List<ExpenseDTO> getAll();
 
-
     @Query(value = """
             SELECT E.id, E.name, E.amount, C.name as 'Category',
-                E.description, T.name as 'Timestamp', E.start_date
+                E.description, T.name as 'Timestamp', E.start_date as 'startDate', E.expiry_date as 'expireDate'
             FROM expense E
                 INNER JOIN users U ON U.id = E.user_id
                 INNER JOIN category C ON C.id = E.category_id
