@@ -39,7 +39,7 @@ public class ExpenseService {
         expenseToUpdate.setName(expense.getName());
         expenseToUpdate.setAmount(expense.getAmount());
         expenseToUpdate.setDescription(expense.getDescription());
-        expenseToUpdate.setDate(expense.getExpiryDate());
+        expenseToUpdate.setStartDate(expense.getExpireDate());
         expenseToUpdate.setTimestamp(expense.getTimestamp());
         expenseToUpdate.setCategory(expense.getCategory());
 

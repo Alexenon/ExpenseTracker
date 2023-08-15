@@ -18,7 +18,7 @@ public interface ExpenseDTO {
     String getTimestamp();
 
     @JsonFormat(pattern = "yyyy-MM-dd")
-    LocalDate getDate();
+    LocalDate getStartDate();
 
     @JsonFormat(pattern = "yyyy-MM-dd")
     LocalDate getExpireDate();

@@ -15,10 +15,10 @@ public class ExpenseRequest {
     private String description;
 
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate date;
+    private LocalDate startDate;
 
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate expiryDate;
+    private LocalDate expireDate;
 
     private String timestampName;
 
