@@ -30,7 +30,7 @@ public class ExpenseConvertor {
         expense.setName(expenseRequest.getName());
         expense.setAmount(expenseRequest.getAmount());
         expense.setStartDate(expenseRequest.getStartDate());
-        expense.setExpiryDate(expenseRequest.getExpiryDate());
+        expense.setExpireDate(expenseRequest.getExpireDate());
         expense.setDescription(expenseRequest.getDescription());
 
         String timestampName = expenseRequest.getTimestampName();
