@@ -49,7 +49,7 @@ public class EditExpenseDialog extends Dialog {
     private final Select<String> intervalField = new Select<>();
     private final ComboBox<String> categoryField = new ComboBox<>("Category");
     private final DatePicker startDateField = new DatePicker("Start Date");
-    private final DatePicker expiryField = new DatePicker("Expiry Date");
+    private final DatePicker expireDateField = new DatePicker("Expire Date");
     private final Button saveButton = new Button("Save");
     private final Button cancelButton = new Button("Cancel");
 
@@ -73,7 +73,7 @@ public class EditExpenseDialog extends Dialog {
     }
 
     private VerticalLayout createDialogLayout() {
-        Component[] components = {nameField, descriptionField, amountField, categoryField, startDateField, intervalField, expiryField};
+        Component[] components = {nameField, descriptionField, amountField, categoryField, startDateField, intervalField, expireDateField};
         VerticalLayout dialogLayout = new VerticalLayout(components);
         dialogLayout.setPadding(false);
         dialogLayout.setSpacing(false);
@@ -109,12 +109,12 @@ public class EditExpenseDialog extends Dialog {
                 .asRequired("Please fill this field")
                 .bind(ExpenseRequest::getStartDate, ExpenseRequest::setStartDate);
 
-        binder.forField(expiryField)
+        binder.forField(expireDateField)
                 .withValidator(
                         expireDate -> expireDate == null || expireDate.isAfter(startDateField.getValue()),
                         "Expire date should be after start date"
                 )
-                .bind(ExpenseRequest::getExpiryDate, ExpenseRequest::setExpiryDate);
+                .bind(ExpenseRequest::getExpireDate, ExpenseRequest::setExpireDate);
 
         binder.bind(descriptionField, ExpenseRequest::getDescription, ExpenseRequest::setDescription);
     }
@@ -126,7 +126,7 @@ public class EditExpenseDialog extends Dialog {
         intervalField.setLabel("Interval");
         intervalField.setItems(timestampNames);
         intervalField.setHelperText("Select how often this expense will be triggered");
-        intervalField.addValueChangeListener(e -> expiryField.setEnabled(!Objects.equals(e.getValue(), "ONCE")));
+        intervalField.addValueChangeListener(e -> expireDateField.setEnabled(!Objects.equals(e.getValue(), "ONCE")));
 
         categoryField.setItems(categoryNames);
         categoryField.setHelperText("Select the category which fits this expense");
@@ -135,11 +135,11 @@ public class EditExpenseDialog extends Dialog {
         startDateField.setI18n(singleFormatI18n);
         startDateField.setHelperText("Format: YYYY-MM-DD");
 
-        expiryField.setEnabled(false); // Expiry date field initial is disabled
-        expiryField.setI18n(singleFormatI18n);
-        expiryField.setTooltipText("Select expire date");
-        expiryField.setPlaceholder("Optional: Choose expire date");
-        expiryField.setHelperText("Format: YYYY-MM-DD");
+        expireDateField.setEnabled(false); // Expire date field initial is disabled
+        expireDateField.setI18n(singleFormatI18n);
+        expireDateField.setTooltipText("Select expire date");
+        expireDateField.setPlaceholder("Optional: Choose expire date");
+        expireDateField.setHelperText("Format: YYYY-MM-DD");
 
         cancelButton.addClickShortcut(Key.ESCAPE);
         cancelButton.addClickListener(e -> {
@@ -160,7 +160,7 @@ public class EditExpenseDialog extends Dialog {
         categoryField.setValue(expenseDTO.getCategory());
         startDateField.setValue(expenseDTO.getStartDate());
         intervalField.setValue(expenseDTO.getTimestamp());
-        expiryField.setValue(expenseDTO.getExpireDate());
+        expireDateField.setValue(expenseDTO.getExpireDate());
     }
 
     private void defaultClickSaveBtnListener() {
@@ -182,7 +182,7 @@ public class EditExpenseDialog extends Dialog {
 
     private Expense getExpenseFromBinder() {
         Expense expense = expenseConvertor.convertToExpense(binder.getBean());
-        expense.setId(expenseDTO.getId()); // Set id to replace existing expense with this one
+        expense.setId(expenseDTO.getId()); // ID is set for replacing existing expense with this one
         return expense;
     }
 
