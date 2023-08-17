@@ -36,59 +36,34 @@ DELIMITER ;
 
 DELIMITER //
 
-CREATE FUNCTION IF NOT EXISTS DaysBetweenMonthly(dateParam DATE, expireDate DATE)
+CREATE FUNCTION DaysBetweenMonthly(dateParam DATE, startDate DATE, expireDate DATE)
 RETURNS INT
 READS SQL DATA
 BEGIN
+	DECLARE result INT;
     DECLARE daysPassed INT;
-    DECLARE result INT;
+    DECLARE startedSameMonthAndYear BOOLEAN;
+    DECLARE expireSameMonthAndYear BOOLEAN;
 
-    DECLARE areSameMonthAndYear BOOLEAN;
-
-    SET areSameMonthAndYear = (YEAR(dateParam) = YEAR(expireDate) AND MONTH(dateParam) = MONTH(expireDate));
     SET daysPassed = DaysPassedInMonth(dateParam);
-
-    IF areSameMonthAndYear THEN
-        IF DAY(expireDate) >= daysPassed THEN
-            SET result = daysPassed;
-        ELSE
-            SET result = DAY(expireDate);
-        END IF;
-    ELSEIF expireDate <= dateParam THEN
-        SET result = 0;
-    ELSE
-        SET result = daysPassed;
-    END IF;
-
-    RETURN result;
-END //
-
-DELIMITER ;
-
------------------------------------------------- [DaysBetweenMonthly] --------------------------------------------------
-
-DELIMITER //
-
-DROP function DaysBetweenMonthly;
-
-CREATE FUNCTION IF NOT EXISTS DaysBetweenMonthly(dateParam DATE, expireDate DATE)
-RETURNS INT
-READS SQL DATA
-BEGIN
-    DECLARE daysPassed INT;
-    DECLARE result INT;
-    DECLARE areSameMonthAndYear BOOLEAN;
-
-    SET areSameMonthAndYear = (YEAR(dateParam) = YEAR(expireDate) AND MONTH(dateParam) = MONTH(expireDate));
-    SET daysPassed = DaysPassedInMonth(dateParam);
+	SET startedSameMonthAndYear = YEAR(dateParam) = YEAR(startDate) AND MONTH(dateParam) = MONTH(startDate);
+    SET expireSameMonthAndYear = YEAR(dateParam) = YEAR(expireDate) AND MONTH(dateParam) = MONTH(expireDate);
 
     IF expireDate <= dateParam THEN
         SET result = 0;
-    ELSEIF areSameMonthAndYear THEN
-        IF DAY(expireDate) >= daysPassed THEN
-            SET result = daysPassed;
+	ELSEIF startedSameMonthAndYear AND NOT expireSameMonthAndYear THEN
+		SET result = daysPassed - DAY(startDate) + 1;
+    ELSEIF expireSameMonthAndYear THEN
+		IF DAY(expireDate) <= daysPassed THEN
+			IF startedSameMonthAndYear THEN
+				SET result = DATEDIFF(expireDate, startDate);
+			ELSE
+				SET result = DAY(expireDate) - 1;
+			END IF;
+		ELSEIF startedSameMonthAndYear THEN
+			SET result = daysPassed - DAY(startDate) + 1;
         ELSE
-            SET result = DATEDIFF(expireDate, dateParam);
+            SET result = daysPassed;
         END IF;
     ELSE
         SET result = daysPassed;
@@ -100,5 +75,6 @@ END //
 DELIMITER ;
 
 ------------------------------------------------ [] --------------------------------------------------
+
 
 
