@@ -1,8 +1,12 @@
 package com.example.application.views.exception_views;
 
+import com.vaadin.flow.router.PageTitle;
+import jakarta.annotation.security.PermitAll;
 import jakarta.servlet.http.HttpServletResponse;
 
-class NullPointerExceptionView extends ExceptionView<NullPointerException> {
+@PermitAll
+@PageTitle("Not Found")
+public class NullPointerExceptionView extends ExceptionView<NullPointerException> {
     @Override
     protected int httpStatus() {
         return HttpServletResponse.SC_NOT_FOUND;

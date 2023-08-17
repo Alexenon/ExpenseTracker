@@ -1,9 +1,13 @@
 package com.example.application.views.exception_views;
 
 import com.vaadin.flow.router.NotFoundException;
+import com.vaadin.flow.router.PageTitle;
+import jakarta.annotation.security.PermitAll;
 import jakarta.servlet.http.HttpServletResponse;
 
-class NotFoundView extends ExceptionView<NotFoundException> {
+@PermitAll
+@PageTitle("Not Found")
+public class NotFoundView extends ExceptionView<NotFoundException> {
     @Override
     protected int httpStatus() {
         return HttpServletResponse.SC_NOT_FOUND;
