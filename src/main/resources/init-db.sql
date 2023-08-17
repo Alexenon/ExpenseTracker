@@ -36,6 +36,39 @@ DELIMITER ;
 
 DELIMITER //
 
+CREATE FUNCTION IF NOT EXISTS DaysBetweenMonthly(dateParam DATE, expireDate DATE)
+RETURNS INT
+READS SQL DATA
+BEGIN
+    DECLARE daysPassed INT;
+    DECLARE result INT;
+
+    DECLARE areSameMonthAndYear BOOLEAN;
+
+    SET areSameMonthAndYear = (YEAR(dateParam) = YEAR(expireDate) AND MONTH(dateParam) = MONTH(expireDate));
+    SET daysPassed = DaysPassedInMonth(dateParam);
+
+    IF areSameMonthAndYear THEN
+        IF DAY(expireDate) >= daysPassed THEN
+            SET result = daysPassed;
+        ELSE
+            SET result = DAY(expireDate);
+        END IF;
+    ELSEIF expireDate <= dateParam THEN
+        SET result = 0;
+    ELSE
+        SET result = daysPassed;
+    END IF;
+
+    RETURN result;
+END //
+
+DELIMITER ;
+
+------------------------------------------------ [DaysBetweenMonthly] --------------------------------------------------
+
+DELIMITER //
+
 DROP function DaysBetweenMonthly;
 
 CREATE FUNCTION IF NOT EXISTS DaysBetweenMonthly(dateParam DATE, expireDate DATE)
@@ -67,4 +100,5 @@ END //
 DELIMITER ;
 
 ------------------------------------------------ [] --------------------------------------------------
+
 
