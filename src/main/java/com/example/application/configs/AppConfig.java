@@ -1,4 +1,4 @@
-package com.example.application;
+package com.example.application.configs;
 
 import com.vaadin.flow.component.datepicker.DatePicker;
 import org.springframework.context.annotation.Bean;

@@ -38,12 +38,12 @@ public class Expense {
     @Getter
     @Setter
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate date;
+    private LocalDate startDate;
 
     @Getter
     @Setter
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate expiryDate;
+    private LocalDate expireDate;
 
     @NotNull
     @ManyToOne
@@ -72,7 +72,7 @@ public class Expense {
         return String.format(
                 "%d, %s, %f, %s, %s, %s, %s, %s %s",
                 id, name, amount, timestamp.getName(), category.getName(),
-                dateFormat.format(date), description, dateFormat.format(expiryDate), user.getUsername()
+                dateFormat.format(startDate), description, dateFormat.format(expireDate), user.getUsername()
         );
     }
 
