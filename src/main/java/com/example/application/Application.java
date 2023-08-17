@@ -18,6 +18,8 @@ public class Application extends SpringBootServletInitializer implements AppShel
         SpringApplication.run(Application.class, args);
     }
 
+    // TODO: Move this into AppConfig
+    //  Rename AppConfig after
     @Override
     public void configurePage(AppShellSettings settings) {
         settings.addLink("shortcut icon", "icons/icon.png");
