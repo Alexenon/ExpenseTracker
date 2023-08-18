@@ -65,23 +65,25 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 
     @Query(value = """
             SELECT C.name, SUM(
-                CASE
-                    WHEN T.name = 'DAILY' THEN E.amount * DAY(LAST_DAY(month_date))
-                    WHEN T.name = 'WEEKLY' THEN E.amount * FLOOR(DAY(LAST_DAY(month_date)) / 7)
-                    WHEN T.name = 'MONTHLY' THEN E.amount
-                    ELSE E.amount
-                END
-            ) as totalSpent
+            	CASE
+            		WHEN T.name = 'DAILY' THEN FLOOR(E.amount * days)
+            		WHEN T.name = 'WEEKLY' THEN FLOOR(E.amount * (days / 7))
+            		WHEN T.name = 'MONTHLY' THEN FLOOR(E.amount)
+            		ELSE FLOOR(E.amount)
+            	END
+            ) as totalSpentPerMonth
             FROM (
-                SELECT E.*, DATE_FORMAT(CONCAT(?2, '-', ?3, '-01'), '%Y-%m-%d') AS month_date
+                SELECT E.*,
+                    MonthValidDays(DATE_FORMAT(CONCAT(?2, '-', ?3, '-01'), '%Y-%m-%d'), E.start_date, E.expire_date) as `days`
                 FROM expense E
-                WHERE E.start_date <= LAST_DAY(CONCAT(?2, '-', ?3, '-01'))
             ) AS E
-                INNER JOIN users U ON U.id = E.user_id
-                INNER JOIN category C ON C.id = E.category_id
-                INNER JOIN timestamp T ON T.id = E.timestamp_id
-            WHERE (E.expire_date IS NULL OR E.expire_date > month_date)
-                AND (U.username = ?1 OR U.email = ?1)
+            INNER JOIN users U ON U.id = E.user_id
+            INNER JOIN timestamp T ON T.id = E.timestamp_id
+            INNER JOIN category C ON C.id = E.category_id
+            WHERE
+                (U.username = ?1 OR U.email = ?1)
+                AND NOT (T.name = 'ONCE' AND MONTH(E.start_date) != ?3)
+                AND (E.expire_date IS NULL OR E.expire_date > DATE_FORMAT(CONCAT(?2, '-', ?3, '-01'), '%Y-%m-%d'))
             GROUP BY C.name
             """, nativeQuery = true)
     List<Object[]> findMonthlyCategoriesTotalSum(String userEmailOrUsername, int year, int month);

@@ -32,15 +32,15 @@ END //
 
 DELIMITER ;
 
------------------------------------------------- [DaysBetweenMonthly] --------------------------------------------------
+------------------------------------------------ [MonthValidDays] --------------------------------------------------
 
 USE expenses;
 
-DROP FUNCTION IF EXISTS DaysBetweenMonthly;
+DROP FUNCTION IF EXISTS MonthValidDays;
 
 DELIMITER //
 
-CREATE FUNCTION DaysBetweenMonthly(dateParam DATE, startDate DATE, expireDate DATE)
+CREATE FUNCTION MonthValidDays(dateParam DATE, startDate DATE, expireDate DATE)
 RETURNS INT
 READS SQL DATA
 BEGIN
@@ -80,18 +80,18 @@ DELIMITER ;
 
 
 SELECT
-    DaysBetweenMonthly('2023-08-01', '2023-08-18', NULL) as 'Result 1', -- starts today(update start date)
-	DaysBetweenMonthly('2023-08-01', '2023-08-10', '2023-08-05') as 'Result 0', -- expired before start_date
-    DaysBetweenMonthly('2023-08-01', '2023-08-01', '2023-08-01') as 'Result 0', -- starts, expires same day
-    DaysBetweenMonthly('2023-08-01', '2023-08-10', '2020-01-01') as 'Result 0', -- expired ago
-    DaysBetweenMonthly('2023-08-01', '2022-01-01', '2023-08-10') as 'Result 9', -- expired recently, started ago
-    DaysBetweenMonthly('2023-08-01', '2023-08-10', '2023-08-15') as 'Result 5', -- expired recently, started this month
-    DaysBetweenMonthly('2023-08-01', '2023-08-01', '2023-08-31') as 'Result DAYS', -- starts, expires soon
-    DaysBetweenMonthly('2023-08-01', '2023-02-02', '2023-08-31') as 'Result DAYS', -- starts ago, expires soon
-    DaysBetweenMonthly('2023-08-01', '2023-02-02', '2024-12-31') as 'Result DAYS', -- starts ago, expires late
-	DaysBetweenMonthly('2023-08-01', '2023-08-01', NULL) as 'Result DAYS', -- starts this month without expiration
-    DaysBetweenMonthly('2023-08-01', '2023-08-08', NULL) as 'Result DAYS-7', -- starts this month without expiration
-    DaysBetweenMonthly('2023-08-01', '2022-01-01', NULL) as 'Result DAYS' -- starts ago without expiration
+    MonthValidDays('2023-08-01', '2023-08-18', NULL) as 'Result 1', -- starts today(update start date)
+	MonthValidDays('2023-08-01', '2023-08-10', '2023-08-05') as 'Result 0', -- expired before start_date
+    MonthValidDays('2023-08-01', '2023-08-01', '2023-08-01') as 'Result 0', -- starts, expires same day
+    MonthValidDays('2023-08-01', '2023-08-10', '2020-01-01') as 'Result 0', -- expired ago
+    MonthValidDays('2023-08-01', '2022-01-01', '2023-08-10') as 'Result 9', -- expired recently, started ago
+    MonthValidDays('2023-08-01', '2023-08-10', '2023-08-15') as 'Result 5', -- expired recently, started this month
+    MonthValidDays('2023-08-01', '2023-08-01', '2023-08-31') as 'Result DAYS', -- starts, expires soon
+    MonthValidDays('2023-08-01', '2023-02-02', '2023-08-31') as 'Result DAYS', -- starts ago, expires soon
+    MonthValidDays('2023-08-01', '2023-02-02', '2024-12-31') as 'Result DAYS', -- starts ago, expires late
+	MonthValidDays('2023-08-01', '2023-08-01', NULL) as 'Result DAYS', -- starts this month without expiration
+    MonthValidDays('2023-08-01', '2023-08-08', NULL) as 'Result DAYS-7', -- starts this month without expiration
+    MonthValidDays('2023-08-01', '2022-01-01', NULL) as 'Result DAYS' -- starts ago without expiration
 ;
 
 ------------------------------------------------ [] --------------------------------------------------

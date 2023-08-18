@@ -32,7 +32,7 @@ public class DashboardView extends Main {
         chartPie.setId("chart-pie");
 
         /* TODO: Fix fillPieChart URL */
-        UI.getCurrent().getPage().executeJs("fillPie('http://localhost:8080/api/expense/grouped?user=coin')");
+        UI.getCurrent().getPage().executeJs("fillPie('http://localhost:8080/api/expense/grouped?user=alex')");
         UI.getCurrent().getPage().executeJs("printData('http://localhost:8080/api/expense/all')");
 
         container.add(chartPie);
