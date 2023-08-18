@@ -1,35 +1,69 @@
-// https://echarts.apache.org/examples/en/editor.html?c=dataset-series-layout-by
-// https://echarts.apache.org/examples/en/editor.html?c=dataset-encode0
-// https://echarts.apache.org/examples/en/editor.html?c=dataset-link
-// https://echarts.apache.org/examples/en/editor.html?c=calendar-vertical
+/**
+ * This function displays information about all expenses stored
+ * and displays them using a chart.
+ */
+window.fillChart = function fillChart() {
+    var chartDom = document.getElementById('yearly-chart');
+    var myChart = echarts.init(chartDom);
 
-option = {
-  legend: {},
-  tooltip: {},
-  dataset: {
-    source: [
-      ['product', '2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2023'],
-      ['Matcha Latte', 41.1, 30.4, 65.1, 53.3, 86.5, 92.1, 85.7, 83.1],
-      ['Milk Tea', 86.5, 92.1, 85.7, 83.1, 86.5, 92.1, 85.7, 83.1],
-      ['Cheese Cocoa', 24.1, 67.2, 79.5, 86.4, 24.1, 67.2, 79.5, 86.4],
-      ['True', 24.1, 67.2, 79.5, 86.4]
-    ]
-  },
-  xAxis: [
-    { type: 'category', gridIndex: 0 },
-    { type: 'category', gridIndex: 1 }
-  ],
-  yAxis: [{ gridIndex: 0 }, { gridIndex: 1 }],
-  grid: [{ bottom: '55%' }, { top: '55%' }],
-  series: [
-    // These series are in the first grid.
-    { type: 'bar', seriesLayoutBy: 'row' },
-    { type: 'bar', seriesLayoutBy: 'row' },
-    { type: 'bar', seriesLayoutBy: 'row' },
-    // These series are in the second grid.
-    { type: 'bar', xAxisIndex: 1, yAxisIndex: 1 },
-    { type: 'bar', xAxisIndex: 1, yAxisIndex: 1 },
-    { type: 'bar', xAxisIndex: 1, yAxisIndex: 1 },
-    { type: 'bar', xAxisIndex: 1, yAxisIndex: 1 }
-  ]
-};
+    var option = {
+      dataset: {
+        source: [
+          ['amount', 'product'],
+          [58212, 'Matcha Latte'],
+          [78254, 'Milk Tea'],
+          [41032, 'Cheese Cocoa'],
+          [12755, 'Cheese Brownie'],
+          [20145, 'Matcha Cocoa'],
+          [79146, 'Tea'],
+          [91852, 'Orange Juice'],
+          [101852, 'Lemon Juice'],
+          [20112, 'Walnut Brownie']
+        ]
+      },
+      grid: { containLabel: true },
+      xAxis: { name: 'amount' },
+      yAxis: { type: 'category' },
+      visualMap: {
+        orient: 'horizontal',
+        left: 'center',
+        min: 0,
+        max: 100000, // TODO: map to max value from data[]
+        text: ['High Score', 'Low Score'], // TODO: Change text for min and max values
+        dimension: 0,
+        inRange: {
+          color: ['#65B581', '#FFCE34', '#FD665F']
+        }
+      },
+      series: [
+        {
+          type: 'bar',
+          encode: {
+            x: 'amount',
+            y: 'product'
+          },
+          // TODO: Add CURRENCY sign for tooltip and label
+          //  currently this doesn't work properly
+          endLine: {
+            show: true,
+            formatter: '$'
+          },
+          // showBackground: true,
+          emphasis: {
+            label: {
+              show: true,
+              distance: 10,
+              fontStyle: 'oblique',
+              fontWeight: 'bolder',
+              fontFamily: 'Courier New',
+              fontSize: 25,
+              position: 'right'
+            }
+          }
+        }
+      ]
+    };
+
+    option && myChart.setOption(option);
+    window.addEventListener('resize', myChart.resize);
+}

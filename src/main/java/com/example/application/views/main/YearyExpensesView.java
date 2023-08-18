@@ -13,27 +13,21 @@ import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 
 @PermitAll
-@PageTitle("Dashboard")
-@Route(value = "dashboard", layout = MainLayout.class)
-@JsModule("./themes/light_theme/components/javascript/fillPieChart.js")
+@PageTitle("Yearly expenses")
+@Route(value = "yearly", layout = MainLayout.class)
+@JsModule("./themes/light_theme/components/javascript/expensesAllTime.js")
 @JavaScript("https://fastly.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js")
-public class DashboardView extends Main {
+public class YearyExpensesView extends Main {
 
-    public DashboardView() {
-        addStyle();
-    }
-
-    private void addStyle() {
+    YearyExpensesView() {
         addClassName("page-content");
         HorizontalLayout container = new HorizontalLayout();
         container.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
 
         Div chartPie = new Div();
-        chartPie.setId("chart-pie");
+        chartPie.setId("yearly-chart");
 
-        /* TODO: Fix fillPieChart URL */
-        UI.getCurrent().getPage().executeJs("fillPie('http://localhost:8080/api/expense/grouped?user=alex')");
-        UI.getCurrent().getPage().executeJs("printData('http://localhost:8080/api/expense/all')");
+        UI.getCurrent().getPage().executeJs("fillChart()");
 
         container.add(chartPie);
         add(container);

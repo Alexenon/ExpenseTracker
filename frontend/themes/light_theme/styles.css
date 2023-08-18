@@ -1,4 +1,5 @@
 @import 'components-style/header.css';
+@import 'components-style/chart.css';
 
 :root {
     --header-background: rgb(255, 255, 255);
@@ -35,9 +36,3 @@ img {
     margin-top: 80px;
 }
 
-#chart-pie {
-    width: 700px;
-    height: 500px;
-    margin-top: 20px;
-    margin-left: 20px;
-}
