@@ -34,6 +34,10 @@ DELIMITER ;
 
 ------------------------------------------------ [DaysBetweenMonthly] --------------------------------------------------
 
+USE expenses;
+
+DROP FUNCTION IF EXISTS DaysBetweenMonthly;
+
 DELIMITER //
 
 CREATE FUNCTION DaysBetweenMonthly(dateParam DATE, startDate DATE, expireDate DATE)
@@ -49,9 +53,9 @@ BEGIN
 	SET startedSameMonthAndYear = YEAR(dateParam) = YEAR(startDate) AND MONTH(dateParam) = MONTH(startDate);
     SET expireSameMonthAndYear = YEAR(dateParam) = YEAR(expireDate) AND MONTH(dateParam) = MONTH(expireDate);
 
-    IF expireDate <= dateParam THEN
+    IF expireDate <= dateParam OR expireDate <= startDate THEN
         SET result = 0;
-	ELSEIF startedSameMonthAndYear AND NOT expireSameMonthAndYear THEN
+	ELSEIF startedSameMonthAndYear AND (expireDate IS NULL OR NOT expireSameMonthAndYear) THEN
 		SET result = daysPassed - DAY(startDate) + 1;
     ELSEIF expireSameMonthAndYear THEN
 		IF DAY(expireDate) <= daysPassed THEN
@@ -73,6 +77,22 @@ BEGIN
 END //
 
 DELIMITER ;
+
+
+SELECT
+    DaysBetweenMonthly('2023-08-01', '2023-08-18', NULL) as 'Result 1', -- starts today(update start date)
+	DaysBetweenMonthly('2023-08-01', '2023-08-10', '2023-08-05') as 'Result 0', -- expired before start_date
+    DaysBetweenMonthly('2023-08-01', '2023-08-01', '2023-08-01') as 'Result 0', -- starts, expires same day
+    DaysBetweenMonthly('2023-08-01', '2023-08-10', '2020-01-01') as 'Result 0', -- expired ago
+    DaysBetweenMonthly('2023-08-01', '2022-01-01', '2023-08-10') as 'Result 9', -- expired recently, started ago
+    DaysBetweenMonthly('2023-08-01', '2023-08-10', '2023-08-15') as 'Result 5', -- expired recently, started this month
+    DaysBetweenMonthly('2023-08-01', '2023-08-01', '2023-08-31') as 'Result DAYS', -- starts, expires soon
+    DaysBetweenMonthly('2023-08-01', '2023-02-02', '2023-08-31') as 'Result DAYS', -- starts ago, expires soon
+    DaysBetweenMonthly('2023-08-01', '2023-02-02', '2024-12-31') as 'Result DAYS', -- starts ago, expires late
+	DaysBetweenMonthly('2023-08-01', '2023-08-01', NULL) as 'Result DAYS', -- starts this month without expiration
+    DaysBetweenMonthly('2023-08-01', '2023-08-08', NULL) as 'Result DAYS-7', -- starts this month without expiration
+    DaysBetweenMonthly('2023-08-01', '2022-01-01', NULL) as 'Result DAYS' -- starts ago without expiration
+;
 
 ------------------------------------------------ [] --------------------------------------------------
 
