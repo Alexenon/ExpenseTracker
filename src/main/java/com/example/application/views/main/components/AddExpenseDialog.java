@@ -6,7 +6,6 @@ import com.example.application.dtos.Timestamps;
 import com.example.application.entities.Expense;
 import com.example.application.services.ExpenseService;
 import com.example.application.utils.ExpenseConvertor;
-import com.example.application.views.main.ExpensesView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
@@ -164,7 +163,7 @@ public class AddExpenseDialog extends Dialog {
         }
     }
 
-    public void addClickSaveBtnListener(Consumer<ExpensesView> listener) {
+    public void addClickSaveBtnListener(Consumer<?> listener) {
         saveButton.addClickListener(e -> listener.accept(null));
     }
 
