@@ -4,14 +4,19 @@ import com.example.application.entities.User;
 import com.example.application.services.UserService;
 import com.example.application.views.main.layouts.MainLayout;
 import com.vaadin.flow.component.AbstractField;
-import com.vaadin.flow.component.Focusable;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Main;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.tabs.Tab;
+import com.vaadin.flow.component.tabs.TabSheet;
+import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
@@ -47,16 +52,57 @@ public class ProfileView extends Main {
         addStyle();
     }
 
+    public void initContent() {
+        logger.info("Accessed registration page");
+        addClassName("page-content");
+
+        H2 title = new H2("Profile");
+        Button saveButton = new Button("Register", e -> {
+            if (binder.validate().isOk()) {
+                logger.info("Profile updated succesfully");
+            } else {
+                logger.warn("Submitted Profile Form with validation errors");
+            }
+        });
+
+        add(
+                title,
+//                getTabSheet(),
+                getTabs(),
+                saveButton
+        );
+    }
+
+    private TabSheet getTabSheet() {
+        TabSheet tabSheet = new TabSheet();
+        tabSheet.add("Dashboard", new Div(new Text("This is the Dashboard tab content")));
+        tabSheet.add("Payment", new Div(new Text("This is the Payment tab content")));
+
+        return tabSheet;
+    }
+
+    private Tabs getTabs() {
+        Tab profile = new Tab(VaadinIcon.USER.create(), new Span("Profile"));
+        Tab settings = new Tab(VaadinIcon.COG.create(), new Span("Settings"));
+        Tab notifications = new Tab(VaadinIcon.BELL.create(), new Span("Notifications"));
+
+        profile.add(new Div(new Text("This is the Profile tab content")));
+        settings.add(new Div(new Text("This is the Settings tab content")));
+        notifications.add(new Div(new Text("This is the Notifications tab content")));
+
+        Tabs tabs = new Tabs(profile, settings, notifications);
+        tabs.setSelectedTab(profile);
+        tabs.setHeight("240px");
+        tabs.setWidth("240px");
+        tabs.setOrientation(Tabs.Orientation.VERTICAL);
+
+        return tabs;
+    }
+
     private void addStyle() {
         username.setEnabled(false);
         password.setEnabled(false);
         email.setEnabled(false);
-
-        add(
-                editLayout(username),
-                editLayout(email),
-                editLayout(password)
-        );
     }
 
     private HorizontalLayout editLayout(AbstractField<?, ?> element) {
@@ -69,7 +115,6 @@ public class ProfileView extends Main {
     private Icon editButton(AbstractField<?, ?> element) {
         Icon icon = new Icon("lumo", "edit");
         icon.addClickListener(e -> {
-            element.setReadOnly(false);
             element.setEnabled(!element.isEnabled());
             setIconImage(icon, element.isEnabled() ? "cross" : "edit");
         });
@@ -79,22 +124,6 @@ public class ProfileView extends Main {
 
     private void setIconImage(Icon icon, String iconSrc) {
         icon.getElement().setAttribute("icon", "lumo:" + iconSrc);
-    }
-
-    public void initContent() {
-        logger.info("Accessed registration page");
-        addClassName("page-content");
-
-        H2 title = new H2("Register");
-        Button button = new Button("Register", e -> {
-            if (binder.validate().isOk()) {
-                logger.info("User created succesfully");
-            } else {
-                logger.warn("Submitted Registration Form with validation errors");
-            }
-        });
-
-        add(title, button);
     }
 
     private void initBinder() {
