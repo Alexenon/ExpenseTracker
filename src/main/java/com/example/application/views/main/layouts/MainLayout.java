@@ -1,9 +1,8 @@
 package com.example.application.views.main.layouts;
 
 import com.example.application.services.SecurityService;
-import com.example.application.views.main.ProfileView;
-import com.example.application.views.main.SettingsView;
 import com.example.application.views.main.components.complex_components.NavigationBar;
+import com.example.application.views.main.components.tabs.TabsWithRoutes;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
@@ -37,7 +36,7 @@ public class MainLayout extends AppLayout {
 
         Icon settingsIcon = new Icon(VaadinIcon.COG);
         settingsIcon.addClassName("user-icon");
-        settingsIcon.addClickListener(e -> UI.getCurrent().navigate(SettingsView.class));
+        settingsIcon.addClickListener(e -> UI.getCurrent().navigate(TabsWithRoutes.class));
 
         NavigationBar navbar = new NavigationBar();
         navbar.add(settingsIcon, personIcon);

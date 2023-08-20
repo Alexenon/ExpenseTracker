@@ -1,15 +1,20 @@
 package com.example.application.views.main.components.tabs;
 
+import com.example.application.views.main.layouts.MainLayout;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.router.ParentLayout;
+import com.vaadin.flow.router.Route;
+import jakarta.annotation.security.PermitAll;
 
-public class NotificationTab extends AbstractTab {
+@PermitAll
+@Route(value = "settings/notifications", layout = TabsWithRoutes.class)
+public class NotificationTab extends Div {
 
     public NotificationTab() {
-        super("Notifications");
+        add(getContent());
     }
 
-    @Override
     public Div getContent() {
         Div div = new Div();
         Paragraph p1 = new Paragraph("This is the Notifications tab");

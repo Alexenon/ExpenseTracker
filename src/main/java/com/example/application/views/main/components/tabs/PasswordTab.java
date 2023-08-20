@@ -4,8 +4,12 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.textfield.PasswordField;
+import com.vaadin.flow.router.Route;
+import jakarta.annotation.security.PermitAll;
 
-public class PasswordTab extends AbstractTab {
+@PermitAll
+@Route(value = "settings/password", layout = TabsWithRoutes.class)
+public class PasswordTab extends Div {
 
     private final H1 title = new H1("Change Password");
     private final PasswordField currentPassword = new PasswordField("Current Password");
@@ -14,10 +18,9 @@ public class PasswordTab extends AbstractTab {
     private final Button changePasswordButton = new Button("Change Password");
 
     public PasswordTab() {
-        super("Change Password");
+        add(getContent());
     }
 
-    @Override
     public Div getContent() {
         Div div = new Div();
         div.add(title, currentPassword, newPassword, confirmPassword, changePasswordButton);
