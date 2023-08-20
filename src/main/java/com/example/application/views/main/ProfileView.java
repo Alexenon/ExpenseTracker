@@ -28,9 +28,9 @@ import jakarta.annotation.security.PermitAll;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@PermitAll
-@PageTitle("Profile")
-@Route(value = "profile", layout = MainLayout.class)
+//@PermitAll
+//@PageTitle("Profile")
+//@Route(value = "profile", layout = MainLayout.class)
 public class ProfileView extends Main {
 
     private static final Logger logger = LoggerFactory.getLogger(RegistrationView.class);
