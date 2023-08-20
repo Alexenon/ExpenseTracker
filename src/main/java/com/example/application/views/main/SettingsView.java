@@ -1,10 +1,10 @@
 package com.example.application.views.main;
 
+import com.example.application.views.main.components.tabs.AbstractTab;
+import com.example.application.views.main.components.tabs.NotificationTab;
 import com.example.application.views.main.components.tabs.PasswordTab;
-import com.example.application.views.main.components.tabs.ProfileTab;
 import com.example.application.views.main.layouts.MainLayout;
 import com.vaadin.flow.component.html.Main;
-import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
@@ -18,18 +18,17 @@ import jakarta.annotation.security.PermitAll;
 @Route(value = "settings", layout = MainLayout.class)
 public class SettingsView extends Main {
 
-    private final Tab profile;
-    private final Tab password;
-    private final Tab notifications;
     private final VerticalLayout content;
 
     public SettingsView() {
         addClassName("page-content");
-        profile = new Tab("Profile");
-        notifications = new Tab("Profile");
-        password = new Tab("Password");
 
-        Tabs tabs = new Tabs(profile, password, notifications);
+        Tab profileTab = new PasswordTab();
+        Tab notificationTab = new NotificationTab();
+        Tab passwordTab = new PasswordTab();
+
+        Tabs tabs = new Tabs(profileTab, notificationTab, passwordTab);
+
         tabs.addSelectedChangeListener(
                 event -> setContent(event.getSelectedTab()));
 
@@ -39,21 +38,14 @@ public class SettingsView extends Main {
 
         HorizontalLayout hLayout = new HorizontalLayout();
         hLayout.add(tabs, content);
-        hLayout.setSpacing(true);
 
         add(hLayout);
     }
 
     private void setContent(Tab tab) {
+        AbstractTab abstractTab = (AbstractTab) tab;
         content.removeAll();
-
-        if (tab.equals(profile)) {
-            content.add(new ProfileTab());
-        } else if (tab.equals(password)) {
-            content.add(new PasswordTab());
-        } else {
-            content.add(new Paragraph("This is the Notifications tab"));
-        }
+        content.add(abstractTab.getContent());
     }
 
 }
