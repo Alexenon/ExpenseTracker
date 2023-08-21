@@ -21,4 +21,5 @@ public class NullPointerExceptionView extends ExceptionView<NullPointerException
     protected String imageSource() {
         return "./images/404.webp";
     }
+
 }

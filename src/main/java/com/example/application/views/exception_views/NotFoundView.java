@@ -1,11 +1,12 @@
 package com.example.application.views.exception_views;
 
+import com.vaadin.flow.router.ErrorParameter;
 import com.vaadin.flow.router.NotFoundException;
 import com.vaadin.flow.router.PageTitle;
-import jakarta.annotation.security.PermitAll;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import jakarta.servlet.http.HttpServletResponse;
 
-@PermitAll
+@AnonymousAllowed
 @PageTitle("Not Found")
 public class NotFoundView extends ExceptionView<NotFoundException> {
     @Override
@@ -15,12 +16,17 @@ public class NotFoundView extends ExceptionView<NotFoundException> {
 
     @Override
     protected String errorTitle() {
-        return "This page was not found!";
+        return "Page not found!";
     }
 
     @Override
     protected String imageSource() {
         return "./images/404.webp";
+    }
+
+    @Override
+    protected String getErrorMessage(ErrorParameter<NotFoundException> parameter) {
+        return "Couldn't find the page you were looking for";
     }
 }
 

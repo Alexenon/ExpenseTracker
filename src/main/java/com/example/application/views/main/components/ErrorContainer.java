@@ -11,41 +11,48 @@ import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Paragraph;
 
 @Tag(Tag.DIV)
-@CssImport("./error-page.css")
+@CssImport("./themes/light_theme/components-style/error-page.css")
 public class ErrorContainer extends Div {
 
     private final H2 errorTitle;
-    private final Paragraph errorMessage;
-    private final Image image;
+    private final Paragraph errorDescription;
+    private final Image errorImage;
 
     public ErrorContainer() {
-        setClassName("error-container");
+        addClassName("error-container");
 
         errorTitle = new H2("H2");
+        errorTitle.addClassName("error-title");
         errorTitle.setText("Ooops...");
 
-        errorMessage = new Paragraph("p");
-        errorMessage.setText("Something went wrong");
+        errorDescription = new Paragraph("p");
+        errorDescription.addClassName("error-description");
+        errorDescription.setText("Something went wrong");
 
-        image = new Image("./images/404.webp", "Error Image");
+        errorImage = new Image("./images/404.webp", "Error Image");
+        errorImage.addClassName("error-image");
 
         Button goHomeBtn = new Button("Go Home");
+        goHomeBtn.addClassName("return-btn");
         goHomeBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         goHomeBtn.addClickListener(event -> getUI().ifPresent(ui -> ui.navigate(HomeView.class)));
 
-        add(errorTitle, errorMessage, image, goHomeBtn);
+        Div detailsContainer = new Div();
+        detailsContainer.add(errorTitle, errorDescription, goHomeBtn);
+
+        add(errorImage, detailsContainer);
     }
 
     public void setErrorTitle(String title) {
         errorTitle.setText(title);
     }
 
-    public void setErrorMessage(String message) {
-        errorMessage.setText(message);
+    public void setErrorDescription(String message) {
+        errorDescription.setText(message);
     }
 
     public void setImageSource(String src) {
-        image.setSrc(src);
+        errorImage.setSrc(src);
     }
 
 }

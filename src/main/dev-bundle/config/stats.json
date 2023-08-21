@@ -135,9 +135,7 @@
  },
  "bundleImports": [
   "@vaadin/vaadin-themable-mixin",
-  "Frontend/style.css",
-  "Frontend/error-page.css",
-  "Frontend/resources/css/header_style.css",
+  "Frontend/themes/light_theme/components-style/error-page.css",
   "@vaadin/grid/theme/lumo/vaadin-grid.js",
   "@vaadin/tooltip/theme/lumo/vaadin-tooltip.js",
   "@vaadin/grid/theme/lumo/vaadin-grid-column.js",
@@ -223,11 +221,8 @@
   "Frontend/themes/light_theme/components/javascript/fillChart.js"
  ],
  "frontendHashes": {
+  "themes/light_theme/components-style/error-page.css": "842024b3981a08e088ebbd67eaeb4b6f1eceebdc8d4d2e654ed602414042c2ca",
   "themes/light_theme/components/javascript/fillChart.js": "13921403e13f8343e554c55cd7c2082329ff26bedc0c6d1f20075c46eb0510b1",
-  "style.css": "aea5ab4467be73fde149b6d7b58723d69758e96c1716e6b72b1a9e74b8eb56a8",
-  "error-page.css": "5cfdfb2412ab6310ef17083e9b4b03ef5c0fc28b64841b08d5d5f89629543f8c",
-  "resources/css/header_style.css": "71313bfd2d21f65f5e60bc8ca0737b389c9127b96c14a0e24669a9efc8fa9e1e",
-  "resources/js/fillChart.js": "a82906103767ce525537635d9d76dae6e4de194a4035a0c23bea0015fb94f914",
   "comboBoxConnector.js": "1d004c3dae9c76f8bcc68678abe1b8f7bdc8b456f5c9c4c7f190df8ed25d66cd",
   "contextMenuConnector.js": "25a200f8086461635ddd92316ebeb5a868294c8650a190efbae120edb1088f4f",
   "contextMenuTargetConnector.js": "870f67643988dd5618c247bd3c28d843f70aa026ee89f44c3c7556b5e70856af",
@@ -250,7 +245,7 @@
   "light_theme": "{\n  \"lumoImports\" : [ \"typography\", \"color\", \"spacing\", \"badge\", \"utility\" ]\n}"
  },
  "entryScripts": [
-  "VAADIN/build/indexhtml-587aece3.js"
+  "VAADIN/build/indexhtml-9e21e066.js"
  ],
  "webComponents": [],
  "packageJsonHash": "a89b689ec344ccdc7b126a3605399c2171141918d2911a0efd1d21aa157c62b8"

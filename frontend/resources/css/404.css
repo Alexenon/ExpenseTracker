@@ -1,4 +1,18 @@
-.error {
+:root {
+    --main: #00BFA6;
+    --background: #e7fffb;
+    --header-background: rgb(255, 255, 255);
+    --color-white: white;
+    --color-black: rgb(51, 40, 40);
+    --color-gray: rgb(123, 123, 123);
+    --table-background: rgb(220, 214, 211);
+    --input-border: #d1d1d1;
+    --invalid-border: #d93025;
+    --invalid: #d93025;
+    --show-hide: #919191;
+}
+
+.error-container {
     min-height: 100vh;
     display: flex;
     align-items: center;
@@ -8,21 +22,21 @@
     background-color: var(--background);
 }
 
-.error h2 {
+.error-container h2 {
     font-size: 4rem;
     line-height: 1.2;
 }
 
-.error span {
+.error-container span {
     color: var(--main);
 }
 
-.error p {
+.error-container p {
     font-size: 1.2rem;
     margin: 1rem 0;
 }
 
-.btn {
+.return-btn {
     max-width: 150px;
     height: 35px;
     margin: 10px 0;
@@ -35,14 +49,13 @@
     border: 1px solid var(--main);
 }
 
-
 @media only screen and (max-width: 992px) {
 
-    .error {
+    .error-container {
         flex-direction: column;
     }
 
-    .error h2 {
+    .error-container h2 {
         font-size: 3rem;
     }
 
@@ -55,7 +68,7 @@
 
 @media only screen and (max-width: 992px) {
 
-    .error p {
+    .error-container p {
         font-size: 1rem;
     }
 
@@ -63,15 +76,15 @@
 
 @media only screen and (max-width: 480px) {
 
-    .error {
+    .error-container {
         gap: 3rem;
     }
 
-    .error h2 {
+    .error-container h2 {
         font-size: 2.5rem;
     }
 
-    .error p {
+    .error-container p {
         margin: 0.8rem 0;
     }
 
