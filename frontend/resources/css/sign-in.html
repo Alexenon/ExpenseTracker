@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/sign-in.css">
+
+</head>
+
+<body>
+    <main>
+
+        <div class="container">
+            <div class="signin-signup">
+
+                <form action="#" class="sign-in-form">
+                    <h2 class="title">Sign in</h2>
+                    <div class="field email-field">
+                        <div class="input-field">
+                            <input type="email" placeholder="Enter your email" class="email">
+                        </div>
+                        <span class="error email-error">
+                            <i class='bx bx-error-circle error-icon'></i>
+                            <p class="error-text">Enter a valid email</p>
+                        </span>
+                    </div>
+
+                    <div class="field create-password">
+                        <div class="input-field">
+                            <input type="password" placeholder="Enter password" class="password">
+                            <i class='bx bx-hide show-hide'></i>
+                        </div>
+                    </div>
+
+                    <div class="field confirm-password">
+                        <div class="input-field">
+                            <input type="password" placeholder="Confirm password" class="cPassword">
+                            <i class='bx bx-hide show-hide'></i>
+                        </div>
+                        <span class="error cPassword-error">
+                            <i class='bx bx-error-circle error-icon'></i>
+                            <p class="error-text">Passwords do not match</p>
+                        </span>
+                    </div>
+
+                    <div class="input-field button btn">
+                        <input type="submit" value="Submit Now" />
+                    </div>
+
+                    <div class="forgot-password">
+                        <a href="#">
+                            <p>Forgot password?</p>
+                        </a>
+                    </div>
+                </form>
+
+            </div>
+
+            <div class="panels-container">
+                <div class="panel left-panel">
+                    <div class="content">
+                        <h3>New here ?</h3>
+                        <p>
+                            Lorem ipsum, dolor sit amet consectetur adipisicing elit. Debitis,
+                            ex ratione. Aliquid!
+                        </p>
+                        <button class="btn transparent" id="sign-up-btn">
+                            Sign up
+                        </button>
+                    </div>
+                    <img src="/img/log.svg" class="image" alt="" />
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script src="/js/validation.js"></script>
+    <script src="/js/sign-in.js"></script>
+
+</body>
+
+</html>
