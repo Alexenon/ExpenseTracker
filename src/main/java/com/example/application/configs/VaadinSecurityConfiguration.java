@@ -29,7 +29,6 @@ public class VaadinSecurityConfiguration extends VaadinWebSecurity {
                 .csrf().disable()
                 .authorizeHttpRequests(auth -> {
                     auth.requestMatchers("/login").permitAll();
-                    auth.requestMatchers("/test-login").permitAll();
                     auth.requestMatchers("/register").permitAll();
                     auth.requestMatchers("/public/**").permitAll();
                     auth.requestMatchers("/icons/**").permitAll();
