@@ -1,4 +1,4 @@
-package com.example.application.configs;
+package com.example.application.configs.security;
 
 import com.example.application.views.main.LoginView;
 import com.vaadin.flow.spring.security.VaadinWebSecurity;
