@@ -221,7 +221,7 @@
   "Frontend/themes/light_theme/components/javascript/fillChart.js"
  ],
  "frontendHashes": {
-  "themes/light_theme/components-style/error-page.css": "842024b3981a08e088ebbd67eaeb4b6f1eceebdc8d4d2e654ed602414042c2ca",
+  "themes/light_theme/components-style/error-page.css": "3dc2680e0a87fa5b6bc9757b6b1c89871516e9e17cc6b38967a5cbbcdba5ea7a",
   "themes/light_theme/components/javascript/fillChart.js": "13921403e13f8343e554c55cd7c2082329ff26bedc0c6d1f20075c46eb0510b1",
   "comboBoxConnector.js": "1d004c3dae9c76f8bcc68678abe1b8f7bdc8b456f5c9c4c7f190df8ed25d66cd",
   "contextMenuConnector.js": "25a200f8086461635ddd92316ebeb5a868294c8650a190efbae120edb1088f4f",
@@ -245,7 +245,7 @@
   "light_theme": "{\n  \"lumoImports\" : [ \"typography\", \"color\", \"spacing\", \"badge\", \"utility\" ]\n}"
  },
  "entryScripts": [
-  "VAADIN/build/indexhtml-9e21e066.js"
+  "VAADIN/build/indexhtml-015ad096.js"
  ],
  "webComponents": [],
  "packageJsonHash": "a89b689ec344ccdc7b126a3605399c2171141918d2911a0efd1d21aa157c62b8"

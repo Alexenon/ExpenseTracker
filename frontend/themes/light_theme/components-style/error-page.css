@@ -13,30 +13,31 @@
 }
 
 .error-container img {
-    width: 50%;
+    width: 40%;
+    margin: 0 auto;
 }
 
 .error-container h2 {
-    font-size: 4rem;
+    font-size: 4vw;
     line-height: 1.2;
+}
+
+.error-container p {
+    font-size: 1.2vw;
+    margin: 1rem 0;
 }
 
 .error-container span {
     color: var(--main);
 }
 
-.error-container p {
-    font-size: 1.2rem;
-    margin: 1rem 0;
-}
 
 .return-btn {
     max-width: 150px;
-    height: 35px;
+    height: 5vh;
     margin: 10px 0;
     padding: 0 15px;
-    font-size: 1rem;
-    font-weight: 600;
+    font-size: 3vh;
     border-radius: 8px;
     color: var(--main);
     background-color: var(--color-white);
