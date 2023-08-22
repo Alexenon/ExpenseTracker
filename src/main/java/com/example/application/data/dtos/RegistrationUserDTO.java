@@ -1,4 +1,4 @@
-package com.example.application.dtos;
+package com.example.application.data.dtos;
 
 public interface RegistrationUserDTO {
 

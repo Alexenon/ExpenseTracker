@@ -1,6 +1,6 @@
 package com.example.application.services;
 
-import com.example.application.dtos.RegistrationUserDTO;
+import com.example.application.data.dtos.RegistrationUserDTO;
 import com.example.application.entities.User;
 import com.example.application.exceptions.UserExistException;
 import com.example.application.repositories.RoleRepository;

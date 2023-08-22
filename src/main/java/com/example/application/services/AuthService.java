@@ -1,7 +1,7 @@
 package com.example.application.services;
 
-import com.example.application.dtos.JwtRequest;
-import com.example.application.dtos.JwtResponse;
+import com.example.application.data.requests.JwtRequest;
+import com.example.application.data.response.JwtResponse;
 import com.example.application.entities.User;
 import com.example.application.utils.JwtTokenUtils;
 import jakarta.validation.Valid;

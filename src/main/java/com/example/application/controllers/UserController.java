@@ -1,6 +1,6 @@
 package com.example.application.controllers;
 
-import com.example.application.dtos.RegistrationUserDTO;
+import com.example.application.data.dtos.RegistrationUserDTO;
 import com.example.application.entities.User;
 import com.example.application.services.UserService;
 import jakarta.validation.Valid;

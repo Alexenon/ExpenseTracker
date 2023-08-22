@@ -1,4 +1,4 @@
-package com.example.application.dtos;
+package com.example.application.data.requests;
 
 import com.example.application.entities.Role;
 import jakarta.validation.constraints.NotNull;
