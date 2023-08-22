@@ -1,10 +1,12 @@
 package com.example.application.services;
 
 import com.example.application.dtos.ExpenseDTO;
+import com.example.application.dtos.Timestamps;
 import com.example.application.entities.Expense;
 import com.example.application.repositories.ExpenseRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -25,11 +27,8 @@ public class ExpenseService {
     }
 
     public Expense saveExpense(Expense expense) {
+        updateExpireDateIfNeeded(expense);
         return repository.save(expense);
-    }
-
-    public void saveExpenses(List<Expense> expenseList) {
-        repository.saveAll(expenseList);
     }
 
     public void updateExpense(Expense expense) {
@@ -39,11 +38,27 @@ public class ExpenseService {
         expenseToUpdate.setName(expense.getName());
         expenseToUpdate.setAmount(expense.getAmount());
         expenseToUpdate.setDescription(expense.getDescription());
-        expenseToUpdate.setStartDate(expense.getExpireDate());
+        expenseToUpdate.setStartDate(expense.getStartDate());
+        expenseToUpdate.setExpireDate(expense.getExpireDate());
         expenseToUpdate.setTimestamp(expense.getTimestamp());
         expenseToUpdate.setCategory(expense.getCategory());
 
+        updateExpireDateIfNeeded(expense);
+
         repository.save(expenseToUpdate);
+    }
+
+    public void saveExpenses(List<Expense> expenseList) {
+        expenseList.forEach(this::updateExpireDateIfNeeded);
+        repository.saveAll(expenseList);
+    }
+
+    private void updateExpireDateIfNeeded(Expense expense) {
+        String timestampName = expense.getTimestamp().getName();
+        if (timestampName.equals(Timestamps.ONCE.toString())) {
+            LocalDate startDate = expense.getStartDate();
+            expense.setExpireDate(startDate.plusDays(1));
+        }
     }
 
     public void deleteExpense(Expense expense) {
