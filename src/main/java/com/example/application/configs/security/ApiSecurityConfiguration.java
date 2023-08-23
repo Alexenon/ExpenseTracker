@@ -15,6 +15,10 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/*
+* TODO: Specify the Order, which has more priority API or Frontend
+* */
+
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor

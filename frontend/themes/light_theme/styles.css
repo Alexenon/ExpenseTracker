@@ -27,6 +27,17 @@
     font-family: 'Poppins', sans-serif;
 }
 
+.remove-style {
+    margin: 0 !important;
+    padding: 0 !important;
+    list-style-type: none !important;
+    outline: none !important;
+    border: none !important;
+    text-decoration: none !important;
+    box-sizing: border-box !important;
+    font-family: 'Poppins', sans-serif !important;
+}
+
 a,
 button {
     color: inherit;
