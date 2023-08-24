@@ -227,7 +227,7 @@
   "themes/light_theme/components/javascript/expensesAllTime.js": "587887778fe287f94ac7bbf17fdb1b137153a01658bc83e6748fcffa10a66546",
   "themes/light_theme/components/javascript/utils.js": "1129730be2854be705af7ee57fa497c5fbc89a974689876ac40599bec1094d22",
   "themes/light_theme/components/javascript/fillPieChart.js": "e2f3953ced48ab22e9b521c28404fa11627c4d998e95ad5845adc14af04335a8",
-  "themes/light_theme/components/javascript/login-script.js": "01b1bfdd76bbb077ebc0704c5fffedf1c8799a4a5477b451e8b9d60cbbae4dc8",
+  "themes/light_theme/components/javascript/login-script.js": "d439f4051b78c7e383291d3b79fb93758354229cf33d12edddb32b6f348e718a",
   "comboBoxConnector.js": "1d004c3dae9c76f8bcc68678abe1b8f7bdc8b456f5c9c4c7f190df8ed25d66cd",
   "contextMenuConnector.js": "25a200f8086461635ddd92316ebeb5a868294c8650a190efbae120edb1088f4f",
   "contextMenuTargetConnector.js": "870f67643988dd5618c247bd3c28d843f70aa026ee89f44c3c7556b5e70856af",
@@ -250,7 +250,7 @@
   "light_theme": "{\n  \"lumoImports\" : [ \"typography\", \"color\", \"spacing\", \"badge\", \"utility\" ]\n}"
  },
  "entryScripts": [
-  "VAADIN/build/indexhtml-1a600f1a.js"
+  "VAADIN/build/indexhtml-93d25dca.js"
  ],
  "webComponents": [],
  "packageJsonHash": "a89b689ec344ccdc7b126a3605399c2171141918d2911a0efd1d21aa157c62b8"

@@ -7,7 +7,6 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.Div;
 
 @Tag("Div")
-@JsModule("./themes/light_theme/components/javascript/login-script.js")
 public class LoginComponent extends Div {
 
     public LoginComponent() {

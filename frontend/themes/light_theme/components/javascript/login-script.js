@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
   const loginForm = document.getElementById('login-form');
+  console.warn('LOADED');
 
   loginForm.addEventListener('submit', async (event) => {
     event.preventDefault(); // Prevent the default form submission

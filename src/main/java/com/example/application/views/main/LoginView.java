@@ -1,11 +1,14 @@
 package com.example.application.views.main;
 
 import com.example.application.views.main.components.LoginComponent;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.login.LoginForm;
 import com.vaadin.flow.component.login.LoginI18n;
+import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
@@ -15,6 +18,7 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 @AnonymousAllowed
 @PageTitle("Login")
 @Route(value = "login")
+@JsModule("./themes/light_theme/components/javascript/login-script.js")
 public class LoginView extends Main implements BeforeEnterObserver {
 
     private final LoginForm loginForm = new LoginForm();
@@ -38,8 +42,6 @@ public class LoginView extends Main implements BeforeEnterObserver {
         loginForm.getChildren().forEach(c -> {
             c.addClassName("HERE");
         });
-
-        NativeButton button = new NativeButton("Native button");
 
         LoginComponent loginComponent = new LoginComponent();
 
