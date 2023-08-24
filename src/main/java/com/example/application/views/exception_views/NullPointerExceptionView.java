@@ -1,5 +1,6 @@
 package com.example.application.views.exception_views;
 
+import com.vaadin.flow.router.ErrorParameter;
 import com.vaadin.flow.router.PageTitle;
 import jakarta.annotation.security.PermitAll;
 import jakarta.servlet.http.HttpServletResponse;
@@ -14,12 +15,16 @@ public class NullPointerExceptionView extends ExceptionView<NullPointerException
 
     @Override
     protected String errorTitle() {
-        return "This page was not found!";
+        return "Something went wrong!";
     }
 
     @Override
     protected String imageSource() {
-        return "./images/404.webp";
+        return "./images/404-error.png";
     }
 
+    @Override
+    protected String getErrorMessage(ErrorParameter<NullPointerException> parameter) {
+        return parameter.getException().getMessage();
+    }
 }
