@@ -1,6 +1,7 @@
 package com.example.application.views.main;
 
 import com.example.application.dtos.ExpenseDTO;
+import com.example.application.exceptions.UnauthorizedException;
 import com.example.application.services.ExpenseService;
 import com.example.application.services.SecurityService;
 import com.example.application.utils.ExpenseConvertor;
@@ -26,6 +27,7 @@ import jakarta.annotation.security.PermitAll;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
 
 @PermitAll
 @PageTitle("Expenses")
@@ -133,7 +135,11 @@ public class ExpensesView extends Main {
 
     private void updateGrid() {
         logger.info("Updated Expense Table");
-        String username = securityService.getAuthenticatedUser().getUsername();
+        UserDetails authenticatedUser = securityService
+                .getAuthenticatedUser()
+                .orElseThrow(() -> new UnauthorizedException("User is not authenticated"));
+
+        String username = authenticatedUser.getUsername();
         grid.setItems(expenseService.getAllExpensesByUser(username));
     }
 
