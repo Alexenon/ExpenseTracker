@@ -60,6 +60,10 @@ public class UserService implements UserDetailsService {
         );
     }
 
+    /*
+    * TODO: Leave just the updated version for creating user
+    * */
+
     public User createNewUser(RegistrationUserDTO registrationUserDto) {
         if (findByUsernameIgnoreCase(registrationUserDto.getUsername()).isPresent()) {
             throw new UserExistException("There is already a user with this username");

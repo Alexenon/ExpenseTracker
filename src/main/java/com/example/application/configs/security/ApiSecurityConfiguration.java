@@ -16,7 +16,7 @@ import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 /*
-* TODO: Specify the Order, which has more priority API or Frontend
+* TODO: Add SUCCESS_LOGIN_URL
 * */
 
 @Configuration

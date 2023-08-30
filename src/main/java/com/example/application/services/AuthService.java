@@ -12,6 +12,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -24,6 +25,7 @@ public class AuthService {
      * */
 
     private final UserService userService;
+    private final PasswordEncoder passwordEncoder;
     private final JwtTokenUtils jwtTokenUtils;
     private final AuthenticationManager authenticationManager;
 
@@ -46,6 +48,20 @@ public class AuthService {
     public ResponseEntity<?> createNewUser(@Valid @RequestBody User user) {
         User newUser = userService.createNewUser(user);
         return ResponseEntity.ok(newUser);
+    }
+
+    public ResponseEntity<?> login(String usernameOrEmail, String password) {
+        User providedUser = userService
+                .findByUsernameOrEmailIgnoreCase(usernameOrEmail)
+                .orElse(null);
+
+        if (providedUser == null) {
+            return new ResponseEntity<>("Wrong username or password", HttpStatus.UNAUTHORIZED);
+        }
+
+        return passwordEncoder.matches(password, providedUser.getPassword())
+                ? ResponseEntity.ok(providedUser)
+                : new ResponseEntity<>("Wrong username or password", HttpStatus.UNAUTHORIZED);
     }
 
 

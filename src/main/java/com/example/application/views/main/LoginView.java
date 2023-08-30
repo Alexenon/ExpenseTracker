@@ -1,14 +1,12 @@
 package com.example.application.views.main;
 
 import com.example.application.views.main.components.LoginComponent;
-import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Main;
-import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.login.LoginForm;
 import com.vaadin.flow.component.login.LoginI18n;
-import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
@@ -39,13 +37,13 @@ public class LoginView extends Main implements BeforeEnterObserver {
         loginForm.addClassNames("login-form", "remove-style");
         loginForm.setAction("login");
         loginForm.setI18n(i18n);
-        loginForm.getChildren().forEach(c -> {
-            c.addClassName("HERE");
-        });
 
         LoginComponent loginComponent = new LoginComponent();
 
-        add(loginComponent);
+
+        add(loginComponent, loginForm);
+
+        UI.getCurrent().getPage().executeJs("addLoginListener()");
     }
 
     @Override
