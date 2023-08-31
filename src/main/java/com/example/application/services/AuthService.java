@@ -1,6 +1,6 @@
 package com.example.application.services;
 
-import com.example.application.data.requests.JwtRequest;
+import com.example.application.data.requests.AuthRequest;
 import com.example.application.data.response.JwtResponse;
 import com.example.application.entities.User;
 import com.example.application.utils.JwtTokenUtils;
@@ -20,16 +20,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RequiredArgsConstructor
 public class AuthService {
 
-    /*
-     * TODO: Add this class implementation, which will be used for API
-     * */
-
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenUtils jwtTokenUtils;
     private final AuthenticationManager authenticationManager;
 
-    public ResponseEntity<?> createAuthToken(@RequestBody JwtRequest authRequest) {
+    public ResponseEntity<?> createAuthToken(@RequestBody AuthRequest authRequest) {
         try {
             UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                     authRequest.getUsername(),
@@ -60,7 +56,7 @@ public class AuthService {
         }
 
         return passwordEncoder.matches(password, providedUser.getPassword())
-                ? ResponseEntity.ok(providedUser)
+                ? ResponseEntity.ok("Succesfully logged in")
                 : new ResponseEntity<>("Wrong username or password", HttpStatus.UNAUTHORIZED);
     }
 

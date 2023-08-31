@@ -3,7 +3,7 @@ package com.example.application.data.requests;
 import lombok.Data;
 
 @Data
-public class JwtRequest {
+public class AuthRequest {
     private String username;
     private String password;
 }
