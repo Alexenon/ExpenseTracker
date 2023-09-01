@@ -219,15 +219,13 @@
   "Frontend/generated/jar-resources/vaadin-time-picker/timepickerConnector.js",
   "Frontend/generated/jar-resources/virtualListConnector.js",
   "Frontend/themes/light_theme/components/javascript/expensesAllTime.js",
-  "Frontend/themes/light_theme/components/javascript/fillPieChart.js",
-  "Frontend/themes/light_theme/components/javascript/login-script.js"
+  "Frontend/themes/light_theme/components/javascript/fillPieChart.js"
  ],
  "frontendHashes": {
   "themes/light_theme/components-style/error-page.css": "4d4e191ef78214b5b99983a87889d7bbebc2947e7b7896bea2134ca518f1b02f",
   "themes/light_theme/components/javascript/expensesAllTime.js": "587887778fe287f94ac7bbf17fdb1b137153a01658bc83e6748fcffa10a66546",
   "themes/light_theme/components/javascript/utils.js": "1129730be2854be705af7ee57fa497c5fbc89a974689876ac40599bec1094d22",
   "themes/light_theme/components/javascript/fillPieChart.js": "e2f3953ced48ab22e9b521c28404fa11627c4d998e95ad5845adc14af04335a8",
-  "themes/light_theme/components/javascript/login-script.js": "b137770c095f99e1b49606fcca7fd8453a0fad82c6dd0e3122af27ac02fd5c42",
   "comboBoxConnector.js": "1d004c3dae9c76f8bcc68678abe1b8f7bdc8b456f5c9c4c7f190df8ed25d66cd",
   "contextMenuConnector.js": "25a200f8086461635ddd92316ebeb5a868294c8650a190efbae120edb1088f4f",
   "contextMenuTargetConnector.js": "870f67643988dd5618c247bd3c28d843f70aa026ee89f44c3c7556b5e70856af",

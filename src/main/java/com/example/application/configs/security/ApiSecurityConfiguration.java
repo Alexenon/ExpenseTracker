@@ -13,11 +13,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
-/*
-* TODO: Add SUCCESS_LOGIN_URL
-* */
 
 @Configuration
 @EnableWebSecurity
@@ -32,14 +27,13 @@ public class ApiSecurityConfiguration {
 
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
-    private final JwtRequestFilter jwtRequestFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf().disable()
                 .authorizeHttpRequests(auth -> {
-//                    auth.requestMatchers("/api/**").authenticated();
+                    auth.requestMatchers("/api/**").permitAll();
                     auth.anyRequest().permitAll();
                 })
                 .formLogin(loginForm -> {
@@ -52,7 +46,6 @@ public class ApiSecurityConfiguration {
                     e.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
                     e.accessDeniedPage(DENIED_PAGE_URL);
                 })
-                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 
