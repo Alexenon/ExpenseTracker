@@ -1,7 +1,6 @@
 package com.example.application.views.main;
 
 import com.example.application.views.main.components.LoginComponent;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
@@ -22,8 +21,6 @@ public class LoginView extends Main implements BeforeEnterObserver {
         loginComponent = new LoginComponent();
 
         add(loginComponent);
-
-        UI.getCurrent().getPage().executeJs("addLoginListener()");
     }
 
     @Override

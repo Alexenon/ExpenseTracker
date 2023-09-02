@@ -20,7 +20,7 @@ public class LoginComponent extends Div {
         container.addClassName("container");
 
         Div signInContainer = new Div();
-        signInContainer.addClassName("signin-signup");
+        signInContainer.addClassName("signup-container");
 
         Component loginForm = getLoginForm();
 
