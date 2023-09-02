@@ -4,7 +4,6 @@ import com.example.application.data.requests.AuthRequest;
 import com.example.application.data.response.JwtResponse;
 import com.example.application.entities.User;
 import com.example.application.utils.JwtTokenUtils;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,23 +40,18 @@ public class AuthService {
         return ResponseEntity.ok(new JwtResponse(token));
     }
 
-    public ResponseEntity<?> createNewUser(@Valid @RequestBody User user) {
-        User newUser = userService.createNewUser(user);
-        return ResponseEntity.ok(newUser);
-    }
-
-    public ResponseEntity<?> login(String usernameOrEmail, String password) {
+    public ResponseEntity<?> authenticate(String usernameOrEmail, String password) {
         User providedUser = userService
                 .findByUsernameOrEmailIgnoreCase(usernameOrEmail)
                 .orElse(null);
 
         if (providedUser == null) {
-            return new ResponseEntity<>("Wrong username or password", HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>("Wrong username or password", HttpStatus.BAD_REQUEST);
         }
 
         return passwordEncoder.matches(password, providedUser.getPassword())
                 ? ResponseEntity.ok("Succesfully logged in")
-                : new ResponseEntity<>("Wrong username or password", HttpStatus.UNAUTHORIZED);
+                : new ResponseEntity<>("Wrong username or password", HttpStatus.BAD_REQUEST);
     }
 
 
