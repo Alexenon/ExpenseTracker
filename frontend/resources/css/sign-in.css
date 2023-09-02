@@ -107,7 +107,6 @@ input {
     color: var(--color-white);
     font-weight: 600;
     margin: 10px 0;
-
 }
 
 .panels-container {
@@ -205,8 +204,6 @@ input {
         padding: 2.5rem 8%;
         grid-column: 1 / 2;
     }
-
-   
 
     .left-panel {
         grid-row: 1 / 2;

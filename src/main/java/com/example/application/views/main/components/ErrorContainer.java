@@ -11,7 +11,7 @@ import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Paragraph;
 
 @Tag(Tag.DIV)
-@CssImport("./themes/light_theme/components-style/error-page.css")
+@CssImport("./themes/light_theme/styles/component-styles/error-page.css")
 public class ErrorContainer extends Div {
 
     private final H2 errorTitle;

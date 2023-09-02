@@ -16,18 +16,47 @@ public class LoginComponent extends Div {
         errorWrapper = new Div();
         errorWrapper.addClassName("error-wrapper");
 
-        add(errorWrapper, getComponent());
+        Div container = new Div();
+        container.addClassName("container");
+
+        Div signInContainer = new Div();
+        signInContainer.addClassName("signin-signup");
+
+        Component loginForm = getLoginForm();
+
+        signInContainer.add(errorWrapper, loginForm);
+        container.add(signInContainer);
+
+        add(container);
     }
 
-    private Component getComponent() {
+    private Component getLoginForm() {
         return new Html(
-                """
-                        <form id="login-form" method="post" action="login">
-                            <label for="username">Username</label>
-                            <input id="username" type="text" name="username" placeholder="Enter Username" autocomplete="username" required/>
-                            <label for="password">Password</label>
-                            <input id="password" type="password" name="password" placeholder="Enter Password" autocomplete="current-password" required/>
-                            <button id="login-btn" type="submit">Login</button>
+                """      
+                        <form id="login-form" method="post" action="login" class="sign-in-form">
+                            <h2 class="title">Sign in</h2>
+                            <div class="field email-field">
+                                <div class="input-field">
+                                    <input type="email" placeholder="Enter your email" class="email">
+                                </div>
+                            </div>
+                                
+                            <div class="field create-password">
+                                <div class="input-field">
+                                    <input type="password" placeholder="Enter password" class="password">
+                                    <i class='bx bx-hide show-hide'></i>
+                                </div>
+                            </div>
+                                
+                            <div class="input-field button btn">
+                                <input type="submit" value="Submit Now" />
+                            </div>
+                                
+                            <div class="forgot-password">
+                                <a href="/forgot-password">
+                                    <p>Forgot password?</p>
+                                </a>
+                            </div>
                         </form>
                         """
         );
