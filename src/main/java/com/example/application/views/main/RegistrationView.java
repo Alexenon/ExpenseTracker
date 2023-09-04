@@ -2,7 +2,7 @@ package com.example.application.views.main;
 
 import com.example.application.entities.User;
 import com.example.application.services.UserService;
-import com.example.application.views.main.layouts.MainLayout;
+import com.example.application.views.main.components.RegisterComponent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H2;
@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 
 @AnonymousAllowed
 @PageTitle("Registation")
-@Route(value = "register", layout = MainLayout.class)
+@Route(value = "register")
 public class RegistrationView extends Main {
 
     private static final Logger logger = LoggerFactory.getLogger(RegistrationView.class);
@@ -40,8 +40,9 @@ public class RegistrationView extends Main {
     public RegistrationView(UserService userService) {
         this.userService = userService;
         binder = new Binder<>(User.class);
-        initBinder();
-        initContent();
+
+        RegisterComponent registration = new RegisterComponent();
+        add(registration);
     }
 
     public void initContent() {

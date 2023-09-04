@@ -1,9 +1,6 @@
 package com.example.application.views.main.components;
 
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.Html;
-import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.html.Div;
 
 @Tag("Div")
@@ -15,13 +12,15 @@ public class LoginComponent extends Div {
     public LoginComponent() {
         this.addClassName("signup-container");
 
+        HtmlContainer form = new HtmlContainer("form");
+
         Component loginForm = getLoginForm();
         loginForm.addClassName("sign-in-form");
 
         errorWrapper = new Div();
         errorWrapper.addClassName("error-wrapper");
 
-        add(errorWrapper, loginForm);
+        add(errorWrapper, loginForm, form);
     }
 
     private Component getLoginForm() {

@@ -1,6 +1,7 @@
 package com.example.application.views.main;
 
 import com.example.application.views.main.components.LoginComponent;
+import com.example.application.views.main.components.LoginForm;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.router.BeforeEnterEvent;
@@ -29,7 +30,11 @@ public class LoginView extends Main implements BeforeEnterObserver {
         panelsContainer.add(getPanelContent());
 
         container.add(loginComponent, panelsContainer);
-        add(container);
+//        add(container);
+
+
+        LoginForm loginForm = new LoginForm();
+        add(loginForm);
     }
 
     private Div getPanelContent() {
