@@ -59,4 +59,12 @@ public class JwtTokenUtils {
                 .parseClaimsJws(token)
                 .getBody();
     }
+
+    public String getSecret() {
+        return secret;
+    }
+
+    public Duration getJwtLifetime() {
+        return jwtLifetime;
+    }
 }

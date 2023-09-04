@@ -10,6 +10,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class SecurityService {
 
@@ -17,14 +19,16 @@ public class SecurityService {
 
     private static final String LOGOUT_SUCCESS_URL = "/";
 
-    public UserDetails getAuthenticatedUser() {
+    public Optional<UserDetails> getAuthenticatedUser() {
         SecurityContext context = SecurityContextHolder.getContext();
         Object principal = context.getAuthentication().getPrincipal();
+
         if (principal instanceof UserDetails) {
-            return (UserDetails) context.getAuthentication().getPrincipal();
+            UserDetails userDetails = (UserDetails) context.getAuthentication().getPrincipal();
+            return Optional.of(userDetails);
         }
 
-        return null;
+        return Optional.empty();
     }
 
     public void logout() {
