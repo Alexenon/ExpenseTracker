@@ -3,9 +3,11 @@ package com.example.application.views.main.components;
 import com.example.application.views.main.components.basic_components.Form;
 import com.example.application.views.main.components.basic_components.NativeInput;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.html.Div;
 import lombok.Getter;
 
+@Tag("Form")
 public class LoginForm extends Form {
 
     @Getter
@@ -13,7 +15,7 @@ public class LoginForm extends Form {
     @Getter
     private final NativeInput password;
     @Getter
-    private final NativeInput submit;
+    private final NativeInput submitBtn;
 
     public LoginForm() {
         this.setId("login-form");
@@ -22,31 +24,33 @@ public class LoginForm extends Form {
 
         username = new NativeInput("username", "text", "Enter your username");
         password = new NativeInput("password", "password", "Enter password");
-        submit = new NativeInput("submit");
+        submitBtn = new NativeInput("submit");
 
         initForm();
     }
 
     private void initForm() {
-        username.setId("username");
-        password.setId("password");
-        submit.setId("submit");
-        submit.setValue("Submit Now");
+        submitBtn.setValue("Submit Now");
 
         Div usernameField = getField(username, "username");
         Div passwordField = getField(password, "password");
-        Div submitField = getField(submit, "submit");
+        Div submitField = getInputField(submitBtn);
+        submitField.addClassNames("btn");
 
         add(usernameField, passwordField, submitField);
     }
 
     private Div getField(Component field, String name) {
-        Div div = new Div();
+        Div inputField = getInputField(field);
+        Div div = new Div(inputField);
         div.addClassNames("field", name);
-        Div inputField = new Div();
-        inputField.addClassName("input-field");
-        inputField.add(field);
-        div.add(inputField);
+        return div;
+    }
+
+    private Div getInputField(Component field) {
+        Div div = new Div();
+        div.addClassName("input-field");
+        div.add(field);
         return div;
     }
 

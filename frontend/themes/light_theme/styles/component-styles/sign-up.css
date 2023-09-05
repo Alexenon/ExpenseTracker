@@ -1,18 +1,17 @@
-.signup-container {
-    left: 25%;
-}
-
-.panels-container {
-    left: 50%;
-}
-
-.container:before {
+.register-page:before {
     transform: translate(100%, -50%);
     right: 52%;
 }
 
+.signup-container {
+    left: 25%;
+}
+
+.position-right {
+    left: 50%;
+}
+
 .right-panel {
-    pointer-events: none;
     padding: 3rem 12% 2rem 17%;
 }
 
@@ -25,7 +24,7 @@
         grid-row: 3 / 4;
     }
 
-    .container.sign-up-mode:before {
+    .sign-up-mode:before {
         transform: translate(-50%, 100%);
         bottom: 32%;
         right: initial;
@@ -36,7 +35,7 @@
         transform: translateY(-630px);
     }
 
-    .container.sign-up-mode .signup-container {
+    register-page.sign-up-mode .signup-container {
         top: 5%;
         transform: translate(-50%, 0);
     }

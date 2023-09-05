@@ -12,7 +12,8 @@
 * TODO: Refactor code below
 */
 
-.container {
+.login-page,
+.register-page {
     position: relative;
     width: 100%;
     background-color: var(--background);
@@ -20,7 +21,8 @@
     overflow: hidden;
 }
 
-.container:before {
+.login-page:before,
+.register-page:before {
     content: "";
     position: absolute;
     height: 2000px;
@@ -52,7 +54,6 @@
     padding: 0rem 5rem;
     overflow: hidden;
     grid-column: 1 / 2;
-    grid-row: 1 / 2;
 }
 
 .title {
@@ -171,7 +172,8 @@ input {
 }
 
 @media (max-width: 870px) {
-    .container {
+    .login-page,
+    .register-page {
         min-height: 800px;
         height: 100vh;
     }
@@ -220,7 +222,8 @@ input {
         font-size: 0.7rem;
     }
 
-    .container:before {
+    .login-page:before,
+    .register-page:before {
         width: 1500px;
         height: 1500px;
         transform: translateX(-50%);
@@ -244,16 +247,17 @@ input {
         padding: 0.5rem 1rem;
     }
 
-    .container {
+    .login-page {
         padding: 1.5rem;
     }
 
-    .container:before {
+    .login-page:before,
+    .register-page {
         bottom: 72%;
         left: 50%;
     }
 
-    .container.sign-up-mode:before {
+    .sign-up-mode:before {
         bottom: 28%;
         left: 50%;
     }

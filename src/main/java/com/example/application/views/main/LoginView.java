@@ -1,6 +1,5 @@
 package com.example.application.views.main;
 
-import com.example.application.views.main.components.LoginComponent;
 import com.example.application.views.main.components.LoginForm;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.*;
@@ -15,26 +14,33 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 @Route(value = "login")
 public class LoginView extends Main implements BeforeEnterObserver {
 
-    private final LoginComponent loginComponent;
+    private final LoginForm loginForm;
+    private final Div errorWrapper;
 
     public LoginView() {
         addClassName("login-page");
+        loginForm = new LoginForm();
+        initLoginForm();
 
-        loginComponent = new LoginComponent();
+        errorWrapper = getErrorWrapper();
 
-        Div container = new Div();
-        container.addClassName("container");
+        Div loginContainer = new Div(errorWrapper, loginForm);
+        loginContainer.addClassName("signin-container");
 
         Div panelsContainer = new Div();
-        panelsContainer.addClassName("panels-container");
+        panelsContainer.addClassNames("panels-container", "position-left");
         panelsContainer.add(getPanelContent());
 
-        container.add(loginComponent, panelsContainer);
-//        add(container);
+        add(loginContainer, panelsContainer);
+    }
 
+    private void initLoginForm() {
+        loginForm.addClassName("sign-in-form");
 
-        LoginForm loginForm = new LoginForm();
-        add(loginForm);
+        H2 title = new H2("Sign in");
+        title.addClassName("title");
+        loginForm.addComponentAsFirst(title);
+
     }
 
     private Div getPanelContent() {
@@ -58,14 +64,26 @@ public class LoginView extends Main implements BeforeEnterObserver {
         return leftPanel;
     }
 
-
     @Override
     public void beforeEnter(BeforeEnterEvent beforeEnterEvent) {
-        if (beforeEnterEvent.getLocation()
+        boolean containsError = beforeEnterEvent.getLocation()
                 .getQueryParameters()
                 .getParameters()
-                .containsKey("error")) {
-            loginComponent.setError(true);
-        }
+                .containsKey("error");
+
+        showError(containsError);
     }
+
+    private void showError(boolean error) {
+        errorWrapper.setVisible(error);
+    }
+
+    private Div getErrorWrapper() {
+        Div div = new Div();
+        div.addClassName("error-wrapper");
+        Paragraph errorText = new Paragraph("Wrong username or password");
+        div.add(errorText);
+        return div;
+    }
+
 }

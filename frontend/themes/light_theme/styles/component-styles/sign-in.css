@@ -1,19 +1,29 @@
-.signin-container {
-    left: 75%;
-}
-
-.panels-container {
-    left: 0;
-}
-
-.container:before {
+.login-page:before {
     transform: translateY(-50%);
     right: 48%;
 }
 
+.signin-container {
+    left: 75%;
+}
+
+.position-left {
+    left: 0;
+}
+
 .left-panel {
-    pointer-events: all;
     padding: 3rem 17% 2rem 12%;
+}
+
+.error-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: red;
+    width: auto;
+    height: 100px;
+    margin: 0% 15% 0% 12%;
+    border-radius: 8px;
 }
 
 .forgot-password {

@@ -10,7 +10,7 @@ public class LoginComponent extends Div {
     private final Text errorMessage = new Text("Wrong username or password");
 
     public LoginComponent() {
-        this.addClassName("signup-container");
+        this.addClassName("signin-container");
 
         HtmlContainer form = new HtmlContainer("form");
 
