@@ -1,16 +1,14 @@
 package com.example.application.views.main.components.basic_components;
 
-import com.vaadin.flow.component.ClickNotifier;
 import com.vaadin.flow.component.PropertyDescriptor;
 import com.vaadin.flow.component.PropertyDescriptors;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Input;
 
 import java.util.Optional;
 
 @Tag(Tag.INPUT)
-public class NativeInput extends Input implements ClickNotifier<Button> {
+public class NativeInput extends Input {
 
     private static final PropertyDescriptor<String, Optional<String>> nameDescriptor = PropertyDescriptors.optionalAttributeWithDefault("name", "");
 

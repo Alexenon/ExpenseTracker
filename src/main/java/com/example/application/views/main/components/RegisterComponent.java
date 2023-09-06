@@ -1,14 +1,10 @@
 package com.example.application.views.main.components;
 
+import com.example.application.views.main.components.basic_components.NativeButton;
 import com.example.application.views.main.components.basic_components.NativeInput;
 import com.example.application.views.main.components.complex_components.forms.RegisterForm;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.textfield.EmailField;
-import com.vaadin.flow.component.textfield.PasswordField;
-import com.vaadin.flow.component.textfield.TextField;
-import lombok.Getter;
 
 public class RegisterComponent extends Div {
 
@@ -38,9 +34,8 @@ public class RegisterComponent extends Div {
         return registerForm.getConfirmPassword();
     }
 
-    public NativeInput getSubmitButton() {
+    public Button getSubmitButton() {
         return registerForm.getSubmitBtn();
     }
-
 
 }

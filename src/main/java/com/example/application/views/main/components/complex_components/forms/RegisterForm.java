@@ -1,9 +1,11 @@
 package com.example.application.views.main.components.complex_components.forms;
 
 import com.example.application.views.main.components.basic_components.Form;
+import com.example.application.views.main.components.basic_components.NativeButton;
 import com.example.application.views.main.components.basic_components.NativeInput;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import lombok.Getter;
 
@@ -19,21 +21,20 @@ public class RegisterForm extends Form {
     @Getter
     private final NativeInput confirmPassword;
     @Getter
-    private final NativeInput submitBtn;
+    private final Button submitBtn;
 
     public RegisterForm() {
         username = new NativeInput("username", "text", "Enter your username");
         email = new NativeInput("email", "email", "Enter your email");
         password = new NativeInput("password", "password", "Enter password");
         confirmPassword = new NativeInput("confirm-password", "password", "Enter confirmation password");
-        submitBtn = new NativeInput("submit");
+        submitBtn = new Button("Submit Now");
+//        submitBtn.setType("button");
 
         initForm();
     }
 
     private void initForm() {
-        submitBtn.setValue("Register");
-
         Div usernameField = getField(username, "username");
         Div emailField = getField(email, "password");
         Div passwordField = getField(password, "password");

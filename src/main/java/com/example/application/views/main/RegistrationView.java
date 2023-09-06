@@ -48,6 +48,7 @@ public class RegistrationView extends Main {
         H2 title = new H2("Register");
 
         registerComponent.getSubmitButton().addClickListener(e -> {
+            logger.info("Clicked");
             if (binder.validate().isOk()) {
                 User user = binder.getBean();
                 logger.info("User '{}' created succesfully", user.getUsername());
