@@ -1,5 +1,7 @@
 package com.example.application.views.main.components;
 
+import com.example.application.views.main.components.basic_components.NativeInput;
+import com.example.application.views.main.components.complex_components.forms.RegisterForm;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
@@ -10,34 +12,34 @@ import lombok.Getter;
 
 public class RegisterComponent extends Div {
 
-    @Getter
-    private final TextField username = new TextField("Username");
-    @Getter
-    private final PasswordField password = new PasswordField("Password");
-    @Getter
-    private final PasswordField confirmPassword = new PasswordField("Confirm password");
-    @Getter
-    private final EmailField email = new EmailField("Email");
+    private final RegisterForm registerForm;
 
     public RegisterComponent() {
         this.addClassName("sign-up-form");
 
-        Div fieldUsername = getField("username", username);
-        Div fieldPassword = getField("password", password);
-        Div fieldConfirmPassword = getField("confirm-password", confirmPassword);
-        Div fieldEmail = getField("email", email);
+        registerForm = new RegisterForm();
 
-        add(fieldUsername, fieldPassword, fieldConfirmPassword, fieldEmail);
+        add(registerForm);
     }
 
-    private Div getField(String fieldName, Component field) {
-        Div div = new Div();
-        div.addClassNames("field", fieldName);
-        Div inputField = new Div();
-        inputField.addClassName("input-field");
-        inputField.add(field);
-        div.add(inputField);
-        return div;
+    public NativeInput getUsernameField() {
+        return registerForm.getUsername();
+    }
+
+    public NativeInput getEmailField() {
+        return registerForm.getEmail();
+    }
+
+    public NativeInput getPasswordField() {
+        return registerForm.getPassword();
+    }
+
+    public NativeInput getConfirmPasswordField() {
+        return registerForm.getConfirmPassword();
+    }
+
+    public NativeInput getSubmitButton() {
+        return registerForm.getSubmitBtn();
     }
 
 
