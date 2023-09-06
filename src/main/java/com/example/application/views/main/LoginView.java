@@ -1,6 +1,6 @@
 package com.example.application.views.main;
 
-import com.example.application.views.main.components.LoginForm;
+import com.example.application.views.main.components.LoginComponent;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.router.BeforeEnterEvent;
@@ -14,33 +14,17 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 @Route(value = "login")
 public class LoginView extends Main implements BeforeEnterObserver {
 
-    private final LoginForm loginForm;
-    private final Div errorWrapper;
+    private final LoginComponent loginComponent;
 
     public LoginView() {
         addClassName("login-page");
-        loginForm = new LoginForm();
-        initLoginForm();
+        loginComponent = new LoginComponent();
+        loginComponent.addClassName("signin-container");
 
-        errorWrapper = getErrorWrapper();
-
-        Div loginContainer = new Div(errorWrapper, loginForm);
-        loginContainer.addClassName("signin-container");
-
-        Div panelsContainer = new Div();
+        Div panelsContainer = new Div(getPanelContent());
         panelsContainer.addClassNames("panels-container", "position-left");
-        panelsContainer.add(getPanelContent());
 
-        add(loginContainer, panelsContainer);
-    }
-
-    private void initLoginForm() {
-        loginForm.addClassName("sign-in-form");
-
-        H2 title = new H2("Sign in");
-        title.addClassName("title");
-        loginForm.addComponentAsFirst(title);
-
+        add(loginComponent, panelsContainer);
     }
 
     private Div getPanelContent() {
@@ -71,19 +55,7 @@ public class LoginView extends Main implements BeforeEnterObserver {
                 .getParameters()
                 .containsKey("error");
 
-        showError(containsError);
-    }
-
-    private void showError(boolean error) {
-        errorWrapper.setVisible(error);
-    }
-
-    private Div getErrorWrapper() {
-        Div div = new Div();
-        div.addClassName("error-wrapper");
-        Paragraph errorText = new Paragraph("Wrong username or password");
-        div.add(errorText);
-        return div;
+        loginComponent.setError(containsError);
     }
 
 }

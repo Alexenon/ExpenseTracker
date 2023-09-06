@@ -1,6 +1,6 @@
 package com.example.application.views.exception_views;
 
-import com.example.application.views.main.components.ErrorContainer;
+import com.example.application.views.main.components.complex_components.ErrorContainer;
 import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.ErrorParameter;

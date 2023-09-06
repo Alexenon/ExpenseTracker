@@ -1,4 +1,4 @@
-package com.example.application.views.main.components;
+package com.example.application.views.main.components.complex_components;
 
 import com.example.application.views.main.HomeView;
 import com.vaadin.flow.component.Tag;

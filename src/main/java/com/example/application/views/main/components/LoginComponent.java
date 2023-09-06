@@ -1,60 +1,57 @@
 package com.example.application.views.main.components;
 
-import com.vaadin.flow.component.*;
+import com.example.application.views.main.components.basic_components.NativeInput;
+import com.example.application.views.main.components.complex_components.forms.LoginForm;
+import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Paragraph;
 
 @Tag("Div")
 public class LoginComponent extends Div {
 
-    private final Div errorWrapper;
-    private final Text errorMessage = new Text("Wrong username or password");
+    private final LoginForm loginForm;
+    private final ErrorWrapper errorWrapper;
 
     public LoginComponent() {
-        this.addClassName("signin-container");
-
-        HtmlContainer form = new HtmlContainer("form");
-
-        Component loginForm = getLoginForm();
+        loginForm = new LoginForm();
         loginForm.addClassName("sign-in-form");
+        loginForm.addComponentAsFirst(getFormTitle());
 
-        errorWrapper = new Div();
+        errorWrapper = new ErrorWrapper();
         errorWrapper.addClassName("error-wrapper");
+        errorWrapper.setErrorMessage("Wrong username or password");
 
-        add(errorWrapper, loginForm, form);
+        add(errorWrapper, loginForm);
     }
 
-    private Component getLoginForm() {
-        return new Html("""      
-                <form id="login-form" method="post" action="login">
-                    <h2 class="title">Sign in</h2>
-                    <div class="field username-field">
-                        <div class="input-field">
-                            <input type="text" name="username" placeholder="Enter your username" class="username">
-                        </div>
-                    </div>
-                    <div class="field password-field">
-                        <div class="input-field">
-                            <input type="password" name="password" placeholder="Enter password" class="password">
-                            <i class='bx bx-hide show-hide'></i>
-                        </div>
-                    </div>
-                    <div class="input-field button btn">
-                        <input type="submit" value="Submit Now" />
-                    </div>
-                    <div class="forgot-password">
-                        <a href="/forgot-password">
-                            <p>Forgot password?</p>
-                        </a>
-                    </div>
-                </form>
-                """);
+    private H2 getFormTitle() {
+        H2 title = new H2("Sign in");
+        title.addClassName("title");
+        return title;
+    }
+
+    public NativeInput getUsernameField() {
+        return loginForm.getUsername();
+    }
+
+    public NativeInput getPasswordField() {
+        return loginForm.getPassword();
     }
 
     public void setError(boolean error) {
-        if (error) {
-            errorWrapper.add(errorMessage);
-        } else {
-            errorWrapper.remove(errorMessage);
+        errorWrapper.setVisible(error);
+    }
+
+    static class ErrorWrapper extends Div {
+        private final Paragraph errorMessage;
+
+        public ErrorWrapper() {
+            this.errorMessage = new Paragraph("Wrong username or password");
+        }
+
+        public void setErrorMessage(String errorMessage) {
+            this.errorMessage.setText(errorMessage);
         }
     }
 

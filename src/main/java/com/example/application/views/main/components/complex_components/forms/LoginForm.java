@@ -1,4 +1,4 @@
-package com.example.application.views.main.components;
+package com.example.application.views.main.components.complex_components.forms;
 
 import com.example.application.views.main.components.basic_components.Form;
 import com.example.application.views.main.components.basic_components.NativeInput;
@@ -48,9 +48,8 @@ public class LoginForm extends Form {
     }
 
     private Div getInputField(Component field) {
-        Div div = new Div();
+        Div div = new Div(field);
         div.addClassName("input-field");
-        div.add(field);
         return div;
     }
 
