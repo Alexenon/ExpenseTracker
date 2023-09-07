@@ -1,7 +1,5 @@
 package com.example.application.views.main.components.complex_components.forms;
 
-import com.example.application.views.main.components.basic_components.Form;
-import com.example.application.views.main.components.basic_components.NativeButton;
 import com.example.application.views.main.components.basic_components.NativeInput;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
@@ -10,7 +8,7 @@ import com.vaadin.flow.component.html.Div;
 import lombok.Getter;
 
 @Tag("form")
-public class RegisterForm extends Form {
+public class RegisterForm extends Div {
 
     @Getter
     private final NativeInput username;
@@ -29,7 +27,6 @@ public class RegisterForm extends Form {
         password = new NativeInput("password", "password", "Enter password");
         confirmPassword = new NativeInput("confirm-password", "password", "Enter confirmation password");
         submitBtn = new Button("Submit Now");
-//        submitBtn.setType("button");
 
         initForm();
     }

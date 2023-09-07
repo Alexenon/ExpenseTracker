@@ -14,6 +14,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @AnonymousAllowed
 @PageTitle("Registation")
@@ -22,20 +23,15 @@ public class RegistrationView extends Main {
 
     private static final Logger logger = LoggerFactory.getLogger(RegistrationView.class);
 
+    private final Binder<User> binder;
     private final RegisterComponent registerComponent;
 
-    private final UserService userService;
+    @Autowired
+    private UserService userService;
 
-    private final Binder<User> binder;
-
-    public RegistrationView(UserService userService) {
-        this.userService = userService;
-
-        registerComponent = new RegisterComponent();
+    public RegistrationView() {
         binder = new Binder<>(User.class);
-
-        RegisterComponent registration = new RegisterComponent();
-        add(registration);
+        registerComponent = new RegisterComponent();
 
         initBinder();
         initContent();
@@ -54,13 +50,14 @@ public class RegistrationView extends Main {
                 logger.info("User '{}' created succesfully", user.getUsername());
                 userService.createNewUser(user);
                 showSuccesfullNotification();
-//                UI.getCurrent().navigate(LoginView.class);
+                // UI.getCurrent().navigate(LoginView.class);
             } else {
                 logger.warn("Submitted Registration Form with validation errors");
                 showErrorNotification();
             }
         });
 
+        add(title, registerComponent);
     }
 
     private void initBinder() {
