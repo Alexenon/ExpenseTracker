@@ -25,35 +25,18 @@ public class ExpenseConvertor {
     private final SecurityService securityService;
 
     /* TODO: REFACTOR THIS
-    *   Throws error for unathenticated user
-    *   Think about allowing posting requests
+    *   Throws error for unathenticated user on API side - FIXING BY NOT ALLOWING UNAUTHENTICATED USERS TO THIS METHOD
+    *   Think about API part, allowing to POST for other users too, or just for logged in
     * */
 
     public Expense convertToExpense(ExpenseRequest expenseRequest) {
-        Expense expense = new Expense();
-
-        expense.setName(expenseRequest.getName());
-        expense.setAmount(expenseRequest.getAmount());
-        expense.setStartDate(expenseRequest.getStartDate());
-        expense.setExpireDate(expenseRequest.getExpireDate());
-        expense.setDescription(expenseRequest.getDescription());
-
-        String timestampName = expenseRequest.getTimestampName();
-        Timestamp timestamp = timestampService.getTimestampByName(timestampName);
-        expense.setTimestamp(timestamp);
-
-        String categoryName = expenseRequest.getCategoryName();
-        Category category = categoryService.getCategoryByName(categoryName);
-        expense.setCategory(category);
-
         String userEmailOrUsername = Objects.requireNonNullElse(expenseRequest.getUserEmailOrUsername(),
                 securityService.getAuthenticatedUser().getUsername());
 
         User user = userService.findByUsernameOrEmailIgnoreCase(userEmailOrUsername)
                 .orElseThrow(() -> new UsernameNotFoundException("User with such username or email not found!"));
-        expense.setUser(user);
 
-        return expense;
+        return convertToExpense(expenseRequest, user);
     }
 
     public Expense convertToExpense(ExpenseRequest expenseRequest, User user) {
