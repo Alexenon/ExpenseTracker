@@ -1,6 +1,6 @@
 package com.example.application.services;
 
-import com.example.application.dtos.Timestamps;
+import com.example.application.data.enums.Timestamps;
 import com.example.application.entities.Timestamp;
 import com.example.application.repositories.TimestampRepository;
 import org.springframework.stereotype.Service;

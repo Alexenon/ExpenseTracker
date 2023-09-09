@@ -248,7 +248,7 @@
   "light_theme": "{\n  \"lumoImports\" : [ \"typography\", \"color\", \"spacing\", \"badge\", \"utility\" ]\n}"
  },
  "entryScripts": [
-  "VAADIN/build/indexhtml-3176accc.js"
+  "VAADIN/build/indexhtml-408b4199.js"
  ],
  "webComponents": [],
  "packageJsonHash": "a89b689ec344ccdc7b126a3605399c2171141918d2911a0efd1d21aa157c62b8"

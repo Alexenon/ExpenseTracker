@@ -1,4 +1,4 @@
-package com.example.application.dtos;
+package com.example.application.data.requests;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;

@@ -1,9 +1,9 @@
-package com.example.application.dtos;
+package com.example.application.data.enums;
 
 public enum Categories {
     Food_And_Drinks,
     Services,
-    Transport,
+    Transport, // TODO: This will THROW error, because it doesn't exists in database
     Distractions,
     Others;
 

@@ -1,11 +1,10 @@
 package com.example.application.services;
 
-import com.example.application.dtos.RegistrationUserDTO;
+import com.example.application.data.requests.RegisterUserRequest;
 import com.example.application.entities.User;
 import com.example.application.exceptions.UserExistException;
 import com.example.application.repositories.RoleRepository;
 import com.example.application.repositories.UserRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -60,28 +59,18 @@ public class UserService implements UserDetailsService {
         );
     }
 
-    public User createNewUser(RegistrationUserDTO registrationUserDto) {
-        if (findByUsernameIgnoreCase(registrationUserDto.getUsername()).isPresent()) {
-            throw new UserExistException("There is already a user with this username");
+    public User createNewUser(RegisterUserRequest request) {
+        if (!request.getPassword().equals(request.getConfirmPassword())) {
+            throw new IllegalArgumentException("Passwords do not match");
         }
 
         User user = new User();
-        user.setUsername(registrationUserDto.getUsername());
-        user.setEmail(registrationUserDto.getEmail());
-        user.setPassword(passwordEncoder.encode(registrationUserDto.getPassword()));
+        user.setUsername(request.getUsername());
+        user.setEmail(request.getEmail());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRoles(List.of(roleRepository.findByName("ROLE_USER").orElseThrow()));
-        return userRepository.save(user);
-    }
 
-    public User createNewUser2(RegistrationUserDTO registrationUserDto) {
-        if (findByUsernameIgnoreCase(registrationUserDto.getUsername()).isPresent()) {
-            throw new UserExistException("There is already a user with this username");
-        }
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        User user = objectMapper.convertValue(registrationUserDto, User.class);
-
-        return userRepository.save(user);
+        return createNewUser(user);
     }
 
     public User createNewUser(User user) {

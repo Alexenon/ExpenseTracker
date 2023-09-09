@@ -1,7 +1,7 @@
 package com.example.application.services;
 
-import com.example.application.dtos.ExpenseDTO;
-import com.example.application.dtos.Timestamps;
+import com.example.application.data.dtos.ExpenseDTO;
+import com.example.application.data.enums.Timestamps;
 import com.example.application.entities.Expense;
 import com.example.application.repositories.ExpenseRepository;
 import org.springframework.stereotype.Service;

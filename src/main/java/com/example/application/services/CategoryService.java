@@ -1,6 +1,6 @@
 package com.example.application.services;
 
-import com.example.application.dtos.Categories;
+import com.example.application.data.enums.Categories;
 import com.example.application.entities.Category;
 import com.example.application.repositories.CategoryRepository;
 import org.springframework.stereotype.Service;

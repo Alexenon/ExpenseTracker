@@ -1,11 +1,6 @@
-package com.example.application.dtos;
+package com.example.application.data.dtos;
 
 public interface RegistrationUserDTO {
-
-    // TODO: Add validation
-    //  - Replace entity everywhere with dtos
-    //  - Add finally jwt token
-
 
     String getUsername();
 

@@ -1,6 +1,6 @@
 package com.example.application.views.main;
 
-import com.example.application.dtos.ExpenseDTO;
+import com.example.application.data.dtos.ExpenseDTO;
 import com.example.application.services.ExpenseService;
 import com.example.application.services.SecurityService;
 import com.example.application.utils.ExpenseConvertor;
