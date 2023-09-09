@@ -3,10 +3,13 @@ package com.example.application.views.main;
 import com.example.application.entities.User;
 import com.example.application.services.UserService;
 import com.example.application.views.main.components.RegisterComponent;
+import com.example.application.views.main.components.basic_components.NativeTextField;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Input;
 import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.validator.EmailValidator;
 import com.vaadin.flow.router.PageTitle;
@@ -23,11 +26,11 @@ public class RegistrationView extends Main {
 
     private static final Logger logger = LoggerFactory.getLogger(RegistrationView.class);
 
-    private final Binder<User> binder;
-    private final RegisterComponent registerComponent;
-
     @Autowired
     private UserService userService;
+
+    private final Binder<User> binder;
+    private final RegisterComponent registerComponent;
 
     public RegistrationView() {
         binder = new Binder<>(User.class);
@@ -57,7 +60,7 @@ public class RegistrationView extends Main {
             }
         });
 
-        add(title, registerComponent);
+//        add(title, registerComponent);
     }
 
     private void initBinder() {
@@ -85,6 +88,36 @@ public class RegistrationView extends Main {
                 .withValidator(new EmailValidator("Please enter a valid email address"))
                 .withValidator(s -> userService.findByEmailIgnoreCase(s).isEmpty(), "This email is already used")
                 .bind(User::getEmail, User::setEmail);
+
+        TextField textField = new TextField();
+        textField.addClassName("no-style");
+        textField.setPlaceholder("Text Field");
+
+        binder.forField(textField)
+                .asRequired("Please fill this field")
+                .withValidator(s -> s.length() > 3, "Field must contain at least 4 characters")
+                .withValidator(s -> s.length() < 6, "Field must contain less than 6 characters")
+                .bind(User::getPassword, User::setPassword);
+
+        Input input = new Input();
+        input.setPlaceholder("Input");
+
+        binder.forField(input)
+                .asRequired("Please fill this field")
+                .withValidator(s -> s.length() > 3, "Field must contain at least 4 characters")
+                .withValidator(s -> s.length() < 6, "Field must contain less than 6 characters")
+                .bind(User::getPassword, User::setPassword);
+
+        NativeTextField nativeL = new NativeTextField();
+        nativeL.setPlaceholder("Input");
+
+        binder.forField(nativeL)
+                .asRequired("Please fill this field")
+                .withValidator(s -> s.length() > 3, "Field must contain at least 4 characters")
+                .withValidator(s -> s.length() < 6, "Field must contain less than 6 characters")
+                .bind(User::getPassword, User::setPassword);
+
+        add(textField, input, nativeL, registerComponent.getSubmitButton());
     }
 
     private void showSuccesfullNotification() {

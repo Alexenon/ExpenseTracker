@@ -68,12 +68,15 @@
     width: 100%;
 }
 
+vaadin-text-field.input-field,
 .input-field {
     position: relative;
     height: 55px;
     width: 100%;
 }
 
+
+vaadin-text-field::part(input-field),
 input {
     height: 100%;
     width: 100%;

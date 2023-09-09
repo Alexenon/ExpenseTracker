@@ -21,6 +21,15 @@ public class RegisterForm extends Div {
     @Getter
     private final Button submitBtn;
 
+    //
+    String s = """
+    <div class="field-container">
+        <input/>
+        <div part="input-field"/>
+        <div part="error-message"/>
+    </div>
+            """;
+
     public RegisterForm() {
         username = new NativeInput("username", "text", "Enter your username");
         email = new NativeInput("email", "email", "Enter your email");
