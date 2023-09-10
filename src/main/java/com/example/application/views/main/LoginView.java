@@ -34,12 +34,12 @@ public class LoginView extends Main implements BeforeEnterObserver {
         Div content = new Div();
         content.addClassNames("content");
 
-        H3 h3 = new H3("New here ?");
-        Paragraph p = new Paragraph("Lorem ipsum, dolor sit amet consectetur adipisicing elit. Debitis, ex ratione. Aliquid!");
+        H3 h3 = new H3("Welcome to IncomeMate!");
+        Paragraph p = new Paragraph("Enter your personal details and start journey with us!");
         Button btn = new Button("Sign up", e -> getUI().ifPresent(ui -> ui.navigate(RegistrationView.class)));
         btn.addClassNames("btn", "transparent");
 
-        Image image = new Image("images/logo_black.png", "Login panel image");
+        Image image = new Image("images/log.svg", "Login page background image");
         image.addClassName("image");
 
         content.add(h3, p, btn);

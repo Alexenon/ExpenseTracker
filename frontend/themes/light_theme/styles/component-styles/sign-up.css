@@ -32,6 +32,14 @@ form > vaadin-text-field::part(error-message) {
     background-color: var(--background);
 }
 
+form > vaadin-text-field::part(error-message)::before {
+    content: url('/icons/error-icon.jpg');
+    margin-right: 4px;
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+}
+
 .position-right {
     left: 50%;
 }
