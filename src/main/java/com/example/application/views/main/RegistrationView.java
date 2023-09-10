@@ -3,11 +3,7 @@ package com.example.application.views.main;
 import com.example.application.entities.User;
 import com.example.application.services.UserService;
 import com.example.application.views.main.components.RegisterComponent;
-import com.example.application.views.main.components.basic_components.NativeInput;
-import com.example.application.views.main.components.basic_components.NativeTextField;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Input;
 import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
@@ -27,16 +23,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class RegistrationView extends Main {
 
     private static final Logger logger = LoggerFactory.getLogger(RegistrationView.class);
-
-    @Autowired
-    private UserService userService;
-
     private final Binder<User> binder;
     private final RegisterComponent registerComponent;
+    @Autowired
+    private UserService userService;
 
     public RegistrationView() {
         binder = new Binder<>(User.class);
         registerComponent = new RegisterComponent();
+        registerComponent.addClassName("signup-container");
+
+        TextField field = new TextField();
+        field.setPlaceholder("Field");
+        add(field);
+
+        add(registerComponent);
 
         initBinder();
         initContent();
@@ -44,7 +45,7 @@ public class RegistrationView extends Main {
 
     public void initContent() {
         logger.info("Accessed registration page");
-        addClassName("page-content");
+        addClassName("register-page");
 
         H2 title = new H2("Register");
 
@@ -77,7 +78,8 @@ public class RegistrationView extends Main {
         binder.forField(registerComponent.getPasswordField())
                 .asRequired("Please fill this field")
                 .withValidator(t -> t.length() > 3, "Password must contain at least 4 characters")
-                .withValidator(s -> s.length() < 12, "Password must contain less than 12 characters");
+                .withValidator(s -> s.length() < 12, "Password must contain less than 12 characters")
+                .bind(User::getPassword, User::setPassword);
 
         binder.forField(registerComponent.getConfirmPasswordField())
                 .asRequired("Please fill this field")
@@ -90,38 +92,6 @@ public class RegistrationView extends Main {
                 .withValidator(new EmailValidator("Please enter a valid email address"))
                 .withValidator(s -> userService.findByEmailIgnoreCase(s).isEmpty(), "This email is already used")
                 .bind(User::getEmail, User::setEmail);
-
-        TextField textField = new TextField();
-        textField.addClassName("no-style");
-        textField.setPlaceholder("Text Field");
-
-        binder.forField(textField)
-                .asRequired("Please fill this field")
-                .withValidator(s -> s.length() > 3, "Field must contain at least 4 characters")
-                .withValidator(s -> s.length() < 6, "Field must contain less than 6 characters")
-                .bind(User::getPassword, User::setPassword);
-
-        Input input = new Input();
-        input.setPlaceholder("Input");
-
-        binder.forField(input)
-                .asRequired("Please fill this field")
-                .withValidator(s -> s.length() > 3, "Field must contain at least 4 characters")
-                .withValidator(s -> s.length() < 6, "Field must contain less than 6 characters")
-                .bind(User::getPassword, User::setPassword);
-
-        NativeTextField nativeL = new NativeTextField();
-        nativeL.setPlaceholder("Input");
-
-        binder.forField(nativeL)
-                .asRequired("Please fill this field")
-                .withValidator(s -> s.length() > 3, "Field must contain at least 4 characters")
-                .withValidator(s -> s.length() < 6, "Field must contain less than 6 characters")
-                .bind(User::getPassword, User::setPassword);
-
-        Div nativeInput = registerComponent.getDiv();
-
-        add(registerComponent);
     }
 
     private void showSuccesfullNotification() {

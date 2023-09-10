@@ -7,28 +7,30 @@
     left: 25%;
 }
 
-vaadin-text-field {
+form > vaadin-text-field {
     margin-bottom: 20px;
-    max-width: 370px;
-    width: 100%;
-    background-color: white;
+    width: 15rem;
+    max-width: 300px;
 }
 
-vaadin-text-field::part(input-field) {
+form > vaadin-text-field::part(input-field) {
     position: relative;
-    height: 55px;
-    width: 100%;
-    background-color: white;
     padding: 0px;
-    /*border-radius: 8px;
-    border: 1px solid var(--input-border);*/
+    height: 55px;
+    border-radius: 8px;
+    border: 1px solid var(--input-border);
+    background-color: white;
 }
 
-vaadin-text-field > input {
-    font-size: 13.333px;
+form > vaadin-text-field > input {
+    padding: 0 15px;
+    font-size: 14px;
     font-weight: 400;
 }
 
+form > vaadin-text-field::part(error-message) {
+    background-color: var(--background);
+}
 
 .position-right {
     left: 50%;

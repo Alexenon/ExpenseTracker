@@ -1,85 +1,33 @@
 package com.example.application.views.main.components.complex_components.forms;
 
-import com.example.application.views.main.components.basic_components.NativeInput;
-import com.vaadin.flow.component.Component;
+import com.example.application.views.main.components.basic_components.Form;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.textfield.TextField;
 import lombok.Getter;
 
 @Tag("form")
-public class RegisterForm extends Div {
+public class RegisterForm extends Form {
 
     @Getter
-    private final NativeInput username;
+    private final TextField username;
     @Getter
-    private final NativeInput email;
+    private final TextField password;
     @Getter
-    private final NativeInput password;
+    private final TextField confirmPassword;
     @Getter
-    private final NativeInput confirmPassword;
+    private final TextField email;
     @Getter
     private final Button submitBtn;
 
-    private final TextField textField;
-
-    //
-    String s = """
-    <div class="field-container">
-        <input/>
-        <div part="input-field"/>
-        <div part="error-message"/>
-    </div>
-            """;
-
     public RegisterForm() {
-        username = new NativeInput("username", "text", "Enter your username");
-        email = new NativeInput("email", "email", "Enter your email");
-        password = new NativeInput("password", "password", "Enter password");
-        confirmPassword = new NativeInput("confirm-password", "password", "Enter confirmation password");
+        username = new TextField(null, "Enter your username");
+        password = new TextField(null, "Enter password");
+        confirmPassword = new TextField(null, "Enter confirm password");
+        email = new TextField(null, "Enter your email");
         submitBtn = new Button("Submit Now");
 
-        textField = new TextField();
-        textField.setPlaceholder("Text Field");
-
-        initForm();
-    }
-
-    private void initForm() {
-        Div usernameField = getField(username, "username");
-        Div emailField = getField(email, "password");
-        Div passwordField = getField(password, "password");
-        Div confirmPasswordField = getField(confirmPassword, "confirm-password");
-
-        Div submitField = getInputField(submitBtn);
-        submitField.addClassNames("btn");
-
-        add(
-                usernameField,
-                emailField,
-                passwordField,
-                confirmPasswordField,
-                textField,
-                submitField
-        );
-    }
-
-    private Div getField(Component field, String name) {
-        Div inputField = getInputField(field);
-        Div div = new Div(inputField);
-        div.addClassNames("field", name);
-        return div;
-    }
-
-    private Div getInputField(Component field) {
-        Div div = new Div(field);
-        div.addClassName("input-field");
-        return div;
-    }
-
-    public Div getFieldMe() {
-        return getField(username, "username");
+        add(username, password, confirmPassword, email, submitBtn);
     }
 
 }
