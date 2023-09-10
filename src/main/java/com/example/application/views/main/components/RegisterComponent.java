@@ -36,4 +36,8 @@ public class RegisterComponent extends Div {
         return registerForm.getSubmitBtn();
     }
 
+    public Div getDiv() {
+        return registerForm.getFieldMe();
+    }
+
 }

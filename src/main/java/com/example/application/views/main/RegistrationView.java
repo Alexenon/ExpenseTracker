@@ -3,7 +3,9 @@ package com.example.application.views.main;
 import com.example.application.entities.User;
 import com.example.application.services.UserService;
 import com.example.application.views.main.components.RegisterComponent;
+import com.example.application.views.main.components.basic_components.NativeInput;
 import com.example.application.views.main.components.basic_components.NativeTextField;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Input;
 import com.vaadin.flow.component.html.Main;
@@ -117,7 +119,9 @@ public class RegistrationView extends Main {
                 .withValidator(s -> s.length() < 6, "Field must contain less than 6 characters")
                 .bind(User::getPassword, User::setPassword);
 
-        add(textField, input, nativeL, registerComponent.getSubmitButton());
+        Div nativeInput = registerComponent.getDiv();
+
+        add(registerComponent);
     }
 
     private void showSuccesfullNotification() {

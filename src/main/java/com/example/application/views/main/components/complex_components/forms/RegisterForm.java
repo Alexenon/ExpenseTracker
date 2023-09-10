@@ -5,6 +5,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.textfield.TextField;
 import lombok.Getter;
 
 @Tag("form")
@@ -21,6 +22,8 @@ public class RegisterForm extends Div {
     @Getter
     private final Button submitBtn;
 
+    private final TextField textField;
+
     //
     String s = """
     <div class="field-container">
@@ -36,6 +39,9 @@ public class RegisterForm extends Div {
         password = new NativeInput("password", "password", "Enter password");
         confirmPassword = new NativeInput("confirm-password", "password", "Enter confirmation password");
         submitBtn = new Button("Submit Now");
+
+        textField = new TextField();
+        textField.setPlaceholder("Text Field");
 
         initForm();
     }
@@ -54,6 +60,7 @@ public class RegisterForm extends Div {
                 emailField,
                 passwordField,
                 confirmPasswordField,
+                textField,
                 submitField
         );
     }
@@ -69,6 +76,10 @@ public class RegisterForm extends Div {
         Div div = new Div(field);
         div.addClassName("input-field");
         return div;
+    }
+
+    public Div getFieldMe() {
+        return getField(username, "username");
     }
 
 }
