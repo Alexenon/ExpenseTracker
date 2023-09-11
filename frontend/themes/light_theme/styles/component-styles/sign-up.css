@@ -28,16 +28,16 @@ form > vaadin-text-field > input {
     font-weight: 400;
 }
 
-form > vaadin-text-field::part(error-message) {
-    background-color: var(--background);
+form > vaadin-text-field::part(error-message)::before {
+    font-family: "lumo-icons";
+    content: var(--lumo-icons-error);
+    font-size: 16px;
+    height: 0px;
+    margin-top: 5px;
 }
 
-form > vaadin-text-field::part(error-message)::before {
-    content: url('/icons/error-icon.jpg');
-    margin-right: 4px;
-    width: 16px;
-    height: 16px;
-    display: inline-block;
+form > vaadin-text-field > [slot="error-message"] {
+    margin: 3px 0px 0px 20px;
 }
 
 .position-right {
