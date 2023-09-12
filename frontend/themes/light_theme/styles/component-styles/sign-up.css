@@ -7,12 +7,22 @@
     left: 25%;
 }
 
+/*
+TODO: Remove following
+    - input (all relatable)
+    - .error (all relatable)
+    - .btn
+    - .invalid
+*/
+
+form > vaadin-password-field,
 form > vaadin-text-field {
-    margin-bottom: 20px;
-    width: 15rem;
+    margin-bottom: 10px;
+    width: 20rem;
     max-width: 300px;
 }
 
+form > vaadin-password-field::part(input-field),
 form > vaadin-text-field::part(input-field) {
     position: relative;
     padding: 0px;
@@ -22,22 +32,46 @@ form > vaadin-text-field::part(input-field) {
     background-color: white;
 }
 
+form > vaadin-password-field > input,
 form > vaadin-text-field > input {
     padding: 0 15px;
     font-size: 14px;
     font-weight: 400;
 }
 
+form > vaadin-password-field::part(error-message)::before,
 form > vaadin-text-field::part(error-message)::before {
     font-family: "lumo-icons";
     content: var(--lumo-icons-error);
-    font-size: 16px;
     height: 0px;
+    font-size: 18px;
+    margin-top: 5px;
+    transition: height 0.1s ease, content 0s;
+}
+
+form > vaadin-password-field > [slot="error-message"],
+form > vaadin-text-field > [slot="error-message"] {
+    margin: 3px 0px 0px 20px;
+}
+
+form > vaadin-password-field::part(reveal-button) {
+    margin-right: 10px;
+}
+
+.submit-btn {
+    height: 50px;
+    max-width: 150px;
+    border-radius: 8px;
+    border: 1px solid var(--input-border);
+    background-color: white;
+    padding: 5px 20px;
     margin-top: 5px;
 }
 
-form > vaadin-text-field > [slot="error-message"] {
-    margin: 3px 0px 0px 20px;
+.submit-btn:hover {
+    cursor: pointer;
+    background-color: lightgray;
+    border: 1px solid gray;
 }
 
 .position-right {

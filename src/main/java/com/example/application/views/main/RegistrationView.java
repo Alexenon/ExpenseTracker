@@ -2,7 +2,7 @@ package com.example.application.views.main;
 
 import com.example.application.entities.User;
 import com.example.application.services.UserService;
-import com.example.application.views.main.components.RegisterComponent;
+import com.example.application.views.main.components.complex_components.forms.RegisterForm;
 import com.example.application.views.main.components.utils.HasNotifications;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.*;
@@ -23,14 +23,14 @@ public class RegistrationView extends Main implements HasNotifications {
     private static final Logger logger = LoggerFactory.getLogger(RegistrationView.class);
 
     private final Binder<User> binder;
-    private final RegisterComponent registerComponent;
+    private final RegisterForm registerForm;
 
     @Autowired
     private UserService userService;
 
     public RegistrationView() {
         binder = new Binder<>(User.class);
-        registerComponent = new RegisterComponent();
+        registerForm = new RegisterForm();
 
         initBinder();
         initContent();
@@ -41,16 +41,20 @@ public class RegistrationView extends Main implements HasNotifications {
         addClassName("register-page");
 
         H2 title = new H2("Register");
-        Div panelContainer = getPanelContainer();
-        registerComponent.addClassName("signup-container");
-
+        title.addClassName("title");
+        registerForm.addClassName("sign-up-form");
+        registerForm.addComponentAsFirst(title);
+        registerForm.getSubmitBtn().addClassName("submit-btn");
         addSubmitListener();
 
-        add(title, registerComponent, panelContainer);
+        Div registerContainer = new Div(registerForm);
+        registerContainer.addClassName("signup-container");
+
+        add(registerContainer, getPanelContainer());
     }
 
     private void addSubmitListener() {
-        registerComponent.getSubmitButton().addClickListener(e -> {
+        registerForm.getSubmitBtn().addClickListener(e -> {
             logger.info("Clicked");
             if (binder.validate().isOk()) {
                 User user = binder.getBean();
@@ -88,26 +92,26 @@ public class RegistrationView extends Main implements HasNotifications {
 
     private void initBinder() {
         binder.setBean(new User());
-        binder.forField(registerComponent.getUsernameField())
+        binder.forField(registerForm.getUsername())
                 .asRequired("Please fill this field")
                 .withValidator(s -> s.length() > 3, "Username must contain at least 4 characters")
                 .withValidator(s -> s.length() < 12, "Username must contain less than 12 characters")
                 .withValidator(s -> userService.findByUsernameIgnoreCase(s).isEmpty(), "Username already exists")
                 .bind(User::getUsername, User::setUsername);
 
-        binder.forField(registerComponent.getPasswordField())
+        binder.forField(registerForm.getPassword())
                 .asRequired("Please fill this field")
                 .withValidator(t -> t.length() > 3, "Password must contain at least 4 characters")
                 .withValidator(s -> s.length() < 12, "Password must contain less than 12 characters")
                 .bind(User::getPassword, User::setPassword);
 
-        binder.forField(registerComponent.getConfirmPasswordField())
+        binder.forField(registerForm.getConfirmPassword())
                 .asRequired("Please fill this field")
                 .withValidator(s -> s.length() > 3, "Password must contain at least 4 characters")
-                .withValidator(s -> s.equals(registerComponent.getPasswordField().getValue()), "Passwords don't match")
+                .withValidator(s -> s.equals(registerForm.getPassword().getValue()), "Passwords don't match")
                 .bind(User::getPassword, User::setPassword);
 
-        binder.forField(registerComponent.getEmailField())
+        binder.forField(registerForm.getEmail())
                 .asRequired("Please fill this field")
                 .withValidator(new EmailValidator("Please enter a valid email address"))
                 .withValidator(s -> userService.findByEmailIgnoreCase(s).isEmpty(), "This email is already used")
