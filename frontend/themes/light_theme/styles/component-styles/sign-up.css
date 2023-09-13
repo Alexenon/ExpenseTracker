@@ -58,22 +58,6 @@ form > vaadin-password-field::part(reveal-button) {
     margin-right: 10px;
 }
 
-.submit-btn {
-    height: 50px;
-    max-width: 150px;
-    border-radius: 8px;
-    border: 1px solid var(--input-border);
-    background-color: white;
-    padding: 5px 20px;
-    margin-top: 5px;
-}
-
-.submit-btn:hover {
-    cursor: pointer;
-    background-color: lightgray;
-    border: 1px solid gray;
-}
-
 .position-right {
     left: 50%;
 }

@@ -1,6 +1,5 @@
 package com.example.application.views.main.components;
 
-import com.example.application.views.main.components.basic_components.NativeInput;
 import com.example.application.views.main.components.complex_components.forms.LoginForm;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.html.Div;
@@ -29,14 +28,6 @@ public class LoginComponent extends Div {
         H2 title = new H2("Sign in");
         title.addClassName("title");
         return title;
-    }
-
-    public NativeInput getUsernameField() {
-        return loginForm.getUsername();
-    }
-
-    public NativeInput getPasswordField() {
-        return loginForm.getPassword();
     }
 
     public void setError(boolean error) {
