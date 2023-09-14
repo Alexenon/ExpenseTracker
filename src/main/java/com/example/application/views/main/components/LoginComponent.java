@@ -14,7 +14,7 @@ public class LoginComponent extends Div {
 
     public LoginComponent() {
         loginForm = new LoginForm();
-        loginForm.addClassName("sign-in-form");
+        loginForm.setId("login-form");
         loginForm.addComponentAsFirst(getFormTitle());
 
         errorWrapper = new ErrorWrapper();

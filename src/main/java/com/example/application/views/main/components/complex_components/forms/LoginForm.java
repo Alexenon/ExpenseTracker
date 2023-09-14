@@ -28,13 +28,13 @@ public class LoginForm extends Form {
 
         username.setId("username-field");
         password.setId("password-field");
-        submitBtn.addClassName("submit-btn");
+        submitBtn.setId("submit-btn");
 
         add(username, password, submitBtn);
-        setupFields();
+        setupAtributesForInputFields();
     }
 
-    private void setupFields() {
+    private void setupAtributesForInputFields() {
         String script = """
                 const usernameField = document.getElementById('username-field');
                 const usernameInput = usernameField.querySelector('input');

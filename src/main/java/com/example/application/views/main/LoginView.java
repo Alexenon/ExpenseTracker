@@ -2,6 +2,8 @@ package com.example.application.views.main;
 
 import com.example.application.views.main.components.LoginComponent;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
@@ -12,14 +14,15 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 @AnonymousAllowed
 @PageTitle("Login")
 @Route(value = "login")
+@CssImport("./themes/light_theme/styles/page-styles/auth-pages.css")
 public class LoginView extends Main implements BeforeEnterObserver {
 
     private final LoginComponent loginComponent;
 
     public LoginView() {
-        addClassName("login-page");
+        setId("login-page");
         loginComponent = new LoginComponent();
-        loginComponent.addClassName("signin-container");
+        loginComponent.addClassName("login-container");
 
         Div panelsContainer = new Div(getPanelContent());
         panelsContainer.addClassNames("panels-container", "position-left");

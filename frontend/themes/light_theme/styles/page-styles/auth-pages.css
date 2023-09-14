@@ -1,0 +1,179 @@
+@import '../component-styles/auth-form.css';
+@import '../page-styles/login-page.css';
+@import '../page-styles/register-page.css';
+
+#login-page,
+#register-page {
+    position: relative;
+    width: 100%;
+    background-color: var(--background);
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+#login-page:before,
+#register-page:before {
+    content: "";
+    position: absolute;
+    height: 2000px;
+    width: 2000px;
+    top: -10%;
+    background-color: var(--main);
+    border-radius: 50%;
+    z-index: 6;
+}
+
+.login-container,
+.register-container {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 50%;
+    display: grid;
+    grid-template-columns: 1fr;
+    z-index: 5;
+}
+
+.panels-container {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    top: 0;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.panel {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: space-around;
+    text-align: center;
+    z-index: 6;
+}
+
+.panel .content {
+    color: var(--color-white);
+}
+
+.image {
+    width: 100%;
+}
+
+.btn {
+    max-width: 150px;
+    background-color: var(--color-white);
+    height: 50px;
+    cursor: pointer;
+    border-radius: 8px;
+    color: var(--color-white);
+    font-weight: 600;
+    margin: 10px 0;
+}
+
+.panel h3 {
+    font-weight: 600;
+    line-height: 1;
+    font-size: 1.5rem;
+}
+
+.panel p {
+    font-size: 0.95rem;
+    padding: 0.7rem 0;
+}
+
+.btn.transparent {
+    background: none;
+    border: 2px solid var(--color-white);
+    width: 130px;
+    height: 41px;
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+@media (max-width: 870px) {
+    #login-page,
+    #register-page {
+        min-height: 800px;
+        height: 100vh;
+    }
+
+    #login-page:before,
+    #register-page:before {
+        width: 1500px;
+        height: 1500px;
+        transform: translateX(-50%);
+        left: 30%;
+        bottom: 68%;
+        right: initial;
+        top: initial;
+    }
+
+    .login-container,
+    .register-container {
+        width: 100%;
+        top: 95%;
+        left: 50%;
+        transform: translate(-50%, -100%);
+    }
+
+    .panels-container {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr 2fr 1fr;
+    }
+
+    .panel {
+        flex-direction: row;
+        justify-content: space-around;
+        align-items: center;
+        padding: 2.5rem 8%;
+        grid-column: 1 / 2;
+    }
+
+    .image {
+        width: 200px;
+    }
+
+    .panel .content {
+        padding-right: 15%;
+    }
+
+    .panel h3 {
+        font-size: 1.2rem;
+    }
+
+    .panel p {
+        font-size: 0.7rem;
+        padding: 0.5rem 0;
+    }
+
+    .btn.transparent {
+        width: 110px;
+        height: 35px;
+        font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 570px) {
+    #login-page {
+        padding: 1.5rem;
+    }
+
+    #login-page:before,
+    #register-page {
+        bottom: 72%;
+        left: 50%;
+    }
+
+    form {
+        padding: 0 1.5rem;
+    }
+
+    .panel .content {
+        padding: 0.5rem 1rem;
+    }
+
+    .image {
+        display: none;
+    }
+}

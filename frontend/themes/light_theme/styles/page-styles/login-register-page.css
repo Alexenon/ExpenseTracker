@@ -1,0 +1,280 @@
+/*
+ * Here are styles for Login, Register and ForgotPassword pages
+ */
+
+@import '../component-styles/sign-in.css';
+@import '../component-styles/sign-up.css';
+
+/*
+* TODO: Rename weird class names
+* TODO: Refactor code below
+*/
+
+.login-page,
+.register-page {
+    position: relative;
+    width: 100%;
+    background-color: var(--background);
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+.login-page:before,
+.register-page:before {
+    content: "";
+    position: absolute;
+    height: 2000px;
+    width: 2000px;
+    top: -10%;
+    background-color: var(--main);
+    border-radius: 50%;
+    z-index: 6;
+}
+
+.signin-container,
+.signup-container {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 50%;
+    display: grid;
+    grid-template-columns: 1fr;
+    z-index: 5;
+}
+
+.sign-in-form,
+.sign-up-form {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    margin-top: 30px;
+    padding: 0rem 5rem;
+    overflow: hidden;
+    grid-column: 1 / 2;
+}
+
+.title {
+    font-size: 2.2rem;
+    color: #444;
+    margin-bottom: 20px;
+}
+
+.field {
+    margin-bottom: 10px;
+    max-width: 370px;
+    width: 100%;
+}
+
+.input-field {
+    position: relative;
+    height: 55px;
+    width: 100%;
+}
+
+input.input-component {
+    height: 100%;
+    width: 100%;
+    border-radius: 8px;
+    padding: 0 15px;
+    border: 1px solid var(--input-border);
+}
+
+.invalid input {
+    border-color: var(--invalid);
+}
+
+.show-hide {
+    position: absolute;
+    right: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;
+    color: var(--show-hide);
+    cursor: pointer;
+    padding: 3px;
+}
+
+.invalid .error {
+    display: flex;
+}
+
+.error {
+    display: flex;
+    align-items: center;
+    margin-top: 6px;
+    color: var(--invalid);
+    font-size: 13px;
+    display: none;
+}
+
+.error-icon {
+    margin-right: 6px;
+    font-size: 15px;
+}
+
+.btn {
+    max-width: 150px;
+    background-color: var(--color-white);
+    height: 50px;
+    cursor: pointer;
+    border-radius: 8px;
+    color: var(--color-white);
+    font-weight: 600;
+    margin: 10px 0;
+}
+
+.submit-btn {
+    height: 50px;
+    max-width: 150px;
+    border-radius: 8px;
+    border: 1px solid var(--input-border);
+    background-color: white;
+    padding: 5px 20px;
+    margin-top: 5px;
+}
+
+.submit-btn:hover {
+    cursor: pointer;
+    background-color: lightgray;
+    border: 1px solid gray;
+}
+
+
+.image {
+    width: 100%;
+}
+
+.panels-container {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    top: 0;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.panel {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: space-around;
+    text-align: center;
+    z-index: 6;
+}
+
+.panel .content {
+    color: var(--color-white);
+}
+
+.panel h3 {
+    font-weight: 600;
+    line-height: 1;
+    font-size: 1.5rem;
+}
+
+.panel p {
+    font-size: 0.95rem;
+    padding: 0.7rem 0;
+}
+
+.btn.transparent {
+    background: none;
+    border: 2px solid var(--color-white);
+    width: 130px;
+    height: 41px;
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+@media (max-width: 870px) {
+    .login-page,
+    .register-page {
+        min-height: 800px;
+        height: 100vh;
+    }
+
+    .signin-container,
+    .signup-container {
+        width: 100%;
+        top: 95%;
+        left: 50%;
+        transform: translate(-50%, -100%);
+    }
+
+    .panels-container {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr 2fr 1fr;
+    }
+
+    .panel {
+        flex-direction: row;
+        justify-content: space-around;
+        align-items: center;
+        padding: 2.5rem 8%;
+        grid-column: 1 / 2;
+    }
+
+    .image {
+        width: 200px;
+    }
+
+    .panel .content {
+        padding-right: 15%;
+    }
+
+    .panel h3 {
+        font-size: 1.2rem;
+    }
+
+    .panel p {
+        font-size: 0.7rem;
+        padding: 0.5rem 0;
+    }
+
+    .btn.transparent {
+        width: 110px;
+        height: 35px;
+        font-size: 0.7rem;
+    }
+
+    .login-page:before,
+    .register-page:before {
+        width: 1500px;
+        height: 1500px;
+        transform: translateX(-50%);
+        left: 30%;
+        bottom: 68%;
+        right: initial;
+        top: initial;
+    }
+}
+
+@media (max-width: 570px) {
+    form {
+        padding: 0 1.5rem;
+    }
+
+    .image {
+        display: none;
+    }
+
+    .panel .content {
+        padding: 0.5rem 1rem;
+    }
+
+    .login-page {
+        padding: 1.5rem;
+    }
+
+    .login-page:before,
+    .register-page {
+        bottom: 72%;
+        left: 50%;
+    }
+
+    .sign-up-mode:before {
+        bottom: 28%;
+        left: 50%;
+    }
+}
