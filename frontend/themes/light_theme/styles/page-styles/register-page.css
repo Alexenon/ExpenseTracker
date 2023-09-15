@@ -1,0 +1,37 @@
+#register-page:before {
+    transform: translate(100%, -50%);
+    right: 52%;
+}
+
+.register-container {
+    left: 25%;
+}
+
+.position-right {
+    left: 50%;
+}
+
+.right-panel {
+    padding: 3rem 12% 2rem 17%;
+}
+
+@media (max-width: 870px) {
+    .register-container {
+        top: 5%;
+        transform: translate(-50%, 0);
+    }
+
+    .panels-container {
+        left: 0;
+    }
+
+    .right-panel {
+        grid-row: 3 / 4;
+    }
+
+    .right-panel .image,
+    .right-panel .content {
+        transform: translateY(-630px);
+    }
+
+}

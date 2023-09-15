@@ -63,7 +63,7 @@ form > vaadin-password-field::part(reveal-button) {
     margin-right: 10px;
 }
 
-#submit-btn {
+form > .submit-btn {
     height: 50px;
     max-width: 150px;
     border-radius: 8px;
@@ -73,7 +73,7 @@ form > vaadin-password-field::part(reveal-button) {
     margin-top: 5px;
 }
 
-#submit-btn:hover {
+form > .submit-btn:hover {
     cursor: pointer;
     background-color: lightgray;
     border: 1px solid gray;

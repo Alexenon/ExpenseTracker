@@ -3,7 +3,6 @@ package com.example.application.views.main;
 import com.example.application.views.main.components.LoginComponent;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
-import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
@@ -24,31 +23,28 @@ public class LoginView extends Main implements BeforeEnterObserver {
         loginComponent = new LoginComponent();
         loginComponent.addClassName("login-container");
 
-        Div panelsContainer = new Div(getPanelContent());
-        panelsContainer.addClassNames("panels-container", "position-left");
-
-        add(loginComponent, panelsContainer);
+        add(loginComponent, getPanelContainer());
     }
 
-    private Div getPanelContent() {
-        Div leftPanel = new Div();
-        leftPanel.addClassNames("panel", "left-panel");
-
-        Div content = new Div();
-        content.addClassNames("content");
-
+    private Div getPanelContainer() {
         H3 h3 = new H3("Welcome to IncomeMate!");
         Paragraph p = new Paragraph("Enter your personal details and start journey with us!");
-        Button btn = new Button("Sign up", e -> getUI().ifPresent(ui -> ui.navigate(RegistrationView.class)));
-        btn.addClassNames("btn", "transparent");
-
+        Button btn = new Button("Register", e -> getUI().ifPresent(ui -> ui.navigate(RegistrationView.class)));
         Image image = new Image("images/log.svg", "Login page background image");
+
+        btn.addClassNames("btn", "transparent");
         image.addClassName("image");
 
-        content.add(h3, p, btn);
-        leftPanel.add(content, image);
+        Div content = new Div(h3, p, btn);
+        content.addClassNames("content");
 
-        return leftPanel;
+        Div leftPanel = new Div(content, image);
+        leftPanel.addClassNames("panel", "left-panel");
+
+        Div panelsContainer = new Div(leftPanel);
+        panelsContainer.addClassNames("panels-container", "position-left");
+
+        return panelsContainer;
     }
 
     @Override

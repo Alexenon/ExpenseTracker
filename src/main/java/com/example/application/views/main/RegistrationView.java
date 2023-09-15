@@ -5,6 +5,7 @@ import com.example.application.services.UserService;
 import com.example.application.views.main.components.complex_components.forms.RegisterForm;
 import com.example.application.views.main.components.utils.HasNotifications;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.validator.EmailValidator;
@@ -18,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @AnonymousAllowed
 @PageTitle("Registation")
 @Route(value = "register")
+@CssImport("./themes/light_theme/styles/page-styles/auth-pages.css")
 public class RegistrationView extends Main implements HasNotifications {
 
     private static final Logger logger = LoggerFactory.getLogger(RegistrationView.class);
@@ -38,17 +40,17 @@ public class RegistrationView extends Main implements HasNotifications {
 
     public void initContent() {
         logger.info("Accessed registration page");
-        addClassName("register-page");
+        setId("register-page");
 
         H2 title = new H2("Register");
-        title.addClassName("title");
-        registerForm.addClassName("sign-up-form");
+        title.addClassName("form-title");
+        registerForm.setId("register-form");
         registerForm.addComponentAsFirst(title);
         registerForm.getSubmitBtn().addClassName("submit-btn");
         addSubmitListener();
 
         Div registerContainer = new Div(registerForm);
-        registerContainer.addClassName("signup-container");
+        registerContainer.addClassName("register-container");
 
         add(registerContainer, getPanelContainer());
     }
@@ -72,7 +74,7 @@ public class RegistrationView extends Main implements HasNotifications {
     private Div getPanelContainer() {
         H3 h3 = new H3("Welcome Back!");
         Paragraph p = new Paragraph("To keep connected with us please login with your personal info");
-        Button btn = new Button("Sign up", e -> getUI().ifPresent(ui -> ui.navigate(LoginView.class)));
+        Button btn = new Button("Log in", e -> getUI().ifPresent(ui -> ui.navigate(LoginView.class)));
         Image image = new Image("images/forgot.svg", "Register page background image");
 
         btn.addClassNames("btn", "transparent");
@@ -81,10 +83,10 @@ public class RegistrationView extends Main implements HasNotifications {
         Div content = new Div(h3, p, btn);
         content.addClassNames("content");
 
-        Div leftPanel = new Div(content, image);
-        leftPanel.addClassNames("panel", "right-panel");
+        Div rightPanel = new Div(content, image);
+        rightPanel.addClassNames("panel", "right-panel");
 
-        Div panelsContainer = new Div(leftPanel);
+        Div panelsContainer = new Div(rightPanel);
         panelsContainer.addClassNames("panels-container", "position-right");
 
         return panelsContainer;
