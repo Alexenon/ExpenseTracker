@@ -26,7 +26,7 @@ public class RegisterForm extends Form {
         email = new TextField(null, "Enter your email");
         password = new PasswordField(null, "Enter password");
         confirmPassword = new PasswordField(null, "Enter confirm password");
-        submitBtn = new NativeButton("Submit Now");
+        submitBtn = new NativeButton("Submit");
 
         add(username, email, password, confirmPassword, submitBtn);
     }

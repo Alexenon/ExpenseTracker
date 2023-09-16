@@ -65,16 +65,16 @@ form > vaadin-password-field::part(reveal-button) {
 
 form > .submit-btn {
     height: 50px;
-    max-width: 150px;
+    max-width: 200px;
     border-radius: 8px;
     border: 1px solid var(--input-border);
     background-color: white;
-    padding: 5px 20px;
+    padding: 5px 40px;
     margin-top: 5px;
+    font-size: 16px;
 }
 
 form > .submit-btn:hover {
     cursor: pointer;
-    background-color: lightgray;
-    border: 1px solid gray;
+    background-color: #f4f4f4;
 }

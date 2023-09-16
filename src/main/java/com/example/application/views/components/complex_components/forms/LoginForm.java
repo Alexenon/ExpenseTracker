@@ -27,7 +27,7 @@ public class LoginForm extends Form {
         title = new H2("Login");
         username = new TextField(null, "Enter your username");
         password = new PasswordField(null, "Enter password");
-        submitBtn = new NativeButton("Submit Now");
+        submitBtn = new NativeButton("Sign In");
 
         title.addClassName("form-title");
         username.setId("username-field");
