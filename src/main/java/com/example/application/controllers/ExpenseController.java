@@ -1,7 +1,7 @@
 package com.example.application.controllers;
 
-import com.example.application.dtos.ExpenseDTO;
-import com.example.application.dtos.ExpenseRequest;
+import com.example.application.data.dtos.ExpenseDTO;
+import com.example.application.data.requests.ExpenseRequest;
 import com.example.application.entities.Expense;
 import com.example.application.services.ExpenseService;
 import com.example.application.utils.ExpenseConvertor;

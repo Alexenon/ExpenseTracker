@@ -1,10 +1,10 @@
 package com.example.application.controllers;
 
-import com.example.application.dtos.RegistrationUserDTO;
-import com.example.application.entities.User;
-import com.example.application.services.UserService;
+import com.example.application.data.requests.RegisterUserRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,24 +12,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/users")
-@RequiredArgsConstructor
 public class UserController {
 
-    private final UserService userService;
+    @Autowired
+    private UserRequestHandler userRequestHandler;
 
-    @PostMapping("/add")
-    public void createNewUser(@Valid @RequestBody RegistrationUserDTO registrationUserDTO) {
-        userService.createNewUser(registrationUserDTO);
-    }
-
-    @PostMapping("/plus")
-    public void createNewUser2(@Valid @RequestBody RegistrationUserDTO registrationUserDTO) {
-        userService.createNewUser2(registrationUserDTO);
-    }
-
-    @PostMapping("/save")
-    public void createNewUser(@Valid @RequestBody User user) {
-        userService.createNewUser(user);
+    @PostMapping("/register")
+    public ResponseEntity<?> createNewUser(@Valid @RequestBody RegisterUserRequest registerUserRequest) {
+        return userRequestHandler.createNewUser(registerUserRequest);
     }
 
 }

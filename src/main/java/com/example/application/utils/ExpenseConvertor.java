@@ -1,6 +1,6 @@
 package com.example.application.utils;
 
-import com.example.application.dtos.ExpenseRequest;
+import com.example.application.data.requests.ExpenseRequest;
 import com.example.application.entities.Category;
 import com.example.application.entities.Expense;
 import com.example.application.entities.Timestamp;
@@ -24,28 +24,37 @@ public class ExpenseConvertor {
     private final CategoryService categoryService;
     private final SecurityService securityService;
 
+    /* TODO: REFACTOR THIS
+    *   Throws error for unathenticated user on API side - FIXING BY NOT ALLOWING UNAUTHENTICATED USERS TO THIS METHOD
+    *   Think about API part, allowing to POST for other users too, or just for logged in
+    * */
+
     public Expense convertToExpense(ExpenseRequest expenseRequest) {
+        String userEmailOrUsername = Objects.requireNonNullElse(expenseRequest.getUserEmailOrUsername(),
+                securityService.getAuthenticatedUser().getUsername());
+
+        User user = userService.findByUsernameOrEmailIgnoreCase(userEmailOrUsername)
+                .orElseThrow(() -> new UsernameNotFoundException("User with such username or email not found!"));
+
+        return convertToExpense(expenseRequest, user);
+    }
+
+    public Expense convertToExpense(ExpenseRequest expenseRequest, User user) {
         Expense expense = new Expense();
+
+        String timestampName = expenseRequest.getTimestampName();
+        Timestamp timestamp = timestampService.getTimestampByName(timestampName);
+
+        String categoryName = expenseRequest.getCategoryName();
+        Category category = categoryService.getCategoryByName(categoryName);
 
         expense.setName(expenseRequest.getName());
         expense.setAmount(expenseRequest.getAmount());
         expense.setStartDate(expenseRequest.getStartDate());
         expense.setExpireDate(expenseRequest.getExpireDate());
         expense.setDescription(expenseRequest.getDescription());
-
-        String timestampName = expenseRequest.getTimestampName();
-        Timestamp timestamp = timestampService.getTimestampByName(timestampName);
         expense.setTimestamp(timestamp);
-
-        String categoryName = expenseRequest.getCategoryName();
-        Category category = categoryService.getCategoryByName(categoryName);
         expense.setCategory(category);
-
-        String userEmailOrUsername = Objects.requireNonNullElse(expenseRequest.getUserEmailOrUsername(),
-                securityService.getAuthenticatedUser().getUsername());
-
-        User user = userService.findByUsernameOrEmailIgnoreCase(userEmailOrUsername)
-                .orElseThrow(() -> new UsernameNotFoundException("User with such username or email not found!"));
         expense.setUser(user);
 
         return expense;
