@@ -1,6 +1,7 @@
-@import 'components-style/header.css';
-@import 'components-style/chart.css';
-@import 'components-style/error-page.css';
+@import 'styles/component-styles/header.css';
+@import 'styles/component-styles/chart.css';
+@import 'styles/page-styles/error-page.css';
+@import 'styles/page-styles/auth-pages.css';
 
 :root {
     --main: #00BFA6;

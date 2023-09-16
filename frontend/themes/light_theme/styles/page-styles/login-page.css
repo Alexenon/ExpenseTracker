@@ -1,0 +1,45 @@
+#login-page:before {
+    transform: translateY(-50%);
+    right: 48%;
+}
+
+.login-container {
+    left: 75%;
+}
+
+.position-left {
+    left: 0;
+}
+
+.left-panel {
+    padding: 3rem 17% 2rem 12%;
+}
+
+.error-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f14f4f;
+    width: auto;
+    height: 100px;
+    margin: 0% 15% 0% 15%;
+    border-radius: 8px;
+}
+
+.error-wrapper > p {
+    color: snow;
+}
+
+.forgot-password {
+    display: flex;
+    justify-content: end;
+    align-items: flex-end;
+    color: var(--color-gray);
+    font-size: 13px;
+}
+
+@media (max-width: 870px) {
+    .left-panel {
+        grid-row: 1 / 2;
+    }
+}

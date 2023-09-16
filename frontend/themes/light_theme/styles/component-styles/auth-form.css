@@ -1,0 +1,80 @@
+/*
+* CSS Style for Login and Register forms
+*/
+
+#login-form,
+#register-form {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    margin-top: 30px;
+    padding: 0rem 5rem;
+    overflow: hidden;
+    grid-column: 1 / 2;
+}
+
+.form-title {
+    font-size: 2.2rem;
+    color: #444;
+    margin-bottom: 20px;
+}
+
+form > vaadin-text-field,
+form > vaadin-password-field {
+    margin-bottom: 10px;
+    width: 20rem;
+    max-width: 300px;
+}
+
+form > vaadin-text-field::part(input-field),
+form > vaadin-password-field::part(input-field) {
+    position: relative;
+    padding: 0px;
+    height: 55px;
+    border-radius: 8px;
+    border: 1px solid var(--input-border);
+    background-color: white;
+}
+
+form > vaadin-text-field > input,
+form > vaadin-password-field > input {
+    padding: 0 15px;
+    font-size: 14px;
+    font-weight: 400;
+}
+
+form > vaadin-text-field::part(error-message)::before,
+form > vaadin-password-field::part(error-message)::before {
+    font-family: "lumo-icons";
+    content: var(--lumo-icons-error);
+    height: 0px;
+    font-size: 18px;
+    margin-top: 5px;
+    transition: height 0.1s ease, content 0s;
+}
+
+form > vaadin-text-field > [slot="error-message"],
+form > vaadin-password-field > [slot="error-message"] {
+    margin: 3px 0px 0px 20px;
+}
+
+form > vaadin-password-field::part(reveal-button) {
+    margin-right: 10px;
+}
+
+form > .submit-btn {
+    height: 50px;
+    max-width: 200px;
+    border-radius: 8px;
+    border: 1px solid var(--input-border);
+    background-color: white;
+    padding: 5px 40px;
+    margin-top: 5px;
+    font-size: 16px;
+}
+
+form > .submit-btn:hover {
+    cursor: pointer;
+    background-color: #f4f4f4;
+}
