@@ -1,9 +1,8 @@
-package com.example.application.views.main.components.tabs;
+package com.example.application.views.components.complex_components.tabs;
 
-import com.example.application.views.main.layouts.MainLayout;
+import com.example.application.views.components.complex_components.tabs.TabsWithRoutes;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Paragraph;
-import com.vaadin.flow.router.ParentLayout;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 

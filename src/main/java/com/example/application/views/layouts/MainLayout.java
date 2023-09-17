@@ -1,8 +1,8 @@
-package com.example.application.views.main.layouts;
+package com.example.application.views.layouts;
 
 import com.example.application.services.SecurityService;
-import com.example.application.views.main.components.complex_components.NavigationBar;
-import com.example.application.views.main.components.tabs.TabsWithRoutes;
+import com.example.application.views.components.complex_components.NavigationBar;
+import com.example.application.views.components.complex_components.tabs.TabsWithRoutes;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;

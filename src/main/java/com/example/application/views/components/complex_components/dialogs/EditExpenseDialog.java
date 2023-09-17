@@ -1,9 +1,9 @@
-package com.example.application.views.main.components;
+package com.example.application.views.components.complex_components.dialogs;
 
-import com.example.application.dtos.Categories;
-import com.example.application.dtos.ExpenseDTO;
-import com.example.application.dtos.ExpenseRequest;
-import com.example.application.dtos.Timestamps;
+import com.example.application.data.dtos.ExpenseDTO;
+import com.example.application.data.enums.Categories;
+import com.example.application.data.enums.Timestamps;
+import com.example.application.data.requests.ExpenseRequest;
 import com.example.application.entities.Expense;
 import com.example.application.services.ExpenseService;
 import com.example.application.utils.ExpenseConvertor;

@@ -1,8 +1,8 @@
-package com.example.application.views.main;
+package com.example.application.views.pages;
 
 import com.example.application.entities.User;
 import com.example.application.services.UserService;
-import com.example.application.views.main.layouts.MainLayout;
+import com.example.application.views.pages.RegistrationView;
 import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
@@ -22,9 +22,6 @@ import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.validator.EmailValidator;
-import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.Route;
-import jakarta.annotation.security.PermitAll;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

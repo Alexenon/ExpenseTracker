@@ -1,6 +1,6 @@
-package com.example.application.views.main.components.tabs;
+package com.example.application.views.components.complex_components.tabs;
 
-import com.example.application.views.main.layouts.MainLayout;
+import com.example.application.views.layouts.MainLayout;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.icon.Icon;
@@ -17,7 +17,7 @@ public class TabsWithRoutes extends HorizontalLayout implements RouterLayout, Be
     public TabsWithRoutes() {
         addClassName("page-content");
 
-        RouteTabs routeTabs = new RouteTabs();
+        com.example.application.views.main.components.tabs.RouteTabs routeTabs = new com.example.application.views.main.components.tabs.RouteTabs();
         routeTabs.add(new RouterLink("Profile", ProfileTab.class));
         routeTabs.add(new RouterLink("Notifications", NotificationTab.class));
         routeTabs.add(new RouterLink("Password", PasswordTab.class));

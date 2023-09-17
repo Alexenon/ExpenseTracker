@@ -1,9 +1,9 @@
 //package com.example.application.views.main;
 //
 //import com.example.application.views.main.components.tabs.AbstractTab;
-//import com.example.application.views.main.components.tabs.NotificationTab;
-//import com.example.application.views.main.components.tabs.PasswordTab;
-//import com.example.application.views.main.layouts.MainLayout;
+//import com.example.application.views.components.complex_components.tabs.NotificationTab;
+//import com.example.application.views.components.complex_components.tabs.PasswordTab;
+//import com.example.application.views.layouts.MainLayout;
 //import com.vaadin.flow.component.html.Main;
 //import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 //import com.vaadin.flow.component.orderedlayout.VerticalLayout;
