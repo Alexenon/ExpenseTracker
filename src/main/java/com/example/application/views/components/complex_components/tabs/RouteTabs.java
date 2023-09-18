@@ -1,4 +1,4 @@
-package com.example.application.views.main.components.tabs;
+package com.example.application.views.components.complex_components.tabs;
 
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
@@ -24,7 +24,13 @@ public class RouteTabs extends Tabs implements BeforeEnterObserver {
         );
 
         setOrientation(Tabs.Orientation.VERTICAL);
-        routerLinkTabMap.put(routerLink, new Tab(routerLink));
+
+        Tab tab = new Tab(routerLink);
+        tab.getElement().addEventListener("click", event -> {
+        });
+
+        routerLinkTabMap.put(routerLink, tab);
+
         add(routerLinkTabMap.get(routerLink));
     }
 
@@ -34,4 +40,5 @@ public class RouteTabs extends Tabs implements BeforeEnterObserver {
         Tab firstTab = routerLinkTabMap.get(firstKey.orElseThrow());
         setSelectedTab(firstTab);
     }
+
 }
