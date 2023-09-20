@@ -9,7 +9,7 @@ import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 
 @PermitAll
-@Route(value = "settings/password", layout = SettingsView.class)
+//@Route(value = "settings/password", layout = SettingsView.class)
 public class PasswordTab extends Div {
 
     private final H1 title = new H1("Change Password");

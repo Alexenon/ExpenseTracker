@@ -3,46 +3,98 @@ package com.example.application.views.pages;
 import com.example.application.views.components.complex_components.tabs.NotificationTab;
 import com.example.application.views.components.complex_components.tabs.PasswordTab;
 import com.example.application.views.components.complex_components.tabs.ProfileTab;
-import com.example.application.views.components.complex_components.tabs.RouteTabs;
 import com.example.application.views.layouts.MainLayout;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Main;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.router.*;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.tabs.Tab;
+import com.vaadin.flow.component.tabs.TabSheet;
+import com.vaadin.flow.router.HasDynamicTitle;
+import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouteConfiguration;
 import jakarta.annotation.security.PermitAll;
 
 @PermitAll
-@PageTitle("Settings")
-@Route(value = "settings")
-@ParentLayout(MainLayout.class)
-public class SettingsView extends HorizontalLayout implements RouterLayout, BeforeEnterObserver {
+@Route(value = "settings", layout = MainLayout.class)
+public class SettingsView extends Main implements HasDynamicTitle {
+
+    private final TabSheet tabSheet;
+    private final Div profileTabContent;
+    private final Div notificationsTabContent;
+    private final Div passwordTabContent;
 
     public SettingsView() {
-        addClassName("page-content");
+        addClassNames("page-content", "settings-page");
 
-        RouteTabs routeTabs = new RouteTabs();
-        routeTabs.add(new RouterLink("Profile", ProfileTab.class));
-        routeTabs.add(new RouterLink("Notifications", NotificationTab.class));
-        routeTabs.add(new RouterLink("Password", PasswordTab.class));
+        tabSheet = new TabSheet();
+        profileTabContent = new ProfileTab();
+        notificationsTabContent = new NotificationTab();
+        passwordTabContent = new PasswordTab();
 
-        Icon icon = new Icon("lumo", "cog");
-        H2 title = new H2("Settings");
+        customizeTabSheet();
+        placeTabsheetVertical();
 
-        Div titleContainer = new Div();
-        titleContainer.add(icon, title);
+        H2 pageTitle = new H2("Settings");
+        pageTitle.addComponentAsFirst(new Icon(VaadinIcon.COG));
 
-        HorizontalLayout layout = new HorizontalLayout();
-        layout.add(routeTabs);
+        Div pageContainer = new Div(pageTitle, tabSheet);
 
-        add(titleContainer, layout);
+        add(pageContainer);
     }
 
     @Override
-    public void beforeEnter(BeforeEnterEvent event) {
-        if (event.getNavigationTarget() == SettingsView.class) {
-            event.forwardTo(ProfileTab.class);
-        }
+    public String getPageTitle() {
+        return tabSheet.getSelectedTab().getLabel();
+    }
+
+    private void customizeTabSheet() {
+        tabSheet.setId("settings-tabsheet");
+
+        Tab profileTab = new Tab(VaadinIcon.USER.create(), new Span("Profile"));
+        Tab notificationsTab = new Tab(VaadinIcon.BELL.create(), new Span("Notifications"));
+        Tab passwordTab = new Tab(VaadinIcon.LOCK.create(), new Span("Password"));
+
+        profileTab.setLabel("profile");
+        notificationsTab.setLabel("notifications");
+        passwordTab.setLabel("password");
+
+        tabSheet.add(profileTab, profileTabContent);
+        tabSheet.add(notificationsTab, notificationsTabContent);
+        tabSheet.add(passwordTab, passwordTabContent);
+
+        tabSheet.addSelectedChangeListener(selectedChangeEvent -> {
+            String urlSuffix = tabSheet.getSelectedIndex() == 0
+                    ? ""
+                    : "/" + tabSheet.getSelectedTab().getLabel();
+
+            updatePageUrl(urlSuffix);
+        });
+    }
+
+    /**
+     * Changes the URL in the browser, but doesn't reload the page.
+     */
+    private void updatePageUrl(String s) {
+        String deepLinkingUrl = RouteConfiguration.forSessionScope().getUrl(getClass());
+        UI.getCurrent().getPage().getHistory().replaceState(null, deepLinkingUrl + s);
+    }
+
+    private void placeTabsheetVertical() {
+        String script = """
+                const tabsheet = document.getElementById('settings-tabsheet');
+                const vaadinTabs = tabsheet.querySelector('vaadin-tabs');
+                vaadinTabs.setAttribute('orientation', 'vertical');
+                """;
+
+        UI.getCurrent().getPage().executeJs(script);
+
+        tabSheet.getStyle().set("display", "grid");
+        tabSheet.getStyle().set("grid-template-columns", "1fr 4fr");
+        tabSheet.getStyle().set("grid-gap", "20px");
     }
 
 }

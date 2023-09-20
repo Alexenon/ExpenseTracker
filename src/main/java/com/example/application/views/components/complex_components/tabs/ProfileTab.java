@@ -7,7 +7,7 @@ import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 
 @PermitAll
-@Route(value = "settings/profile", layout = SettingsView.class)
+//@Route(value = "settings/profile", layout = SettingsView.class)
 public class ProfileTab extends Div {
 
     Paragraph text = new Paragraph("This is the Profile tab");

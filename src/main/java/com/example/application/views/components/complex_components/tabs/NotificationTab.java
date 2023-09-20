@@ -7,7 +7,7 @@ import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 
 @PermitAll
-@Route(value = "settings/notifications", layout = SettingsView.class)
+//@Route(value = "settings/notifications", layout = SettingsView.class)
 public class NotificationTab extends Div {
 
     public NotificationTab() {
