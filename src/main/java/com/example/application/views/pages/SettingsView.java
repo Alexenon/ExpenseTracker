@@ -42,6 +42,7 @@ public class SettingsView extends Main implements HasDynamicTitle {
         pageTitle.addComponentAsFirst(new Icon(VaadinIcon.COG));
 
         Div pageContainer = new Div(pageTitle, tabSheet);
+        pageContainer.addClassName("page-container");
 
         add(pageContainer);
     }
