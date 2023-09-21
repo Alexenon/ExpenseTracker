@@ -4,7 +4,8 @@ Web Application to track your expenses
 ### Run the Application:
 
 * From your IDE:
-> Locate the main class Application.class in `src/main/java/com/example/application` Right-click on the class and select "Run".
+  * Locate the main class Application.class in `src/main/java/com/example/application`
+  * Right-click on the class and select "Run".
 
 * Using Maven:
 ```
