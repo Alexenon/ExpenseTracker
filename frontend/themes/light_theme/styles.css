@@ -69,10 +69,11 @@ img {
 }
 
 #settings-tabsheet {
-    height: 100%;
+    height: 90%;
 }
 
 vaadin-tabs::part(tabs) {
+
     margin: 0;
 }
 
@@ -93,3 +94,10 @@ vaadin-tab {
     border-bottom: 1px solid;
     padding: 10px;
 }
+
+vaadin-tab[focused],
+vaadin-tab[active]::after,
+vaadin-tab[selected]::before {
+    display: none;
+}
+
