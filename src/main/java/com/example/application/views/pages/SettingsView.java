@@ -59,9 +59,9 @@ public class SettingsView extends Main implements HasDynamicTitle {
         Tab notificationsTab = new Tab(VaadinIcon.BELL.create(), new Span("Notifications"));
         Tab passwordTab = new Tab(VaadinIcon.LOCK.create(), new Span("Password"));
 
-        profileTab.setLabel("profile");
-        notificationsTab.setLabel("notifications");
-        passwordTab.setLabel("password");
+        profileTab.setClassName("profile-tab");
+        notificationsTab.setClassName("notifications-tab");
+        passwordTab.setClassName("password-tab");
 
         tabSheet.add(profileTab, profileTabContent);
         tabSheet.add(notificationsTab, notificationsTabContent);
@@ -70,7 +70,7 @@ public class SettingsView extends Main implements HasDynamicTitle {
         tabSheet.addSelectedChangeListener(selectedChangeEvent -> {
             String urlSuffix = tabSheet.getSelectedIndex() == 0
                     ? ""
-                    : "/" + tabSheet.getSelectedTab().getLabel();
+                    : "/" + tabSheet.getSelectedTab().getClassName().replace("-tab", "");
 
             updatePageUrl(urlSuffix);
         });

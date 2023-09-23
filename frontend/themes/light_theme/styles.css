@@ -68,6 +68,10 @@ img {
     margin-bottom: 20px;
 }
 
+.page-container > h2 > vaadin-icon {
+    height: 30px;
+}
+
 #settings-tabsheet {
     height: 90%;
 }
@@ -95,6 +99,7 @@ vaadin-tab {
     padding: 10px;
 }
 
+vaadin-tab::after,
 vaadin-tab[focused],
 vaadin-tab[active]::after,
 vaadin-tab[selected]::before {
