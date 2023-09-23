@@ -13,16 +13,23 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.TabSheet;
-import com.vaadin.flow.router.HasDynamicTitle;
-import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouteConfiguration;
+import com.vaadin.flow.router.*;
 import jakarta.annotation.security.PermitAll;
+
+import java.util.regex.Pattern;
 
 @PermitAll
 @Route(value = "settings", layout = MainLayout.class)
-public class SettingsView extends Main implements HasDynamicTitle {
+@RouteAlias(value = "settings/notifications", layout = MainLayout.class)
+@RouteAlias(value = "settings/password", layout = MainLayout.class)
+public class SettingsView extends Main implements HasDynamicTitle, BeforeEnterObserver {
 
     private final TabSheet tabSheet;
+
+    private final Tab profileTab = new Tab(VaadinIcon.USER.create(), new Span("Profile"));
+    private final Tab notificationsTab = new Tab(VaadinIcon.BELL.create(), new Span("Notifications"));
+    private final Tab passwordTab = new Tab(VaadinIcon.LOCK.create(), new Span("Password"));
+
     private final Div profileTabContent;
     private final Div notificationsTabContent;
     private final Div passwordTabContent;
@@ -48,16 +55,28 @@ public class SettingsView extends Main implements HasDynamicTitle {
     }
 
     @Override
+    public void beforeEnter(BeforeEnterEvent beforeEnterEvent) {
+        String url = beforeEnterEvent.getLocation().getPath();
+        String urlSuffix = url.substring(url.lastIndexOf("/") + 1);
+
+        Tab selectedTab;
+        switch (urlSuffix) {
+            case "notifications" -> selectedTab = notificationsTab;
+            case "password" -> selectedTab = passwordTab;
+            default -> selectedTab = profileTab;
+        }
+
+        tabSheet.setSelectedTab(selectedTab);
+        updatePageTitle(urlSuffix);
+    }
+
+    @Override
     public String getPageTitle() {
         return tabSheet.getSelectedTab().getLabel();
     }
 
     private void customizeTabSheet() {
         tabSheet.setId("settings-tabsheet");
-
-        Tab profileTab = new Tab(VaadinIcon.USER.create(), new Span("Profile"));
-        Tab notificationsTab = new Tab(VaadinIcon.BELL.create(), new Span("Notifications"));
-        Tab passwordTab = new Tab(VaadinIcon.LOCK.create(), new Span("Password"));
 
         profileTab.setClassName("profile-tab");
         notificationsTab.setClassName("notifications-tab");
@@ -73,15 +92,40 @@ public class SettingsView extends Main implements HasDynamicTitle {
                     : "/" + tabSheet.getSelectedTab().getClassName().replace("-tab", "");
 
             updatePageUrl(urlSuffix);
+            updatePageTitle(urlSuffix);
         });
     }
 
     /**
-     * Changes the URL in the browser, but doesn't reload the page.
+     * Changes page URL in the browser, without reloading the page.
      */
-    private void updatePageUrl(String s) {
+    private void updatePageUrl(String url) {
         String deepLinkingUrl = RouteConfiguration.forSessionScope().getUrl(getClass());
-        UI.getCurrent().getPage().getHistory().replaceState(null, deepLinkingUrl + s);
+        UI.getCurrent().getPage().getHistory().replaceState(null, deepLinkingUrl + url);
+    }
+
+    /**
+     * Changes the page title, without reloading the page.
+     */
+    private void updatePageTitle(String title) {
+        title = replaceSpecialCharacters(title);
+        title = replaceWithCapitalLetter(title);
+        UI.getCurrent().getPage().setTitle(title);
+    }
+
+    private String replaceSpecialCharacters(String str) {
+        return Pattern
+                .compile("[^a-zA-Z0-9\\s]")
+                .matcher(str)
+                .replaceAll("");
+    }
+
+    private String replaceWithCapitalLetter(String str) {
+        if (str.isEmpty() || str.isBlank()) {
+            return str;
+        }
+
+        return Character.toUpperCase(str.charAt(0)) + str.substring(1).toLowerCase();
     }
 
     private void placeTabsheetVertical() {
