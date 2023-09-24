@@ -7,8 +7,6 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.router.RouteConfiguration;
 
-import java.util.regex.Pattern;
-
 @Tag(Tag.MAIN)
 public abstract class AbstractPage extends Main implements HasNotifications {
 
