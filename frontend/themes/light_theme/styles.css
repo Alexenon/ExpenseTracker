@@ -96,7 +96,16 @@ vaadin-tabs::part(tabs) {
 
 vaadin-tab {
     border-bottom: 1px solid;
-    padding: 10px;
+    padding: 12px;
+}
+
+vaadin-tab > vaadin-icon {
+    font-size: 12px;
+    margin-right: 5px;
+}
+
+vaadin-tab > span {
+    font-size: 18px;
 }
 
 vaadin-tab::before,

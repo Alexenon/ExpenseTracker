@@ -1,5 +1,6 @@
 package com.example.application.views.pages;
 
+import com.example.application.utils.StringUtils;
 import com.example.application.views.components.utils.HasNotifications;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
@@ -23,24 +24,9 @@ public abstract class AbstractPage extends Main implements HasNotifications {
      * Changes the page title, without reloading the page.
      */
     public void updatePageTitle(String title) {
-        title = replaceSpecialCharacters(title);
-        title = replaceWithCapitalLetter(title);
+        title = StringUtils.replaceSpecialCharacters(title);
+        title = StringUtils.replaceWithCapitalLetter(title);
         UI.getCurrent().getPage().setTitle(title);
-    }
-
-    private String replaceSpecialCharacters(String str) {
-        return Pattern
-                .compile("[^a-zA-Z0-9\\s]")
-                .matcher(str)
-                .replaceAll("");
-    }
-
-    private String replaceWithCapitalLetter(String str) {
-        if (str.isEmpty() || str.isBlank()) {
-            return str;
-        }
-
-        return Character.toUpperCase(str.charAt(0)) + str.substring(1).toLowerCase();
     }
 
 }

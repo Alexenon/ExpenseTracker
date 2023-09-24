@@ -1,5 +1,6 @@
 package com.example.application.views.pages;
 
+import com.example.application.utils.StringUtils;
 import com.example.application.views.components.complex_components.tabs.NotificationTab;
 import com.example.application.views.components.complex_components.tabs.PasswordTab;
 import com.example.application.views.components.complex_components.tabs.ProfileTab;
@@ -52,6 +53,12 @@ public class SettingsView extends AbstractPage implements HasDynamicTitle, Befor
     }
 
     @Override
+    public String getPageTitle() {
+        String activeTabName = getActiveTabName();
+        return StringUtils.replaceWithCapitalLetter(activeTabName);
+    }
+
+    @Override
     public void beforeEnter(BeforeEnterEvent beforeEnterEvent) {
         String url = beforeEnterEvent.getLocation().getPath();
         String urlSuffix = url.substring(url.lastIndexOf("/") + 1);
@@ -64,12 +71,7 @@ public class SettingsView extends AbstractPage implements HasDynamicTitle, Befor
         }
 
         tabSheet.setSelectedTab(selectedTab);
-        updatePageTitle(urlSuffix);
-    }
-
-    @Override
-    public String getPageTitle() {
-        return tabSheet.getSelectedTab().getLabel();
+        updatePageTitle(getActiveTabName());
     }
 
     private void customizeTabSheet() {
@@ -84,13 +86,16 @@ public class SettingsView extends AbstractPage implements HasDynamicTitle, Befor
         tabSheet.add(passwordTab, passwordTabContent);
 
         tabSheet.addSelectedChangeListener(selectedChangeEvent -> {
-            String urlSuffix = tabSheet.getSelectedIndex() == 0
-                    ? ""
-                    : "/" + tabSheet.getSelectedTab().getClassName().replace("-tab", "");
+            String tabName = getActiveTabName();
+            String url = tabSheet.getSelectedIndex() == 0 ? "" : "/" + tabName;
 
-            updatePageUrl(urlSuffix);
-            updatePageTitle(urlSuffix);
+            updatePageUrl(url);
+            updatePageTitle(tabName);
         });
+    }
+
+    private String getActiveTabName() {
+        return tabSheet.getSelectedTab().getClassName().replace("-tab", "");
     }
 
     private void placeTabsheetVertical() {
