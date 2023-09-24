@@ -99,8 +99,8 @@ vaadin-tab {
     padding: 10px;
 }
 
+vaadin-tab::before,
 vaadin-tab::after,
-vaadin-tab[focused],
 vaadin-tab[active]::after,
 vaadin-tab[selected]::before {
     display: none;
