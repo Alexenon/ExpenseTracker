@@ -13,7 +13,6 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -30,7 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @PermitAll
 @PageTitle("Expenses")
 @Route(value = "expenses", layout = MainLayout.class)
-public class ExpensesView extends Main {
+public class ExpensesView extends AbstractPage {
 
     private static final Logger logger = LoggerFactory.getLogger(ExpensesView.class);
 

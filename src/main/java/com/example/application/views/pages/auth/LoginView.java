@@ -1,9 +1,13 @@
-package com.example.application.views.pages;
+package com.example.application.views.pages.auth;
 
 import com.example.application.views.components.LoginComponent;
+import com.example.application.views.pages.AbstractPage;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
-import com.vaadin.flow.component.html.*;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
@@ -14,7 +18,7 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 @PageTitle("Login")
 @Route(value = "login")
 @CssImport("./themes/light_theme/styles/page-styles/auth-pages.css")
-public class LoginView extends Main implements BeforeEnterObserver {
+public class LoginView extends AbstractPage implements BeforeEnterObserver {
 
     private final LoginComponent loginComponent;
 

@@ -1,9 +1,10 @@
-package com.example.application.views.pages;
+package com.example.application.views.pages.auth;
 
 import com.example.application.entities.User;
 import com.example.application.services.UserService;
 import com.example.application.views.components.complex_components.forms.RegisterForm;
 import com.example.application.views.components.utils.HasNotifications;
+import com.example.application.views.pages.AbstractPage;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.*;
@@ -20,7 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @PageTitle("Registation")
 @Route(value = "register")
 @CssImport("./themes/light_theme/styles/page-styles/auth-pages.css")
-public class RegistrationView extends Main implements HasNotifications {
+public class RegistrationView extends AbstractPage implements HasNotifications {
 
     private static final Logger logger = LoggerFactory.getLogger(RegistrationView.class);
 

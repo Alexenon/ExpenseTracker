@@ -7,7 +7,6 @@ import com.example.application.views.layouts.MainLayout;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -16,13 +15,11 @@ import com.vaadin.flow.component.tabs.TabSheet;
 import com.vaadin.flow.router.*;
 import jakarta.annotation.security.PermitAll;
 
-import java.util.regex.Pattern;
-
 @PermitAll
 @Route(value = "settings", layout = MainLayout.class)
 @RouteAlias(value = "settings/notifications", layout = MainLayout.class)
 @RouteAlias(value = "settings/password", layout = MainLayout.class)
-public class SettingsView extends Main implements HasDynamicTitle, BeforeEnterObserver {
+public class SettingsView extends AbstractPage implements HasDynamicTitle, BeforeEnterObserver {
 
     private final TabSheet tabSheet;
 
@@ -94,38 +91,6 @@ public class SettingsView extends Main implements HasDynamicTitle, BeforeEnterOb
             updatePageUrl(urlSuffix);
             updatePageTitle(urlSuffix);
         });
-    }
-
-    /**
-     * Changes page URL in the browser, without reloading the page.
-     */
-    private void updatePageUrl(String url) {
-        String deepLinkingUrl = RouteConfiguration.forSessionScope().getUrl(getClass());
-        UI.getCurrent().getPage().getHistory().replaceState(null, deepLinkingUrl + url);
-    }
-
-    /**
-     * Changes the page title, without reloading the page.
-     */
-    private void updatePageTitle(String title) {
-        title = replaceSpecialCharacters(title);
-        title = replaceWithCapitalLetter(title);
-        UI.getCurrent().getPage().setTitle(title);
-    }
-
-    private String replaceSpecialCharacters(String str) {
-        return Pattern
-                .compile("[^a-zA-Z0-9\\s]")
-                .matcher(str)
-                .replaceAll("");
-    }
-
-    private String replaceWithCapitalLetter(String str) {
-        if (str.isEmpty() || str.isBlank()) {
-            return str;
-        }
-
-        return Character.toUpperCase(str.charAt(0)) + str.substring(1).toLowerCase();
     }
 
     private void placeTabsheetVertical() {
