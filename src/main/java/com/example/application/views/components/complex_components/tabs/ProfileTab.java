@@ -14,5 +14,15 @@ public class ProfileTab extends Div {
 
     public ProfileTab() {
         add(text);
+
+        for (int i = 0; i < 10; i++) {
+            add(content(i));
+        }
+
+    }
+
+    private Div content(int i) {
+        Paragraph p = new Paragraph("Paragraph " + i);
+        return new Div(p);
     }
 }

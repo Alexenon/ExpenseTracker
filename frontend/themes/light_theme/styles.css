@@ -59,9 +59,13 @@ img {
 
 /* SETTINGS PAGE */
 
+.settings-page {
+
+}
+
 .page-container {
     padding: 20px 40px;
-    height: 80vh;
+    height: auto;
 }
 
 .page-container > h2 {
@@ -73,28 +77,28 @@ img {
 }
 
 #settings-tabsheet {
-    height: 90%;
-}
-
-vaadin-tabs::part(tabs) {
-
-    margin: 0;
+    height: 100%;
 }
 
 #settings-tabsheet::part(tabs-container) {
     padding: 0;
-    background-color: cyan;
+    background-color: var(--background);
     border: 1px solid;
     border-radius: 4px;
 }
 
 #settings-tabsheet::part(content) {
-    background-color: cyan;
+    background-color: var(--background);
     border: 1px solid;
     border-radius: 4px;
 }
 
+vaadin-tabs::part(tabs) {
+    margin: 0;
+}
+
 vaadin-tab {
+    color: rgba(27, 43, 65, 0.69);
     border-bottom: 1px solid;
     padding: 12px;
 }
@@ -113,5 +117,14 @@ vaadin-tab::after,
 vaadin-tab[active]::after,
 vaadin-tab[selected]::before {
     display: none;
+}
+
+vaadin-tab[selected] {
+    color: #000;
+    background-color: rgba(0,0,0,.2);
+}
+
+vaadin-tab:hover {
+    color: #000;
 }
 
