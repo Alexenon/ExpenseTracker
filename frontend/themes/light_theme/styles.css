@@ -82,6 +82,7 @@ img {
 
 #settings-tabsheet::part(tabs-container) {
     padding: 0;
+    min-height: 70vh;
     background-color: var(--background);
     border: 1px solid;
     border-radius: 4px;

@@ -1,13 +1,10 @@
 package com.example.application.views.components.complex_components.tabs;
 
-import com.example.application.views.pages.SettingsView;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Paragraph;
-import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 
 @PermitAll
-//@Route(value = "settings/notifications", layout = SettingsView.class)
 public class NotificationTab extends Div {
 
     public NotificationTab() {

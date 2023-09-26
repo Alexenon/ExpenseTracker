@@ -1,15 +1,12 @@
 package com.example.application.views.components.complex_components.tabs;
 
-import com.example.application.views.pages.SettingsView;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.textfield.PasswordField;
-import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 
 @PermitAll
-//@Route(value = "settings/password", layout = SettingsView.class)
 public class PasswordTab extends Div {
 
     private final H1 title = new H1("Change Password");
