@@ -89,6 +89,7 @@ img {
 }
 
 #settings-tabsheet::part(content) {
+    padding: 0;
     background-color: var(--background);
     border: 1px solid;
     border-radius: 4px;
@@ -129,3 +130,33 @@ vaadin-tab:hover {
     color: #000;
 }
 
+/* Password Tab */
+
+.tab-container {
+    padding: 32px;
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+}
+
+.tab-title {
+    margin-bottom: 20px;
+}
+
+/*.tab-content {
+    height: 100%;
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+}*/
+
+.settings-password-form {
+    height: 100%;
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+}
+
+.settings-form-group:not(:last-child) {
+    margin-bottom: 1.5rem
+}
