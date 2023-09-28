@@ -2,10 +2,10 @@ package com.example.application.views.components.complex_components.tabs;
 
 import com.example.application.views.components.basic_components.Form;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.NativeButton;
 import com.vaadin.flow.component.textfield.PasswordField;
 import jakarta.annotation.security.PermitAll;
 
@@ -16,7 +16,7 @@ public class PasswordTab extends Div {
     private final PasswordField currentPassword = new PasswordField();
     private final PasswordField newPassword = new PasswordField();
     private final PasswordField confirmPassword = new PasswordField();
-    private final Button submitBtn = new Button();
+    private final NativeButton submitBtn = new NativeButton("Change password");
 
     public PasswordTab() {
         addClassName("tab-container");
@@ -32,15 +32,18 @@ public class PasswordTab extends Div {
         currentPassword.setId("current-password");
         newPassword.setId("new-password");
         confirmPassword.setId("confirm-password");
+        submitBtn.getElement().setAttribute("type", "submit");
     }
 
     private Form getChangePasswordForm() {
         Form form = new Form();
+        form.setMethod("POST");
+        form.setAction("/");
         form.addClassName("settings-password-form");
         form.add(
                 getLabelWithInput("Current password", currentPassword),
                 getLabelWithInput("New Password", newPassword),
-                getLabelWithInput("Confirm password", confirmPassword),
+                getLabelWithInput("Confirm new password", confirmPassword),
                 submitBtn
         );
         return form;

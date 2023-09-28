@@ -143,13 +143,6 @@ vaadin-tab:hover {
     margin-bottom: 20px;
 }
 
-/*.tab-content {
-    height: 100%;
-    display: flex;
-    align-items: flex-start;
-    flex-direction: column;
-}*/
-
 .settings-password-form {
     height: 100%;
     display: flex;
@@ -160,15 +153,31 @@ vaadin-tab:hover {
 .settings-form-group {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     width: 400px;
 }
 
 .settings-form-group:not(:last-child) {
-    margin-bottom: 1.5rem
+    margin-bottom: 1.2rem
 }
 
-/* TODO: Get the last element inside the div with this class */
-.settings-form-group:last-child {
-    background-color: cyan;
-    width 400px;
+.settings-form-group > :first-child {
+    font-size: 14px;
+}
+
+.settings-form-group > :last-child::part(input-field) {
+    width: 300px;
+}
+
+/*
+    --buttonHeight: 4rem;
+    --buttonPaddings: .5rem 1.8rem;
+*/
+
+.settings-password-form > button {
+    color: white;
+    background-color: rgb(129, 182, 76);
+    padding: var(--buttonPaddings,.5rem 2rem);
+    font-size: var(--fontSize,1.5rem);
+    font-weight: 600;
 }
