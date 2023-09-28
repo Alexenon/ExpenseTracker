@@ -1,39 +1,56 @@
 package com.example.application.views.components.complex_components.tabs;
 
+import com.example.application.views.components.basic_components.Form;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.textfield.PasswordField;
 import jakarta.annotation.security.PermitAll;
 
 @PermitAll
 public class PasswordTab extends Div {
 
-    private final H3 title = new H3("Change Password");
-    private final PasswordField currentPassword = new PasswordField("Current Password");
-    private final PasswordField newPassword = new PasswordField("New Password");
-    private final PasswordField confirmPassword = new PasswordField("Confirm New Password");
-    private final Button changePasswordButton = new Button("Change Password");
+    private final H2 title = new H2("Change Password");
+    private final PasswordField currentPassword = new PasswordField();
+    private final PasswordField newPassword = new PasswordField();
+    private final PasswordField confirmPassword = new PasswordField();
+    private final Button submitBtn = new Button();
 
     public PasswordTab() {
         addClassName("tab-container");
 
         addStyleToElements();
 
-        add(title, getTabContent());
+        add(title, getChangePasswordForm());
     }
 
     private void addStyleToElements() {
         title.addClassName("tab-title");
 
-        currentPassword.addClassName("settings-form-group");
-        newPassword.addClassName("settings-form-group");
-        confirmPassword.addClassName("settings-form-group");
+        currentPassword.setId("current-password");
+        newPassword.setId("new-password");
+        confirmPassword.setId("confirm-password");
     }
 
-    private Div getTabContent() {
-        Div div = new Div(currentPassword, newPassword, confirmPassword, changePasswordButton);
-        div.addClassName("settings-password-form");
+    private Form getChangePasswordForm() {
+        Form form = new Form();
+        form.addClassName("settings-password-form");
+        form.add(
+                getLabelWithInput("Current password", currentPassword),
+                getLabelWithInput("New Password", newPassword),
+                getLabelWithInput("Confirm password", confirmPassword),
+                submitBtn
+        );
+        return form;
+    }
+
+    private Div getLabelWithInput(String labelName, Component inputField) {
+        Label labelElement = new Label(labelName);
+        labelElement.setFor(inputField);
+        Div div = new Div(labelElement, inputField);
+        div.addClassName("settings-form-group");
         return div;
     }
 

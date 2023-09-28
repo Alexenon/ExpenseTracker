@@ -157,6 +157,18 @@ vaadin-tab:hover {
     flex-direction: column;
 }
 
+.settings-form-group {
+    display: flex;
+    justify-content: space-between;
+    width: 400px;
+}
+
 .settings-form-group:not(:last-child) {
     margin-bottom: 1.5rem
+}
+
+/* TODO: Get the last element inside the div with this class */
+.settings-form-group:last-child {
+    background-color: cyan;
+    width 400px;
 }
