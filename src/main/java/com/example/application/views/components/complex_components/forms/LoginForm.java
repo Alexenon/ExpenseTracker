@@ -38,6 +38,10 @@ public class LoginForm extends Form {
         setupAtributesForInputFields();
     }
 
+    // TODO: Check autocomplete, it may point to wrong input
+    //  Expected: autocomplete="password-field > input"
+    //  Actual: To check
+
     private void setupAtributesForInputFields() {
         String script = """
                 const usernameField = document.getElementById('username-field');
