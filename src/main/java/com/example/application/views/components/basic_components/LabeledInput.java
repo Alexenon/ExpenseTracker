@@ -25,7 +25,6 @@ public class LabeledInput<T extends TextFieldBase<T, ?>> extends Div {
     public void setInputId(String id) {
         inputField.setId(id);
         labelField.setFor(id);
-        setNativeInputAttribute("name", id);
     }
 
     public void setNativeInputAttribute(String attribute, String value) {

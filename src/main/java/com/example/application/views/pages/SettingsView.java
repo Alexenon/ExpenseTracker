@@ -74,6 +74,10 @@ public class SettingsView extends AbstractPage implements HasDynamicTitle, Befor
         updatePageTitle(getActiveTabName());
     }
 
+    private String getActiveTabName() {
+        return tabSheet.getSelectedTab().getClassName().replace("-tab", "");
+    }
+
     private void customizeTabSheet() {
         tabSheet.setId("settings-tabsheet");
 
@@ -92,10 +96,6 @@ public class SettingsView extends AbstractPage implements HasDynamicTitle, Befor
             updatePageUrl(url);
             updatePageTitle(tabName);
         });
-    }
-
-    private String getActiveTabName() {
-        return tabSheet.getSelectedTab().getClassName().replace("-tab", "");
     }
 
     private void placeTabsheetVertical() {
