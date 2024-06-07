@@ -16,6 +16,9 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * @noinspection ClassCanBeRecord
+ */
 @Service
 public class UserService implements UserDetailsService {
 

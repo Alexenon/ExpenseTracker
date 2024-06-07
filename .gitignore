@@ -1,4 +1,5 @@
-/target/
+target/
+.mvn/
 .idea/
 .vscode/
 .settings
