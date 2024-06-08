@@ -35,10 +35,10 @@ public class LoginForm extends Form {
         submitBtn.addClassName("submit-btn");
 
         add(title, username, password, submitBtn);
-        setupAtributesForInputFields();
+        setupAttributesForInputFields();
     }
 
-    private void setupAtributesForInputFields() {
+    private void setupAttributesForInputFields() {
         String script = """
                 const usernameField = document.getElementById('username-field');
                 const usernameInput = usernameField.querySelector('input');

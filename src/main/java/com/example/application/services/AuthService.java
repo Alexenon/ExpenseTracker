@@ -15,6 +15,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
+/**
+ * @noinspection ClassCanBeRecord
+ */
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -50,7 +53,7 @@ public class AuthService {
         }
 
         return passwordEncoder.matches(password, providedUser.getPassword())
-                ? ResponseEntity.ok("Succesfully logged in")
+                ? ResponseEntity.ok("Successfully logged in")
                 : new ResponseEntity<>("Wrong username or password", HttpStatus.BAD_REQUEST);
     }
 
