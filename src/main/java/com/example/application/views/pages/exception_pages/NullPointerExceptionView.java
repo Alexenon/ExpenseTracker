@@ -19,7 +19,7 @@ public class NullPointerExceptionView extends ExceptionView<NullPointerException
 
     @Override
     protected String imageSource() {
-        return "./images/404.webp";
+        return "./images/error-pages/404.png";
     }
 
 }

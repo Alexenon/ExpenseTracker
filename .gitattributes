@@ -1,3 +1,6 @@
+## This file is designed to track used languages in this project in GitHub,
+## but ignoring the files that comes from used libraries like Vaadin
+
 *.java linguist-detectable=true
 *.html linguist-detectable=true
 *.css linguist-detectable=true
@@ -6,5 +9,8 @@
 
 ### NOT WORKING PROPERLY
 
+
+
 # Ignore all JavaScript files recursively in this directory and its subdirectories
-/src/main/dev-bundle/webapp/VAADIN/build/*.js linguist-vendored=false
+# /src/main/dev-bundle/webapp/VAADIN/build/*.js linguist-vendored=false
+/src/main/dev-bundle/ linguist-vendored=false

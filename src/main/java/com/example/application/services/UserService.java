@@ -2,7 +2,7 @@ package com.example.application.services;
 
 import com.example.application.data.requests.RegisterUserRequest;
 import com.example.application.entities.User;
-import com.example.application.exceptions.UserExistException;
+import com.example.application.utils.exceptions.UserExistException;
 import com.example.application.repositories.RoleRepository;
 import com.example.application.repositories.UserRepository;
 import jakarta.transaction.Transactional;

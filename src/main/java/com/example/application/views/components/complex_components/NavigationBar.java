@@ -16,7 +16,7 @@ import java.util.List;
 @Tag(Tag.NAV)
 public class NavigationBar extends Nav {
 
-    private final Image logoImage = new Image("/images/logo-white-background.png", "Logo image");
+    private final Image logoImage = new Image("/images/logos/logo-white-background.png", "Logo image");
     private final RouterLink expensesLink = new RouterLink("Expenses", ExpensesView.class);
     private final RouterLink dashboardLink = new RouterLink("Dashboard", DashboardView.class);
     private final RouterLink contactLink = new RouterLink("Yearly", YearyExpensesView.class);

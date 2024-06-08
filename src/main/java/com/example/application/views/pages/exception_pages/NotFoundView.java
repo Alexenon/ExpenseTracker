@@ -21,7 +21,7 @@ public class NotFoundView extends ExceptionView<NotFoundException> {
 
     @Override
     protected String imageSource() {
-        return "./images/404-error.png";
+        return "./images/error-pages/404.png";
     }
 
     @Override

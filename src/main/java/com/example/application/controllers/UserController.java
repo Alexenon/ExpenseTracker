@@ -2,7 +2,6 @@ package com.example.application.controllers;
 
 import com.example.application.data.requests.RegisterUserRequest;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

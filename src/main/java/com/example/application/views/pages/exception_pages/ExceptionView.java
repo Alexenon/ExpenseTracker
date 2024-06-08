@@ -13,7 +13,7 @@ public abstract class ExceptionView<T extends Exception> extends Main implements
     protected final ErrorContainer errorContainer;
 
     public ExceptionView() {
-//        addClassName("page-error");
+        addClassName("page-error");
         errorContainer = new ErrorContainer();
         add(errorContainer);
     }
