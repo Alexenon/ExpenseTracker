@@ -8,7 +8,7 @@ public interface HasNotifications {
     int DURATION_MILLIS = 5000;
     Notification.Position DEFAULT_POSITION = Notification.Position.TOP_CENTER;
 
-    default void showSuccesfullNotification(String text) {
+    default void showSuccessfulNotification(String text) {
         Notification notification = Notification.show(text);
         notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
         notification.setPosition(DEFAULT_POSITION);

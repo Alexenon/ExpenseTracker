@@ -1,11 +1,12 @@
 package com.example.application.views.components.complex_components.dialogs;
 
 import com.example.application.data.enums.Categories;
-import com.example.application.data.requests.ExpenseRequest;
 import com.example.application.data.enums.Timestamps;
+import com.example.application.data.requests.ExpenseRequest;
 import com.example.application.entities.Expense;
 import com.example.application.services.ExpenseService;
 import com.example.application.utils.ExpenseConvertor;
+import com.example.application.views.components.utils.HasNotifications;
 import com.example.application.views.pages.ExpensesView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
@@ -15,8 +16,6 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
@@ -35,7 +34,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-public class AddExpenseDialog extends Dialog {
+public class AddExpenseDialog extends Dialog implements HasNotifications {
 
     private static final Logger logger = LoggerFactory.getLogger(AddExpenseDialog.class);
 
@@ -156,11 +155,11 @@ public class AddExpenseDialog extends Dialog {
         if (binder.validate().isOk()) {
             logger.info("Saved expense using data provided inside `Add New Expense` form");
             expenseService.saveExpense(getExpenseFromBinder());
-            showSuccesfullNotification();
+            showSuccessfulNotification("Expense submitted successfully!");
             this.close();
         } else {
-            logger.warn("Submiting `Add New Expense` form with validation errors");
-            showErrorNotification();
+            logger.warn("Submitting `Add New Expense` form with validation errors");
+            showErrorNotification("An error occurred while submitting Add New Expense form");
         }
     }
 
@@ -170,22 +169,6 @@ public class AddExpenseDialog extends Dialog {
 
     private Expense getExpenseFromBinder() {
         return expenseConvertor.convertToExpense(binder.getBean());
-    }
-
-    private void showSuccesfullNotification() {
-        Notification notification = Notification.show("Expense submitted succesfully!");
-        notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-        notification.setPosition(Notification.Position.TOP_CENTER);
-        notification.setDuration(5000);
-        notification.open();
-    }
-
-    private void showErrorNotification() {
-        Notification notification = Notification.show("An error occured while submiting Add New Expense form");
-        notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
-        notification.setPosition(Notification.Position.TOP_CENTER);
-        notification.setDuration(5000);
-        notification.open();
     }
 
     @Override

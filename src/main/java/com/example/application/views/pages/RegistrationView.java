@@ -62,7 +62,7 @@ public class RegistrationView extends Main implements HasNotifications {
                 User user = binder.getBean();
                 logger.info("User '{}' created succesfully", user.getUsername());
                 userService.createNewUser(user);
-                showSuccesfullNotification("User created succesfully!");
+                showSuccessfulNotification("User created succesfully!");
                 // UI.getCurrent().navigate(LoginView.class);
             } else {
                 logger.warn("Submitted Registration Form with validation errors");

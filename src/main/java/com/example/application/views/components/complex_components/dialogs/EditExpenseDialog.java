@@ -1,12 +1,13 @@
 package com.example.application.views.components.complex_components.dialogs;
 
-import com.example.application.data.enums.Categories;
 import com.example.application.data.dtos.ExpenseDTO;
-import com.example.application.data.requests.ExpenseRequest;
+import com.example.application.data.enums.Categories;
 import com.example.application.data.enums.Timestamps;
+import com.example.application.data.requests.ExpenseRequest;
 import com.example.application.entities.Expense;
 import com.example.application.services.ExpenseService;
 import com.example.application.utils.ExpenseConvertor;
+import com.example.application.views.components.utils.HasNotifications;
 import com.example.application.views.pages.ExpensesView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
@@ -16,8 +17,6 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
@@ -34,7 +33,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-public class EditExpenseDialog extends Dialog {
+public class EditExpenseDialog extends Dialog implements HasNotifications {
 
     private static final Logger logger = LoggerFactory.getLogger(EditExpenseDialog.class);
 
@@ -168,11 +167,11 @@ public class EditExpenseDialog extends Dialog {
         if (binder.validate().isOk()) {
             logger.info("Updated the expense using data provided inside `Edit Expense` form");
             expenseService.saveExpense(getExpenseFromBinder());
-            showSuccesfullNotification();
+            showSuccessfulNotification("Expense submitted successfully!");
             this.close();
         } else {
             logger.warn("Submitted `Edit Expense` form with validation errors");
-            showErrorNotification();
+            showErrorNotification("An error occurred while submitting `Edit Expense` form");
         }
     }
 
@@ -184,22 +183,6 @@ public class EditExpenseDialog extends Dialog {
         Expense expense = expenseConvertor.convertToExpense(binder.getBean());
         expense.setId(expenseDTO.getId()); // ID is set for replacing existing expense with this one
         return expense;
-    }
-
-    private void showSuccesfullNotification() {
-        Notification notification = Notification.show("Expense submitted succesfully!");
-        notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-        notification.setPosition(Notification.Position.TOP_CENTER);
-        notification.setDuration(5000);
-        notification.open();
-    }
-
-    private void showErrorNotification() {
-        Notification notification = Notification.show("An error occured while submiting `Edit Expense` form");
-        notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
-        notification.setPosition(Notification.Position.TOP_CENTER);
-        notification.setDuration(5000);
-        notification.open();
     }
 
     @Override

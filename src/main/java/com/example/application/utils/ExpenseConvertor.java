@@ -25,7 +25,7 @@ public class ExpenseConvertor {
     private final SecurityService securityService;
 
     /* TODO: REFACTOR THIS
-    *   Throws error for unathenticated user on API side - FIXING BY NOT ALLOWING UNAUTHENTICATED USERS TO THIS METHOD
+    *   Throws error for unauthenticated user on API side - FIXING BY NOT ALLOWING UNAUTHENTICATED USERS TO THIS METHOD
     *   Think about API part, allowing to POST for other users too, or just for logged in
     * */
 

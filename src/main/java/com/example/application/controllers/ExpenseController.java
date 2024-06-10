@@ -14,8 +14,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 // TODO: Use logged user to retrieve data,
-//  because this controller is ussed only by logged user
-
+//  because this controller is used only by logged user
 
 @RestController
 @RequestMapping("/api/expense")
@@ -67,7 +66,7 @@ public class ExpenseController {
     @DeleteMapping("/delete")
     public String deleteExpense(@RequestBody Expense expense) {
         expenseService.deleteExpense(expense);
-        return "The expense was deleted succesfully";
+        return "The expense was deleted successfully";
     }
 
     @DeleteMapping("/delete/{expenseId}")
@@ -84,7 +83,7 @@ public class ExpenseController {
 
     @GetMapping("/{categoryName}")
     public List<ExpenseDTO> getExpensesByCategory(@PathVariable String categoryName) {
-        return expenseService.getExpeneseByCategory(categoryName);
+        return expenseService.getExpensesByCategory(categoryName);
     }
 
     /**

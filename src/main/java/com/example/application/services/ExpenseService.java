@@ -73,7 +73,7 @@ public class ExpenseService {
         repository.deleteAll();
     }
 
-    public List<ExpenseDTO> getExpeneseByCategory(String categoryName) {
+    public List<ExpenseDTO> getExpensesByCategory(String categoryName) {
         return repository.findByCategory(categoryName);
     }
 
