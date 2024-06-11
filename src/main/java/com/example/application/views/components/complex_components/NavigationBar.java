@@ -1,9 +1,6 @@
 package com.example.application.views.components.complex_components;
 
-import com.example.application.views.pages.DashboardView;
-import com.example.application.views.pages.ExpensesView;
-import com.example.application.views.pages.HomeView;
-import com.example.application.views.pages.YearyExpensesView;
+import com.example.application.views.pages.*;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.html.Div;
@@ -20,6 +17,7 @@ public class NavigationBar extends Nav {
     private final RouterLink expensesLink = new RouterLink("Expenses", ExpensesView.class);
     private final RouterLink dashboardLink = new RouterLink("Dashboard", DashboardView.class);
     private final RouterLink contactLink = new RouterLink("Yearly", YearyExpensesView.class);
+    private final RouterLink holdingLink = new RouterLink("Holdings", HoldingsView.class);
 
     public NavigationBar() {
         addClassName("navbar");
@@ -41,7 +39,7 @@ public class NavigationBar extends Nav {
     }
 
     public List<Component> getRoutes() {
-        return List.of(logoImage, expensesLink, dashboardLink, contactLink);
+        return List.of(logoImage, expensesLink, dashboardLink, contactLink, holdingLink);
     }
 
 }
