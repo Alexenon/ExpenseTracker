@@ -1,5 +1,9 @@
 package com.example.application.views.components.complex_components.dialogs;
 
+import com.example.application.data.models.Asset;
+import com.example.application.data.models.Currency;
+import com.example.application.data.models.CurrencyProvider;
+import com.example.application.data.models.Holding;
 import com.example.application.entities.AssetWatcher;
 import com.example.application.entities.User;
 import com.example.application.entities.WatchPrice;
@@ -39,6 +43,8 @@ public class AddHoldingDialog extends Dialog implements HasNotifications {
     private final Button saveButton = new Button("Save");
     private final Button cancelButton = new Button("Cancel");
 
+    private final CurrencyProvider currencyProvider;
+
 
     public AddHoldingDialog(AssetWatcherService assetWatcherService,
                             SecurityService securityService,
@@ -46,6 +52,7 @@ public class AddHoldingDialog extends Dialog implements HasNotifications {
         this.assetWatcherService = assetWatcherService;
         this.securityService = securityService;
         this.userService = userService;
+        this.currencyProvider = CurrencyProvider.getInstance();
 
         add(createDialogLayout());
         addStyleToElements();
@@ -64,11 +71,9 @@ public class AddHoldingDialog extends Dialog implements HasNotifications {
     }
 
     private void addStyleToElements() {
-        List<String> cryptoCurrencyNames = List.of("BTC", "ETH", "SOL", "TON", "NOT");
-
         nameField.setLabel("Token");
-        nameField.setItems(cryptoCurrencyNames);
-        nameField.setHelperText("Select the crypto currency you want to buy");
+        nameField.setItems(currencyProvider.getCurrencyList().stream().map(Currency::getName).toList());
+        nameField.setHelperText("Select the crypto currency you want to add");
 
         cancelButton.addClickShortcut(Key.ESCAPE);
         cancelButton.addClickListener(e -> this.close());
@@ -80,8 +85,8 @@ public class AddHoldingDialog extends Dialog implements HasNotifications {
     }
 
     private void defaultClickSaveBtnListener() {
-        AssetWatcher assetWatcher = getAssetWatcher();
-        assetWatcherService.save(assetWatcher);
+//        AssetWatcher assetWatcher = getAssetWatcher();
+//        assetWatcherService.save(assetWatcher);
         this.close();
     }
 
@@ -93,6 +98,13 @@ public class AddHoldingDialog extends Dialog implements HasNotifications {
 //        String username = securityService.getAuthenticatedUserDetails().getUsername();
 
         return new AssetWatcher(currencyName, watchPrices, comment, user);
+    }
+
+    public Asset getAsset() {
+        Currency currency = currencyProvider.getCurrencyByName(nameField.getValue());
+        List<Holding> holdings = new ArrayList<>();
+        String comment = commentField.getValue();
+        return new Asset(currency, holdings, comment);
     }
 
     public void addClickSaveBtnListener(Consumer<?> listener) {

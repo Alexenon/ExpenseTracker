@@ -2,25 +2,19 @@ package com.example.application.data.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
+
+import java.math.BigDecimal;
 
 @AllArgsConstructor
 public class Currency {
 
     @Getter
-    @Setter
-    private String name;
+    private final String name;
 
     @Getter
-    @Setter
-    private double currentPrice;
+    private final BigDecimal currentPrice;
 
     @Getter
-    @Setter
-    private double minPrice;
-
-    @Getter
-    @Setter
-    private double maxPrice;
+    private final BigDecimal changesLast24Hours;
 
 }
