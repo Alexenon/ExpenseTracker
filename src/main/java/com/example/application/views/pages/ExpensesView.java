@@ -133,7 +133,7 @@ public class ExpensesView extends Main {
 
     private void updateGrid() {
         logger.info("Updated Expense Table");
-        String username = securityService.getAuthenticatedUser().getUsername();
+        String username = securityService.getAuthenticatedUserDetails().getUsername();
         grid.setItems(expenseService.getAllExpensesByUser(username));
     }
 

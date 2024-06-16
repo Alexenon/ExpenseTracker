@@ -1,5 +1,11 @@
 package com.example.application.views.components.complex_components.dialogs;
 
+import com.example.application.entities.AssetWatcher;
+import com.example.application.entities.User;
+import com.example.application.entities.WatchPrice;
+import com.example.application.services.AssetWatcherService;
+import com.example.application.services.SecurityService;
+import com.example.application.services.UserService;
 import com.example.application.views.components.utils.HasNotifications;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
@@ -18,9 +24,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 public class AddHoldingDialog extends Dialog implements HasNotifications {
+
+    private final AssetWatcherService assetWatcherService;
+    private final SecurityService securityService;
+    private final UserService userService;
 
     private final Select<String> nameField = new Select<>();
     private final TextArea commentField = new TextArea("Comments");
@@ -30,7 +39,14 @@ public class AddHoldingDialog extends Dialog implements HasNotifications {
     private final Button saveButton = new Button("Save");
     private final Button cancelButton = new Button("Cancel");
 
-    public AddHoldingDialog() {
+
+    public AddHoldingDialog(AssetWatcherService assetWatcherService,
+                            SecurityService securityService,
+                            UserService userService) {
+        this.assetWatcherService = assetWatcherService;
+        this.securityService = securityService;
+        this.userService = userService;
+
         add(createDialogLayout());
         addStyleToElements();
     }
@@ -58,19 +74,25 @@ public class AddHoldingDialog extends Dialog implements HasNotifications {
         cancelButton.addClickListener(e -> this.close());
 
         saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
-        saveButton.addClickListener(e -> {
-            String text = priceLayer.getPrices()
-                    .stream()
-                    .map(String::valueOf)
-                    .collect(Collectors.joining("\n"));
-            commentField.setValue(text);
-        });
+        saveButton.addClickListener(e -> defaultClickSaveBtnListener());
 
         this.getFooter().add(cancelButton, saveButton);
     }
 
     private void defaultClickSaveBtnListener() {
-        // Save the holding
+        AssetWatcher assetWatcher = getAssetWatcher();
+        assetWatcherService.save(assetWatcher);
+        this.close();
+    }
+
+    private AssetWatcher getAssetWatcher() {
+        String currencyName = nameField.getValue();
+        List<WatchPrice> watchPrices = priceLayer.getPrices().stream().map(WatchPrice::new).toList();
+        String comment = commentField.getValue();
+        User user = userService.findByUsernameIgnoreCase("test").orElse(null);
+//        String username = securityService.getAuthenticatedUserDetails().getUsername();
+
+        return new AssetWatcher(currencyName, watchPrices, comment, user);
     }
 
     public void addClickSaveBtnListener(Consumer<?> listener) {
@@ -85,19 +107,18 @@ public class AddHoldingDialog extends Dialog implements HasNotifications {
         }
 
         private void addNewContainer() {
-            Div subContainer = new Div();
-
             NumberField amountField = new NumberField("Amount");
             amountField.setSuffixComponent(new Span("USDT"));
             amountField.getStyle().set("margin-bottom", "1rem");
+            amountField.setMin(0);
 
             Button addButton = new Button("Add");
             addButton.addClickListener(e -> addNewContainer());
 
             Button removeButton = new Button("Remove");
+            Div subContainer = new Div(amountField, addButton, removeButton);
             removeButton.addClickListener(e -> wrapper.remove(subContainer));
 
-            subContainer.add(amountField, addButton, removeButton);
             wrapper.add(subContainer);
         }
 

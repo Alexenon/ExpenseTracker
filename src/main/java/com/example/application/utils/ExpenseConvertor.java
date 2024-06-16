@@ -31,7 +31,7 @@ public class ExpenseConvertor {
 
     public Expense convertToExpense(ExpenseRequest expenseRequest) {
         String userEmailOrUsername = Objects.requireNonNullElse(expenseRequest.getUserEmailOrUsername(),
-                securityService.getAuthenticatedUser().getUsername());
+                securityService.getAuthenticatedUserDetails().getUsername());
 
         User user = userService.findByUsernameOrEmailIgnoreCase(userEmailOrUsername)
                 .orElseThrow(() -> new UsernameNotFoundException("User with such username or email not found!"));

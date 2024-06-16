@@ -2,6 +2,10 @@ package com.example.application.views.pages;
 
 import com.example.application.data.models.Currency;
 import com.example.application.data.models.Holding;
+import com.example.application.entities.AssetWatcher;
+import com.example.application.services.AssetWatcherService;
+import com.example.application.services.SecurityService;
+import com.example.application.services.UserService;
 import com.example.application.views.components.complex_components.dialogs.AddHoldingDialog;
 import com.example.application.views.layouts.MainLayout;
 import com.vaadin.flow.component.button.Button;
@@ -11,6 +15,7 @@ import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
@@ -19,20 +24,32 @@ import java.util.List;
 @Route(value = "holdings", layout = MainLayout.class)
 public class HoldingsView extends Main {
 
-    private final Grid<Holding> grid = new Grid<>(Holding.class);
+    private final AssetWatcherService assetWatcherService;
+    private final SecurityService securityService;
+    private final UserService userService;
 
-    public HoldingsView() {
+    private final Grid<AssetWatcher> grid = new Grid<>(AssetWatcher.class);
+
+    @Autowired
+    public HoldingsView(AssetWatcherService assetWatcherService,
+                        SecurityService securityService,
+                        UserService userService) {
+        this.assetWatcherService = assetWatcherService;
+        this.securityService = securityService;
+        this.userService = userService;
+
         getStyle().set("margin-top", "100px");
 
         Button addBtn = new Button("Add");
         addBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         addBtn.addClickListener(event -> {
-            AddHoldingDialog dialog = new AddHoldingDialog();
+            AddHoldingDialog dialog = new AddHoldingDialog(assetWatcherService, securityService, userService);
             dialog.open();
             dialog.addClickSaveBtnListener(grid -> updateGrid());
         });
 
-        grid.removeAllColumns();
+
+//        grid.removeAllColumns();
 //        grid.addColumns("name");
 
 //        grid.addColumn(h -> {
@@ -51,7 +68,7 @@ public class HoldingsView extends Main {
     }
 
     private void updateGrid() {
-//        grid.setItems(null);
+        grid.setItems(assetWatcherService.getAssetsWatchers());
     }
 
     private List<Currency> getCurrencyList() {
