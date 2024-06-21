@@ -17,7 +17,7 @@ public class NavigationBar extends Nav {
     private final RouterLink expensesLink = new RouterLink("Expenses", ExpensesView.class);
     private final RouterLink dashboardLink = new RouterLink("Dashboard", DashboardView.class);
     private final RouterLink contactLink = new RouterLink("Yearly", YearyExpensesView.class);
-    private final RouterLink holdingLink = new RouterLink("Holdings", HoldingsView.class);
+    private final RouterLink holdingLink = new RouterLink("Holdings", AssetsDashboardView.class);
 
     public NavigationBar() {
         addClassName("navbar");

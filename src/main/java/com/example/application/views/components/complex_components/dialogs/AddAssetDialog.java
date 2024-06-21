@@ -29,7 +29,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class AddHoldingDialog extends Dialog implements HasNotifications {
+public class AddAssetDialog extends Dialog implements HasNotifications {
 
     private final AssetWatcherService assetWatcherService;
     private final SecurityService securityService;
@@ -46,9 +46,9 @@ public class AddHoldingDialog extends Dialog implements HasNotifications {
     private final CurrencyProvider currencyProvider;
 
 
-    public AddHoldingDialog(AssetWatcherService assetWatcherService,
-                            SecurityService securityService,
-                            UserService userService) {
+    public AddAssetDialog(AssetWatcherService assetWatcherService,
+                          SecurityService securityService,
+                          UserService userService) {
         this.assetWatcherService = assetWatcherService;
         this.securityService = securityService;
         this.userService = userService;

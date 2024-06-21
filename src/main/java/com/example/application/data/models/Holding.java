@@ -19,6 +19,10 @@ public class Holding {
     private BigDecimal priceBought;
 
     @Getter
-    private LocalDateTime dateTime;
+    private LocalDateTime dateTimeBought;
+
+    public Holding(String currencyName, double amount, BigDecimal priceBought) {
+        this(currencyName, amount, priceBought, LocalDateTime.now());
+    }
 
 }

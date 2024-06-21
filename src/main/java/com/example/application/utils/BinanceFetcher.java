@@ -11,8 +11,9 @@ import java.net.http.HttpResponse;
 import java.util.List;
 
 /*
- * https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT
+ * https://binance.github.io/binance-api-swagger/
  *
+ * https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT
  *
  * https://dev.binance.vision/t/how-to-correctly-get-lowest-highest-price-in-last-3-days-for-a-given-symbol/10220
  * */
