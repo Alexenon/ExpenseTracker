@@ -28,9 +28,7 @@ public abstract class ExceptionView<T extends Exception> extends Main implements
     }
 
     protected String getErrorMessage(ErrorParameter<T> parameter) {
-        return parameter.hasCustomMessage()
-                ? parameter.getCustomMessage()
-                : parameter.getException().getMessage();
+        return parameter.getException().toString();
     }
 
     protected abstract int httpStatus();
