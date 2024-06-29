@@ -1,6 +1,8 @@
 package com.example.application.views.components;
 
 import com.example.application.data.models.Asset;
+import com.example.application.views.pages.AssetDetailsView;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.grid.Grid;
@@ -20,12 +22,6 @@ import java.util.List;
 import java.util.Set;
 
 /*
- * All columns
- * Start columns
- * Selected columns
- * */
-
-/*
     // TODO: Better display first columns
     _________________________________________________________________________________
     | Name | Price | 24h changes | Amount  | Avg buy | All-time low | All-time high |
@@ -38,14 +34,8 @@ public class AssetsGrid extends Div {
     private final TextField searchField = new TextField();
     private final GridListDataView<Asset> dataView = grid.setItems();
 
-    private Grid.Column<Asset> nameCol;
-    private Grid.Column<Asset> priceCol;
-    private Grid.Column<Asset> avgBuyCol;
-    private Grid.Column<Asset> amountCol;
     private MultiSelectComboBox<String> columnSelector;
     private List<Grid.Column<Asset>> listColumnsToSelect;
-    private Grid.Column<Asset> profitChangesCol;
-    private Grid.Column<Asset> additionalHelperCol;
 
     public AssetsGrid() {
         initializeGrid();
@@ -56,12 +46,12 @@ public class AssetsGrid extends Div {
 
     private void initializeGrid() {
         columnSelector = new MultiSelectComboBox<>();
-        nameCol = grid.addColumn(a -> a.getCurrency().getName()).setKey("Name").setHeader("Name");
-        priceCol = grid.addColumn(priceRenderer(a -> a.getCurrency().getCurrentPrice())).setKey("Price").setHeader("Price");
-        avgBuyCol = grid.addColumn(priceRenderer(Asset::getAveragePrice)).setKey("Avg Buy").setHeader("Avg Buy");
-        amountCol = grid.addColumn(Asset::getTotalAmount).setKey("Amount").setHeader("Amount");
-        profitChangesCol = grid.addColumn(new ComponentRenderer<>(this::renderProfitChanges)).setKey("Profit Changes").setHeader("Profit Changes");
-        additionalHelperCol = grid.addColumn(new ComponentRenderer<>(this::threeDotsBtn)).setHeader(columnSelector);
+        Grid.Column<Asset> nameCol = grid.addColumn(a -> a.getCurrency().getName()).setKey("Name").setHeader("Name");
+        Grid.Column<Asset> priceCol = grid.addColumn(priceRenderer(a -> a.getCurrency().getCurrentPrice())).setKey("Price").setHeader("Price");
+        Grid.Column<Asset> avgBuyCol = grid.addColumn(priceRenderer(Asset::getAveragePrice)).setKey("Avg Buy").setHeader("Avg Buy");
+        Grid.Column<Asset> amountCol = grid.addColumn(Asset::getTotalAmount).setKey("Amount").setHeader("Amount");
+        Grid.Column<Asset> profitChangesCol = grid.addColumn(new ComponentRenderer<>(this::renderProfitChanges)).setKey("Profit Changes").setHeader("Profit Changes");
+        grid.addColumn(new ComponentRenderer<>(this::threeDotsBtn)).setHeader(columnSelector);
         listColumnsToSelect = List.of(nameCol, priceCol, avgBuyCol, amountCol, profitChangesCol);
 
         grid.getColumns().forEach(c -> {
@@ -69,7 +59,10 @@ public class AssetsGrid extends Div {
             c.setAutoWidth(true);
         });
         grid.setColumnReorderingAllowed(true);
-        grid.addItemClickListener(System.out::println);
+        grid.addItemClickListener(row -> {
+            String assetName = row.getItem().getCurrency().getName().toLowerCase();
+            UI.getCurrent().navigate(AssetDetailsView.class, assetName);
+        });
     }
 
     private void initializeColumnSelector() {
