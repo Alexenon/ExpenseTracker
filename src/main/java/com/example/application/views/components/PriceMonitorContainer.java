@@ -6,10 +6,17 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
-import com.vaadin.flow.component.radiobutton.RadioGroupVariant;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.NumberField;
 
+/**
+ * <p>Container to track a currency wanted price when to buy/sell</p><br>
+ *
+ * Features:
+ * <li>Wanted price</li>
+ * <li>Amount in USDT</li>
+ * <li>Amount in % of USDT</li>
+ */
 public class PriceMonitorContainer extends Div {
 
     private final RadioButtonGroup<String> radioButtonGroup = new RadioButtonGroup<>();
