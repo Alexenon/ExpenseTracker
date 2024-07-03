@@ -2,30 +2,40 @@ package com.example.application.utils;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class CoinAmountCalculator {
+public class InvestmentStrategyCalculator {
+
+    private static final String COIN_NAME = "ETH";
 
     public static void main(String[] args) {
-        String coin = "BTC";
         double totalAmount = 4000.0;
         double investRatePercentage = 2.0;
 //        double sumToInvest = totalAmount * investRatePercentage / 100.0;
-        double sumToInvest = 100;
-        double sellPrice = 73000;
+        double sumToInvest = 800;
+        double sellPrice = 4000;
 
-        List<Double> pricesWhenToBuy = List.of(60_000.0, 55_000.0, 50_000.0, 40_000.0);
+        // BTC - 60k submitted
+//        List<Double> pricesWhenToBuy = List.of(60_000.0, 55_000.0, 50_000.0, 45_000.0, 40_000.0, 35_000.0, 30_000.0);
+        // ETH -
+        List<Double> pricesWhenToBuy = List.of(3000.0, 2750.0, 2500.0, 2250.0, 2000.0);
 
         System.out.println("Constant Strategy");
-        printSell(pricesWhenToBuy, constantStrategy(sumToInvest, pricesWhenToBuy), sellPrice);
+        printSell(sumToInvest, pricesWhenToBuy, constantStrategy(sumToInvest, pricesWhenToBuy), sellPrice);
 
         System.out.println("Linear Strategy");
-        printSell(pricesWhenToBuy, linearStrategy(sumToInvest, pricesWhenToBuy), sellPrice);
+        printSell(sumToInvest, pricesWhenToBuy, linearStrategy(sumToInvest, pricesWhenToBuy), sellPrice);
+
+        System.out.println("Fibonacci Strategy");
+        printSell(sumToInvest, pricesWhenToBuy, fibonacciStrategy(sumToInvest, pricesWhenToBuy), sellPrice);
 
         System.out.println("Exponential Strategy");
-        printSell(pricesWhenToBuy, exponentialStrategy(sumToInvest, pricesWhenToBuy), sellPrice);
+        printSell(sumToInvest, pricesWhenToBuy, exponentialStrategy(sumToInvest, pricesWhenToBuy), sellPrice);
 
+        System.out.println("Custom Strategy");
+//        printSell(sumToInvest, pricesWhenToBuy, customStrategy(sumToInvest, List.of(0.3, 0.4, 0.5, 0.2, 0.1)), sellPrice);
     }
 
     private static void printBuy(List<Double> pricesToBuy, List<Double> amountToBuy) {
@@ -36,17 +46,20 @@ public class CoinAmountCalculator {
         });
     }
 
-    private static void printSell(List<Double> pricesToBuy, List<Double> amountToBuy, double sellPrice) {
+    private static void printSell(double totalInvestAmount, List<Double> pricesToBuy, List<Double> amountToBuy, double sellPrice) {
+        System.out.printf("Invest Amount for %s: $%.2f\n", COIN_NAME, totalInvestAmount);
+
         IntStream.range(0, pricesToBuy.size()).forEach(i -> {
             double buyPrice = pricesToBuy.get(i);
             double investedAmount = amountToBuy.get(i);
-            double percentage = profitPercentage(buyPrice, sellPrice);
+            double investPercentage = investedAmount * 100 / totalInvestAmount;
+            double profitPercentage = profitPercentage(buyPrice, sellPrice);
             double profit = profit(buyPrice, sellPrice, investedAmount);
-            System.out.printf("At $%.2f: $%.2f rate: %.2f%% gain: $%.2f\n",
-                    buyPrice, investedAmount, percentage, profit);
+            System.out.printf("At $%.2f -> invest: $%.2f investRate: %.2f%% -> profitRate: %.2f%% profit: $%.2f\n",
+                    buyPrice, investedAmount, investPercentage, profitPercentage, profit);
         });
 
-        System.out.printf("Sold at $%.2f\n\n", sellPrice);
+        System.out.printf("Sell at $%.2f\n\n", sellPrice);
     }
 
 
@@ -119,7 +132,7 @@ public class CoinAmountCalculator {
 
 
     /*
-     * BEST FOR A LOT OF BUYS MORE YOU BUY DECREASING, MORE PRICE
+    BEST FOR A LOT OF BUYS MORE YOU BUY DECREASING, MORE PRICE
 
     Sum of first 3 Fibonacci numbers:
         Sum = 1 + 1 + 2 = 4
@@ -132,16 +145,46 @@ public class CoinAmountCalculator {
         At the second level: 1 unit * $25 = $25
         At the third level: 2 units * $25 = $50
     * */
-    private static List<Double> fibonacciStrategy() {
-        return null;
+    private static List<Double> fibonacciStrategy(double sumToInvest, List<Double> pricesToBuy) {
+        List<Integer> fibonacciList = generateFibonacciSequence()
+                .limit(pricesToBuy.size())
+                .boxed()
+                .collect(Collectors.toList());
+
+        int fibonacciSum = fibonacciList.stream().mapToInt(Integer::intValue).sum();
+        double distribution = sumToInvest / fibonacciSum;
+
+        return fibonacciList.stream()
+                .map(i -> i * distribution)
+                .collect(Collectors.toCollection(LinkedList::new));
     }
 
-    private static int fibonacciSum(int n) {
-        if (n == 0)
-            return 1;
-        if (n == 1)
-            return 2;
-        return fibonacciSum(n - 1) + fibonacciSum(n - 2) + 1;
+    /**
+     * @param percentagesAmount list of percentages that should be applied to the sum<br>
+     *                          Example: [0.2, 0.3, 0.45] - 20%, 30%, 45%
+     */
+    private static List<Double> customStrategy(double sumToInvest, List<Double> percentagesAmount) {
+        return percentagesAmount.stream()
+                .mapToDouble(i -> sumToInvest * i)
+                .boxed()
+                .collect(Collectors.toCollection(LinkedList::new));
+    }
+
+    private static List<Double> stepStrategy(double sumToInvest, double start, double step) {
+        List<Double> pricesWhenToBuy = new LinkedList<>();
+
+        double currentStep = step;
+        while (sumToInvest > currentStep) {
+            sumToInvest -= currentStep;
+            currentStep += step;
+        }
+
+        return pricesWhenToBuy;
+    }
+
+    public static IntStream generateFibonacciSequence() {
+        AtomicInteger fibonacci = new AtomicInteger(1);
+        return IntStream.iterate(1, fibonacci::getAndAdd);
     }
 
     private static int sumSeriesPowTwo(int n) {
