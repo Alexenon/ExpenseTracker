@@ -46,8 +46,8 @@ public class AssetsGrid extends Div {
 
     private void initializeGrid() {
         columnSelector = new MultiSelectComboBox<>();
-        Grid.Column<Asset> nameCol = grid.addColumn(a -> a.getCurrency().getName()).setKey("Name").setHeader("Name");
-        Grid.Column<Asset> priceCol = grid.addColumn(priceRenderer(a -> a.getCurrency().getCurrentPrice())).setKey("Price").setHeader("Price");
+        Grid.Column<Asset> nameCol = grid.addColumn(a -> a.getAssetData().getName()).setKey("Name").setHeader("Name");
+        Grid.Column<Asset> priceCol = grid.addColumn(priceRenderer(a -> a.getAssetData().getPriceUsd())).setKey("Price").setHeader("Price");
         Grid.Column<Asset> avgBuyCol = grid.addColumn(priceRenderer(Asset::getAveragePrice)).setKey("Avg Buy").setHeader("Avg Buy");
         Grid.Column<Asset> amountCol = grid.addColumn(Asset::getTotalAmount).setKey("Amount").setHeader("Amount");
         Grid.Column<Asset> profitChangesCol = grid.addColumn(new ComponentRenderer<>(this::renderProfitChanges)).setKey("Profit Changes").setHeader("Profit Changes");
@@ -60,8 +60,9 @@ public class AssetsGrid extends Div {
         });
         grid.setColumnReorderingAllowed(true);
         grid.addItemClickListener(row -> {
-            String assetName = row.getItem().getCurrency().getName().toLowerCase();
-            UI.getCurrent().navigate(AssetDetailsView.class, assetName);
+            System.out.println(row.getItem());
+            String symbol = row.getItem().getAssetData().getSymbol().toLowerCase();
+            UI.getCurrent().navigate(AssetDetailsView.class, symbol);
         });
     }
 
@@ -86,7 +87,7 @@ public class AssetsGrid extends Div {
 
         dataView.setFilter(asset -> {
             String searchTerm = searchField.getValue().trim();
-            return searchTerm.isEmpty() || asset.getCurrency().getName().contains(searchTerm);
+            return searchTerm.isEmpty() || asset.getAssetData().getName().contains(searchTerm);
         });
     }
 
@@ -114,7 +115,7 @@ public class AssetsGrid extends Div {
         # arrow-size 16x16
     * */
     private Div renderProfitChanges(Asset asset) {
-        double value = asset.getCurrency().getChangesLast24Hours().doubleValue();
+        double value = asset.getAssetData().getSpotMoving24HourChangePercentageUsd();
         Paragraph changes = new Paragraph(String.valueOf(value));
         Icon direction = new Icon();
         Div div = new Div(direction, changes);

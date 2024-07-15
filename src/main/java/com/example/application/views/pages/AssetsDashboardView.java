@@ -1,7 +1,7 @@
 package com.example.application.views.pages;
 
 import com.example.application.data.models.Asset;
-import com.example.application.data.models.CurrencyProvider;
+import com.example.application.data.models.InstrumentsProvider;
 import com.example.application.services.AssetWatcherService;
 import com.example.application.services.SecurityService;
 import com.example.application.services.UserService;
@@ -27,7 +27,7 @@ public class AssetsDashboardView extends Main {
     private final AssetWatcherService assetWatcherService;
     private final SecurityService securityService;
     private final UserService userService;
-    private final CurrencyProvider currencyProvider;
+    private final InstrumentsProvider instrumentsProvider;
 
     private final AssetsGrid assetsGrid = new AssetsGrid();
     private final List<Asset> assets = new ArrayList<>();
@@ -39,7 +39,7 @@ public class AssetsDashboardView extends Main {
         this.assetWatcherService = assetWatcherService;
         this.securityService = securityService;
         this.userService = userService;
-        currencyProvider = CurrencyProvider.getInstance();
+        instrumentsProvider = InstrumentsProvider.getInstance();
 
         getStyle().set("margin-top", "100px");
 
@@ -61,7 +61,7 @@ public class AssetsDashboardView extends Main {
     }
 
     public void updateAssets() {
-        assets.addAll(currencyProvider.getCurrencyList().stream().map(Asset::new).toList());
+        assets.addAll(instrumentsProvider.getAssets());
     }
 
 }

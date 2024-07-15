@@ -1,5 +1,6 @@
 package com.example.application.data.models;
 
+import com.example.application.utils.responses.AssetData;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,7 +11,10 @@ import java.util.List;
 public class Asset {
 
     @Getter
-    private final Currency currency;
+    private final String symbol;
+
+    @Getter
+    private final AssetData assetData;
 
     @Getter
     private List<Holding> holdings;
@@ -21,17 +25,18 @@ public class Asset {
 
     @Setter
     @Getter
-    private boolean isFavorite;
+    private boolean markedAsFavorite;
 
-    public Asset(Currency currency) {
-        this(currency, new ArrayList<>(), "");
+    public Asset(String symbol) {
+        this(symbol, new ArrayList<>(), "");
     }
 
-    public Asset(Currency currency, List<Holding> holdings, String comment) {
-        this.currency = currency;
+    public Asset(String symbol, List<Holding> holdings, String comment) {
+        this.symbol = symbol;
+        this.assetData = InstrumentsProvider.getInstance().getCoinData(symbol);
         this.holdings = holdings;
         this.comment = comment;
-        this.isFavorite = false;
+        this.markedAsFavorite = false;
     }
 
     public double getAveragePrice() {

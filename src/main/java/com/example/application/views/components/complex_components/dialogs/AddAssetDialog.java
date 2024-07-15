@@ -2,8 +2,8 @@ package com.example.application.views.components.complex_components.dialogs;
 
 import com.example.application.data.models.Asset;
 import com.example.application.data.models.Currency;
-import com.example.application.data.models.CurrencyProvider;
 import com.example.application.data.models.Holding;
+import com.example.application.data.models.InstrumentsProvider;
 import com.example.application.entities.AssetWatcher;
 import com.example.application.entities.User;
 import com.example.application.entities.WatchPrice;
@@ -43,7 +43,7 @@ public class AddAssetDialog extends Dialog implements HasNotifications {
     private final Button saveButton = new Button("Save");
     private final Button cancelButton = new Button("Cancel");
 
-    private final CurrencyProvider currencyProvider;
+    private final InstrumentsProvider instrumentsProvider;
 
 
     public AddAssetDialog(AssetWatcherService assetWatcherService,
@@ -52,7 +52,7 @@ public class AddAssetDialog extends Dialog implements HasNotifications {
         this.assetWatcherService = assetWatcherService;
         this.securityService = securityService;
         this.userService = userService;
-        this.currencyProvider = CurrencyProvider.getInstance();
+        this.instrumentsProvider = InstrumentsProvider.getInstance();
 
         add(createDialogLayout());
         addStyleToElements();
@@ -72,7 +72,7 @@ public class AddAssetDialog extends Dialog implements HasNotifications {
 
     private void addStyleToElements() {
         nameField.setLabel("Token");
-        nameField.setItems(currencyProvider.getCurrencyList().stream().map(Currency::getName).toList());
+        nameField.setItems(instrumentsProvider.getCurrencyList().stream().map(Currency::getName).toList());
         nameField.setHelperText("Select the crypto currency you want to add");
 
         cancelButton.addClickShortcut(Key.ESCAPE);
@@ -101,10 +101,10 @@ public class AddAssetDialog extends Dialog implements HasNotifications {
     }
 
     public Asset getAsset() {
-        Currency currency = currencyProvider.getCurrencyByName(nameField.getValue());
+        Currency currency = instrumentsProvider.getCurrencyByName(nameField.getValue());
         List<Holding> holdings = new ArrayList<>();
         String comment = commentField.getValue();
-        return new Asset(currency, holdings, comment);
+        return new Asset(currency.getName(), holdings, comment);
     }
 
     public void addClickSaveBtnListener(Consumer<?> listener) {
