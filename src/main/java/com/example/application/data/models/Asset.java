@@ -14,9 +14,6 @@ public class Asset {
     private final String symbol;
 
     @Getter
-    private final AssetData assetData;
-
-    @Getter
     private List<Holding> holdings;
 
     @Setter
@@ -27,13 +24,14 @@ public class Asset {
     @Getter
     private boolean markedAsFavorite;
 
+    private AssetData assetData;
+
     public Asset(String symbol) {
         this(symbol, new ArrayList<>(), "");
     }
 
     public Asset(String symbol, List<Holding> holdings, String comment) {
         this.symbol = symbol;
-        this.assetData = InstrumentsProvider.getInstance().getCoinData(symbol);
         this.holdings = holdings;
         this.comment = comment;
         this.markedAsFavorite = false;
@@ -63,6 +61,13 @@ public class Asset {
 
     public void removeHolding(Holding holding) {
         holdings.remove(holding);
+    }
+
+    public AssetData getAssetData() {
+        if (assetData == null) {
+            assetData = InstrumentsProvider.getInstance().getCoinData(symbol);
+        }
+        return assetData;
     }
 
 }

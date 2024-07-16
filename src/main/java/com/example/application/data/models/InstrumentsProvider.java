@@ -6,36 +6,40 @@ import com.example.application.utils.responses.AssetData;
 import lombok.Getter;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
 
 public class InstrumentsProvider {
 
-    private static volatile InstrumentsProvider instance;
+    private static InstrumentsProvider instance;
 
     @Getter
     private List<Currency> currencyList;
 
     @Getter
-    private CopyOnWriteArrayList<Asset> assets;
-
+    private List<Asset> assets;
 
     private InstrumentsProvider() {
-        this.currencyList = updateCurrencyList();
         this.assets = initAssets();
     }
 
     public static InstrumentsProvider getInstance() {
         if (instance == null) {
-            synchronized (InstrumentsProvider.class) {
-                if (instance == null) {
-                    System.out.println("NEW INSTANCE");
-                    instance = new InstrumentsProvider();
-                }
-            }
+            System.out.println("New Instance");
+            instance = new InstrumentsProvider();
         }
         return instance;
+    }
+
+    public AssetData getCoinData(String name) {
+        return CryptoCompareFetcher.getCoinMetaData(name).getData();
+    }
+
+    public List<Asset> initAssets() {
+        return Arrays.stream(Symbol.values())
+                .map(Enum::name)
+                .map(Asset::new)
+                .toList();
     }
 
     public List<Currency> updateCurrencyList() {
@@ -58,20 +62,5 @@ public class InstrumentsProvider {
                 .findFirst()
                 .orElse(null);
     }
-
-    public AssetData getCoinData(String name) {
-        return CryptoCompareFetcher.getCoinMetaData(name).getData();
-    }
-
-    public CopyOnWriteArrayList<Asset> initAssets() {
-        System.out.println(" -> RECEIVING ASSETS");
-
-        return currencyList.stream()
-                .map(Currency::getName)
-                .map(Asset::new)
-                .filter(a -> a.getAssetData().getPriceUsd() > 0)
-                .collect(Collectors.toCollection(CopyOnWriteArrayList::new));
-    }
-
 
 }
