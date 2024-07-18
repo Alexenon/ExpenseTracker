@@ -1,0 +1,174 @@
+.coin-details-content {
+    height: 100%;
+    margin: 100px;
+    min-height: 30vh;
+    position: relative;
+}
+
+.section-card-wrapper {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 30px;
+    -webkit-box-align: center;
+    box-shadow: rgba(0, 0, 0, 0.02) 0px 8px 12px;
+    border-radius: 24px;
+}
+
+.widget-card {
+    margin: 0px;
+    flex: 0 0 auto;
+    height: fit-content;
+    max-width: 382px !important;
+    padding: 16px 16px 24px !important;
+}
+
+.rounded-button {
+    border: 1px solid #e5e5e5;
+    background-color: var(--white-color);
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    margin: 10px;
+}
+
+.rounded-button > span {
+    transition: .5s color, .5s background;
+}
+
+.price-wrapper {
+    display: flex;
+    align-items: center;
+    margin-top: 13px;
+}
+
+.price-wrapper > p {
+    font-weight: 700;
+    font-size: 32px;
+    line-height: 42px;
+    letter-spacing: 0px;
+    color: var(--color-black);
+}
+
+.price-change-badge {
+    height: 30px;
+    display: flex;
+    align-items: center;
+    padding: 4px;
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+}
+
+.price-change-badge > vaadin-icon {
+    font-size: 16px;
+}
+
+    /* arrow-size 16x16 */
+
+.price-badge-green {
+    background: rgba(52, 179, 73, .1);
+}
+
+.price-badge-red {
+    background: rgba(240, 41, 52, .1);
+}
+
+.price-text-green {
+    color: #34b349;
+}
+
+.price-text-red {
+    color: #f02934;
+}
+
+/*
+    Header Section
+*/
+
+.asset-details-header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.coin-overview-name-container {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.coin-overview-name-container > .dot {
+    font-weight: 500;
+}
+
+.coin-overview-name-container > .dot {
+    margin: 0 10px 0 5px;
+}
+
+.coin-overview-name-container > span {
+    font-weight: 500;
+    font-size: 18px;
+    line-height: 26px;
+    letter-spacing: 0px;
+    color: #7f7f7f;;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    max-width: 100px;
+    white-space: nowrap;
+}
+
+.coin-overview-image {
+    width: 40px;
+    height: 40px;
+    margin-right: 12px;
+}
+
+.coin-overview-rank {
+    background: rgb(39, 117, 202);
+    display: inline-flex;
+    align-items: center;
+    line-height: 1;
+    border-radius: 6px;
+    padding: 2px 8px;
+    margin: 0px;
+    width: fit-content;
+    height: 20px;
+    letter-spacing: 0;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 12px;
+    color: var(--color-white);
+}
+
+.coin-overview_price {
+    font-weight: 700;
+    font-size: 32px;
+    line-height: 42px;
+    -webkit-letter-spacing: 0;
+    -moz-letter-spacing: 0;
+    -ms-letter-spacing: 0;
+    letter-spacing: 0;
+    color: var(--textColor);
+}
+
+/*
+    Market Stats Section
+*/
+
+.market-stats-item {
+    max-width: 236px;
+    flex: 0 0 auto;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.market-stats-item > label {
+    font-size: 18px;
+}
+
+.market-stats-item > p {
+    font-size: 20px;
+    font-weight: 500;
+}
+

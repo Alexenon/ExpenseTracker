@@ -18,7 +18,9 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.ValueProvider;
 
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 /*
@@ -97,23 +99,11 @@ public class AssetsGrid extends Div {
         return new NumberRenderer<>(priceProvider, priceFormat, nullPriceRepresentation);
     }
 
-    /*
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 30px;
-        width: 50px;
-        border-radius: 8px;
-        background-color: rgba(240, 41, 52, 0.1); #red
-        background: rgba(52, 179, 73, 0.1); # green
+    private NumberRenderer<Asset> priceRenderer2(ValueProvider<Asset, Number> priceProvider) {
+        NumberFormat nf = NumberFormat.getCurrencyInstance(Locale.US);
+        return new NumberRenderer<>(priceProvider, nf, "$0.00");
+    }
 
-            --RedLightColor: #f02934;
-            --GreenLightColor: #34b349;
-            --RedDarkColor: #ff4d4d;
-            --GreenDarkColor: #6ccf59;
-
-        # arrow-size 16x16
-    * */
     private Div renderProfitChanges(Asset asset) {
         double value = asset.getAssetData().getSpotMoving24HourChangePercentageUsd();
         Paragraph changes = new Paragraph(String.valueOf(value));

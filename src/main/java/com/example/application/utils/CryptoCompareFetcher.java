@@ -18,7 +18,7 @@ import java.util.Map;
 /*
  * https://developers.cryptocompare.com/documentation/legacy/Other/allCoinsWithContentEndpoint
  *
- * https://developers.cryptocompare.com/documentation/data-api/asset_v1_top_list
+ * https://developers.cryptocompare.com/documentation/data-api/asset_v1_metadata
  *
  *
  * */
@@ -66,6 +66,9 @@ public class CryptoCompareFetcher {
         }
     }
 
+    /**
+     * <a href="https://developers.cryptocompare.com/documentation/data-api/asset_v1_metadata">Documentation</a>
+     * */
     public static AssetMetaDataApiResp getCoinMetaData(String symbol) {
         try {
             String url = METADATA_URL + "?asset="

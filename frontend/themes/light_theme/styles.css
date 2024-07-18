@@ -2,6 +2,7 @@
 @import 'styles/component-styles/chart.css';
 @import 'styles/page-styles/error-page.css';
 @import 'styles/page-styles/auth-pages.css';
+@import 'styles/page-styles/asset-details-page.css';
 
 :root {
     --main: #00BFA6;

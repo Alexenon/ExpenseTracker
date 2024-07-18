@@ -39,7 +39,7 @@ public class AssetsDashboardView extends Main {
         this.assetWatcherService = assetWatcherService;
         this.securityService = securityService;
         this.userService = userService;
-        instrumentsProvider = InstrumentsProvider.getInstance();
+        this.instrumentsProvider = InstrumentsProvider.getInstance();
 
         getStyle().set("margin-top", "100px");
 
