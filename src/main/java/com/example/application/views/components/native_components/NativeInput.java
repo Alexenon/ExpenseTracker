@@ -1,4 +1,4 @@
-package com.example.application.views.components.basic_components;
+package com.example.application.views.components.native_components;
 
 import com.example.application.views.components.utils.TextFieldValidationSupport;
 import com.vaadin.flow.component.PropertyDescriptor;
