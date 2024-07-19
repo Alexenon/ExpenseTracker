@@ -10,9 +10,21 @@
     align-items: center;
     flex-wrap: wrap;
     gap: 30px;
-    -webkit-box-align: center;
+    padding: 30px;
     box-shadow: rgba(0, 0, 0, 0.02) 0px 8px 12px;
     border-radius: 24px;
+    background: var(--white-color);
+    border: 1px solid #f2f2f2;
+    margin-bottom: 30px;
+}
+
+.section-title {
+    padding: 0 20px;
+    margin: 40px 0 20px;
+    font-weight: 600;
+    font-size: 25px;
+    line-height: 32px;
+    color: var(--black-color);
 }
 
 .widget-card {
@@ -48,6 +60,7 @@
     line-height: 42px;
     letter-spacing: 0px;
     color: var(--color-black);
+    margin-right: 10px;
 }
 
 .price-change-badge {
@@ -55,6 +68,7 @@
     display: flex;
     align-items: center;
     padding: 4px;
+    margin-bottom: 8px;
     border-radius: 8px;
     overflow: hidden;
     position: relative;
@@ -152,6 +166,29 @@
 }
 
 /*
+    Holdings Section
+*/
+
+.holdings-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.holdings-section-header > vaadin-button {
+    border: 1px solid #e5e5e5;
+    padding: 6px 16px 6px 12px;
+    border-radius: 12px;
+    background-color: white;
+    font-size: 16px;
+    color: black;
+}
+
+
+
+
+
+/*
     Market Stats Section
 */
 
@@ -169,6 +206,6 @@
 
 .market-stats-item > p {
     font-size: 20px;
-    font-weight: 500;
+    font-weight: 600;
 }
 

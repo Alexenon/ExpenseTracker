@@ -3,6 +3,7 @@ package com.example.application.views.pages;
 import com.example.application.data.models.Asset;
 import com.example.application.data.models.InstrumentsProvider;
 import com.example.application.views.components.PriceMonitorContainer;
+import com.example.application.views.components.complex_components.PriceBadge;
 import com.example.application.views.layouts.MainLayout;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.*;
@@ -14,6 +15,7 @@ import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
+import com.vaadin.flow.theme.lumo.LumoIcon;
 
 import java.text.NumberFormat;
 import java.util.Locale;
@@ -46,6 +48,7 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
                 headerDetailsSection(),
                 priceMonitorContainer,
                 notesArea,
+                holdingsSection(),
                 marketStatsSection(),
                 aboutSection()
         );
@@ -69,7 +72,7 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(Locale.US);
         String priceValue = currencyFormat.format(asset.getAssetData().getPriceUsd());
         Paragraph price = new Paragraph(priceValue);
-        Div priceChangeBadge = createPriceChangeBadge(asset.getAssetData().getSpotMoving24HourChangePercentageUsd());
+        Div priceChangeBadge = new PriceBadge(asset.getAssetData().getSpotMoving24HourChangePercentageUsd());
         Div priceWrapper = new Div(price, priceChangeBadge);
         priceWrapper.setClassName("price-wrapper");
 
@@ -97,7 +100,38 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         return section;
     }
 
+    private Section aboutSection() {
+        Paragraph description = new Paragraph(asset.getAssetData().getAssetDescriptionSummary());
+        return new Section(description);
+    }
+
+    private Section holdingsSection() {
+        H3 title = new H3("Holdings");
+        title.setClassName("section-title");
+        Button addTransactionBtn = new Button("Add Transaction", LumoIcon.PLUS.create());
+        addTransactionBtn.setIconAfterText(false);
+
+        Div header = new Div(title, addTransactionBtn);
+        header.setClassName("holdings-section-header");
+
+        Div body = new Div();
+        body.addClassName("section-card-wrapper");
+
+        Div diversity = createMarketStatsItem("Portfolio Diversity", "8%");
+        Div totalWorth = createMarketStatsItem("Total Worth", "$200");
+        Div totalCost = createMarketStatsItem("Total Cost", "$180");
+        Div profitLoss = createMarketStatsItem("Profit Loss", "$20");
+
+        body.add(diversity, totalWorth, totalCost, profitLoss);
+
+        return new Section(header, body);
+    }
+
     private Section marketStatsSection() {
+        Section section = new Section();
+        H3 title = new H3("Market Stats");
+        title.setClassName("section-title");
+
         Div marketCap = createMarketStatsItem("Market Cap",
                 String.valueOf(asset.getAssetData().getTotalMktCapUsd()));
         Div circulationSupply = createMarketStatsItem("Circulation Supply",
@@ -107,18 +141,11 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         Div volume24Hour = createMarketStatsItem("Volume 24h",
                 String.valueOf(asset.getAssetData().getSpotMoving24HourQuoteVolumeUsd()));
 
-        Section section = new Section(marketCap, circulationSupply, totalSupply, volume24Hour);
-        section.addClassNames("section-card-wrapper", "market-stats-section");
+        Div body = new Div(marketCap, circulationSupply, totalSupply, volume24Hour);
+        body.addClassNames("section-card-wrapper", "market-stats-section");
+
+        section.add(title, body);
         return section;
-    }
-
-    private Section aboutSection() {
-        Paragraph description = new Paragraph(asset.getAssetData().getAssetDescriptionSummary());
-        return new Section(description);
-    }
-
-    private Section holdingsSection() {
-        return new Section();
     }
 
     private Section transactionSection() {
@@ -143,29 +170,6 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
                 : VaadinIcon.STAR_O.create();
     }
 
-    private Div createPriceChangeBadge(double priceChange) {
-        String formattedPercentage = String.format("%.2f%%", priceChange);
-        Paragraph percentage = new Paragraph(formattedPercentage);
-
-        Icon iconDirection;
-        if (priceChange > 0) {
-            iconDirection = VaadinIcon.ARROW_UP.create();
-            iconDirection.setClassName("price-text-green");
-            percentage.setClassName("price-badge-green");
-        } else if (priceChange < 0) {
-            iconDirection = VaadinIcon.ARROW_DOWN.create();
-            iconDirection.setClassName("price-text-red");
-            percentage.setClassName("price-badge-red");
-        } else {
-            iconDirection = VaadinIcon.MINUS.create();
-            iconDirection.removeClassNames("price-text-green", "price-text-red");
-            percentage.removeClassNames("price-badge-green", "price-badge-red");
-        }
-
-        Div priceWrapper = new Div(iconDirection, percentage);
-        priceWrapper.setClassName("price-change-badge");
-        return priceWrapper;
-    }
 
 
     /*
