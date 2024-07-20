@@ -2,6 +2,7 @@ package com.example.application.views.pages;
 
 import com.example.application.data.models.Asset;
 import com.example.application.data.models.InstrumentsProvider;
+import com.example.application.data.models.NumberType;
 import com.example.application.views.components.PriceMonitorContainer;
 import com.example.application.views.components.complex_components.PriceBadge;
 import com.example.application.views.layouts.MainLayout;
@@ -20,7 +21,11 @@ import com.vaadin.flow.theme.lumo.LumoIcon;
 import java.text.NumberFormat;
 import java.util.Locale;
 
-// TODO: Think about Holdings + Transactions
+/* // TODO: Think about Holdings + Transactions
+ *
+ *       String formattedPrice = String.format("$%.2f", value);
+ *       String formattedPercentage = String.format("%.2f%%", Math.abs(value));
+ * */
 
 @AnonymousAllowed
 @PageTitle("Asset Details")
@@ -69,10 +74,10 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         coinNameContainer.setClassName("coin-overview-name-container");
         coinNameContainer.add(image, coinName, dot, symbol);
 
-        NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(Locale.US);
-        String priceValue = currencyFormat.format(asset.getAssetData().getPriceUsd());
-        Paragraph price = new Paragraph(priceValue);
-        PriceBadge percentageBadge = new PriceBadge(asset.getAssetData().getSpotMoving24HourChangePercentageUsd(), false);
+        String assetPrice = NumberFormat.getCurrencyInstance(Locale.US).format(asset.getAssetData().getPriceUsd());
+        Paragraph price = new Paragraph(assetPrice);
+        double percentageChangeLast24H = asset.getAssetData().getSpotMoving24HourChangePercentageUsd();
+        PriceBadge percentageBadge = new PriceBadge(percentageChangeLast24H, NumberType.PERCENT);
         Div priceWrapper = new Div(price, percentageBadge);
         priceWrapper.setClassName("price-wrapper");
 

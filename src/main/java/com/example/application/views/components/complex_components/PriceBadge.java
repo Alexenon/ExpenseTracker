@@ -1,5 +1,6 @@
 package com.example.application.views.components.complex_components;
 
+import com.example.application.data.models.NumberType;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Paragraph;
@@ -8,71 +9,82 @@ import com.vaadin.flow.theme.lumo.LumoIcon;
 import lombok.Getter;
 import lombok.Setter;
 
-// type: price, percentage
-// background: on/off
-
 @Tag(Tag.DIV)
 public class PriceBadge extends Div {
 
     @Getter
-    private Icon directionIcon;
+    private double value;
+
+    @Getter
+    private Icon icon;
 
     @Getter
     private Paragraph textField;
 
-    @Getter
-    private boolean withBackground;
-
-    public PriceBadge(double value, boolean priceType) {
-        String formattedPrice = String.format("$%.2f", value);
-        String formattedPercentage = String.format("%.2f%%", Math.abs(value));
-
-        withBackground = false;
-        directionIcon = getIcon(value);
-        textField = priceType
-                ? new Paragraph(formattedPrice)
-                : new Paragraph(formattedPercentage);
-
+    // Builder
+    public PriceBadge(double value, NumberType numberType, boolean withIcon, boolean withBackground, boolean withColor) {
+        this.value = value;
+        this.textField = new Paragraph(numberType.parse(value));
 
         addClassName("price-change-badge");
-        setTextColor(getTextColorByValue(value));
-        setBackgroundColor(getBackgroundColorByValue(value));
-        add(directionIcon, textField);
+        setIcon();
+        setTextColor();
+        setBackgroundColor();
+        add(icon, textField);
     }
 
-    public void removeTextColor() {
-        setTextColor(Color.DEFAULT_TEXT_COLOR);
+
+    public PriceBadge(double value, NumberType numberType) {
+        this.value = value;
+        this.textField = new Paragraph(numberType.parse(value));
+
+        addClassName("price-change-badge");
+        setIcon();
+        setTextColor();
+        setBackgroundColor();
+        add(icon, textField);
     }
 
-    public void removeBackground() {
-        this.withBackground = false;
-        setBackgroundColor(Color.DEFAULT_BACKGROUND_COLOR);
-    }
-
-    private void removeIcon() {
-        directionIcon.removeFromParent();
+    public void setIcon() {
+        icon = getIconByValue();
     }
 
     public void setTextColor(Color color) {
         textField.getStyle().set("color", color.getValue());
-        directionIcon.getStyle().set("color", color.getValue());
+        icon.getStyle().set("color", color.getValue());
+    }
+
+    public void setTextColor() {
+        setTextColor(getTextColorByValue());
     }
 
     public void setBackgroundColor(Color color) {
         this.getStyle().set("background", color.getValue());
     }
 
-    private Color getTextColorByValue(double value) {
+    public void setBackgroundColor() {
+        setBackgroundColor(getBackgroundColorByValue());
+    }
+
+    private void removeIcon() {
+        icon.removeFromParent();
+    }
+
+    public void setValue(double value) {
+        this.value = value;
+    }
+
+    private Color getTextColorByValue() {
         return (value == 0) ? Color.DEFAULT_TEXT_COLOR
                 : ((value > 0) ? Color.GREEN_TEXT_COLOR : Color.RED_TEXT_COLOR);
     }
 
-    private Color getBackgroundColorByValue(double value) {
+    private Color getBackgroundColorByValue() {
         return (value == 0) ? Color.DEFAULT_BACKGROUND_COLOR
                 : ((value > 0) ? Color.GREEN_BACKGROUND_COLOR : Color.RED_BACKGROUND_COLOR);
     }
 
-    private Icon getIcon(double value) {
+    private Icon getIconByValue() {
         return (value == 0) ? LumoIcon.MINUS.create()
                 : ((value > 0) ? LumoIcon.CHEVRON_UP.create() : LumoIcon.CHEVRON_DOWN.create());
     }
@@ -96,6 +108,8 @@ public class PriceBadge extends Div {
         }
 
     }
+
+
 
 
 }
