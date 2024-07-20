@@ -72,8 +72,8 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(Locale.US);
         String priceValue = currencyFormat.format(asset.getAssetData().getPriceUsd());
         Paragraph price = new Paragraph(priceValue);
-        Div priceChangeBadge = new PriceBadge(asset.getAssetData().getSpotMoving24HourChangePercentageUsd());
-        Div priceWrapper = new Div(price, priceChangeBadge);
+        PriceBadge percentageBadge = new PriceBadge(asset.getAssetData().getSpotMoving24HourChangePercentageUsd(), false);
+        Div priceWrapper = new Div(price, percentageBadge);
         priceWrapper.setClassName("price-wrapper");
 
         Div coinInfoContainer = new Div(rank, coinNameContainer, priceWrapper);
