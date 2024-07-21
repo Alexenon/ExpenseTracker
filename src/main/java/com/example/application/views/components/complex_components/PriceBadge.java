@@ -21,37 +21,35 @@ public class PriceBadge extends Div {
     @Getter
     private Paragraph textField;
 
-    // Builder
-    public PriceBadge(double value, NumberType numberType, boolean withIcon, boolean withBackground, boolean withColor) {
-        this.value = value;
-        this.textField = new Paragraph(numberType.parse(value));
-
-        addClassName("price-change-badge");
-        setIcon();
-        setTextColor();
-        setBackgroundColor();
-        add(icon, textField);
+    public PriceBadge(double value, NumberType numberType) {
+        this(value, numberType, true, true, true);
     }
 
-
-    public PriceBadge(double value, NumberType numberType) {
+    // Builder
+    public PriceBadge(double value, NumberType numberType, boolean withColor, boolean withIcon, boolean withBackground) {
         this.value = value;
         this.textField = new Paragraph(numberType.parse(value));
 
         addClassName("price-change-badge");
-        setIcon();
-        setTextColor();
-        setBackgroundColor();
-        add(icon, textField);
+        if (withIcon)
+            setIcon();
+        if (withColor)
+            setTextColor();
+        if (withBackground)
+            setBackgroundColor();
+
+        add(textField);
     }
 
     public void setIcon() {
         icon = getIconByValue();
+        addComponentAsFirst(icon);
     }
 
     public void setTextColor(Color color) {
         textField.getStyle().set("color", color.getValue());
-        icon.getStyle().set("color", color.getValue());
+        if (icon != null)
+            icon.getStyle().set("color", color.getValue());
     }
 
     public void setTextColor() {
@@ -108,8 +106,6 @@ public class PriceBadge extends Div {
         }
 
     }
-
-
 
 
 }

@@ -29,6 +29,10 @@ public class Container extends Div {
         return new Builder();
     }
 
+    public static Builder builder(String className) {
+        return new Builder(className);
+    }
+
     /**
      * Builder class to create easier the nested containers
      */
@@ -39,6 +43,10 @@ public class Container extends Div {
             this.instance = new Container();
         }
 
+        public Builder(String className) {
+            this.instance = new Container(className);
+        }
+
         public Builder addComponent(Component component) {
             instance.add(component);
             return this;
@@ -46,16 +54,6 @@ public class Container extends Div {
 
         public Builder addComponents(Component... components) {
             instance.add(components);
-            return this;
-        }
-
-        public Builder removeComponent(Component component) {
-            instance.remove(component);
-            return this;
-        }
-
-        public Builder removeFromParent() {
-            instance.removeFromParent();
             return this;
         }
 
@@ -69,13 +67,8 @@ public class Container extends Div {
             return this;
         }
 
-        public Builder removeClassName(String className) {
-            instance.removeClassName(className);
-            return this;
-        }
-
-        public Builder removeClassNames(String... classNames) {
-            instance.removeClassNames(classNames);
+        public Builder setStyle(String property, String value) {
+            instance.getStyle().set(property, value);
             return this;
         }
 

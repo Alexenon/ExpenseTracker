@@ -5,11 +5,14 @@ import com.example.application.data.models.InstrumentsProvider;
 import com.example.application.data.models.NumberType;
 import com.example.application.views.components.PriceMonitorContainer;
 import com.example.application.views.components.complex_components.PriceBadge;
+import com.example.application.views.components.native_components.Container;
 import com.example.application.views.layouts.MainLayout;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
@@ -122,10 +125,21 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         Div body = new Div();
         body.addClassName("section-card-wrapper");
 
-        Div diversity = createMarketStatsItem("Portfolio Diversity", "8%");
-        Div totalWorth = createMarketStatsItem("Total Worth", "$200");
-        Div totalCost = createMarketStatsItem("Total Cost", "$180");
-        Div profitLoss = createMarketStatsItem("Profit Loss", "$20");
+        PriceBadge diversityValue = new PriceBadge(8, NumberType.PERCENT, true, false, false);
+        ProgressBar diversityBar = new ProgressBar(0, 100, 100.0 / 8);
+        Container diversityContainer = Container.builder("portfolio-diversity")
+                .addComponent(diversityValue)
+                .addComponent(diversityBar)
+                .build();
+
+        PriceBadge worthValue = new PriceBadge(200, NumberType.CURRENCY, false, false, false);
+        PriceBadge costValue = new PriceBadge(180, NumberType.CURRENCY, false, false, false);
+        PriceBadge profitLossValue = new PriceBadge(20, NumberType.CURRENCY, true, false, false);
+
+        Div diversity = createStatsItem("Portfolio Diversity", diversityContainer);
+        Div totalWorth = createStatsItem("Total Worth", worthValue);
+        Div totalCost = createStatsItem("Total Cost", costValue);
+        Div profitLoss = createStatsItem("Profit Loss", profitLossValue);
 
         body.add(diversity, totalWorth, totalCost, profitLoss);
 
@@ -165,6 +179,13 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         label.setFor(paragraph);
 
         Div div = new Div(label, paragraph);
+        div.addClassName("market-stats-item");
+        return div;
+    }
+
+    private Div createStatsItem(String labelText, Component valueComponent) {
+        Paragraph label = new Paragraph(labelText);
+        Div div = new Div(label, valueComponent);
         div.addClassName("market-stats-item");
         return div;
     }

@@ -184,9 +184,12 @@
     color: black;
 }
 
-
-
-
+.portfolio-diversity {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 60%;
+}
 
 /*
     Market Stats Section
@@ -198,6 +201,7 @@
     width: 100%;
     display: flex;
     flex-direction: column;
+    align-items: center;
 }
 
 .market-stats-item > label {

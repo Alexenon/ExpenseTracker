@@ -7,7 +7,7 @@ const patternTooltip = '{name}: {value} MDL ({percent}%)';
 
 /**
  * This function take the information displayed on element from pie chart
- * that users clicks, and displays more information using expense.id
+ * that users clicks, and displays more information using 'expense.id'
  */
 function showChartDetails() {
     var chartElement = getElementByXPath(chartXpath + '//canvas');
