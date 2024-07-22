@@ -8,7 +8,7 @@ import java.math.BigInteger;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CoinData {
+public class Coin {
     @JsonProperty("Id")
     private String id;
 

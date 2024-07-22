@@ -14,7 +14,7 @@ public class ComponentBuilder {
 
     public ComponentBuilder addClass(String className) {
         if (component != null) {
-            component.addClassNames(className);
+            component.addClassName(className);
         }
         return this;
     }
@@ -26,7 +26,7 @@ public class ComponentBuilder {
         return this;
     }
 
-    public ComponentBuilder add(Component ... childComponents) {
+    public ComponentBuilder add(Component... childComponents) {
         if (component instanceof HasComponents) {
             ((HasComponents) component).add(childComponents);
         }
@@ -36,4 +36,16 @@ public class ComponentBuilder {
     public Component build() {
         return component;
     }
+
+    @FunctionalInterface
+    public interface Customizer<T> {
+        static <T> Customizer<T> withDefaults() {
+            return (t) -> {
+            };
+        }
+
+        void customize(T t);
+    }
+
 }
+

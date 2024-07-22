@@ -10,6 +10,7 @@
     --header-background: rgb(255, 255, 255);
     --color-white: white;
     --color-black: rgb(51, 40, 40);
+    --color-orange: #ff9332;
     --color-gray: rgb(123, 123, 123);
     --table-background: rgb(220, 214, 211);
     --input-border: #d1d1d1;
@@ -53,6 +54,12 @@ img {
     height: auto;
     -webkit-user-drag: none;
 }
+
+vaadin-text-area::part(input-field) {
+    background: white;
+    padding: 0;
+}
+
 
 .page-content {
     margin-top: 80px;

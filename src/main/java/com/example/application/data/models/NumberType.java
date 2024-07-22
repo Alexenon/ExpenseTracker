@@ -3,6 +3,12 @@ package com.example.application.data.models;
 import java.text.NumberFormat;
 import java.util.Locale;
 
+/* TODO:
+    Take a look at the DecimalFormat class. Most people use it for formatting numbers as strings,
+    but it actually has a parse method to go the other way around! You initialize it with your
+    pattern (see the tutorial), and then invoke parse() on the input string.
+*/
+
 /**
  * Class to identify type of number, and how it should be parsed as String
  * <li>integer - rounded integer, without digits after comma</li>

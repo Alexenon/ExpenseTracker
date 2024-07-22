@@ -24,11 +24,7 @@ import com.vaadin.flow.theme.lumo.LumoIcon;
 import java.text.NumberFormat;
 import java.util.Locale;
 
-/* // TODO: Think about Holdings + Transactions
- *
- *       String formattedPrice = String.format("$%.2f", value);
- *       String formattedPercentage = String.format("%.2f%%", Math.abs(value));
- * */
+// TODO: Add Transactions
 
 @AnonymousAllowed
 @PageTitle("Asset Details")
@@ -36,7 +32,6 @@ import java.util.Locale;
 public class AssetDetailsView extends Main implements HasUrlParameter<String> {
 
     private final PriceMonitorContainer priceMonitorContainer = new PriceMonitorContainer();
-    private final TextArea notesArea = new TextArea();
     private Asset asset;
 
     @Override
@@ -55,7 +50,7 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         add(
                 headerDetailsSection(),
                 priceMonitorContainer,
-                notesArea,
+                notesAndConvertorSection(),
                 holdingsSection(),
                 marketStatsSection(),
                 aboutSection()
@@ -105,12 +100,53 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         Paragraph totalInvestedParagraph = new Paragraph();
         Paragraph dollarProfitParagraph = new Paragraph();
         Paragraph percentageProfitParagraph = new Paragraph();
+        section.add(totalInvestedParagraph, dollarProfitParagraph, percentageProfitParagraph);
         return section;
     }
 
-    private Section aboutSection() {
-        Paragraph description = new Paragraph(asset.getAssetData().getAssetDescriptionSummary());
-        return new Section(description);
+    private Section notesAndConvertorSection() {
+        Section section = new Section();
+        section.addClassName("notes-convertor-section");
+        section.add(notesSection());
+        section.add(convertorSection());
+        return section;
+    }
+
+    private Section notesSection() {
+        H3 title = new H3("Notes");
+        title.setClassName("section-title");
+        TextArea notesArea = new TextArea();
+        notesArea.setClassName("note-area");
+        notesArea.setPlaceholder("Add your thoughts about coin here.");
+        Button saveBtn = new Button("Save");
+
+        Container sectionBody = Container.builder()
+                .addClassNames("note-wrapper")
+                .addComponent(notesArea)
+                .addComponent(saveBtn)
+                .build();
+
+        Section section = new Section(title, sectionBody);
+        section.addClassName("notes-section");
+        return section;
+    }
+
+    private Section convertorSection() {
+        H3 title = new H3("Crypto Convertor");
+        title.setClassName("section-title");
+
+        Input input = new Input();
+        Input output = new Input();
+
+        Container sectionBody = Container.builder()
+                .addClassNames("convertor")
+                .addComponent(input)
+                .addComponent(output)
+                .build();
+
+        Section section = new Section(title, sectionBody);
+        section.addClassName("convertor-section");
+        return section;
     }
 
     private Section holdingsSection() {
@@ -167,6 +203,14 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         return section;
     }
 
+    private Section aboutSection() {
+        H3 title = new H3("About " + asset.getAssetData().getName());
+        title.setClassName("section-title");
+        Paragraph description = new Paragraph(asset.getAssetData().getAssetDescriptionSummary());
+        Container body = new Container("section-card-wrapper", description);
+        return new Section(title, body);
+    }
+
     private Section transactionSection() {
         return new Section();
     }
@@ -195,14 +239,6 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
                 ? VaadinIcon.STAR.create()
                 : VaadinIcon.STAR_O.create();
     }
-
-
-
-    /*
-        Take a look at the DecimalFormat class. Most people use it for formatting numbers as strings,
-        but it actually has a parse method to go the other way around! You initialize it with your
-        pattern (see the tutorial), and then invoke parse() on the input string.
-    */
 
 }
 

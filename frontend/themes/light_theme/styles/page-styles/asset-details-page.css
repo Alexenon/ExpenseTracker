@@ -27,14 +27,6 @@
     color: var(--black-color);
 }
 
-.widget-card {
-    margin: 0px;
-    flex: 0 0 auto;
-    height: fit-content;
-    max-width: 382px !important;
-    padding: 16px 16px 24px !important;
-}
-
 .rounded-button {
     border: 1px solid #e5e5e5;
     background-color: var(--white-color);
@@ -211,5 +203,91 @@
 .market-stats-item > p {
     font-size: 20px;
     font-weight: 600;
+}
+
+/*
+    Notes Widget
+*/
+
+.widget-card {
+    margin: 0px;
+    flex: 0 0 auto;
+    height: fit-content;
+    max-width: 382px !important;
+    padding: 16px 16px 24px !important;
+}
+
+.widget-wrapper {
+    display: block;
+    color: var(--black-color);
+    border-radius: 20px;
+    box-sizing: border-box;
+}
+
+
+/* Notes Convertor Section */
+
+.notes-convertor-section {
+    display: flex;
+    gap: 30px;
+}
+
+.notes-section,
+.convertor-section {
+    flex: 1 1 0%;
+}
+
+.note-wrapper {
+    min-height: 172px;
+    padding: 20px;
+    border: 1px solid #e5e5e5;
+    border-radius: 16px;
+    box-shadow: rgba(0, 0, 0, 0.02) 0px 8px 12px 0px;
+}
+
+.note-area {
+    min-height: 107px;
+    padding: 18px 18px 20px;
+    color: #333333;
+    overflow: hidden;
+    font-size: 16px;
+    line-height: 24px;
+    letter-spacing: 0px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    border: 1px solid #e5e5e5;
+    border-radius: 16px;
+    background: white;
+    width: 100%;
+}
+
+.note-wrapper > vaadin-text-area[focused] {
+    border: 1px solid var(--color-orange);
+}
+
+.note-wrapper > vaadin-button {
+    color: white;
+    width: 40px;
+    height: 36px;
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+    letter-spacing: 0;
+    border-radius: 8px;
+    background: var(--color-orange);
+    box-shadow: 0 4px 6px rgba(255, 147, 50, .2);
+    padding: 0 16px;
+    margin-top: 12px;
+}
+
+.convertor {
+    width: 100%;
+    display: flex;
+    -webkit-box-align: center;
+    align-items: center;
+    flex-direction: column;
+    z-index: 2;
+    box-shadow: rgba(0, 0, 0, 0.02) 0px 8px 12px;
 }
 

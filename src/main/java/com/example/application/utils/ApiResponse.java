@@ -16,7 +16,7 @@ public class ApiResponse {
     private String message;
 
     @JsonProperty("Data")
-    private Map<String, CoinData> data;
+    private Map<String, Coin> data;
 
     // Getters and Setters
 }
