@@ -4,6 +4,9 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.html.Div;
 
+import java.util.function.Function;
+import java.util.function.Supplier;
+
 @Tag(Tag.DIV)
 public class Container extends Div {
 
@@ -48,6 +51,18 @@ public class Container extends Div {
         }
 
         public Builder addComponent(Component component) {
+            instance.add(component);
+            return this;
+        }
+
+        public Builder addComponent(Supplier<Component> componentSupplier) {
+            Component component = componentSupplier.get();
+            instance.add(component);
+            return this;
+        }
+
+        public <T extends Component> Builder addComponent(Function<Container, T> componentSupplier) {
+            T component = componentSupplier.apply(instance);
             instance.add(component);
             return this;
         }

@@ -13,6 +13,7 @@ import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.progressbar.ProgressBar;
+import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
@@ -31,7 +32,6 @@ import java.util.Locale;
 @Route(value = "details", layout = MainLayout.class)
 public class AssetDetailsView extends Main implements HasUrlParameter<String> {
 
-    private final PriceMonitorContainer priceMonitorContainer = new PriceMonitorContainer();
     private Asset asset;
 
     @Override
@@ -49,7 +49,7 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
 
         add(
                 headerDetailsSection(),
-                priceMonitorContainer,
+                new PriceMonitorContainer(), // TODO: Style and integrate this fully
                 notesAndConvertorSection(),
                 holdingsSection(),
                 marketStatsSection(),
@@ -74,6 +74,7 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
 
         String assetPrice = NumberFormat.getCurrencyInstance(Locale.US).format(asset.getAssetData().getPriceUsd());
         Paragraph price = new Paragraph(assetPrice);
+        price.setId("asset-price");
         double percentageChangeLast24H = asset.getAssetData().getSpotMoving24HourChangePercentageUsd();
         PriceBadge percentageBadge = new PriceBadge(percentageChangeLast24H, NumberType.PERCENT);
         Div priceWrapper = new Div(price, percentageBadge);
@@ -135,14 +136,43 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         H3 title = new H3("Crypto Convertor");
         title.setClassName("section-title");
 
-        Input input = new Input();
-        Input output = new Input();
+        Image inputImage = new Image(asset.getAssetData().getLogoUrl(), asset.getAssetData().getName());
+        inputImage.setClassName("coin-overview-image");
+
+        NumberField inputField = new NumberField();
+        inputField.setMin(0);
+        inputField.setValue(1.0);
+        Container inputContainer = Container.builder()
+                .addComponent(inputImage)
+                .addComponent(new Paragraph(asset.getSymbol()))
+                .addComponent(inputField)
+                .build();
+
+
+        NumberField outputField = new NumberField();
+
+        Container outputContainer = Container.builder()
+                .addComponent(() -> {
+                    Image outputImage = new Image("./images/others/usd.png", "USD image");
+                    outputImage.setWidth("30px");
+                    outputImage.setHeight("30px");
+                    outputImage.getStyle().set("margin", "0 17px 0 5px");
+                    return outputImage;
+                })
+                .addComponent(new Paragraph("USD"))
+                .addComponent(outputField)
+                .build();
 
         Container sectionBody = Container.builder()
-                .addClassNames("convertor")
-                .addComponent(input)
-                .addComponent(output)
+                .addClassName("convertor")
+                .addComponent(inputContainer)
+                .addComponent(outputContainer)
                 .build();
+
+
+        // TODO: Doesn't work
+        inputField.addKeyUpListener(e -> outputField.setValue(inputField.getValue() * asset.getAssetData().getPriceUsd()));
+
 
         Section section = new Section(title, sectionBody);
         section.addClassName("convertor-section");

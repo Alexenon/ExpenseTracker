@@ -55,11 +55,11 @@ img {
     -webkit-user-drag: none;
 }
 
-vaadin-text-area::part(input-field) {
+vaadin-text-area::part(input-field),
+vaadin-number-field::part(input-field) {
     background: white;
     padding: 0;
 }
-
 
 .page-content {
     margin-top: 80px;
