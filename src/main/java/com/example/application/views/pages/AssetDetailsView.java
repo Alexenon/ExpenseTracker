@@ -13,8 +13,8 @@ import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.progressbar.ProgressBar;
-import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.PageTitle;
@@ -49,9 +49,9 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
 
         add(
                 headerDetailsSection(),
-                new PriceMonitorContainer(), // TODO: Style and integrate this fully
                 notesAndConvertorSection(),
                 holdingsSection(),
+                priceMonitorSection(), // TODO: Style and integrate this fully
                 marketStatsSection(),
                 aboutSection()
         );
@@ -93,6 +93,13 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         section.addClassName("asset-details-header");
         section.add(coinInfoContainer, markAsFavorite);
 
+        return section;
+    }
+
+    private Section priceMonitorSection() {
+        Section section = new Section();
+        section.addClassName("section-card-wrapper");
+        section.add(new PriceMonitorContainer());
         return section;
     }
 
@@ -139,17 +146,18 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         Image inputImage = new Image(asset.getAssetData().getLogoUrl(), asset.getAssetData().getName());
         inputImage.setClassName("coin-overview-image");
 
-        NumberField inputField = new NumberField();
-        inputField.setMin(0);
-        inputField.setValue(1.0);
+        TextField inputField = new TextField();
+        inputField.setPattern("^0*[0-9]*\\.?[0-9]*$");
+        inputField.setValue("1");
+
         Container inputContainer = Container.builder()
                 .addComponent(inputImage)
                 .addComponent(new Paragraph(asset.getSymbol()))
                 .addComponent(inputField)
                 .build();
 
-
-        NumberField outputField = new NumberField();
+        TextField outputField = new TextField();
+        outputField.setPattern("^0*[0-9]*\\.?[0-9]*$");
 
         Container outputContainer = Container.builder()
                 .addComponent(() -> {
@@ -171,8 +179,10 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
 
 
         // TODO: Doesn't work
-        inputField.addKeyUpListener(e -> outputField.setValue(inputField.getValue() * asset.getAssetData().getPriceUsd()));
-
+        inputField.addKeyUpListener(e -> {
+            double calculatedPrice = Double.parseDouble(inputField.getValue()) * asset.getAssetData().getPriceUsd();
+            outputField.setValue(NumberType.CURRENCY.parse(calculatedPrice));
+        });
 
         Section section = new Section(title, sectionBody);
         section.addClassName("convertor-section");

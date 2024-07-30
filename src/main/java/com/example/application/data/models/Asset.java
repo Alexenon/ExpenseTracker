@@ -4,7 +4,6 @@ import com.example.application.utils.responses.AssetData;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,11 +37,12 @@ public class Asset {
     }
 
     public double getAveragePrice() {
-        return holdings.stream()
-                .map(Holding::getPriceBought)
-                .mapToDouble(BigDecimal::doubleValue)
-                .average()
-                .orElse(0.0);
+//        return holdings.stream()
+//                .map(Holding::getPriceBought)
+//                .mapToDouble(BigDecimal::doubleValue)
+//                .average()
+//                .orElse(0.0);
+        return 0;
     }
 
     public double getProfit() {

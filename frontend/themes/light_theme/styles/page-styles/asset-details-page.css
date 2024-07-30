@@ -70,8 +70,6 @@
     font-size: 16px;
 }
 
-    /* arrow-size 16x16 */
-
 .price-badge-green {
     background: rgba(52, 179, 73, .1);
 }
@@ -286,11 +284,12 @@
     display: flex;
     align-items: center;
     flex-direction: column;
-    z-index: 2;
+    gap: 40px;
+    justify-content: space-around;
     box-shadow: rgba(0, 0, 0, 0.02) 0px 8px 12px;
     border: 1px solid #e5e5e5;
     border-radius: 16px;
-    padding: 20px;
+    padding: 30px;
 }
 
 .convertor > div {
@@ -317,7 +316,7 @@
     margin: 0 12px 0 0;
 }
 
-/*TODO: Check this*/
+/* TODO: Check this */
 .convertor > div > vaadin-number-field > input {
     text-align: right;
     height: 50px;
@@ -327,8 +326,6 @@
     color: black;
     padding: 0 20px;
 }
-
-
 
 vaadin-number-field {
     width: 100%;

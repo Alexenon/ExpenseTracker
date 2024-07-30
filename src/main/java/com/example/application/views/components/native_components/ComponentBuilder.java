@@ -37,6 +37,17 @@ public class ComponentBuilder<T extends Component> {
         return this;
     }
 
+    public ComponentBuilder<T> setSize(String size) {
+        if (size == null) {
+            instance.getStyle().remove("width");
+            instance.getStyle().remove("height");
+        } else {
+            instance.getStyle().set("width", size);
+            instance.getStyle().set("height", size);
+        }
+        return this;
+    }
+
     public T build() {
         instanceConsumer.accept(instance);
         return instance;
