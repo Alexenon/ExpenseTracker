@@ -57,8 +57,12 @@ img {
 
 vaadin-text-area::part(input-field),
 vaadin-number-field::part(input-field) {
-    background: white;
-    padding: 0;
+/*    background: white;
+    padding: 0;*/
+}
+
+vaadin-button.no-background {
+    background: none;
 }
 
 .page-content {

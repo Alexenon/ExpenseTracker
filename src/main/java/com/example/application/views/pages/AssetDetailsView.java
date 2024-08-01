@@ -4,6 +4,7 @@ import com.example.application.data.models.Asset;
 import com.example.application.data.models.InstrumentsProvider;
 import com.example.application.data.models.NumberType;
 import com.example.application.views.components.PriceMonitorContainer;
+import com.example.application.views.components.PriceTargetContainer;
 import com.example.application.views.components.complex_components.PriceBadge;
 import com.example.application.views.components.native_components.Container;
 import com.example.application.views.layouts.MainLayout;
@@ -51,6 +52,7 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
                 headerDetailsSection(),
                 notesAndConvertorSection(),
                 holdingsSection(),
+                priceWatcherSection(),
                 priceMonitorSection(), // TODO: Style and integrate this fully
                 marketStatsSection(),
                 aboutSection()
@@ -93,6 +95,13 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         section.addClassName("asset-details-header");
         section.add(coinInfoContainer, markAsFavorite);
 
+        return section;
+    }
+
+    private Section priceWatcherSection() {
+        Section section = new Section();
+        section.addClassName("section-card-wrapper");
+        section.add(new PriceTargetContainer());
         return section;
     }
 
@@ -189,6 +198,7 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         return section;
     }
 
+    // https://coinstats.app/coins/usd-coin/holdings/
     private Section holdingsSection() {
         H3 title = new H3("Holdings");
         title.setClassName("section-title");
