@@ -1,5 +1,6 @@
-package com.example.application.data.models;
+package com.example.application.data.models.crypto;
 
+import com.example.application.entities.crypto.Asset;
 import lombok.Data;
 
 import java.time.LocalDateTime;

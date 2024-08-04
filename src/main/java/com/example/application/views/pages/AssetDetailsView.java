@@ -1,8 +1,8 @@
 package com.example.application.views.pages;
 
-import com.example.application.data.models.Asset;
 import com.example.application.data.models.InstrumentsProvider;
 import com.example.application.data.models.NumberType;
+import com.example.application.data.models.crypto.AssetData;
 import com.example.application.views.components.PriceMonitorContainer;
 import com.example.application.views.components.PriceTargetContainer;
 import com.example.application.views.components.complex_components.PriceBadge;
@@ -22,6 +22,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.theme.lumo.LumoIcon;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.text.NumberFormat;
 import java.util.Locale;
@@ -33,13 +34,17 @@ import java.util.Locale;
 @Route(value = "details", layout = MainLayout.class)
 public class AssetDetailsView extends Main implements HasUrlParameter<String> {
 
-    private Asset asset;
+    private AssetData assetData;
+
+    @Autowired
+    private InstrumentsProvider instrumentsProvider;
 
     @Override
-    public void setParameter(BeforeEvent beforeEvent, String assetName) {
-        this.asset = InstrumentsProvider.getInstance().getAssets()
-                .stream().filter(a -> a.getSymbol().equalsIgnoreCase(assetName))
-                .findFirst().orElseThrow();
+    public void setParameter(BeforeEvent beforeEvent, String symbol) {
+        this.assetData = instrumentsProvider.getListOfAssetData().stream()
+                .filter(a -> a.getAsset().getSymbol().equalsIgnoreCase(symbol))
+                .findFirst()
+                .orElseThrow();
 
         buildPage();
         getElement().executeJs("window.scrollTo(0,0)"); // Scroll to top of the page, on initialization
@@ -65,30 +70,30 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         rank.setClassName("coin-overview-rank");
 
         Div coinNameContainer = new Div();
-        Image image = new Image(asset.getAssetData().getLogoUrl(), asset.getAssetData().getName());
+        Image image = new Image(assetData.getAssetInfo().getLogoUrl(), assetData.getAssetInfo().getName());
         image.setClassName("coin-overview-image");
-        H1 coinName = new H1(asset.getAssetData().getName());
+        H1 coinName = new H1(assetData.getAssetInfo().getName());
         Span dot = new Span("•");
         dot.setClassName("dot");
-        Span symbol = new Span(asset.getAssetData().getSymbol());
+        Span symbol = new Span(assetData.getAssetInfo().getSymbol());
         coinNameContainer.setClassName("coin-overview-name-container");
         coinNameContainer.add(image, coinName, dot, symbol);
 
-        String assetPrice = NumberFormat.getCurrencyInstance(Locale.US).format(asset.getAssetData().getPriceUsd());
+        String assetPrice = NumberFormat.getCurrencyInstance(Locale.US).format(assetData.getAssetInfo().getPriceUsd());
         Paragraph price = new Paragraph(assetPrice);
         price.setId("asset-price");
-        double percentageChangeLast24H = asset.getAssetData().getSpotMoving24HourChangePercentageUsd();
+        double percentageChangeLast24H = assetData.getAssetInfo().getSpotMoving24HourChangePercentageUsd();
         PriceBadge percentageBadge = new PriceBadge(percentageChangeLast24H, NumberType.PERCENT);
         Div priceWrapper = new Div(price, percentageBadge);
         priceWrapper.setClassName("price-wrapper");
 
         Div coinInfoContainer = new Div(rank, coinNameContainer, priceWrapper);
 
-        Button markAsFavorite = new Button(getStarIcon(asset.isMarkedAsFavorite()));
+        Button markAsFavorite = new Button(getStarIcon(assetData.getAsset().isMarkedAsFavorite()));
         markAsFavorite.addClassName("rounded-button");
         markAsFavorite.addClickListener(e -> {
-            boolean isFavorite = asset.isMarkedAsFavorite();
-            asset.setMarkedAsFavorite(!isFavorite);
+            boolean isFavorite = assetData.getAsset().isMarkedAsFavorite();
+            assetData.getAsset().setMarkedAsFavorite(!isFavorite);
             markAsFavorite.setIcon(getStarIcon(!isFavorite));
         });
 
@@ -152,7 +157,7 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         H3 title = new H3("Crypto Convertor");
         title.setClassName("section-title");
 
-        Image inputImage = new Image(asset.getAssetData().getLogoUrl(), asset.getAssetData().getName());
+        Image inputImage = new Image(assetData.getAssetInfo().getLogoUrl(), assetData.getAssetInfo().getName());
         inputImage.setClassName("coin-overview-image");
 
         TextField inputField = new TextField();
@@ -161,7 +166,7 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
 
         Container inputContainer = Container.builder()
                 .addComponent(inputImage)
-                .addComponent(new Paragraph(asset.getSymbol()))
+                .addComponent(new Paragraph(assetData.getAsset().getSymbol()))
                 .addComponent(inputField)
                 .build();
 
@@ -189,7 +194,7 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
 
         // TODO: Doesn't work
         inputField.addKeyUpListener(e -> {
-            double calculatedPrice = Double.parseDouble(inputField.getValue()) * asset.getAssetData().getPriceUsd();
+            double calculatedPrice = Double.parseDouble(inputField.getValue()) * assetData.getAssetInfo().getPriceUsd();
             outputField.setValue(NumberType.CURRENCY.parse(calculatedPrice));
         });
 
@@ -238,13 +243,13 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         title.setClassName("section-title");
 
         Div marketCap = createMarketStatsItem("Market Cap",
-                String.valueOf(asset.getAssetData().getTotalMktCapUsd()));
+                String.valueOf(assetData.getAssetInfo().getTotalMktCapUsd()));
         Div circulationSupply = createMarketStatsItem("Circulation Supply",
-                String.valueOf(asset.getAssetData().getSupplyCirculating()));
+                String.valueOf(assetData.getAssetInfo().getSupplyCirculating()));
         Div totalSupply = createMarketStatsItem("Total Supply",
-                String.valueOf(asset.getAssetData().getSupplyTotal()));
+                String.valueOf(assetData.getAssetInfo().getSupplyTotal()));
         Div volume24Hour = createMarketStatsItem("Volume 24h",
-                String.valueOf(asset.getAssetData().getSpotMoving24HourQuoteVolumeUsd()));
+                String.valueOf(assetData.getAssetInfo().getSpotMoving24HourQuoteVolumeUsd()));
 
         Div body = new Div(marketCap, circulationSupply, totalSupply, volume24Hour);
         body.addClassNames("section-card-wrapper", "market-stats-section");
@@ -254,9 +259,9 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
     }
 
     private Section aboutSection() {
-        H3 title = new H3("About " + asset.getAssetData().getName());
+        H3 title = new H3("About " + assetData.getAssetInfo().getName());
         title.setClassName("section-title");
-        Paragraph description = new Paragraph(asset.getAssetData().getAssetDescriptionSummary());
+        Paragraph description = new Paragraph(assetData.getAssetInfo().getAssetDescriptionSummary());
         Container body = new Container("section-card-wrapper", description);
         return new Section(title, body);
     }

@@ -1,6 +1,5 @@
 package com.example.application.views.pages;
 
-import com.example.application.data.models.Asset;
 import com.example.application.data.models.InstrumentsProvider;
 import com.example.application.services.AssetWatcherService;
 import com.example.application.services.SecurityService;
@@ -16,30 +15,28 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @AnonymousAllowed
 @PageTitle("Assets Dashboard")
 @Route(value = "assets-dashboard", layout = MainLayout.class)
 public class AssetsDashboardView extends Main {
 
+    private final InstrumentsProvider instrumentsProvider;
     private final AssetWatcherService assetWatcherService;
     private final SecurityService securityService;
     private final UserService userService;
-    private final InstrumentsProvider instrumentsProvider;
 
     private final AssetsGrid assetsGrid = new AssetsGrid();
-    private final List<Asset> assets = new ArrayList<>();
 
     @Autowired
-    public AssetsDashboardView(AssetWatcherService assetWatcherService,
-                               SecurityService securityService,
-                               UserService userService) {
+    public AssetsDashboardView(
+            InstrumentsProvider instrumentsProvider,
+            AssetWatcherService assetWatcherService,
+            SecurityService securityService,
+            UserService userService) {
+        this.instrumentsProvider = instrumentsProvider;
         this.assetWatcherService = assetWatcherService;
         this.securityService = securityService;
         this.userService = userService;
-        this.instrumentsProvider = InstrumentsProvider.getInstance();
 
         getStyle().set("margin-top", "100px");
 
@@ -49,19 +46,19 @@ public class AssetsDashboardView extends Main {
             AddAssetDialog dialog = new AddAssetDialog(assetWatcherService, securityService, userService);
             dialog.open();
             dialog.addClickSaveBtnListener(grid -> {
-                assets.add(dialog.getAsset());
+//                assets.add(dialog.getAsset());
                 // Update dataGridView
             });
         });
 
         updateAssets();
-        assetsGrid.setItems(assets);
+        assetsGrid.setItems(instrumentsProvider.getListOfAssetData());
 
         add(addBtn, assetsGrid);
     }
 
     public void updateAssets() {
-        assets.addAll(instrumentsProvider.getAssets());
+
     }
 
 }

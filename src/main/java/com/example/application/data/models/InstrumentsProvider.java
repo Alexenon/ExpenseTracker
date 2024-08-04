@@ -1,44 +1,52 @@
 package com.example.application.data.models;
 
+import com.example.application.data.models.crypto.AssetData;
+import com.example.application.data.models.crypto.Currency;
+import com.example.application.entities.crypto.Asset;
+import com.example.application.repositories.AssetRepository;
 import com.example.application.utils.BinanceFetcher;
 import com.example.application.utils.CryptoCompareFetcher;
-import com.example.application.utils.responses.AssetData;
+import com.example.application.utils.responses.AssetInfo;
 import lombok.Getter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.List;
 
+@Component
 public class InstrumentsProvider {
 
-    private static InstrumentsProvider instance;
+    private final AssetRepository assetRepository;
+    private final List<Asset> assets;
 
     @Getter
     private List<Currency> currencyList;
 
     @Getter
-    private List<Asset> assets;
+    private List<AssetData> listOfAssetData;
 
-    private InstrumentsProvider() {
-        this.assets = initAssets();
+    @Autowired
+    private InstrumentsProvider(AssetRepository assetRepository) {
+        this.assetRepository = assetRepository;
+        this.assets = assetRepository.findAll();
+        this.listOfAssetData = initAssetsData();
     }
 
-    public static InstrumentsProvider getInstance() {
-        if (instance == null) {
-            System.out.println("New Instance");
-            instance = new InstrumentsProvider();
-        }
-        return instance;
-    }
-
-    public AssetData getCoinData(String name) {
+    public AssetInfo getAssetInfo(String name) {
         return CryptoCompareFetcher.getCoinMetaData(name).getData();
     }
 
-    public List<Asset> initAssets() {
-        return Arrays.stream(Symbol.values())
-                .map(Enum::name)
-                .map(Asset::new)
+    public List<AssetData> initAssetsData() {
+        return assets.stream()
+                .map(asset -> new AssetData(asset, getAssetInfo(asset.getSymbol())))
+                .toList();
+    }
+
+    public List<AssetInfo> getAssetsInfo() {
+        return assets.stream()
+                .map(Asset::getSymbol)
+                .map(this::getAssetInfo)
                 .toList();
     }
 

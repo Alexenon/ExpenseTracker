@@ -1,5 +1,6 @@
-package com.example.application.entities;
+package com.example.application.entities.crypto;
 
+import com.example.application.entities.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

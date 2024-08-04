@@ -1,12 +1,11 @@
 package com.example.application.views.components.complex_components.dialogs;
 
-import com.example.application.data.models.Asset;
-import com.example.application.data.models.Currency;
-import com.example.application.data.models.Holding;
 import com.example.application.data.models.InstrumentsProvider;
-import com.example.application.entities.AssetWatcher;
+import com.example.application.data.models.crypto.Currency;
 import com.example.application.entities.User;
-import com.example.application.entities.WatchPrice;
+import com.example.application.entities.crypto.Asset;
+import com.example.application.entities.crypto.AssetWatcher;
+import com.example.application.entities.crypto.WatchPrice;
 import com.example.application.services.AssetWatcherService;
 import com.example.application.services.SecurityService;
 import com.example.application.services.UserService;
@@ -43,7 +42,7 @@ public class AddAssetDialog extends Dialog implements HasNotifications {
     private final Button saveButton = new Button("Save");
     private final Button cancelButton = new Button("Cancel");
 
-    private final InstrumentsProvider instrumentsProvider;
+    private InstrumentsProvider instrumentsProvider;
 
 
     public AddAssetDialog(AssetWatcherService assetWatcherService,
@@ -52,7 +51,6 @@ public class AddAssetDialog extends Dialog implements HasNotifications {
         this.assetWatcherService = assetWatcherService;
         this.securityService = securityService;
         this.userService = userService;
-        this.instrumentsProvider = InstrumentsProvider.getInstance();
 
         add(createDialogLayout());
         addStyleToElements();
@@ -100,11 +98,10 @@ public class AddAssetDialog extends Dialog implements HasNotifications {
         return new AssetWatcher(currencyName, watchPrices, comment, user);
     }
 
+    // TODO: Refactor
     public Asset getAsset() {
         Currency currency = instrumentsProvider.getCurrencyByName(nameField.getValue());
-        List<Holding> holdings = new ArrayList<>();
-        String comment = commentField.getValue();
-        return new Asset(currency.getName(), holdings, comment);
+        return new Asset(currency.getName());
     }
 
     public void addClickSaveBtnListener(Consumer<?> listener) {

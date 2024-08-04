@@ -1,6 +1,6 @@
 package com.example.application.utils.investment;
 
-public class InvestmentCalculator {
+public class InvestUtilsCalculator {
     private double startAmount;
     private double endAmount;
 

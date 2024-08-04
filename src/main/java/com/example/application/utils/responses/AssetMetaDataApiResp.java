@@ -14,7 +14,7 @@ import lombok.Data;
 public class AssetMetaDataApiResp {
 
     @JsonProperty("Data")
-    private AssetData data;
+    private AssetInfo data;
 
     @JsonProperty("Err")
     private ErrorData error;

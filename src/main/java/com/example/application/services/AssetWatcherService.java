@@ -1,6 +1,6 @@
 package com.example.application.services;
 
-import com.example.application.entities.AssetWatcher;
+import com.example.application.entities.crypto.AssetWatcher;
 import com.example.application.entities.User;
 import com.example.application.repositories.AssetWatcherRepository;
 import org.springframework.beans.factory.annotation.Autowired;

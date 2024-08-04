@@ -6,6 +6,7 @@ import lombok.Data;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -16,15 +17,20 @@ public class InvestmentStrategyCalculator {
     public static void main(String[] args) {
         double totalAmount = 4000.0;
         double investRatePercentage = 1.0;
-        double sumToInvest = totalAmount * investRatePercentage / 100.0;
+//        double sumToInvest = totalAmount * investRatePercentage / 100.0;
 //        double sumToInvest = 800;
-        double sellPrice = 2;
+        double sumToInvest = 250;
+        double sellPrice = 500;
+
 
         // BTC - 60k submitted
 //        List<Double> pricesWhenToBuy = List.of(60_000.0, 55_000.0, 50_000.0, 45_000.0, 40_000.0, 35_000.0, 30_000.0);
         // ETH -
 //        List<Double> pricesWhenToBuy = List.of(3000.0, 2750.0, 2500.0, 2250.0, 2000.0);
-        List<Double> pricesWhenToBuy = List.of(0.35, 0.25, 0.10);
+//        List<Double> pricesWhenToBuy = List.of(0.35, 0.25, 0.10);
+        // SOL
+        List<Double> pricesWhenToBuy = List.of(140.0, 130.0, 120.0, 110.0);
+
 
         System.out.println("Constant Strategy");
         printSell(sumToInvest, pricesWhenToBuy, constantStrategy(sumToInvest, pricesWhenToBuy), sellPrice);
@@ -58,6 +64,7 @@ public class InvestmentStrategyCalculator {
 
     private static void printSell(double totalInvestAmount, List<Double> pricesToBuy, List<Double> amountToBuy, double sellPrice) {
         System.out.printf("Invest Amount for %s: $%.2f\n", COIN_NAME, totalInvestAmount);
+        AtomicReference<Double> totalProfit = new AtomicReference<>((double) 0);
 
         IntStream.range(0, pricesToBuy.size()).forEach(i -> {
             double buyPrice = pricesToBuy.get(i);
@@ -65,10 +72,12 @@ public class InvestmentStrategyCalculator {
             double investPercentage = investedAmount * 100 / totalInvestAmount;
             double profitPercentage = MathUtils.profitPercentage(buyPrice, sellPrice);
             double profit = MathUtils.profit(buyPrice, sellPrice, investedAmount);
+            totalProfit.updateAndGet(v -> v + profit);
             System.out.printf("At $%.2f -> invest: $%.2f investRate: %.2f%% -> profitRate: %.2f%% profit: $%.2f\n",
                     buyPrice, investedAmount, investPercentage, profitPercentage, profit);
         });
 
+        System.out.printf("Total profit: $%.2f\n", totalProfit.get());
         System.out.printf("Sell at $%.2f\n\n", sellPrice);
     }
 

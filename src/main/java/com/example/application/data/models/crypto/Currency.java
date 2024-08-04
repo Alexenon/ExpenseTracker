@@ -1,4 +1,4 @@
-package com.example.application.data.models;
+package com.example.application.data.models.crypto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
