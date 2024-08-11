@@ -4,8 +4,6 @@ import com.example.application.data.models.InstrumentsProvider;
 import com.example.application.data.models.crypto.Currency;
 import com.example.application.entities.User;
 import com.example.application.entities.crypto.Asset;
-import com.example.application.entities.crypto.AssetWatcher;
-import com.example.application.entities.crypto.WatchPrice;
 import com.example.application.services.AssetWatcherService;
 import com.example.application.services.SecurityService;
 import com.example.application.services.UserService;
@@ -88,15 +86,7 @@ public class AddAssetDialog extends Dialog implements HasNotifications {
         this.close();
     }
 
-    private AssetWatcher getAssetWatcher() {
-        String currencyName = nameField.getValue();
-        List<WatchPrice> watchPrices = priceLayer.getPrices().stream().map(WatchPrice::new).toList();
-        String comment = commentField.getValue();
-        User user = userService.findByUsernameIgnoreCase("test").orElse(null);
-//        String username = securityService.getAuthenticatedUserDetails().getUsername();
 
-        return new AssetWatcher(currencyName, watchPrices, comment, user);
-    }
 
     // TODO: Refactor
     public Asset getAsset() {

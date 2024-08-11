@@ -1,50 +1,67 @@
 package com.example.application.entities.crypto;
 
-import com.example.application.entities.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.ToString;
 
-import java.util.List;
-
-@Entity(name = "crypto_watcher")
+@Data
+@Entity(name = "asset_watcher")
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 public class AssetWatcher {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Getter
-    @Setter
     private long id;
 
-    @Column(name = "currency_name", nullable = false)
-    @Getter
-    @Setter
-    private String currencyName;
-
-    @OneToMany
-    @JoinColumn(name = "watch_price_id", nullable = false)
-    @Getter
-    @Setter
-    private List<WatchPrice> watchPrices;
-
-    @Getter
-    @Setter
-    private String comment;
-
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    @Getter
-    @Setter
-    private User user;
+    @JoinColumn(name = "asset_id", nullable = false)
+    private Asset asset;
 
-    public AssetWatcher(String currencyName, List<WatchPrice> watchPrices, String comment, User user) {
-        this.currencyName = currencyName;
-        this.watchPrices = watchPrices;
-        this.comment = comment;
-        this.user = user;
+    @Column(nullable = false)
+    private double target;
+
+    @Column(nullable = false)
+    private double targetAmount;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TargetType targetType;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ActionType actionType;
+
+    @Column(nullable = false)
+    private boolean isCompleted;
+
+    /**
+     * @param target       represents the price target or percentage target of the asset price
+     * @param targetAmount represents the amount to invest when the target is reached
+     * @param targetType   represents the type of the target - price / percentage
+     * //@param isCompleted  represents if the target was achieved
+     */
+    public AssetWatcher(Asset asset, double target, double targetAmount, TargetType targetType, ActionType actionType) {
+        this.asset = asset;
+        this.target = target;
+        this.targetAmount = targetAmount;
+        this.targetType = targetType;
+        this.actionType = actionType;
     }
+
+    public enum TargetType {
+        PERCENTAGE,
+        PRICE
+    }
+
+    public enum ActionType {
+        BUY,
+        SELL
+    }
+
 }
+
+

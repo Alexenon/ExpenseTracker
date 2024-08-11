@@ -3,6 +3,7 @@ package com.example.application.views.pages;
 import com.example.application.data.models.InstrumentsProvider;
 import com.example.application.data.models.NumberType;
 import com.example.application.data.models.crypto.AssetData;
+import com.example.application.services.InstrumentsService;
 import com.example.application.views.components.PriceMonitorContainer;
 import com.example.application.views.components.PriceTargetContainer;
 import com.example.application.views.components.complex_components.PriceBadge;
@@ -38,6 +39,9 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
 
     @Autowired
     private InstrumentsProvider instrumentsProvider;
+
+    @Autowired
+    private InstrumentsService instrumentsService;
 
     @Override
     public void setParameter(BeforeEvent beforeEvent, String symbol) {
@@ -106,7 +110,7 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
     private Section priceWatcherSection() {
         Section section = new Section();
         section.addClassName("section-card-wrapper");
-        section.add(new PriceTargetContainer());
+        section.add(new PriceTargetContainer(assetData.getAsset(), instrumentsService));
         return section;
     }
 

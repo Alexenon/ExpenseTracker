@@ -12,8 +12,11 @@ import java.time.LocalDateTime;
 
 @Data
 public class CryptoTransaction {
+
     private Asset asset;
-    private double amount;
+    private double price;           // $3200
+    private double quantity;        // 0.001 ETH
+    private double amountUSD;       // $200
     private TransactionType type;
     private LocalDateTime dateTime;
 

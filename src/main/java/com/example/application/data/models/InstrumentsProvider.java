@@ -17,7 +17,6 @@ import java.util.List;
 @Component
 public class InstrumentsProvider {
 
-    private final AssetRepository assetRepository;
     private final List<Asset> assets;
 
     @Getter
@@ -28,7 +27,6 @@ public class InstrumentsProvider {
 
     @Autowired
     private InstrumentsProvider(AssetRepository assetRepository) {
-        this.assetRepository = assetRepository;
         this.assets = assetRepository.findAll();
         this.listOfAssetData = initAssetsData();
     }

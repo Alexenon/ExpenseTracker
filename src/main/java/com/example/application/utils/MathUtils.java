@@ -5,6 +5,18 @@ import java.util.stream.IntStream;
 
 public class MathUtils {
 
+    /**
+     * Usage
+     * <pre><code>
+     *     generateFibonacciSequence()
+     *                 .limit(5)
+     *                 .boxed()
+     *                 .collect(Collectors.toList());
+     * </code></pre>
+     *
+     *
+     * @return a stream that can be boxed as a list of integers, or any kind of list
+     * */
     public static IntStream generateFibonacciSequence() {
         AtomicInteger fibonacci = new AtomicInteger(1);
         return IntStream.iterate(1, fibonacci::getAndAdd);

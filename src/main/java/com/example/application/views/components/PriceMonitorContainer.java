@@ -90,10 +90,7 @@ public class PriceMonitorContainer extends Div {
 
         public PriceLayout() {
             init();
-            add(price, usdtAmount, percent, markAsBought,
-                    getNumberField("New Price", true),
-                    getNumberField("New Percentage", false),
-                    removeIcon);
+            add(price, usdtAmount, percent, markAsBought, removeIcon);
         }
 
         private void init() {

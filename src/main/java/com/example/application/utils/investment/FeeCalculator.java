@@ -11,9 +11,9 @@ public class FeeCalculator {
     private double feeAmount;
 
     public static void main(String[] args) {
-        double rateForOtherCard = 18;
-        double rateForSameCard = 18.2;
-        double sumToTransfer = 4000;
+        double rateForOtherCard = 18.10;  // MAIB
+        double rateForSameCard = 18.45;   // MOLD
+        double sumToTransfer = 8000;
 
         double transferOtherCardFee = FeeCalculator.builder()
                 .withTransferAmount(sumToTransfer)
@@ -24,11 +24,20 @@ public class FeeCalculator {
 
         double rateDifference = sumToTransfer * (rateForSameCard - rateForOtherCard);
 
-        System.out.printf("Sending %.2f at rate of %.2f will cost additional %.2f\n",
-                sumToTransfer, rateForOtherCard, transferOtherCardFee);
-        System.out.printf("Sending %.2f at rate of %.2f will cost additional %.2f\n",
-                sumToTransfer, rateForSameCard, 0.0);
-        System.out.printf("rate: %.2f", rateDifference);
+        printResults(sumToTransfer, rateForOtherCard, transferOtherCardFee);
+        printResults(sumToTransfer, rateForSameCard, 0.0);
+    }
+
+    private static void printResults(double sumToTransfer, double rate, double feeAmount) {
+        double boughtAmountUSDT = sumToTransfer / rate;
+
+        System.out.printf("""
+                        Buying with %.2f at price of %.2f per USDT
+                            -> fee: %.2f
+                            -> bought: %.2f USDT
+                        """,
+                sumToTransfer, rate, feeAmount, boughtAmountUSDT);
+        System.out.println();
     }
 
     public static Builder builder() {
