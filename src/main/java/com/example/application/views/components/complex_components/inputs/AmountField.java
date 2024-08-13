@@ -8,8 +8,9 @@ import com.vaadin.flow.component.textfield.NumberField;
 import java.util.List;
 
 /**
- * Field that supports an asset amount as price equivalent - '$',
- * or percentage equivalent - '%'
+ * Field that supports an amount as:
+ *  - price equivalent -> '$'
+ *  - percentage equivalent -> '%'
  */
 public class AmountField extends Div {
 

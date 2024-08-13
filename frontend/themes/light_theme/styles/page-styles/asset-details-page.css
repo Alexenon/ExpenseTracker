@@ -331,6 +331,41 @@ vaadin-number-field {
     width: 100%;
 }
 
+.section-card-wrapper .price-watcher-wrapper {
+    display: flex;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 20px;
+    margin-bottom: 15px;
+}
 
+.price-watcher-card-content {
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+    flex-wrap: wrap;
+    gap: 10px;
+    min-width: 200px;
+}
+
+.asset-amount-field {
+    max-width: 300px;
+}
+
+.asset-amount-field::part(input-field) {
+    color: black;
+}
+
+.card-wrapper-body {
+    display: flex;
+    gap: 10px;
+    flex-direction: column;
+}
+
+.card-wrapper-footer {
+    display: flex;
+    gap: 10px;
+}
 
 

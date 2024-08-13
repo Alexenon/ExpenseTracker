@@ -8,6 +8,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.theme.lumo.LumoIcon;
@@ -19,15 +20,10 @@ import java.util.List;
 
 /*
  * TODO:
- *  - Add second class and check how css will work
- *  - Place the icons on top right corner (try position: relative)
- *  - Add footer for 'Save' and 'Delete' buttons
+ *  - Add mark as completed style -> maybe 'completed' class
  *  - Add percentage alternative
- *      - Think about adding $ and % signs
- *  - Think how to display
- *          -> missing information
- *  - Cancel button should return the old values - taken from fields
- *  - Display the database information already on this component
+ *  - Cancel button should return the old values - taken from fields -> NOT WORKING
+ *  - Add style for 'Save' and 'Delete' buttons
  * */
 
 public class PriceTargetContainer extends Div {
@@ -48,8 +44,8 @@ public class PriceTargetContainer extends Div {
         this.instrumentsService = instrumentsService;
         this.targets = instrumentsService.getAssetWatchersByAsset(asset);
 
-        fillData();
         initialize();
+        fillComponent();
     }
 
     private void initialize() {
@@ -57,7 +53,7 @@ public class PriceTargetContainer extends Div {
         addBtn.addClickListener(event -> priceLayoutContainer.add(new PriceLayout()));
     }
 
-    private void fillData() {
+    private void fillComponent() {
         if (targets.isEmpty()) {
             priceLayoutContainer.add(new PriceLayout());
         } else {
@@ -80,7 +76,6 @@ public class PriceTargetContainer extends Div {
         private final Button editBtn = new Button(LumoIcon.EDIT.create());
         private final Button saveBtn = new Button("Save");
         private final Button deleteBtn = new Button("Delete");
-        private final Button cancelBtn = new Button("Cancel");
 
         private boolean isEditMode;
 
@@ -91,58 +86,53 @@ public class PriceTargetContainer extends Div {
         public PriceLayout() {
             this.isEditMode = true;
             this.assetWatcher = new AssetWatcher();
+            this.assetWatcher.setAsset(asset);
+            this.assetWatcher.setTargetType(AssetWatcher.TargetType.PRICE);
+            this.assetWatcher.setActionType(AssetWatcher.ActionType.BUY);
             init();
         }
 
         public PriceLayout(AssetWatcher assetWatcher) {
             this.assetWatcher = assetWatcher;
             init();
-            target.setValue(assetWatcher.getTarget());
-            targetAmount.setValue(assetWatcher.getTargetAmount());
         }
 
         private void init() {
-            setClassName("section-card-wrapper");
+            addClassName("section-card-wrapper");
+            addClassName("price-watcher-wrapper");
 
-            editBtn.addClickListener(event -> setEditMode(true));
-            deleteBtn.addClickListener(event -> this.removeFromParent());
             saveBtn.addClickListener(event -> {
-
-                AssetWatcher assetWatcher = getFilledAssetWatcher();
-                System.out.println("Saving " + assetWatcher);
-                instrumentsService.saveAssetWatcher(assetWatcher);
-
-                setEditMode(false);
+                if (binder.writeBeanIfValid(assetWatcher)) {
+                    System.out.println("Saving " + assetWatcher);
+                    instrumentsService.saveAssetWatcher(assetWatcher);
+                    setEditMode(false);
+                } else {
+                    System.out.println("Validation failed.");
+                }
             });
-            cancelBtn.addClickListener(event -> setEditMode(false));
+            deleteBtn.addClickListener(event -> this.removeFromParent());
+            editBtn.addClickListener(event -> {
+                setEditMode(!isEditMode);
+                revertChanges();
+            });
 
-            add(
-                    editBtn,
-                    buildBody(),
-                    buildFooter()
-            );
+            Container content = Container.builder("price-watcher-card-content")
+                    .addComponent(buildBody())
+                    .addComponent(buildFooter())
+                    .build();
 
-            editBtn.setVisible(!isEditMode);
-            markAsBought.setVisible(isEditMode);
-            deleteBtn.setVisible(isEditMode);
-            saveBtn.setVisible(isEditMode);
-            cancelBtn.setVisible(isEditMode);
+            add(content, editBtn);
 
             saveBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
             deleteBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_ERROR);
 
-            initBinder();
-        }
+            target.setClassName("asset-amount-field");
+            targetAmount.setClassName("asset-amount-field");
+            target.setPrefixComponent(new Paragraph("$"));
+            targetAmount.setPrefixComponent(new Paragraph("$"));
 
-        public void setEditMode(boolean editMode) {
-            isEditMode = editMode;
-            target.setReadOnly(!isEditMode);
-            targetAmount.setReadOnly(!isEditMode);
-            editBtn.setVisible(!isEditMode);
-            markAsBought.setVisible(isEditMode);
-            saveBtn.setVisible(isEditMode);
-            deleteBtn.setVisible(isEditMode);
-            cancelBtn.setVisible(isEditMode);
+            initBinder();
+            setEditMode(isEditMode);
         }
 
         private Div buildBody() {
@@ -159,13 +149,20 @@ public class PriceTargetContainer extends Div {
                     .addClassName("card-wrapper-footer")
                     .addComponent(saveBtn)
                     .addComponent(deleteBtn)
-                    .addComponent(cancelBtn)
                     .build();
         }
 
-        private void initBinder() {
-            binder.setBean(assetWatcher);
+        public void setEditMode(boolean editMode) {
+            isEditMode = editMode;
+            target.setReadOnly(!isEditMode);
+            targetAmount.setReadOnly(!isEditMode);
+            markAsBought.setVisible(isEditMode);
+            saveBtn.setVisible(isEditMode);
+            deleteBtn.setVisible(isEditMode);
+            editBtn.setIcon(isEditMode ? LumoIcon.CROSS.create() : LumoIcon.EDIT.create());
+        }
 
+        private void initBinder() {
             // This is for price
             // TODO: Make same for percentage
             binder.forField(target)
@@ -180,28 +177,20 @@ public class PriceTargetContainer extends Div {
 
             binder.forField(markAsBought)
                     .bind(AssetWatcher::isCompleted, AssetWatcher::setCompleted);
+
+            // Initially load the bean into the form
+            binder.readBean(assetWatcher);
         }
 
-
-        private AssetWatcher getFilledAssetWatcher() {
-            AssetWatcher assetWatcher = binder.getBean();
-            assetWatcher.setAsset(asset);
-            assetWatcher.setTargetType(AssetWatcher.TargetType.PRICE);
-            assetWatcher.setActionType(AssetWatcher.ActionType.BUY);
-            return assetWatcher;
+        /**
+         * Resetting form to have old values on cancel action
+         * */
+        private void revertChanges() {
+            binder.readBean(assetWatcher);
+            target.setValue(assetWatcher.getTarget());
+            targetAmount.setValue(assetWatcher.getTargetAmount());
         }
 
-//        public AssetWatcher getAssetWatcher() {
-//            double targetValue = targetPrice.getValue();
-//            double targetAmountValue = targetAmount.getValue();
-//            boolean isCompletedValue = markAsBought.getValue();
-//
-//            return new AssetWatcher(0, asset, targetValue, targetAmountValue,
-//                    AssetWatcher.TargetType.PRICE,
-//                    AssetWatcher.ActionType.BUY,
-//                    isCompletedValue
-//            );
-//        }
     }
 
 

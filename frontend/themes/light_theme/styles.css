@@ -61,6 +61,10 @@ vaadin-number-field::part(input-field) {
     padding: 0;*/
 }
 
+vaadin-number-field > [slot="prefix"] {
+    margin: 0;
+}
+
 vaadin-button.no-background {
     background: none;
 }
