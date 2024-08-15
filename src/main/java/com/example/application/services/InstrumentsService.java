@@ -31,6 +31,10 @@ public class InstrumentsService {
         return assetWatcherRepository.findByAsset(asset);
     }
 
+    public List<AssetWatcher> getAssetWatchersByAssetAndActionType(Asset asset, AssetWatcher.ActionType actionType) {
+        return assetWatcherRepository.findByAssetAndActionType(asset, actionType);
+    }
+
     public AssetWatcher saveAssetWatcher(AssetWatcher assetWatcher) {
         return assetWatcherRepository.save(assetWatcher);
     }

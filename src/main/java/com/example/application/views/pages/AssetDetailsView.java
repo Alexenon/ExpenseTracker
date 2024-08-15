@@ -3,9 +3,13 @@ package com.example.application.views.pages;
 import com.example.application.data.models.InstrumentsProvider;
 import com.example.application.data.models.NumberType;
 import com.example.application.data.models.crypto.AssetData;
+import com.example.application.entities.crypto.AssetWatcher;
 import com.example.application.services.InstrumentsService;
+import com.example.application.utils.common.MathUtils;
+import com.example.application.utils.common.StringUtils;
+import com.example.application.views.components.CurrencyField;
 import com.example.application.views.components.PriceMonitorContainer;
-import com.example.application.views.components.PriceTargetContainer;
+import com.example.application.views.components.PriceWatchlistComponent;
 import com.example.application.views.components.complex_components.PriceBadge;
 import com.example.application.views.components.native_components.Container;
 import com.example.application.views.layouts.MainLayout;
@@ -14,6 +18,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
@@ -25,6 +30,7 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.theme.lumo.LumoIcon;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.math.BigInteger;
 import java.text.NumberFormat;
 import java.util.Locale;
 
@@ -61,7 +67,8 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
                 headerDetailsSection(),
                 notesAndConvertorSection(),
                 holdingsSection(),
-                priceWatcherSection(),
+                createWatchlistSection(AssetWatcher.ActionType.BUY),
+                createWatchlistSection(AssetWatcher.ActionType.SELL),
                 priceMonitorSection(), // TODO: Style and integrate this fully
                 marketStatsSection(),
                 aboutSection()
@@ -107,17 +114,13 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         return section;
     }
 
-    private Section priceWatcherSection() {
-        Section section = new Section();
-        section.addClassName("section-card-wrapper");
-        section.add(new PriceTargetContainer(assetData.getAsset(), instrumentsService));
-        return section;
-    }
-
     private Section priceMonitorSection() {
         Section section = new Section();
         section.addClassName("section-card-wrapper");
         section.add(new PriceMonitorContainer());
+        CurrencyField currencyField = new CurrencyField("");
+        currencyField.setLabel("My Label");
+        section.add(currencyField);
         return section;
     }
 
@@ -209,17 +212,23 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
 
     // https://coinstats.app/coins/usd-coin/holdings/
     private Section holdingsSection() {
-        H3 title = new H3("Holdings");
-        title.setClassName("section-title");
-        Button addTransactionBtn = new Button("Add Transaction", LumoIcon.PLUS.create());
-        addTransactionBtn.setIconAfterText(false);
-
-        Div header = new Div(title, addTransactionBtn);
-        header.setClassName("holdings-section-header");
+        Container header = Container.builder("section-header")
+                .addComponent(() -> {
+                    H3 title = new H3("Holdings");
+                    title.setClassName("section-title");
+                    return title;
+                })
+                .addComponent(() -> {
+                    Button addTransactionBtn = new Button("Add Transaction", LumoIcon.PLUS.create());
+                    addTransactionBtn.setIconAfterText(false);
+                    return addTransactionBtn;
+                })
+                .build();
 
         Div body = new Div();
         body.addClassName("section-card-wrapper");
 
+        // TODO: Add actual values
         PriceBadge diversityValue = new PriceBadge(8, NumberType.PERCENT, true, false, false);
         ProgressBar diversityBar = new ProgressBar(0, 100, 100.0 / 8);
         Container diversityContainer = Container.builder("portfolio-diversity")
@@ -246,14 +255,29 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         H3 title = new H3("Market Stats");
         title.setClassName("section-title");
 
-        Div marketCap = createMarketStatsItem("Market Cap",
-                String.valueOf(assetData.getAssetInfo().getTotalMktCapUsd()));
-        Div circulationSupply = createMarketStatsItem("Circulation Supply",
-                String.valueOf(assetData.getAssetInfo().getSupplyCirculating()));
-        Div totalSupply = createMarketStatsItem("Total Supply",
-                String.valueOf(assetData.getAssetInfo().getSupplyTotal()));
-        Div volume24Hour = createMarketStatsItem("Volume 24h",
-                String.valueOf(assetData.getAssetInfo().getSpotMoving24HourQuoteVolumeUsd()));
+        Div marketCap = createStatsItem("Market Cap",
+                MathUtils.formatBigNumber(assetData.getAssetInfo().getTotalMktCapUsd()));
+
+        BigInteger totalSupplyValue = assetData.getAssetInfo().getSupplyTotal();
+        BigInteger circulationSupplyValue = assetData.getAssetInfo().getSupplyCirculating();
+        int percentageUseOfCirculationSupply = MathUtils.percentageOf(circulationSupplyValue, totalSupplyValue);
+        ProgressBar bar = new ProgressBar(0, 100, percentageUseOfCirculationSupply);
+
+        Container circulationSupplyContainer = Container.builder("portfolio-diversity")
+                .addComponent(() -> {
+                    Paragraph circulationText = new Paragraph(MathUtils.formatBigNumber(circulationSupplyValue));
+                    Paragraph percentageText = new Paragraph(String.format("(%d%%)", percentageUseOfCirculationSupply));
+                    return new HorizontalLayout(circulationText, percentageText);
+                })
+                .addComponent(bar)
+                .build();
+
+        Div circulationSupply = createStatsItem("Circulation Supply", circulationSupplyContainer);
+
+        Div totalSupply = createStatsItem("Total Supply",
+                MathUtils.formatBigNumber(assetData.getAssetInfo().getSupplyTotal()));
+        Div volume24Hour = createStatsItem("Volume 24h",
+                MathUtils.formatBigNumber(assetData.getAssetInfo().getSpotMoving24HourQuoteVolumeUsd()));
 
         Div body = new Div(marketCap, circulationSupply, totalSupply, volume24Hour);
         body.addClassNames("section-card-wrapper", "market-stats-section");
@@ -274,22 +298,26 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         return new Section();
     }
 
-    private Div createMarketStatsItem(String labelText, String valueText) {
+    private Div createStatsItem(String labelText, String valueText) {
         Paragraph paragraph = new Paragraph(valueText);
         paragraph.setId(labelText);
+        paragraph.addClassName("stats-item");
 
         Label label = new Label(labelText);
         label.setFor(paragraph);
+        label.addClassName("stats-title");
 
         Div div = new Div(label, paragraph);
-        div.addClassName("market-stats-item");
+        div.addClassName("stats-details-wrapper");
         return div;
     }
 
     private Div createStatsItem(String labelText, Component valueComponent) {
         Paragraph label = new Paragraph(labelText);
+        label.addClassName("stats-title");
         Div div = new Div(label, valueComponent);
-        div.addClassName("market-stats-item");
+        valueComponent.addClassName("stats-item");
+        div.addClassName("stats-details-wrapper");
         return div;
     }
 
@@ -297,6 +325,31 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         return isMarkedAsFavorite
                 ? VaadinIcon.STAR.create()
                 : VaadinIcon.STAR_O.create();
+    }
+
+    private Section createWatchlistSection(AssetWatcher.ActionType actionType) {
+        PriceWatchlistComponent watchlistComponent = new PriceWatchlistComponent(assetData.getAsset(),
+                actionType, instrumentsService);
+
+        Container header = Container.builder("section-header")
+                .addComponent(() -> {
+                    H3 title = new H3(StringUtils.uppercaseFirstLetter(actionType.name()) + " Watchlist");
+                    title.setClassName("section-title");
+                    return title;
+                })
+                .addComponent(() -> {
+                    Button addTransactionBtn = new Button("Add Watchlist", LumoIcon.PLUS.create());
+                    addTransactionBtn.setIconAfterText(false);
+                    addTransactionBtn.addClickListener(e -> watchlistComponent.addNewPriceLayout());
+                    return addTransactionBtn;
+                })
+                .build();
+
+        Container body = Container.builder("section-card-wrapper")
+                .addComponent(watchlistComponent)
+                .build();
+
+        return new Section(header, body);
     }
 
 }

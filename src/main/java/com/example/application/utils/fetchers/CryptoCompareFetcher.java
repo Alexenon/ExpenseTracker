@@ -1,6 +1,8 @@
-package com.example.application.utils;
+package com.example.application.utils.fetchers;
 
-import com.example.application.utils.responses.AssetMetaDataApiResp;
+import com.example.application.utils.fetchers.api_responses.ApiResponse;
+import com.example.application.utils.fetchers.api_responses.Coin;
+import com.example.application.utils.fetchers.api_responses.AssetMetaDataApiResp;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;

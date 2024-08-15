@@ -3,64 +3,63 @@ package com.example.application.views.components;
 import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.AssetWatcher;
 import com.example.application.services.InstrumentsService;
+import com.example.application.utils.common.StringUtils;
 import com.example.application.views.components.native_components.Container;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Paragraph;
-import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.converter.StringToDoubleConverter;
 import com.vaadin.flow.theme.lumo.LumoIcon;
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
 /*
  * TODO:
- *  - Add mark as completed style -> maybe 'completed' class
  *  - Add percentage alternative
- *  - Cancel button should return the old values - taken from fields -> NOT WORKING
  *  - Add style for 'Save' and 'Delete' buttons
  * */
 
-public class PriceTargetContainer extends Div {
+public class PriceWatchlistComponent extends Div {
 
     private final Asset asset;
+    private final AssetWatcher.ActionType actionType;
     private final InstrumentsService instrumentsService;
 
-    private final Div priceLayoutContainer = new Div();
-    private final Button addBtn = new Button(LumoIcon.PLUS.create());
+    private final List<AssetWatcher> targets;
 
-    @Getter
-    @Setter
-    private List<AssetWatcher> targets;
+    private final Div priceLayoutContainer = new Div();
 
     @Autowired
-    public PriceTargetContainer(Asset asset, InstrumentsService instrumentsService) {
+    public PriceWatchlistComponent(Asset asset, AssetWatcher.ActionType actionType, InstrumentsService instrumentsService) {
         this.asset = asset;
+        this.actionType = actionType;
         this.instrumentsService = instrumentsService;
-        this.targets = instrumentsService.getAssetWatchersByAsset(asset);
+        this.targets = instrumentsService.getAssetWatchersByAssetAndActionType(asset, actionType);
 
         initialize();
         fillComponent();
     }
 
     private void initialize() {
-        add(addBtn, priceLayoutContainer);
-        addBtn.addClickListener(event -> priceLayoutContainer.add(new PriceLayout()));
+        add(priceLayoutContainer);
     }
 
     private void fillComponent() {
         if (targets.isEmpty()) {
-            priceLayoutContainer.add(new PriceLayout());
+            addNewPriceLayout();
         } else {
             targets.forEach(assetWatcher -> priceLayoutContainer.add(new PriceLayout(assetWatcher)));
         }
     }
 
+    public void addNewPriceLayout() {
+        priceLayoutContainer.add(new PriceLayout());
+    }
 
     /*
      * PriceLayout used for tracking wanted sell/buy prices
@@ -70,8 +69,9 @@ public class PriceTargetContainer extends Div {
         private final AssetWatcher assetWatcher;
         private final Binder<AssetWatcher> binder = new Binder<>(AssetWatcher.class);
 
-        private final NumberField target = new NumberField("Buy Price");
-        private final NumberField targetAmount = new NumberField("Amount in USD");
+        private final Paragraph status = new Paragraph();
+        private final CurrencyField target = new CurrencyField("Price");
+        private final CurrencyField targetAmount = new CurrencyField("Amount in USD");
         private final Checkbox markAsBought = new Checkbox("Mark as bought");
         private final Button editBtn = new Button(LumoIcon.EDIT.create());
         private final Button saveBtn = new Button("Save");
@@ -88,7 +88,7 @@ public class PriceTargetContainer extends Div {
             this.assetWatcher = new AssetWatcher();
             this.assetWatcher.setAsset(asset);
             this.assetWatcher.setTargetType(AssetWatcher.TargetType.PRICE);
-            this.assetWatcher.setActionType(AssetWatcher.ActionType.BUY);
+            this.assetWatcher.setActionType(actionType);
             init();
         }
 
@@ -101,6 +101,33 @@ public class PriceTargetContainer extends Div {
             addClassName("section-card-wrapper");
             addClassName("price-watcher-wrapper");
 
+            // Scrolls smoothly to the center of newly created element
+            UI.getCurrent().getPage()
+                    .executeJs("arguments[0].scrollIntoView({ behavior: 'smooth', block: 'center' });", this);
+
+            Container content = Container.builder("price-watcher-card-content")
+                    .addComponent(status)
+                    .addComponent(buildBody())
+                    .addComponent(buildFooter())
+                    .build();
+
+            add(content, editBtn);
+
+            target.setLabel(StringUtils.uppercaseFirstLetter(actionType.name()) + " " + target.getLabel());
+            target.setClassName("asset-amount-field");
+            targetAmount.setClassName("asset-amount-field");
+            status.setClassName("watchlist-status");
+
+            saveBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
+            deleteBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_ERROR);
+
+            editBtn.addClickListener(event -> {
+                setEditMode(!isEditMode);
+                revertChanges();
+            });
+
+            markAsBought.addClickListener(e -> updateStatus());
+
             saveBtn.addClickListener(event -> {
                 if (binder.writeBeanIfValid(assetWatcher)) {
                     System.out.println("Saving " + assetWatcher);
@@ -110,29 +137,12 @@ public class PriceTargetContainer extends Div {
                     System.out.println("Validation failed.");
                 }
             });
+
             deleteBtn.addClickListener(event -> this.removeFromParent());
-            editBtn.addClickListener(event -> {
-                setEditMode(!isEditMode);
-                revertChanges();
-            });
-
-            Container content = Container.builder("price-watcher-card-content")
-                    .addComponent(buildBody())
-                    .addComponent(buildFooter())
-                    .build();
-
-            add(content, editBtn);
-
-            saveBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
-            deleteBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_ERROR);
-
-            target.setClassName("asset-amount-field");
-            targetAmount.setClassName("asset-amount-field");
-            target.setPrefixComponent(new Paragraph("$"));
-            targetAmount.setPrefixComponent(new Paragraph("$"));
 
             initBinder();
             setEditMode(isEditMode);
+            updateStatus();
         }
 
         private Div buildBody() {
@@ -156,23 +166,26 @@ public class PriceTargetContainer extends Div {
             isEditMode = editMode;
             target.setReadOnly(!isEditMode);
             targetAmount.setReadOnly(!isEditMode);
+            status.setVisible(!isEditMode);
             markAsBought.setVisible(isEditMode);
             saveBtn.setVisible(isEditMode);
             deleteBtn.setVisible(isEditMode);
-            editBtn.setIcon(isEditMode ? LumoIcon.CROSS.create() : LumoIcon.EDIT.create());
+            editBtn.setIcon(isEditMode ? LumoIcon.UNDO.create() : LumoIcon.EDIT.create());
         }
 
+        // This is for price
+        // TODO: Make same for percentage
         private void initBinder() {
-            // This is for price
-            // TODO: Make same for percentage
             binder.forField(target)
                     .asRequired("Please fill this field")
-                    .withValidator(amount -> amount.longValue() >= 0, "Target should be greater or equal to 0")
+                    .withConverter(new StringToDoubleConverter(0.0, "Couldn't convert to double"))
+                    .withValidator(amount -> amount > 0, "Target should be bigger than 0")
                     .bind(AssetWatcher::getTarget, AssetWatcher::setTarget);
 
             binder.forField(targetAmount)
                     .asRequired("Please fill this field")
-                    .withValidator(amount -> amount.longValue() >= 0, "Amount should be greater or equal to 0")
+                    .withConverter(new StringToDoubleConverter(0.0, "Couldn't convert to double"))
+                    .withValidator(amount -> amount > 0, "Amount should be bigger than 0")
                     .bind(AssetWatcher::getTargetAmount, AssetWatcher::setTargetAmount);
 
             binder.forField(markAsBought)
@@ -184,11 +197,16 @@ public class PriceTargetContainer extends Div {
 
         /**
          * Resetting form to have old values on cancel action
-         * */
+         */
         private void revertChanges() {
             binder.readBean(assetWatcher);
-            target.setValue(assetWatcher.getTarget());
-            targetAmount.setValue(assetWatcher.getTargetAmount());
+            updateStatus();
+        }
+
+        private void updateStatus() {
+            status.setText(markAsBought.getValue() ? "Ended" : "Ongoing");
+            status.removeClassNames("completed", "ongoing");
+            status.addClassName(markAsBought.getValue() ? "completed" : "ongoing");
         }
 
     }

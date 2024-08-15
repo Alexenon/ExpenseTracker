@@ -10,4 +10,6 @@ public interface AssetWatcherRepository extends JpaRepository<AssetWatcher, Long
 
     List<AssetWatcher> findByAsset(Asset asset);
 
+    List<AssetWatcher> findByAssetAndActionType(Asset asset, AssetWatcher.ActionType actionType);
+
 }

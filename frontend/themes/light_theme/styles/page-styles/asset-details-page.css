@@ -18,6 +18,21 @@
     margin-bottom: 30px;
 }
 
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.section-header > vaadin-button {
+    border: 1px solid #e5e5e5;
+    padding: 6px 16px 6px 12px;
+    border-radius: 12px;
+    background-color: white;
+    font-size: 16px;
+    color: black;
+}
+
 .section-title {
     padding: 0 20px;
     margin: 40px 0 20px;
@@ -25,6 +40,10 @@
     font-size: 25px;
     line-height: 32px;
     color: var(--black-color);
+}
+
+.section-card-wrapper > vaadin-button {
+    background: none;
 }
 
 .rounded-button {
@@ -159,21 +178,6 @@
     Holdings Section
 */
 
-.holdings-section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.holdings-section-header > vaadin-button {
-    border: 1px solid #e5e5e5;
-    padding: 6px 16px 6px 12px;
-    border-radius: 12px;
-    background-color: white;
-    font-size: 16px;
-    color: black;
-}
-
 .portfolio-diversity {
     display: flex;
     flex-direction: column;
@@ -185,7 +189,7 @@
     Market Stats Section
 */
 
-.market-stats-item {
+.stats-details-wrapper {
     max-width: 236px;
     flex: 0 0 auto;
     width: 100%;
@@ -194,13 +198,13 @@
     align-items: center;
 }
 
-.market-stats-item > label {
-    font-size: 18px;
-}
-
-.market-stats-item > p {
+.stats-details-wrapper > .stats-title {
     font-size: 20px;
     font-weight: 600;
+}
+
+.stats-details-wrapper > .stats-item {
+    font-size: 18px;
 }
 
 /*
@@ -340,6 +344,10 @@ vaadin-number-field {
     margin-bottom: 15px;
 }
 
+.price-watcher-wrapper > vaadin-button {
+    margin-top: 10px;
+}
+
 .price-watcher-card-content {
     display: flex;
     align-items: flex-start;
@@ -347,6 +355,7 @@ vaadin-number-field {
     flex-wrap: wrap;
     gap: 10px;
     min-width: 200px;
+    position: relative;
 }
 
 .asset-amount-field {
@@ -368,4 +377,20 @@ vaadin-number-field {
     gap: 10px;
 }
 
+.watchlist-status {
+    position: absolute;
+    border-radius: 0px 200px 0px 40px;
+    padding: 0px 7px;
+    top: -26px;
+    right: -75px;
+    font-size: 12px;
+}
+
+.ongoing {
+    background: #f5f5dc;
+}
+
+.completed {
+    background: #c0ced3;
+}
 

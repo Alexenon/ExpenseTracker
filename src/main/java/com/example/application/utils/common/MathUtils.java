@@ -1,9 +1,13 @@
-package com.example.application.utils;
+package com.example.application.utils.common;
 
+import java.math.BigInteger;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
 public class MathUtils {
+
+    private static final double BILLION = 1_000_000_000.0;
+    private static final double MILLION = 1_000_000.0;
 
     /**
      * Usage
@@ -14,9 +18,8 @@ public class MathUtils {
      *                 .collect(Collectors.toList());
      * </code></pre>
      *
-     *
      * @return a stream that can be boxed as a list of integers, or any kind of list
-     * */
+     */
     public static IntStream generateFibonacciSequence() {
         AtomicInteger fibonacci = new AtomicInteger(1);
         return IntStream.iterate(1, fibonacci::getAndAdd);
@@ -35,5 +38,24 @@ public class MathUtils {
         return sellPrice * 100 / buyPrice;
     }
 
+    public static int percentageOf(BigInteger a, BigInteger b) {
+        return a.multiply(BigInteger.valueOf(100)).divide(b).intValue();
+    }
+
+    public static String formatBigNumber(double number) {
+        if (number >= BILLION) {
+            return String.format("%.2fB", number / BILLION);
+        }
+
+        if (number >= MILLION) {
+            return String.format("%.2fM", number / MILLION);
+        }
+
+        return String.format("%.2f", number);
+    }
+
+    public static String formatBigNumber(BigInteger number) {
+        return formatBigNumber(number.doubleValue());
+    }
 
 }

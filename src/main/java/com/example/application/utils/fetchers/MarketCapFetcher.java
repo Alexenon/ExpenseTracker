@@ -1,4 +1,4 @@
-package com.example.application.utils;
+package com.example.application.utils.fetchers;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;

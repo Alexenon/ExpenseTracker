@@ -1,4 +1,4 @@
-package com.example.application.utils.responses;
+package com.example.application.utils.fetchers.api_responses;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;

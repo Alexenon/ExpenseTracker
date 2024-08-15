@@ -1,7 +1,7 @@
 package com.example.application.data.models.crypto;
 
 import com.example.application.entities.crypto.Asset;
-import com.example.application.utils.responses.AssetInfo;
+import com.example.application.utils.fetchers.api_responses.AssetInfo;
 import lombok.Data;
 
 import java.util.ArrayList;

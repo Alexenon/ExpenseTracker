@@ -1,4 +1,4 @@
-package com.example.application.utils;
+package com.example.application.utils.fetchers;
 
 import com.example.application.data.CryptoCurrency;
 import com.fasterxml.jackson.core.type.TypeReference;
