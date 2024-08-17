@@ -8,6 +8,7 @@ import com.example.application.services.InstrumentsService;
 import com.example.application.utils.common.MathUtils;
 import com.example.application.utils.common.StringUtils;
 import com.example.application.views.components.CurrencyField;
+import com.example.application.views.components.PercentageField;
 import com.example.application.views.components.PriceMonitorContainer;
 import com.example.application.views.components.PriceWatchlistComponent;
 import com.example.application.views.components.complex_components.PriceBadge;
@@ -118,9 +119,14 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         Section section = new Section();
         section.addClassName("section-card-wrapper");
         section.add(new PriceMonitorContainer());
-        CurrencyField currencyField = new CurrencyField("");
-        currencyField.setLabel("My Label");
-        section.add(currencyField);
+
+        HorizontalLayout layout = new HorizontalLayout();
+        PercentageField percentageField = new PercentageField("Percentage");
+        Span estimatedSign = new Span("~");
+        Paragraph estimatedMoneyAmount = new Paragraph("$300");
+        layout.add(percentageField, estimatedSign, estimatedMoneyAmount);
+
+        section.add(layout);
         return section;
     }
 
