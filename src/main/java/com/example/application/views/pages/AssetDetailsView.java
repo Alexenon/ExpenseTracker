@@ -7,7 +7,6 @@ import com.example.application.entities.crypto.AssetWatcher;
 import com.example.application.services.InstrumentsService;
 import com.example.application.utils.common.MathUtils;
 import com.example.application.utils.common.StringUtils;
-import com.example.application.views.components.CurrencyField;
 import com.example.application.views.components.PercentageField;
 import com.example.application.views.components.PriceMonitorContainer;
 import com.example.application.views.components.PriceWatchlistComponent;
@@ -23,6 +22,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.PageTitle;
@@ -205,8 +205,8 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
                 .build();
 
 
-        // TODO: Doesn't work
-        inputField.addKeyUpListener(e -> {
+        inputField.setValueChangeMode(ValueChangeMode.EAGER);
+        inputField.addValueChangeListener(e -> {
             double calculatedPrice = Double.parseDouble(inputField.getValue()) * assetData.getAssetInfo().getPriceUsd();
             outputField.setValue(NumberType.CURRENCY.parse(calculatedPrice));
         });
