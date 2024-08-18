@@ -6,6 +6,10 @@ import org.vaadin.textfieldformatter.NumeralFieldFormatter;
 
 public class CurrencyField extends TextField {
 
+    public CurrencyField() {
+        this(null);
+    }
+
     public CurrencyField(String label) {
         super(label);
         setAllowedCharPattern("[0-9.]");
@@ -32,6 +36,10 @@ public class CurrencyField extends TextField {
 
     public void setValue(double value) {
         this.setValue(String.valueOf(value));
+    }
+
+    public void setFormatter(NumeralFieldFormatter formatter) {
+        formatter.extend(this);
     }
 
 }

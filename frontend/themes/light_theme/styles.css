@@ -1,5 +1,8 @@
+/* TODO: '@import' component doesn't work inside pages css files  */
+
 @import 'styles/component-styles/header.css';
 @import 'styles/component-styles/chart.css';
+@import 'styles/component-styles/multi-button-group.css';
 @import 'styles/page-styles/error-page.css';
 @import 'styles/page-styles/auth-pages.css';
 @import 'styles/page-styles/asset-details-page.css';
@@ -73,3 +76,30 @@ vaadin-button.no-background {
 .page-content {
     margin-top: 80px;
 }
+
+
+
+/* TODO: Check this */
+.button-radio-group vaadin-radio-button::part(radio) {
+    display: none;
+}
+
+.button-radio-group vaadin-radio-button {
+    margin: 0;
+    padding: 0;
+    border: none;
+    font-size: 20px;
+/*    border-radius: 5px;
+    border: 1px solid black;*/
+    background: none;
+    transition: all ease 0.3s;
+}
+
+.button-radio-group vaadin-button {
+    background: none;
+    height: 30px;
+    width: auto;
+    border: 0.125rem solid black;
+}
+
+

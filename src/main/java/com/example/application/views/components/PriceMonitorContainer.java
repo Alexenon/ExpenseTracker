@@ -55,7 +55,7 @@ public class PriceMonitorContainer extends Div {
         private final NumberField tokenAmount = new NumberField("Amount in Tokens");
         private final NumberField usdtAmount = new NumberField("Amount in USDT");
         private final NumberField percentAmount = new NumberField("Percentage amount");
-        private final Span amountHelperSpan = new Span("&asymp;");
+        private final Span amountHelperSpan = new Span("≈");
 
         private final Button removeIcon = new Button(LumoIcon.CROSS.create());
         private final Checkbox markAsBought = new Checkbox("Mark as bought");
@@ -81,6 +81,7 @@ public class PriceMonitorContainer extends Div {
             setup();
         }
 
+        // TODO: Percentage should be allowed just for SELL type
         private void setup() {
             radioButtonGroup.setLabel("Additional providers");
             radioButtonGroup.setItems("None", "Token Amount", "USDT Amount", "Percentage");
@@ -91,6 +92,7 @@ public class PriceMonitorContainer extends Div {
             price.setValueChangeMode(ValueChangeMode.EAGER);
 
             tokenAmount.setValue(0.0);
+            tokenAmount.setVisible(false);
             tokenAmount.setValueChangeMode(ValueChangeMode.EAGER);
             tokenAmount.addValueChangeListener(l -> amountHelperSpan.setText(getTokenAmountListenerValue()));
 
@@ -146,7 +148,7 @@ public class PriceMonitorContainer extends Div {
             NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(Locale.US);
             currencyFormat.setMaximumFractionDigits(0);
 
-            return  "~" + currencyFormat.format(priceValue * tokenAmountValue);
+            return "≈" + currencyFormat.format(priceValue * tokenAmountValue);
         }
 
         private String getUSDTAmountListenerValue() {
@@ -154,7 +156,7 @@ public class PriceMonitorContainer extends Div {
             double usdtAmountValue = Objects.requireNonNullElse(usdtAmount.getValue(), 0.0);
             double amountTokens = usdtAmountValue / priceValue;
 
-            return "~" + amountTokens + "BTC";
+            return "≈" + amountTokens + "BTC";
         }
 
         public void replaceAmountField(NumberField newComponent) {

@@ -7,6 +7,7 @@ import com.example.application.entities.crypto.AssetWatcher;
 import com.example.application.services.InstrumentsService;
 import com.example.application.utils.common.MathUtils;
 import com.example.application.utils.common.StringUtils;
+import com.example.application.views.components.CurrencyField;
 import com.example.application.views.components.PercentageField;
 import com.example.application.views.components.PriceMonitorContainer;
 import com.example.application.views.components.PriceWatchlistComponent;
@@ -36,6 +37,8 @@ import java.text.NumberFormat;
 import java.util.Locale;
 
 // TODO: Add Transactions
+
+// cursor: not-allowed;
 
 @AnonymousAllowed
 @PageTitle("Asset Details")
@@ -173,18 +176,17 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         Image inputImage = new Image(assetData.getAssetInfo().getLogoUrl(), assetData.getAssetInfo().getName());
         inputImage.setClassName("coin-overview-image");
 
-        TextField inputField = new TextField();
-        inputField.setPattern("^0*[0-9]*\\.?[0-9]*$");
-        inputField.setValue("1");
+        CurrencyField tokenAmountField = new CurrencyField();
+        tokenAmountField.setValue(1);
+
+        CurrencyField usdAmountField = new CurrencyField();
+        usdAmountField.setValue(assetData.getAssetInfo().getPriceUsd());
 
         Container inputContainer = Container.builder()
                 .addComponent(inputImage)
                 .addComponent(new Paragraph(assetData.getAsset().getSymbol()))
-                .addComponent(inputField)
+                .addComponent(tokenAmountField)
                 .build();
-
-        TextField outputField = new TextField();
-        outputField.setPattern("^0*[0-9]*\\.?[0-9]*$");
 
         Container outputContainer = Container.builder()
                 .addComponent(() -> {
@@ -195,7 +197,7 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
                     return outputImage;
                 })
                 .addComponent(new Paragraph("USD"))
-                .addComponent(outputField)
+                .addComponent(usdAmountField)
                 .build();
 
         Container sectionBody = Container.builder()
@@ -205,10 +207,16 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
                 .build();
 
 
-        inputField.setValueChangeMode(ValueChangeMode.EAGER);
-        inputField.addValueChangeListener(e -> {
-            double calculatedPrice = Double.parseDouble(inputField.getValue()) * assetData.getAssetInfo().getPriceUsd();
-            outputField.setValue(NumberType.CURRENCY.parse(calculatedPrice));
+        tokenAmountField.setValueChangeMode(ValueChangeMode.EAGER);
+        tokenAmountField.addKeyUpListener(e -> {
+            double calculatedPrice = tokenAmountField.doubleValue() * assetData.getAssetInfo().getPriceUsd();
+            usdAmountField.setValue(calculatedPrice);
+        });
+
+        usdAmountField.setValueChangeMode(ValueChangeMode.EAGER);
+        usdAmountField.addKeyUpListener(e -> {
+            double calculatedPrice = usdAmountField.doubleValue() / assetData.getAssetInfo().getPriceUsd();
+            tokenAmountField.setValue(calculatedPrice);
         });
 
         Section section = new Section(title, sectionBody);
