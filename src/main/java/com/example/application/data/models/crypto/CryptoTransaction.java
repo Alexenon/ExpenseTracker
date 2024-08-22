@@ -5,27 +5,33 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
-/* User can use
- *   - coin amount to sell/buy
- *   - money amount to sell/buy
- * */
-
 @Data
 public class CryptoTransaction {
 
     private Asset asset;
-    private double price;           // $3200
-    private double quantity;        // 0.001 ETH
-    private double amountUSD;       // $200
+    private double price;
+    private double amount;
+    private AmountType amountType;
     private TransactionType type;
     private LocalDateTime dateTime;
 
+    public enum AmountType {
+        TOKEN, USD
+    }
+
     public enum TransactionType {
         BUY,
-        SELL,
-        TRANSFER,   // TODO: to implement
-        STAKE       // TODO: to implement
+        SELL
     }
+
+    public boolean isBuyTransaction() {
+        return this.type == TransactionType.BUY;
+    }
+
+    public boolean isSellTransaction() {
+        return this.type == TransactionType.SELL;
+    }
+
 }
 
 

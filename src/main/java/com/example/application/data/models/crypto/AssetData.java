@@ -19,16 +19,24 @@ public class AssetData {
         this.assetInfo = assetInfo;
         this.transactions = new ArrayList<>();
     }
+
+    public double getPrice() {
+        return assetInfo.getPriceUsd();
+    }
+
+    public double getChangesLast24hPercentage() {
+        return assetInfo.getSpotMoving24HourChangePercentageUsd();
+    }
     
     public double getAverageBuyPrice() {
         double totalCost = transactions.stream()
-                .filter(transaction -> transaction.getType().equals(CryptoTransaction.TransactionType.BUY))
-                .mapToDouble(CryptoTransaction::getAmountUSD)
+                .filter(CryptoTransaction::isBuyTransaction)
+                .mapToDouble(CryptoTransaction::getAmount)
                 .sum();
 
         double totalQuantity = transactions.stream()
-                .filter(transaction -> transaction.getType().equals(CryptoTransaction.TransactionType.BUY))
-                .mapToDouble(CryptoTransaction::getQuantity)
+                .filter(CryptoTransaction::isBuyTransaction)
+                .mapToDouble(CryptoTransaction::getAmount)
                 .sum();
 
         return totalQuantity == 0 ? 0 : totalCost / totalQuantity;

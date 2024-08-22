@@ -64,7 +64,7 @@ public class PriceBadge extends Div {
         setBackgroundColor(getBackgroundColorByValue());
     }
 
-    private void removeIcon() {
+    public void removeIcon() {
         icon.removeFromParent();
     }
 
@@ -83,11 +83,19 @@ public class PriceBadge extends Div {
     }
 
     private Icon getIconByValue() {
-        return (value == 0) ? LumoIcon.MINUS.create()
-                : ((value > 0) ? LumoIcon.CHEVRON_UP.create() : LumoIcon.CHEVRON_DOWN.create());
+        if (value < 0) {
+            Icon icon = LumoIcon.CHEVRON_DOWN.create();
+            icon.getStyle().set("margin-bottom", "5px");
+            return icon;
+        }
+
+        if (value > 0)
+            return LumoIcon.CHEVRON_UP.create();
+
+        return LumoIcon.MINUS.create();
     }
 
-    enum Color {
+    public enum Color {
         // text color
         DEFAULT_TEXT_COLOR("black"),
         GREEN_TEXT_COLOR("#34b349"),

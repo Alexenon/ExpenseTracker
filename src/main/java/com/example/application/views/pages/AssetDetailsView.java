@@ -22,7 +22,6 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextArea;
-import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
@@ -33,8 +32,6 @@ import com.vaadin.flow.theme.lumo.LumoIcon;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigInteger;
-import java.text.NumberFormat;
-import java.util.Locale;
 
 // TODO: Add Transactions
 
@@ -84,23 +81,32 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         Paragraph rank = new Paragraph("RANK #4");
         rank.setClassName("coin-overview-rank");
 
-        Div coinNameContainer = new Div();
-        Image image = new Image(assetData.getAssetInfo().getLogoUrl(), assetData.getAssetInfo().getName());
-        image.setClassName("coin-overview-image");
-        H1 coinName = new H1(assetData.getAssetInfo().getName());
-        Span dot = new Span("•");
-        dot.setClassName("dot");
-        Span symbol = new Span(assetData.getAssetInfo().getSymbol());
-        coinNameContainer.setClassName("coin-overview-name-container");
-        coinNameContainer.add(image, coinName, dot, symbol);
+        Container coinNameContainer = Container.builder("coin-overview-name-container")
+                .addComponent(() -> {
+                    Image image = new Image(assetData.getAssetInfo().getLogoUrl(), assetData.getAssetInfo().getName());
+                    image.setClassName("coin-overview-image");
+                    return image;
+                })
+                .addComponent(new H1(assetData.getAssetInfo().getName()))
+                .addComponent(() -> {
+                    Span dot = new Span("•");
+                    dot.setClassName("dot");
+                    return dot;
+                })
+                .addComponent(new Span(assetData.getAssetInfo().getSymbol()))
+                .build();
 
-        String assetPrice = NumberFormat.getCurrencyInstance(Locale.US).format(assetData.getAssetInfo().getPriceUsd());
-        Paragraph price = new Paragraph(assetPrice);
-        price.setId("asset-price");
-        double percentageChangeLast24H = assetData.getAssetInfo().getSpotMoving24HourChangePercentageUsd();
-        PriceBadge percentageBadge = new PriceBadge(percentageChangeLast24H, NumberType.PERCENT);
-        Div priceWrapper = new Div(price, percentageBadge);
-        priceWrapper.setClassName("price-wrapper");
+        Container priceWrapper = Container.builder()
+                .addClassName("price-wrapper")
+                .addComponent(() -> {
+                    String assetPrice = NumberType.CURRENCY.parse(assetData.getAssetInfo().getPriceUsd());
+                    return new Paragraph(assetPrice);
+                })
+                .addComponent(() -> {
+                    double percentageChangeLast24H = assetData.getAssetInfo().getSpotMoving24HourChangePercentageUsd();
+                    return new PriceBadge(percentageChangeLast24H, NumberType.PERCENT);
+                })
+                .build();
 
         Div coinInfoContainer = new Div(rank, coinNameContainer, priceWrapper);
 
@@ -118,6 +124,24 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         return section;
     }
 
+    private Section investedDetailsSection() {
+        Section section = new Section();
+        H3 title = new H3("Portfolio Statistics");
+        title.setClassName("section-title");
+
+        Div body = new Div();
+        body.addClassNames("section-card-wrapper");
+
+
+
+        Div totalInvestedParagraph = createStatsItem("Total Invested in BTC", "$50000");
+        Div dollarProfitParagraph = createStatsItem("Total Invested in BTC", "$50000");
+        Div percentageProfitParagraph = createStatsItem("", "");
+
+
+        return section;
+    }
+
     private Section priceMonitorSection() {
         Section section = new Section();
         section.addClassName("section-card-wrapper");
@@ -130,15 +154,6 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         layout.add(percentageField, estimatedSign, estimatedMoneyAmount);
 
         section.add(layout);
-        return section;
-    }
-
-    private Section investedDetailsSection() {
-        Section section = new Section();
-        Paragraph totalInvestedParagraph = new Paragraph();
-        Paragraph dollarProfitParagraph = new Paragraph();
-        Paragraph percentageProfitParagraph = new Paragraph();
-        section.add(totalInvestedParagraph, dollarProfitParagraph, percentageProfitParagraph);
         return section;
     }
 
@@ -233,9 +248,9 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
                     return title;
                 })
                 .addComponent(() -> {
-                    Button addTransactionBtn = new Button("Add Transaction", LumoIcon.PLUS.create());
-                    addTransactionBtn.setIconAfterText(false);
-                    return addTransactionBtn;
+                    Button addHoldingBtn = new Button("Add Holding", LumoIcon.PLUS.create());
+                    addHoldingBtn.setIconAfterText(false);
+                    return addHoldingBtn;
                 })
                 .build();
 

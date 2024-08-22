@@ -82,6 +82,12 @@ public class Container extends Div {
             return this;
         }
 
+        public Builder setFlexCentered() {
+            setStyle("display", "flex");
+            setStyle("align-items", "center");
+            return this;
+        }
+
         public Builder setStyle(String property, String value) {
             instance.getStyle().set(property, value);
             return this;

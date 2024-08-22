@@ -128,6 +128,10 @@
     margin: 0 10px 0 5px;
 }
 
+.coin-overview-name-container > p {
+    margin: 0px;
+}
+
 .coin-overview-name-container > span {
     font-weight: 500;
     font-size: 18px;
@@ -204,6 +208,9 @@
 }
 
 .stats-details-wrapper > .stats-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
     font-size: 18px;
 }
 

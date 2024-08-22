@@ -53,18 +53,18 @@ public class PriceWatchlistComponent extends Div {
         if (targets.isEmpty()) {
             addNewPriceLayout();
         } else {
-            targets.forEach(assetWatcher -> priceLayoutContainer.add(new PriceLayout(assetWatcher)));
+            targets.forEach(assetWatcher -> priceLayoutContainer.add(new WatchlistLayout(assetWatcher)));
         }
     }
 
     public void addNewPriceLayout() {
-        priceLayoutContainer.add(new PriceLayout());
+        priceLayoutContainer.add(new WatchlistLayout());
     }
 
     /*
      * PriceLayout used for tracking wanted sell/buy prices
      * */
-    private class PriceLayout extends Div {
+    private class WatchlistLayout extends Div {
 
         private final AssetWatcher assetWatcher;
         private final Binder<AssetWatcher> binder = new Binder<>(AssetWatcher.class);
@@ -80,10 +80,10 @@ public class PriceWatchlistComponent extends Div {
         private boolean isEditMode;
 
         /**
-         * Default constructor, that is used when no data is retrieved from database,
-         * and the component fields should be filled
+         * Default constructor, that is used when creating a watchlistLayout without any data
+         * to be retrieved from the database, and the component fields should be filled and saved.
          */
-        public PriceLayout() {
+        public WatchlistLayout() {
             this.isEditMode = true;
             this.assetWatcher = new AssetWatcher();
             this.assetWatcher.setAsset(asset);
@@ -92,7 +92,7 @@ public class PriceWatchlistComponent extends Div {
             init();
         }
 
-        public PriceLayout(AssetWatcher assetWatcher) {
+        public WatchlistLayout(AssetWatcher assetWatcher) {
             this.assetWatcher = assetWatcher;
             init();
         }

@@ -89,8 +89,8 @@ vaadin-button.no-background {
     padding: 0;
     border: none;
     font-size: 20px;
-/*    border-radius: 5px;
-    border: 1px solid black;*/
+    /*    border-radius: 5px;
+        border: 1px solid black;*/
     background: none;
     transition: all ease 0.3s;
 }
@@ -101,5 +101,4 @@ vaadin-button.no-background {
     width: auto;
     border: 0.125rem solid black;
 }
-
 

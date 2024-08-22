@@ -1,8 +1,11 @@
 package com.example.application.views.components;
 
+import com.example.application.data.models.NumberType;
 import com.example.application.data.models.crypto.AssetData;
+import com.example.application.views.components.complex_components.PriceBadge;
 import com.example.application.views.components.native_components.Container;
 import com.example.application.views.pages.AssetDetailsView;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
@@ -20,7 +23,6 @@ import com.vaadin.flow.data.renderer.NumberRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.ValueProvider;
 
-import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
@@ -29,10 +31,10 @@ import java.util.Set;
 
 /*
     // TODO: Better display first columns
-    _________________________________________________________________________________________________________________________
-    | Name | Price  | 7d Change | Amount | Avg buy | Avg sell | All-time low | All-time high | Value | Invested | Realized  |
-    | BTC  | $64000 | 2%        | 0.0034 | $60000  |    -     | $10          | $73000        | $230  | $200     | $30 / 10% |
-    _________________________________________________________________________________________________________________________
+    _______________________________________________________________________________________________________________________________________
+    | Name | Price  | 24h Changes | Amount | Avg buy | Avg sell | All-time low | All-time high | Total Worth | Total Invested | Realized  |
+    | BTC  | $64000 | 2%          | 0.0034 | $60000  |    -     | $10          | $73000        | $230        | $200           | $30 / 10% |
+    _______________________________________________________________________________________________________________________________________
 */
 public class AssetsGrid extends Div {
 
@@ -54,13 +56,14 @@ public class AssetsGrid extends Div {
         columnSelector = new MultiSelectComboBox<>();
 
         Grid.Column<AssetData> nameCol = grid.addColumn(columnNameRenderer()).setKey("Name").setHeader("Name");
-        Grid.Column<AssetData> priceCol = grid.addColumn(columnPriceRenderer(a -> a.getAssetInfo().getPriceUsd())).setKey("Price").setHeader("Price");
+        Grid.Column<AssetData> priceCol = grid.addColumn(columnPriceRenderer(AssetData::getPrice)).setKey("Price").setHeader("Price");
+        Grid.Column<AssetData> changes24hCol = grid.addColumn(columnChanges24hRenderer()).setKey("Changes 24h").setHeader("Changes 24h");
         Grid.Column<AssetData> avgBuyCol = grid.addColumn(columnPriceRenderer(AssetData::getAverageBuyPrice)).setKey("Avg Buy").setHeader("Avg Buy");
         Grid.Column<AssetData> avgSellCol = grid.addColumn(columnPriceRenderer(AssetData::getAverageSellPrice)).setKey("Avg Sell").setHeader("Avg Sell");
         Grid.Column<AssetData> amountCol = grid.addColumn(a -> a.getAsset().getAmount()).setKey("Amount").setHeader("Amount");
 //        Grid.Column<AssetData> profitChangesCol = grid.addColumn(new ComponentRenderer<>(this::renderProfitChanges)).setKey("Profit Changes").setHeader("Profit Changes");
         grid.addColumn(new ComponentRenderer<>(this::threeDotsBtn)).setHeader(columnSelector);
-        listColumnsToSelect = List.of(nameCol, priceCol, avgBuyCol, avgSellCol, amountCol);
+        listColumnsToSelect = List.of(nameCol, priceCol, changes24hCol, avgBuyCol, avgSellCol, amountCol);
 
         grid.getColumns().forEach(c -> {
             c.setSortable(true);
@@ -117,13 +120,16 @@ public class AssetsGrid extends Div {
         );
     }
 
-    private NumberRenderer<AssetData> columnPriceRenderer(ValueProvider<AssetData, Number> priceProvider) {
-        DecimalFormat priceFormat = new DecimalFormat("$#,##0.00###");
-        String nullPriceRepresentation = "$0.00";
-        return new NumberRenderer<>(priceProvider, priceFormat, nullPriceRepresentation);
+    private ComponentRenderer<Component, AssetData> columnChanges24hRenderer() {
+        return new ComponentRenderer<>(a -> {
+            PriceBadge percentageBadge = new PriceBadge(a.getChangesLast24hPercentage(), NumberType.PERCENT);
+            percentageBadge.getStyle().set("margin-bottom", "0px");
+            percentageBadge.setBackgroundColor(PriceBadge.Color.DEFAULT_BACKGROUND_COLOR);
+            return percentageBadge;
+        });
     }
 
-    private NumberRenderer<AssetData> priceRenderer2(ValueProvider<AssetData, Number> priceProvider) {
+    private NumberRenderer<AssetData> columnPriceRenderer(ValueProvider<AssetData, Number> priceProvider) {
         NumberFormat nf = NumberFormat.getCurrencyInstance(Locale.US);
         return new NumberRenderer<>(priceProvider, nf, "$0.00");
     }
