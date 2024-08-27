@@ -21,7 +21,7 @@ public class Wallet {
 
     public void addTransaction(CryptoTransaction transaction) {
         transactions.add(transaction);
-        Asset transactionAsset = getAsset(transaction.getAsset());
+        Asset transactionAsset = getAsset(transaction.getAssetReceived());
 //        transactionAsset.setHoldingAmount(transaction.getAmount());
     }
 

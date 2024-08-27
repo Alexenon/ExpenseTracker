@@ -1,0 +1,59 @@
+/*
+    TODO:
+        - Add style for grid
+        - Style the filtering way to add/remove columns
+*/
+
+/*
+    Asset Search Field
+*/
+.asset-search-field {
+    width: 250px;
+}
+
+.asset-search-field::part(input-field) {
+    background-color: white;
+    padding: 5px 10px;
+    border-radius: 10px;
+    border: 1px solid var(--o20Color);
+}
+
+.asset-search-field > [slot="suffix"] {
+    margin-left: 10px;
+}
+
+.asset-search-field[focused]::part(input-field) {
+    border: 1px solid var(--color-orange);
+}
+
+/*
+    Grid Header
+*/
+.assets-grid-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+}
+
+.sync-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.sync-container > vaadin-button {
+    width: 150px;
+    color: black;
+    background: white;
+    height: 40px;
+    font-size: 16px;
+    line-height: 24px;
+    letter-spacing: 0;
+    border-radius: 12px;
+    border: 1px solid var(--o10Color);
+}
+
+.sync-container > vaadin-checkbox {
+    margin-top: 5px;
+}

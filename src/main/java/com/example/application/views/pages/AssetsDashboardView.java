@@ -50,23 +50,12 @@ public class AssetsDashboardView extends Main {
 
         getStyle().set("margin-top", "100px");
 
-        Button addBtn = new Button("Add");
-        addBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        addBtn.addClickListener(event -> {
-            AddAssetDialog dialog = new AddAssetDialog(assetWatcherService, securityService, userService);
-            dialog.open();
-            dialog.addClickSaveBtnListener(grid -> {
-//                assets.add(dialog.getAsset());
-                // Update dataGridView
-            });
-        });
 
         updateAssets();
         assetsGrid.setItems(instrumentsProvider.getListOfAssetData());
 
         add(
                 performanceSection(),
-                addBtn,
                 assetsGrid
         );
     }

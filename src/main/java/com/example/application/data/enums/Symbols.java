@@ -9,6 +9,9 @@ public enum Symbols {
     SOL,
     BNB,
     MNT,
+    USDT,
+    USDC,
+    DAI,
     ALT;
 
     public static List<String> getAll() {

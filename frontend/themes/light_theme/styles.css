@@ -5,6 +5,8 @@
 @import 'styles/component-styles/multi-button-group.css';
 @import 'styles/page-styles/error-page.css';
 @import 'styles/page-styles/auth-pages.css';
+
+@import 'styles/page-styles/assets-page.css';
 @import 'styles/page-styles/asset-details-page.css';
 
 :root {
@@ -20,6 +22,22 @@
     --invalid-border: #d93025;
     --invalid: #d93025;
     --show-hide: #919191;
+    --o3Color: #f7f7f7;
+    --o5Color: #f2f2f2;
+    --o10Color: #e5e5e5;
+    --o15Color: #d9d9d9;
+    --o20Color: #cccccc;
+    --o25Color: #bfbfbf;
+    --o30Color: #b2b2b2;
+    --o35Color: #a6a6a6;
+    --o40Color: #999999;
+    --o45Color: #8c8c8c;
+    --o50Color: #7f7f7f;
+    --o55Color: #737373;
+    --o60Color: #666666;
+    --o70Color: #4c4c4c;
+    --o75Color: #404040;
+    --o80Color: #333333;
 }
 
 * {

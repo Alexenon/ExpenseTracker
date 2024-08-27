@@ -4,6 +4,8 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.textfield.TextField;
 import org.vaadin.textfieldformatter.NumeralFieldFormatter;
 
+import java.text.DecimalFormat;
+
 public class CurrencyField extends TextField {
 
     public CurrencyField() {
@@ -18,17 +20,18 @@ public class CurrencyField extends TextField {
         NumeralFieldFormatter formatter = new NumeralFieldFormatter.Builder()
                 .delimiter(",")
                 .decimalMark(".")
-                .decimalScale(3)
+                .decimalScale(2)
                 .nonNegativeOnly(true)
                 .stripLeadingZeroes(true)
                 .build();
+
 
         formatter.extend(this);
     }
 
     public double doubleValue() {
         try {
-            return Double.parseDouble(this.getValue());
+            return Double.parseDouble(this.getValue().replace(",", ""));
         } catch (NumberFormatException e) {
             return 0;
         }

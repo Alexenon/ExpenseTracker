@@ -133,7 +133,6 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         body.addClassNames("section-card-wrapper");
 
 
-
         Div totalInvestedParagraph = createStatsItem("Total Invested in BTC", "$50000");
         Div dollarProfitParagraph = createStatsItem("Total Invested in BTC", "$50000");
         Div percentageProfitParagraph = createStatsItem("", "");
@@ -221,17 +220,20 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
                 .addComponent(outputContainer)
                 .build();
 
-
+        // TODO: Deleting all from input looks strange
+        // TODO: setValue() should be same formatter as default
         tokenAmountField.setValueChangeMode(ValueChangeMode.EAGER);
         tokenAmountField.addKeyUpListener(e -> {
             double calculatedPrice = tokenAmountField.doubleValue() * assetData.getAssetInfo().getPriceUsd();
             usdAmountField.setValue(calculatedPrice);
+            System.out.println("usdAmountField = " + calculatedPrice);
         });
 
         usdAmountField.setValueChangeMode(ValueChangeMode.EAGER);
         usdAmountField.addKeyUpListener(e -> {
             double calculatedPrice = usdAmountField.doubleValue() / assetData.getAssetInfo().getPriceUsd();
             tokenAmountField.setValue(calculatedPrice);
+            System.out.println("tokenAmountField = " + calculatedPrice);
         });
 
         Section section = new Section(title, sectionBody);
@@ -296,6 +298,7 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
                 .addComponent(() -> {
                     Paragraph circulationText = new Paragraph(MathUtils.formatBigNumber(circulationSupplyValue));
                     Paragraph percentageText = new Paragraph(String.format("(%d%%)", percentageUseOfCirculationSupply));
+                    percentageText.getStyle().set("color", "blue");
                     return new HorizontalLayout(circulationText, percentageText);
                 })
                 .addComponent(bar)

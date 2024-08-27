@@ -31,7 +31,6 @@ public class Asset {
     @Column(nullable = false)
     private LocalDateTime lastTimeUpdated;
 
-
     public Asset(String symbol) {
         this(0, symbol, 0.0, null, false, LocalDateTime.now());
     }

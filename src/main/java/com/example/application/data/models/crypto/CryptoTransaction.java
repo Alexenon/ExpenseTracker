@@ -8,20 +8,25 @@ import java.time.LocalDateTime;
 @Data
 public class CryptoTransaction {
 
-    private Asset asset;
-    private double price;
-    private double amount;
-    private AmountType amountType;
-    private TransactionType type;
-    private LocalDateTime dateTime;
+    private Asset assetReceived;
 
-    public enum AmountType {
-        TOKEN, USD
-    }
+    private Asset assetGiven;
+
+    private double price;
+
+    private double amount;
+
+    private TransactionType type;
+
+    private String comment;
+
+    private LocalDateTime dateTime;
 
     public enum TransactionType {
         BUY,
         SELL
+        // TRANSFER - Add asset amount from external sources
+        // CONVERT  - Switch from one asset to another
     }
 
     public boolean isBuyTransaction() {
