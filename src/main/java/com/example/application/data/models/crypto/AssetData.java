@@ -20,6 +20,14 @@ public class AssetData {
         this.transactions = new ArrayList<>();
     }
 
+    public String getName() {
+        return assetInfo.getName();
+    }
+
+    public String getSymbol() {
+        return assetInfo.getSymbol();
+    }
+
     public double getPrice() {
         return assetInfo.getPriceUsd();
     }
@@ -27,16 +35,16 @@ public class AssetData {
     public double getChangesLast24hPercentage() {
         return assetInfo.getSpotMoving24HourChangePercentageUsd();
     }
-    
+
     public double getAverageBuyPrice() {
         double totalCost = transactions.stream()
                 .filter(CryptoTransaction::isBuyTransaction)
-                .mapToDouble(CryptoTransaction::getAmount)
+                .mapToDouble(CryptoTransaction::getOrderQuantity)
                 .sum();
 
         double totalQuantity = transactions.stream()
                 .filter(CryptoTransaction::isBuyTransaction)
-                .mapToDouble(CryptoTransaction::getAmount)
+                .mapToDouble(CryptoTransaction::getOrderQuantity)
                 .sum();
 
         return totalQuantity == 0 ? 0 : totalCost / totalQuantity;

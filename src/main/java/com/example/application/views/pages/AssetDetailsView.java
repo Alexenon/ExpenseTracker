@@ -12,6 +12,7 @@ import com.example.application.views.components.PercentageField;
 import com.example.application.views.components.PriceMonitorContainer;
 import com.example.application.views.components.PriceWatchlistComponent;
 import com.example.application.views.components.complex_components.PriceBadge;
+import com.example.application.views.components.complex_components.dialogs.AddTransactionDialog;
 import com.example.application.views.components.native_components.Container;
 import com.example.application.views.layouts.MainLayout;
 import com.vaadin.flow.component.Component;
@@ -70,7 +71,7 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
                 holdingsSection(),
                 createWatchlistSection(AssetWatcher.ActionType.BUY),
                 createWatchlistSection(AssetWatcher.ActionType.SELL),
-                priceMonitorSection(), // TODO: Style and integrate this fully
+                priceMonitorSection(),
                 marketStatsSection(),
                 aboutSection()
         );
@@ -252,6 +253,7 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
                 .addComponent(() -> {
                     Button addHoldingBtn = new Button("Add Holding", LumoIcon.PLUS.create());
                     addHoldingBtn.setIconAfterText(false);
+                    addHoldingBtn.addClickListener(e -> new AddTransactionDialog(assetData, instrumentsProvider).open());
                     return addHoldingBtn;
                 })
                 .build();
@@ -326,7 +328,8 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         return new Section(title, body);
     }
 
-    private Section transactionSection() {
+    // TODO: Grid with last 10 transactions
+    private Section transactionHistorySection() {
         return new Section();
     }
 
@@ -370,10 +373,10 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
                     return title;
                 })
                 .addComponent(() -> {
-                    Button addTransactionBtn = new Button("Add Watchlist", LumoIcon.PLUS.create());
-                    addTransactionBtn.setIconAfterText(false);
-                    addTransactionBtn.addClickListener(e -> watchlistComponent.addNewPriceLayout());
-                    return addTransactionBtn;
+                    Button addWatchlistBtn = new Button("Add Watchlist", LumoIcon.PLUS.create());
+                    addWatchlistBtn.setIconAfterText(false);
+                    addWatchlistBtn.addClickListener(e -> watchlistComponent.addNewPriceLayout());
+                    return addWatchlistBtn;
                 })
                 .build();
 

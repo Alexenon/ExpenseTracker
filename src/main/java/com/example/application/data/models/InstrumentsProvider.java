@@ -14,6 +14,14 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.util.List;
 
+/*
+* TODO:
+*  - Remove @Getters
+*  - Add update List<AssetData>, List<AssetInfo>
+*  - Rename AssetInfo -> AssetMeta (maybe)
+*  - Remove old implementation of currencies
+* */
+
 @Component
 public class InstrumentsProvider {
 
@@ -31,21 +39,21 @@ public class InstrumentsProvider {
         this.listOfAssetData = initAssetsData();
     }
 
-    public AssetInfo getAssetInfo(String name) {
-        return CryptoCompareFetcher.getCoinMetaData(name).getData();
+    public AssetData getAssetDataBySymbol(String symbol) {
+        return listOfAssetData.stream()
+                .filter(assetData -> assetData.getSymbol().equalsIgnoreCase(symbol))
+                .findFirst()
+                .orElseThrow();
     }
 
-    public List<AssetData> initAssetsData() {
+    private List<AssetData> initAssetsData() {
         return assets.stream()
                 .map(asset -> new AssetData(asset, getAssetInfo(asset.getSymbol())))
                 .toList();
     }
 
-    public List<AssetInfo> getAssetsInfo() {
-        return assets.stream()
-                .map(Asset::getSymbol)
-                .map(this::getAssetInfo)
-                .toList();
+    private AssetInfo getAssetInfo(String name) {
+        return CryptoCompareFetcher.getCoinMetaData(name).getData();
     }
 
     public List<Currency> updateCurrencyList() {

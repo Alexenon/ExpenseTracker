@@ -3,30 +3,47 @@ package com.example.application.data.models.crypto;
 import com.example.application.entities.crypto.Asset;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+
+/*
+* TODO:
+*   - Add SpotPairs - BTC/USDT, BTC/USDC, ...
+* */
 
 @Data
 public class CryptoTransaction {
 
-    private Asset assetReceived;
+    private Asset asset;
 
-    private Asset assetGiven;
+    private double marketPrice;
 
-    private double price;
+    private double orderTotalPrice;
 
-    private double amount;
+    private double orderQuantity;
 
     private TransactionType type;
 
     private String comment;
 
-    private LocalDateTime dateTime;
+    private LocalDate date;
 
-    public enum TransactionType {
-        BUY,
-        SELL
-        // TRANSFER - Add asset amount from external sources
-        // CONVERT  - Switch from one asset to another
+    public CryptoTransaction() {
+    }
+
+    public CryptoTransaction(Asset asset, double marketPrice, double orderTotalPrice, TransactionType type) {
+        this(asset, marketPrice, orderTotalPrice, type, null, LocalDate.now());
+    }
+
+    public CryptoTransaction(Asset asset, double marketPrice, double orderTotalPrice,
+                             TransactionType type, String comment, LocalDate date) {
+        this.asset = asset;
+        this.marketPrice = marketPrice;
+        this.orderTotalPrice = orderTotalPrice;
+        this.orderQuantity = orderTotalPrice / marketPrice;
+        this.type = type;
+        this.comment = comment;
+        this.date = date;
     }
 
     public boolean isBuyTransaction() {
@@ -35,6 +52,13 @@ public class CryptoTransaction {
 
     public boolean isSellTransaction() {
         return this.type == TransactionType.SELL;
+    }
+
+    public enum TransactionType {
+        BUY,
+        SELL
+        // TRANSFER - Add asset amount from external sources
+        // CONVERT  - Switch from one asset to another
     }
 
 }
