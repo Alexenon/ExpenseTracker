@@ -2,17 +2,14 @@ package com.example.application.views.pages;
 
 import com.example.application.data.models.InstrumentsProvider;
 import com.example.application.data.models.NumberType;
-import com.example.application.services.AssetWatcherService;
+import com.example.application.services.crypto.AssetWatcherService;
 import com.example.application.services.SecurityService;
 import com.example.application.services.UserService;
 import com.example.application.views.components.AssetsGrid;
 import com.example.application.views.components.complex_components.PriceBadge;
-import com.example.application.views.components.complex_components.dialogs.AddAssetDialog;
 import com.example.application.views.components.native_components.Container;
 import com.example.application.views.layouts.MainLayout;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;

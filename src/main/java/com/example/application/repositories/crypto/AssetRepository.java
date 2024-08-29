@@ -1,4 +1,4 @@
-package com.example.application.repositories;
+package com.example.application.repositories.crypto;
 
 import com.example.application.entities.crypto.Asset;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -2,7 +2,7 @@ package com.example.application.views.components;
 
 import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.AssetWatcher;
-import com.example.application.services.InstrumentsService;
+import com.example.application.services.crypto.InstrumentsService;
 import com.example.application.utils.common.StringUtils;
 import com.example.application.views.components.native_components.Container;
 import com.vaadin.flow.component.UI;

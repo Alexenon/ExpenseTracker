@@ -27,12 +27,12 @@ public class AssetWatcher {
     @Column(nullable = false)
     private double targetAmount;
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private TargetType targetType;
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private ActionType actionType;
 
     @Column(nullable = false)

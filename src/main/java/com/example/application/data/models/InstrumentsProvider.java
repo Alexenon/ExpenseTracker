@@ -3,7 +3,7 @@ package com.example.application.data.models;
 import com.example.application.data.models.crypto.AssetData;
 import com.example.application.data.models.crypto.Currency;
 import com.example.application.entities.crypto.Asset;
-import com.example.application.repositories.AssetRepository;
+import com.example.application.repositories.crypto.AssetRepository;
 import com.example.application.utils.fetchers.BinanceFetcher;
 import com.example.application.utils.fetchers.CryptoCompareFetcher;
 import com.example.application.utils.fetchers.api_responses.AssetInfo;

@@ -1,6 +1,6 @@
 package com.example.application.entities;
 
-import com.example.application.services.InstrumentsService;
+import com.example.application.services.crypto.InstrumentsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;

@@ -4,6 +4,7 @@ import com.example.application.data.models.InstrumentsProvider;
 import com.example.application.data.models.crypto.AssetData;
 import com.example.application.data.models.crypto.CryptoTransaction;
 import com.example.application.entities.crypto.Asset;
+import com.example.application.services.crypto.InstrumentsService;
 import com.example.application.views.components.CurrencyField;
 import com.example.application.views.components.native_components.Container;
 import com.vaadin.flow.component.Key;
@@ -33,6 +34,7 @@ public class AddTransactionDialog extends Dialog {
     private final AssetData assetData;
     private final CryptoTransaction transaction;
     private final InstrumentsProvider instrumentsProvider;
+    private final InstrumentsService instrumentsService;
     private final Binder<CryptoTransaction> binder = new Binder<>(CryptoTransaction.class);
 
     private final ComboBox<AssetData> assetSymbolField = new ComboBox<>("Asset");
@@ -46,9 +48,12 @@ public class AddTransactionDialog extends Dialog {
     private final Button cancelButton = new Button("Cancel");
 
     @Autowired
-    public AddTransactionDialog(AssetData assetData, InstrumentsProvider instrumentsProvider) {
+    public AddTransactionDialog(AssetData assetData,
+                                InstrumentsProvider instrumentsProvider,
+                                InstrumentsService instrumentsService) {
         this.assetData = assetData;
         this.instrumentsProvider = instrumentsProvider;
+        this.instrumentsService = instrumentsService;
         this.transaction = new CryptoTransaction();
 
         buildForm();
@@ -71,7 +76,11 @@ public class AddTransactionDialog extends Dialog {
 
         saveButton.addClickShortcut(Key.ENTER);
         saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
-        saveButton.addClickListener(e -> System.out.println("Okay")); // TODO: HERE
+        saveButton.addClickListener(e -> {
+            CryptoTransaction savedTransaction = instrumentsService.saveTransaction(binder.getBean());
+            this.close();
+            System.out.printf("Saved -> %s\n", savedTransaction);
+        }); // TODO: HERE
 
         cancelButton.addClickShortcut(Key.ESCAPE);
         cancelButton.addClickListener(e -> this.close());
@@ -130,10 +139,10 @@ public class AddTransactionDialog extends Dialog {
                 .asRequired("Please fill this field")
                 .withConverter(new StringToDoubleConverter(0.0, "Couldn't convert to double"))
                 .withValidator(price -> price > 0, "Market price should be bigger than 0")
-                .bind(CryptoTransaction::getOrderTotalPrice, CryptoTransaction::setOrderTotalPrice);
+                .bind(CryptoTransaction::getOrderTotalCost, CryptoTransaction::setOrderTotalCost);
 
         binder.forField(notesField)
-                .bind(CryptoTransaction::getComment, CryptoTransaction::setComment);
+                .bind(CryptoTransaction::getNotes, CryptoTransaction::setNotes);
 
         binder.forField(datePicker)
                 .bind(CryptoTransaction::getDate, CryptoTransaction::setDate);

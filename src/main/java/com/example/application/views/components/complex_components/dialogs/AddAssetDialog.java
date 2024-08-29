@@ -2,9 +2,8 @@ package com.example.application.views.components.complex_components.dialogs;
 
 import com.example.application.data.models.InstrumentsProvider;
 import com.example.application.data.models.crypto.Currency;
-import com.example.application.entities.User;
 import com.example.application.entities.crypto.Asset;
-import com.example.application.services.AssetWatcherService;
+import com.example.application.services.crypto.AssetWatcherService;
 import com.example.application.services.SecurityService;
 import com.example.application.services.UserService;
 import com.example.application.views.components.utils.HasNotifications;

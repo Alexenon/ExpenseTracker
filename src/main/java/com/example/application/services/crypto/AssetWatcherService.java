@@ -1,7 +1,7 @@
-package com.example.application.services;
+package com.example.application.services.crypto;
 
 import com.example.application.entities.crypto.AssetWatcher;
-import com.example.application.repositories.AssetWatcherRepository;
+import com.example.application.repositories.crypto.AssetWatcherRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

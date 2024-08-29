@@ -4,13 +4,10 @@ import com.example.application.data.models.InstrumentsProvider;
 import com.example.application.data.models.NumberType;
 import com.example.application.data.models.crypto.AssetData;
 import com.example.application.entities.crypto.AssetWatcher;
-import com.example.application.services.InstrumentsService;
+import com.example.application.services.crypto.InstrumentsService;
 import com.example.application.utils.common.MathUtils;
 import com.example.application.utils.common.StringUtils;
-import com.example.application.views.components.CurrencyField;
-import com.example.application.views.components.PercentageField;
-import com.example.application.views.components.PriceMonitorContainer;
-import com.example.application.views.components.PriceWatchlistComponent;
+import com.example.application.views.components.*;
 import com.example.application.views.components.complex_components.PriceBadge;
 import com.example.application.views.components.complex_components.dialogs.AddTransactionDialog;
 import com.example.application.views.components.native_components.Container;
@@ -34,9 +31,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigInteger;
 
-// TODO: Add Transactions
-
-// cursor: not-allowed;
+/*
+ * TODO: Add Transactions
+ *  - cursor: not-allowed;    - style something
+ * */
 
 @AnonymousAllowed
 @PageTitle("Asset Details")
@@ -73,7 +71,8 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
                 createWatchlistSection(AssetWatcher.ActionType.SELL),
                 priceMonitorSection(),
                 marketStatsSection(),
-                aboutSection()
+                aboutSection(),
+                transactionHistorySection()
         );
     }
 
@@ -253,7 +252,8 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
                 .addComponent(() -> {
                     Button addHoldingBtn = new Button("Add Holding", LumoIcon.PLUS.create());
                     addHoldingBtn.setIconAfterText(false);
-                    addHoldingBtn.addClickListener(e -> new AddTransactionDialog(assetData, instrumentsProvider).open());
+                    addHoldingBtn.addClickListener(e -> new AddTransactionDialog(assetData, instrumentsProvider,
+                            instrumentsService).open());
                     return addHoldingBtn;
                 })
                 .build();
@@ -330,7 +330,9 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
 
     // TODO: Grid with last 10 transactions
     private Section transactionHistorySection() {
-        return new Section();
+        H3 title = new H3("Transactions");
+        title.setClassName("section-title");
+        return new Section(title, new TransactionsGrid(instrumentsService));
     }
 
     private Div createStatsItem(String labelText, String valueText) {
