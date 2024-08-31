@@ -3,12 +3,14 @@ package com.example.application.views.components.native_components;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.dom.Element;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 @Tag(Tag.DIV)
-public class Container extends Div {
+public class Container extends Div implements FlexComponent {
 
     public Container() {
         super();
@@ -50,6 +52,11 @@ public class Container extends Div {
             this.instance = new Container(className);
         }
 
+        public Builder addElement(Element element) {
+            instance.getElement().appendChild(element);
+            return this;
+        }
+
         public Builder addComponent(Component component) {
             instance.add(component);
             return this;
@@ -82,14 +89,28 @@ public class Container extends Div {
             return this;
         }
 
-        public Builder setFlexCentered() {
-            setStyle("display", "flex");
-            setStyle("align-items", "center");
+        public Builder setDisplay(String type) {
+            instance.getStyle().set("display", type);
+            return this;
+        }
+
+        public Builder setAlignItems(FlexComponent.Alignment alignment) {
+            instance.setAlignItems(alignment);
+            return this;
+        }
+
+        public Builder setAlignSelf(FlexComponent.Alignment alignment) {
+            instance.setAlignSelf(alignment);
             return this;
         }
 
         public Builder setStyle(String property, String value) {
             instance.getStyle().set(property, value);
+            return this;
+        }
+
+        public Builder setGap(String value) {
+            instance.getStyle().set("gap", value);
             return this;
         }
 

@@ -8,6 +8,7 @@
 
 @import 'styles/page-styles/assets-page.css';
 @import 'styles/page-styles/asset-details-page.css';
+@import 'styles/page-styles/transactions-page.css';
 
 :root {
     --main: #00BFA6;
@@ -38,6 +39,10 @@
     --o70Color: #4c4c4c;
     --o75Color: #404040;
     --o80Color: #333333;
+    --GreenLightColor: #34b349;
+    --GreenDarkColor: #6ccf59;
+    --RedLightColor: #f02934;
+    --RedDarkColor: #ff4d4d;
 }
 
 * {
@@ -51,15 +56,8 @@
     font-family: 'Poppins', sans-serif;
 }
 
-.remove-style {
-    margin: 0 !important;
-    padding: 0 !important;
-    list-style-type: none !important;
-    outline: none !important;
-    border: none !important;
-    text-decoration: none !important;
-    box-sizing: border-box !important;
-    font-family: 'Poppins', sans-serif !important;
+p {
+    margin: 0;
 }
 
 a,
@@ -118,5 +116,18 @@ vaadin-button.no-background {
     height: 30px;
     width: auto;
     border: 0.125rem solid black;
+}
+
+/*
+    Modal Close Button [X]
+*/
+vaadin-button.modal-close-btn {
+    color: var(--o40Color);
+    background: none;
+}
+
+vaadin-button.modal-close-btn > vaadin-icon {
+    height: 40px;
+    width: 40px;
 }
 

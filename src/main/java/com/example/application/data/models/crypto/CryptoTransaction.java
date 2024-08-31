@@ -77,7 +77,12 @@ public class CryptoTransaction {
 
     public enum TransactionType {
         BUY,
-        SELL
+        SELL;
+
+        public boolean isBuyTransaction() {
+            return this.equals(TransactionType.BUY);
+        }
+
     }
 
     @Override

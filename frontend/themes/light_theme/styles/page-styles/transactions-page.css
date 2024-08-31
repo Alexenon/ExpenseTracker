@@ -1,0 +1,36 @@
+/*
+    Transaction Details Modal
+*/
+
+.transaction-details-modal {
+}
+
+.transaction-details-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 13px 15px;
+    border-radius: 16px;
+    border: 1px solid var(--o10Color);
+    margin-bottom: 10px;
+}
+
+.transaction-profit-loss-badge-label {
+    font-weight: 400;
+    font-size: 15px;
+    line-height: 18px;
+    color: var(--o50Color);
+}
+
+.transaction-profit-loss-badge-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.info-value-item {
+    color: black;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+}

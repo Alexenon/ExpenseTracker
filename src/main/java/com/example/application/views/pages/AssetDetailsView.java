@@ -332,7 +332,13 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
     private Section transactionHistorySection() {
         H3 title = new H3("Transactions");
         title.setClassName("section-title");
-        return new Section(title, new TransactionsGrid(instrumentsService));
+
+        Button seeAllTransactionsBtn = new Button("See more transactions");
+
+        TransactionsGrid transactionsGrid = new TransactionsGrid(instrumentsService, instrumentsProvider);
+        transactionsGrid.setItems(instrumentsService.getTransactionsByAsset(assetData.getAsset()));
+        transactionsGrid.setPageSize(10);
+        return new Section(title, transactionsGrid);
     }
 
     private Div createStatsItem(String labelText, String valueText) {

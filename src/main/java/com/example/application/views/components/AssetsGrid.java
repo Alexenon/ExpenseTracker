@@ -35,6 +35,7 @@ import java.util.Set;
     TODO:
      - Think about column header style(maybe align item center)
      - Add sync button functionality(don't forget about checkbox value)
+     - Maybe display -> Hidden (≈17)
 
     _______________________________________________________________________________________________________________________________________
     | Name | Price  | 24h Changes | Amount | Avg buy | Avg sell | All-time low | All-time high | Total Worth | Total Invested | Realized  |
@@ -136,22 +137,8 @@ public class AssetsGrid extends Div {
     private void initializeSyncButton() {
         syncButton.addClickListener(event -> {
             animateSyncButtonIcon();
+            System.out.println("TODO:");
         });
-    }
-
-    private void animateSyncButtonIcon() {
-        syncButton.getIcon().getElement().executeJs(
-                """
-                        this.style.transition = 'transform 1s ease-in-out';
-                        this.style.transform = 'rotate(360deg)';
-                        this.style.color = 'var(--color-orange)';
-                        setTimeout(() => {
-                            this.style.transition = '';
-                            this.style.transform = '';
-                            this.style.color = 'var(--color-black)';
-                        }, 1000);
-                        """
-        );
     }
 
     private ComponentRenderer<Container, AssetData> columnNameRenderer() {
@@ -185,6 +172,21 @@ public class AssetsGrid extends Div {
     private NumberRenderer<AssetData> columnPriceRenderer(ValueProvider<AssetData, Number> priceProvider) {
         NumberFormat nf = NumberFormat.getCurrencyInstance(Locale.US);
         return new NumberRenderer<>(priceProvider, nf, "$0.00");
+    }
+
+    private void animateSyncButtonIcon() {
+        syncButton.getIcon().getElement().executeJs(
+                """
+                        this.style.transition = 'transform 1s ease-in-out';
+                        this.style.transform = 'rotate(360deg)';
+                        this.style.color = 'var(--color-orange)';
+                        setTimeout(() => {
+                            this.style.transition = '';
+                            this.style.transform = '';
+                            this.style.color = 'var(--color-black)';
+                        }, 1000);
+                        """
+        );
     }
 
     private Button threeDotsBtn() {
