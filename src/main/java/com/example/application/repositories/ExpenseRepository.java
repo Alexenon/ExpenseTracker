@@ -1,6 +1,7 @@
 package com.example.application.repositories;
 
 import com.example.application.data.dtos.ExpenseDTO;
+import com.example.application.data.dtos.projections.ExpensesSumGroupedByCategory;
 import com.example.application.entities.Expense;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -8,6 +9,10 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+
+/*
+ * TODO: ADD VIEW TO EXCLUDE ADDING ALIASES EVERYWHERE
+ * */
 
 @Repository
 public interface ExpenseRepository extends JpaRepository<Expense, Long> {
@@ -21,7 +26,6 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
             """, nativeQuery = true)
     List<ExpenseDTO> getAll();
 
-    // TODO: ADD VIEW TO EXCLUDE ADDING ALIASES EVERYWHERE
     @Query(value = """
             SELECT E.id, E.name, E.amount, C.name as 'Category',
                 E.description, T.name as 'Timestamp', E.start_date as 'startDate', E.expire_date as 'expireDate'
@@ -63,11 +67,27 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
             """, nativeQuery = true)
     List<ExpenseDTO> findByCategory(@Param("categoryName") String categoryName);
 
+    /**
+     * <p>
+     * NOTE: In case it's selected current month, this displays the amount of money
+     * user spent till current day, and not till the end of current month.
+     *
+     * <p>
+     * So if it's second day of month, the result will display the amount of money user
+     * managed to spend till this day, other expenses will be displayed on the day when it should
+     * be triggered
+     *
+     * <p>
+     * TODO: Monthly expenses however are calculated starting from first day of a month,
+     *  which is a bug for current implementation of displaying the price till current day
+     *
+     * @return sql table with 2 fields -> categoryName, totalSpentPerMonth
+     */
     @Query(value = """
-            SELECT C.name, SUM(
+            SELECT C.name as categoryName, SUM(
             	CASE
             		WHEN T.name = 'DAILY' THEN FLOOR(E.amount * days)
-            		WHEN T.name = 'WEEKLY' THEN FLOOR(E.amount * (days / 7))
+            		WHEN T.name = 'WEEKLY' THEN FLOOR(E.amount * FLOOR(days / 7))
             		WHEN T.name = 'MONTHLY' THEN FLOOR(E.amount)
             		ELSE FLOOR(E.amount)
             	END
@@ -86,30 +106,30 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
                 AND (E.expire_date IS NULL OR E.expire_date > DATE_FORMAT(CONCAT(?2, '-', ?3, '-01'), '%Y-%m-%d'))
             GROUP BY C.name
             """, nativeQuery = true)
-    List<Object[]> findMonthlyCategoriesTotalSum(String userEmailOrUsername, int year, int month);
+    List<ExpensesSumGroupedByCategory> findExpensesTotalSumGroupedByCategory(String userEmailOrUsername, int year, int month);
 
     @Query(value = """
-        SELECT C.name, SUM(
-            CASE
-                WHEN T.name = 'DAILY' THEN E.amount * DAYOFYEAR(LAST_DAY(year_date))
-                WHEN T.name = 'WEEKLY' THEN E.amount * FLOOR(DAYOFYEAR(LAST_DAY(year_date)) / 7)
-                WHEN T.name = 'MONTHLY' THEN E.amount * 12
-                WHEN T.name = 'YEARLY' THEN E.amount
-                ELSE E.amount
-            END
-        ) as totalSpent
-        FROM (
-            SELECT E.*, DATE_FORMAT(CONCAT(?2, '-01-01'), '%Y-%m-%d') AS year_date
-            FROM expense E
-            WHERE YEAR(E.start_date) = ?2
-        ) AS E
-            INNER JOIN users U ON U.id = E.user_id
-            INNER JOIN category C ON C.id = E.category_id
-            INNER JOIN timestamp T ON T.id = E.timestamp_id
-        WHERE (E.expire_date IS NULL OR E.expire_date > year_date)
-            AND (U.username = ?1 OR U.email = ?1)
-        GROUP BY C.name
-        """, nativeQuery = true)
+            SELECT C.name, SUM(
+                CASE
+                    WHEN T.name = 'DAILY' THEN E.amount * DAYOFYEAR(LAST_DAY(year_date))
+                    WHEN T.name = 'WEEKLY' THEN E.amount * FLOOR(DAYOFYEAR(LAST_DAY(year_date)) / 7)
+                    WHEN T.name = 'MONTHLY' THEN E.amount * 12
+                    WHEN T.name = 'YEARLY' THEN E.amount
+                    ELSE E.amount
+                END
+            ) as totalSpent
+            FROM (
+                SELECT E.*, DATE_FORMAT(CONCAT(?2, '-01-01'), '%Y-%m-%d') AS year_date
+                FROM expense E
+                WHERE YEAR(E.start_date) = ?2
+            ) AS E
+                INNER JOIN users U ON U.id = E.user_id
+                INNER JOIN category C ON C.id = E.category_id
+                INNER JOIN timestamp T ON T.id = E.timestamp_id
+            WHERE (E.expire_date IS NULL OR E.expire_date > year_date)
+                AND (U.username = ?1 OR U.email = ?1)
+            GROUP BY C.name
+            """, nativeQuery = true)
     List<Object[]> findYearlyCategoriesTotalSum(String userEmailOrUsername, int year);
 
     @Query(value = """

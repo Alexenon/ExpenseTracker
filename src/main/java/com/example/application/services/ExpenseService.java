@@ -1,6 +1,7 @@
 package com.example.application.services;
 
 import com.example.application.data.dtos.ExpenseDTO;
+import com.example.application.data.dtos.projections.ExpensesSumGroupedByCategory;
 import com.example.application.data.enums.Timestamps;
 import com.example.application.entities.Expense;
 import com.example.application.repositories.ExpenseRepository;
@@ -85,8 +86,12 @@ public class ExpenseService {
         return repository.findExpensesPerYear(year);
     }
 
-    public List<Object[]> getMonthlyCategoriesTotalSum(String userEmailOrUsername, int year, int month) {
-        return repository.findMonthlyCategoriesTotalSum(userEmailOrUsername, year, month);
+    public List<ExpensesSumGroupedByCategory> getExpensesTotalSumGroupedByCategory(String userEmailOrUsername) {
+        return repository.findExpensesTotalSumGroupedByCategory(userEmailOrUsername, LocalDate.now().getYear(), LocalDate.now().getMonthValue());
+    }
+
+    public List<ExpensesSumGroupedByCategory> getExpensesTotalSumGroupedByCategory(String userEmailOrUsername, int year, int month) {
+        return repository.findExpensesTotalSumGroupedByCategory(userEmailOrUsername, year, month);
     }
 
 }

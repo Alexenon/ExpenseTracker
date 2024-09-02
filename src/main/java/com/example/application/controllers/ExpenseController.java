@@ -1,6 +1,7 @@
 package com.example.application.controllers;
 
 import com.example.application.data.dtos.ExpenseDTO;
+import com.example.application.data.dtos.projections.ExpensesSumGroupedByCategory;
 import com.example.application.data.requests.ExpenseRequest;
 import com.example.application.entities.Expense;
 import com.example.application.services.ExpenseService;
@@ -91,39 +92,35 @@ public class ExpenseController {
      *
      * @param month The month parameter specifying the month to retrieve expenses for. If not provided,
      *              the current month will be used.
+     *
      * @return A list of ExpenseDTO objects representing the expenses for the specified month.
      */
     @GetMapping("/get")
-    public List<ExpenseDTO> getExpensesByMonth(
-            @RequestParam(value = "month", required = false) Integer month
-    ) {
-        return expenseService.getExpensesByMonth(Objects.requireNonNullElseGet(month,
-                () -> LocalDate.now().getMonthValue()));
+    public List<ExpenseDTO> getExpensesByMonth(@RequestParam(value = "month", required = false) Integer month) {
+        month = Objects.requireNonNullElse(month, LocalDate.now().getMonthValue());
+        return expenseService.getExpensesByMonth(month);
     }
 
     @GetMapping("/getByYear")
-    public List<ExpenseDTO> getExpensesByYear(
-            @RequestParam(value = "year", required = false) Integer year
-    ) {
-        return expenseService.getExpensesByYear(Objects.requireNonNullElseGet(year,
-                () -> LocalDate.now().getYear()));
+    public List<ExpenseDTO> getExpensesByYear(@RequestParam(value = "year", required = false) Integer year) {
+        year = Objects.requireNonNullElse(year, LocalDate.now().getYear());
+        return expenseService.getExpensesByYear(year);
     }
 
     @GetMapping("/grouped")
-    public List<Object[]> getExpensesTotalSumGroupedByCategory(
+    public List<ExpensesSumGroupedByCategory> getExpensesTotalSumGroupedByCategory(
             @RequestParam(value = "user") String userEmailOrUsername,
             @RequestParam(value = "year", required = false) Integer year,
             @RequestParam(value = "month", required = false) Integer month
     ) {
-        if (year == null) {
-            year = LocalDate.now().getYear();
+        year = Objects.requireNonNullElse(year, LocalDate.now().getYear());
+        month = Objects.requireNonNullElse(month, LocalDate.now().getMonthValue());
+
+        if (month < 1 || month > 12) {
+            throw new IllegalArgumentException();
         }
 
-        if (month == null || month < 1 || month > 12) {
-            month = LocalDate.now().getMonthValue();
-        }
-
-        return expenseService.getMonthlyCategoriesTotalSum(userEmailOrUsername, year, month);
+        return expenseService.getExpensesTotalSumGroupedByCategory(userEmailOrUsername, year, month);
     }
 
 }
