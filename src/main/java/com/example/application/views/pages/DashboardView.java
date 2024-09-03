@@ -9,6 +9,7 @@ import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Main;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.router.PageTitle;
@@ -30,6 +31,8 @@ public class DashboardView extends Main {
     private final SecurityService securityService;
     private final ExpenseService expenseService;
 
+    private String selectedCategory;
+
     public DashboardView(SecurityService securityService, ExpenseService expenseService) {
         this.securityService = securityService;
         this.expenseService = expenseService;
@@ -43,9 +46,24 @@ public class DashboardView extends Main {
         chartPie.setId("chart-pie");
         initMonthlyExpensesChart();
 
+        Paragraph selectedCategoryField = new Paragraph();
+
+
+        // TODO: Display table with selected category
+        chartPie.getElement().addEventListener("click", event -> chartPie.getElement()
+                .executeJs("return this.getAttribute('data-selected');")
+                .then(String.class, selectedValue -> {
+                    if (selectedValue == null || selectedValue.isEmpty() || selectedValue.equals(selectedCategory)) {
+                        return;
+                    }
+
+                    selectedCategory = selectedValue;
+                    selectedCategoryField.setText(selectedCategory);
+                }));
+
         HorizontalLayout container = new HorizontalLayout(chartPie);
         container.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
-        add(container);
+        add(container, selectedCategoryField);
     }
 
     private void initMonthlyExpensesChart() {

@@ -18,8 +18,6 @@ function showChartDetails() {
     });
 }
 
-// TODO: Add on chart element click -> set attribute 
-
 /**
  * Updates the pie chart with json data
  */
@@ -93,6 +91,7 @@ window.fillChartPie = function fillChartPie(jsonDataString) {
   // LISTENER FOR CLICKING ON SERIES PIE
   chart.on('click', 'series.pie', function (params) {
     console.log(params);
+    element.setAttribute('data-selected', params.data.name);
     // console.log(params.data.name);
   });
 
