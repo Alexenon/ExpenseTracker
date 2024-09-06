@@ -42,20 +42,20 @@ public class MathUtils {
         return a.multiply(BigInteger.valueOf(100)).divide(b).intValue();
     }
 
+    public static String formatBigNumber(BigInteger number) {
+        return formatBigNumber(number.doubleValue());
+    }
+
     public static String formatBigNumber(double number) {
         if (number >= BILLION) {
-            return String.format("%.2fB", number / BILLION);
+            return String.format("%.2f B", number / BILLION);
         }
 
         if (number >= MILLION) {
-            return String.format("%.2fM", number / MILLION);
+            return String.format("%.2f M", number / MILLION);
         }
 
         return String.format("%.2f", number);
-    }
-
-    public static String formatBigNumber(BigInteger number) {
-        return formatBigNumber(number.doubleValue());
     }
 
 }

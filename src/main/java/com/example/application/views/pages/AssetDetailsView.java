@@ -9,7 +9,7 @@ import com.example.application.utils.common.MathUtils;
 import com.example.application.utils.common.StringUtils;
 import com.example.application.views.components.*;
 import com.example.application.views.components.complex_components.PriceBadge;
-import com.example.application.views.components.complex_components.dialogs.AddTransactionDialog;
+import com.example.application.views.components.complex_components.dialogs.transactions.AddTransactionDialog;
 import com.example.application.views.components.native_components.Container;
 import com.example.application.views.layouts.MainLayout;
 import com.vaadin.flow.component.Component;
@@ -42,6 +42,7 @@ import java.math.BigInteger;
 public class AssetDetailsView extends Main implements HasUrlParameter<String> {
 
     private AssetData assetData;
+    private AddTransactionDialog addTransactionDialog;
 
     @Autowired
     private InstrumentsProvider instrumentsProvider;
@@ -55,6 +56,8 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
                 .filter(a -> a.getAsset().getSymbol().equalsIgnoreCase(symbol))
                 .findFirst()
                 .orElseThrow();
+
+        this.addTransactionDialog = new AddTransactionDialog(assetData, instrumentsService, instrumentsProvider);
 
         buildPage();
         getElement().executeJs("window.scrollTo(0,0)"); // Scroll to top of the page, on initialization
@@ -83,11 +86,11 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
 
         Container coinNameContainer = Container.builder("coin-overview-name-container")
                 .addComponent(() -> {
-                    Image image = new Image(assetData.getAssetInfo().getLogoUrl(), assetData.getAssetInfo().getName());
+                    Image image = new Image(assetData.getAssetInfo().getLogoUrl(), assetData.getName());
                     image.setClassName("coin-overview-image");
                     return image;
                 })
-                .addComponent(new H1(assetData.getAssetInfo().getName()))
+                .addComponent(new H1(assetData.getName()))
                 .addComponent(() -> {
                     Span dot = new Span("•");
                     dot.setClassName("dot");
@@ -187,7 +190,7 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         H3 title = new H3("Crypto Convertor");
         title.setClassName("section-title");
 
-        Image inputImage = new Image(assetData.getAssetInfo().getLogoUrl(), assetData.getAssetInfo().getName());
+        Image inputImage = new Image(assetData.getAssetInfo().getLogoUrl(), assetData.getName());
         inputImage.setClassName("coin-overview-image");
 
         CurrencyField tokenAmountField = new CurrencyField();
@@ -252,8 +255,7 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
                 .addComponent(() -> {
                     Button addHoldingBtn = new Button("Add Holding", LumoIcon.PLUS.create());
                     addHoldingBtn.setIconAfterText(false);
-                    addHoldingBtn.addClickListener(e -> new AddTransactionDialog(assetData, instrumentsProvider,
-                            instrumentsService).open());
+                    addHoldingBtn.addClickListener(e -> addTransactionDialog.open());
                     return addHoldingBtn;
                 })
                 .build();
@@ -321,7 +323,7 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
     }
 
     private Section aboutSection() {
-        H3 title = new H3("About " + assetData.getAssetInfo().getName());
+        H3 title = new H3("About " + assetData.getName());
         title.setClassName("section-title");
         Paragraph description = new Paragraph(assetData.getAssetInfo().getAssetDescriptionSummary());
         Container body = new Container("section-card-wrapper", description);

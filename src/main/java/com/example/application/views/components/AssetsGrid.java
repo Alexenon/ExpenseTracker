@@ -119,7 +119,7 @@ public class AssetsGrid extends Div {
 
             dataView.setFilter(assetData -> {
                 String symbol = assetData.getAsset().getSymbol().toLowerCase();
-                String name = assetData.getAssetInfo().getName().toLowerCase();
+                String name = assetData.getName().toLowerCase();
                 return searchTerm.isEmpty() || symbol.contains(searchTerm) || name.contains(searchTerm);
             });
         });

@@ -66,7 +66,9 @@ public class InstrumentsService {
 
     public CryptoTransaction saveTransaction(CryptoTransaction transaction) {
         transaction.setOrderQuantity(transaction.getOrderTotalCost() / transaction.getMarketPrice());
-        return transactionRepository.save(transaction);
+        CryptoTransaction savedTransaction = transactionRepository.save(transaction);
+        System.out.printf("Saved -> %s\n", savedTransaction);
+        return savedTransaction;
     }
 
     public void deleteTransaction(CryptoTransaction transaction) {

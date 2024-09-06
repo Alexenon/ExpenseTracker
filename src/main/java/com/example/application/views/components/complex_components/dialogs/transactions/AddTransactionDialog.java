@@ -1,4 +1,4 @@
-package com.example.application.views.components.complex_components.dialogs;
+package com.example.application.views.components.complex_components.dialogs.transactions;
 
 import com.example.application.data.models.InstrumentsProvider;
 import com.example.application.data.models.crypto.AssetData;
@@ -25,9 +25,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.time.LocalDate;
 
 // TODO:
-//  - Save into database
-//  - Add slider for percentage buy/transfer
 //  - boolean subtractFromGivenAsset
+//  - Add slider for percentage buy/transfer
 //  - private final CurrencyField quantityField = new CurrencyField("Order Quantity");
 public class AddTransactionDialog extends Dialog {
 
@@ -47,13 +46,19 @@ public class AddTransactionDialog extends Dialog {
     private final Button saveButton = new Button("Save");
     private final Button cancelButton = new Button("Cancel");
 
+    public AddTransactionDialog(InstrumentsService instrumentsService,
+                                InstrumentsProvider instrumentsProvider) {
+        this(null, instrumentsService, instrumentsProvider);
+    }
+
+
     @Autowired
     public AddTransactionDialog(AssetData assetData,
-                                InstrumentsProvider instrumentsProvider,
-                                InstrumentsService instrumentsService) {
+                                InstrumentsService instrumentsService,
+                                InstrumentsProvider instrumentsProvider) {
         this.assetData = assetData;
-        this.instrumentsProvider = instrumentsProvider;
         this.instrumentsService = instrumentsService;
+        this.instrumentsProvider = instrumentsProvider;
         this.transaction = new CryptoTransaction();
 
         buildForm();

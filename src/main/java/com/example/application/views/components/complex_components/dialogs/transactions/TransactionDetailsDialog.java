@@ -1,4 +1,4 @@
-package com.example.application.views.components.complex_components.dialogs;
+package com.example.application.views.components.complex_components.dialogs.transactions;
 
 import com.example.application.data.models.InstrumentsProvider;
 import com.example.application.data.models.NumberType;
@@ -7,7 +7,6 @@ import com.example.application.data.models.crypto.CryptoTransaction;
 import com.example.application.services.crypto.InstrumentsService;
 import com.example.application.views.components.complex_components.PriceBadge;
 import com.example.application.views.components.native_components.Container;
-import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.*;
@@ -47,7 +46,18 @@ public class TransactionDetailsDialog extends Dialog {
     private void buildForm() {
         addClassName("transaction-details-modal");
         setHeaderTitle("Transaction");
+
+        Button editBtn = new Button("Edit");
+        editBtn.getElement().setProperty("text-decoration", "underline");
+        editBtn.addClickListener(e -> {
+            EditTransactionDialog editTransactionDialog = new EditTransactionDialog(assetData,
+                    transaction, instrumentsService, instrumentsProvider);
+            editTransactionDialog.open();
+            this.close();
+        });
+
         add(
+                editBtn,
                 detailsTransaction(),
                 detailsProfitLoss(),
                 createInfoItem("Date", formatDate(transaction.getDate())),
@@ -65,7 +75,7 @@ public class TransactionDetailsDialog extends Dialog {
                 .addComponent(new HorizontalLayout(totalPriceField, pricePerTokenField))
                 .build();
 
-        Image symbolImage = new Image(assetData.getAssetInfo().getLogoUrl(), assetData.getAssetInfo().getName());
+        Image symbolImage = new Image(assetData.getAssetInfo().getLogoUrl(), assetData.getName());
         symbolImage.setClassName("coin-overview-image");
 
         Div body = Container.builder()

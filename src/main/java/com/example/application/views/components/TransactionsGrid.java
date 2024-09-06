@@ -16,7 +16,9 @@ import com.example.application.data.models.InstrumentsProvider;
 import com.example.application.data.models.crypto.AssetData;
 import com.example.application.data.models.crypto.CryptoTransaction;
 import com.example.application.services.crypto.InstrumentsService;
-import com.example.application.views.components.complex_components.dialogs.TransactionDetailsDialog;
+import com.example.application.views.components.complex_components.dialogs.transactions.AddTransactionDialog;
+import com.example.application.views.components.complex_components.dialogs.transactions.TransactionDetailsDialog;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.grid.Grid;
@@ -26,6 +28,7 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.data.renderer.NumberRenderer;
 import com.vaadin.flow.function.ValueProvider;
+import com.vaadin.flow.theme.lumo.LumoIcon;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.text.NumberFormat;
@@ -43,6 +46,7 @@ public class TransactionsGrid extends Div {
     private final MultiSelectComboBox<CryptoTransaction.TransactionType> typeSearchField = new MultiSelectComboBox<>("Transaction Type");
     private final Grid<CryptoTransaction> grid = new Grid<>();
     private final GridListDataView<CryptoTransaction> dataView = grid.setItems();
+    private final Button addTransactionBtn = new Button("Add Holding", LumoIcon.PLUS.create());
 
     @Autowired
     public TransactionsGrid(InstrumentsService instrumentsService, InstrumentsProvider instrumentsProvider) {
@@ -54,7 +58,12 @@ public class TransactionsGrid extends Div {
     }
 
     private Div gridHeader() {
-        Div header = new Div(nameSearchField, typeSearchField);
+        addTransactionBtn.setIconAfterText(false);
+        addTransactionBtn.addClickListener(e -> {
+            AddTransactionDialog dialog = new AddTransactionDialog(instrumentsService, instrumentsProvider);
+            dialog.open();
+        });
+        Div header = new Div(nameSearchField, typeSearchField, addTransactionBtn);
         header.addClassName("assets-grid-header");
         return header;
     }
@@ -64,13 +73,16 @@ public class TransactionsGrid extends Div {
         grid.addColumn(columnPriceRenderer(CryptoTransaction::getMarketPrice)).setKey("Price").setHeader("Price");
         grid.addColumn(CryptoTransaction::getOrderQuantity).setKey("Amount").setHeader("Amount");
 
-        grid.getColumns().forEach(c -> {
-            c.setSortable(true);
-            c.setAutoWidth(true);
-        });
         grid.setColumnReorderingAllowed(true);
+        grid.getColumns().forEach(column -> {
+            column.setSortable(true);
+            column.setAutoWidth(true);
+        });
+
         grid.addItemClickListener(row -> {
-            new TransactionDetailsDialog(row.getItem(), instrumentsService, instrumentsProvider).open();
+            TransactionDetailsDialog detailsDialog =
+                    new TransactionDetailsDialog(row.getItem(), instrumentsService, instrumentsProvider);
+            detailsDialog.open();
         });
     }
 
