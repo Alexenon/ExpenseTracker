@@ -7,6 +7,7 @@ import com.example.application.data.models.crypto.CryptoTransaction;
 import com.example.application.services.crypto.InstrumentsService;
 import com.example.application.views.components.complex_components.PriceBadge;
 import com.example.application.views.components.native_components.Container;
+import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.*;
@@ -27,6 +28,9 @@ public class TransactionDetailsDialog extends Dialog {
     private final InstrumentsService instrumentsService;
     private final InstrumentsProvider instrumentsProvider;
 
+    private final Paragraph editBtn = new Paragraph("Edit");
+    private final Button closeBtn = new Button(LumoIcon.CROSS.create(), e -> this.close());
+
     @Autowired
     public TransactionDetailsDialog(CryptoTransaction transaction,
                                     InstrumentsService instrumentsService,
@@ -37,41 +41,45 @@ public class TransactionDetailsDialog extends Dialog {
         this.assetData = instrumentsProvider.getAssetDataBySymbol(transaction.getAsset().getSymbol());
 
         buildForm();
-
-        Button closeBtn = new Button(LumoIcon.CROSS.create(), e -> this.close());
-        closeBtn.addClassName("modal-close-btn");
-        getHeader().add(closeBtn);
     }
 
     private void buildForm() {
         addClassName("transaction-details-modal");
         setHeaderTitle("Transaction");
 
-        Button editBtn = new Button("Edit");
-        editBtn.getElement().setProperty("text-decoration", "underline");
+        initializeFields();
+
+        add(
+                detailsTransaction(),
+                detailsProfitLoss(),
+                createInfoItem("Date", formatDate(transaction.getDate())),
+                createInfoItem("Notes", transaction.getNotes())
+        );
+
+        getHeader().add(closeBtn);
+    }
+
+    private void initializeFields() {
+        closeBtn.addClickShortcut(Key.ESCAPE);
+        closeBtn.addClassName("modal-close-btn");
+
+        editBtn.addClassName("edit-btn");
         editBtn.addClickListener(e -> {
             EditTransactionDialog editTransactionDialog = new EditTransactionDialog(assetData,
                     transaction, instrumentsService, instrumentsProvider);
             editTransactionDialog.open();
             this.close();
         });
-
-        add(
-                editBtn,
-                detailsTransaction(),
-                detailsProfitLoss(),
-                createInfoItem("Date", formatDate(transaction.getDate())),
-                createInfoItem("Notes", transaction.getNotes())
-        );
     }
 
     private Div detailsTransaction() {
         String formattedPrice = NumberType.CURRENCY.parse(transaction.getMarketPrice());
+        String formattedAmount = NumberType.AMOUNT.parse(transaction.getOrderQuantity(), transaction.getAsset().getSymbol());
         Paragraph pricePerTokenField = new Paragraph(String.format("(1 %s = %s)", assetData.getSymbol(), formattedPrice));
         Paragraph totalPriceField = new Paragraph(NumberType.CURRENCY.parse(transaction.getOrderTotalCost()));
 
         Div priceDetails = Container.builder()
-                .addComponent(new H4(NumberType.CURRENCY.parse(transaction.getOrderQuantity())))
+                .addComponent(new H4(formattedAmount))
                 .addComponent(new HorizontalLayout(totalPriceField, pricePerTokenField))
                 .build();
 
@@ -85,6 +93,7 @@ public class TransactionDetailsDialog extends Dialog {
                     typeField.addClassName("transaction-profit-loss-badge-label");
                     return typeField;
                 })
+                .addComponent(editBtn)
                 .addComponent(new Container("price-profit-wrapper", symbolImage, priceDetails))
                 .build();
 
@@ -99,6 +108,7 @@ public class TransactionDetailsDialog extends Dialog {
                 .addComponent(() -> {
                     Paragraph p = new Paragraph("Profit/Loss");
                     p.addClassName("transaction-profit-loss-badge-label");
+                    p.getStyle().set("margin-bottom", "5px");
                     return p;
                 })
                 .addComponent(() -> Container.builder()

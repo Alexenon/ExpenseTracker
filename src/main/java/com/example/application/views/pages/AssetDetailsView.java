@@ -330,19 +330,6 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         return new Section(title, body);
     }
 
-    // TODO: Grid with last 10 transactions
-    private Section transactionHistorySection() {
-        H3 title = new H3("Transactions");
-        title.setClassName("section-title");
-
-        Button seeAllTransactionsBtn = new Button("See more transactions");
-
-        TransactionsGrid transactionsGrid = new TransactionsGrid(instrumentsService, instrumentsProvider);
-        transactionsGrid.setItems(instrumentsService.getTransactionsByAsset(assetData.getAsset()));
-        transactionsGrid.setPageSize(10);
-        return new Section(title, transactionsGrid);
-    }
-
     private Div createStatsItem(String labelText, String valueText) {
         Paragraph paragraph = new Paragraph(valueText);
         paragraph.setId(labelText);
@@ -370,6 +357,29 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         return isMarkedAsFavorite
                 ? VaadinIcon.STAR.create()
                 : VaadinIcon.STAR_O.create();
+    }
+
+    private Section transactionHistorySection() {
+        Container header = Container.builder("section-header")
+                .addComponent(() -> {
+                    H3 title = new H3("Transactions");
+                    title.setClassName("section-title");
+                    return title;
+                })
+                .addComponent(() -> {
+                    Button addHoldingBtn = new Button("Add Transaction", LumoIcon.PLUS.create());
+                    addHoldingBtn.setIconAfterText(false);
+                    addHoldingBtn.addClickListener(e -> addTransactionDialog.open());
+                    return addHoldingBtn;
+                })
+                .build();
+
+        Button seeAllTransactionsBtn = new Button("See more transactions");
+
+        TransactionsGrid transactionsGrid = new TransactionsGrid(instrumentsService, instrumentsProvider);
+        transactionsGrid.setItems(instrumentsService.getTransactionsByAsset(assetData.getAsset()));
+        transactionsGrid.setPageSize(10);
+        return new Section(header, transactionsGrid);
     }
 
     private Section createWatchlistSection(AssetWatcher.ActionType actionType) {

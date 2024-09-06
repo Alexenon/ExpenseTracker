@@ -22,6 +22,18 @@ public enum NumberType {
             return NumberFormat.getIntegerInstance().format(value);
         }
     },
+    AMOUNT {
+        @Override
+        public String parse(double value) {
+            return value < 1
+                    ? String.format("%.6f", value)
+                    : String.format("%.2f", value);
+        }
+
+        public String parse(double value, String symbol) {
+            return parse(value) + " " + symbol;
+        }
+    },
     PERCENT {
         @Override
         public String parse(double value) {
