@@ -3,9 +3,7 @@ package com.example.application.views.components;
 
 /*
     TODO:
-     - Think about column header style(maybe align item center)
-     - Add sync button functionality(don't forget about checkbox value)
-    
+     - [?] Add sync button functionality(don't forget about checkbox value)
     _______________________________________________________________________________________________________________________________________
     | Name | Price  | Total Cost  | Amount | Edit | Delete |
     | BTC  | $64000 | $450        | 0.0034 | [⚒]  |  [❌]  |

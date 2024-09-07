@@ -32,7 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.math.BigInteger;
 
 /*
- * TODO: Add Transactions
+ * TODO:
  *  - cursor: not-allowed;    - style something
  * */
 

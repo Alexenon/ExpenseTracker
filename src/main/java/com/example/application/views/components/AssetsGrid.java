@@ -35,10 +35,8 @@ import java.util.function.Consumer;
 
 /*
     TODO:
-     - Think about column header style(maybe align item center)
-     - Add sync button functionality(don't forget about checkbox value)
-     - Display -> Hidden (≈17 assets) <> bottom of grid
-     - Display footer statistics details for certain columns
+     - [?] Think about column header style(maybe align item center)
+     - [?] Display footer statistics details for certain columns
     _______________________________________________________________________________________________________________________________________
     | Name | Price  | 24h Changes | Amount | Avg buy | Avg sell | All-time low | All-time high | Total Worth | Total Invested | Realized  |
     | BTC  | $64000 | 2%          | 0.0034 | $60000  |    -     | $10          | $73000        | $230        | $200           | $30 / 10% |
@@ -103,7 +101,7 @@ public class AssetsGrid extends Div {
             UI.getCurrent().navigate(AssetDetailsView.class, row.getItem().getAsset().getSymbol().toUpperCase());
         });
 
-        grid.getElement().getStyle().set("overflow", "hidden");
+        grid.getElement().executeJs("this.shadowRoot.querySelector('table').style.overflow = 'hidden';");
 
 //        dataProvider.addDataProviderListener(changeEvent -> {
 //            quantityColumn.setFooter("Total Quantity: " + calculateTotalQuantityOnGrid(dataProvider));
@@ -142,22 +140,17 @@ public class AssetsGrid extends Div {
     private void initializeFilteringNonZeroValues() {
         checkbox.addClickListener(e -> {
             if (checkbox.getValue().equals(true)) {
-                dataView.setFilter(assetData -> assetData.getAsset().getAmount() > 0);
+                hideZeroAmountItems();
             } else {
                 resetGridFilteredItems();
             }
 
             updateHiddenRowsCounter();
         });
-
     }
 
-    // TODO: Add sync functionality
-    private void initializeSyncButton() {
-        syncButton.addClickListener(event -> {
-            animateSyncButtonIcon();
-            System.out.println("TODO:");
-        });
+    private void hideZeroAmountItems() {
+        dataView.setFilter(assetData -> assetData.getAsset().getAmount() > 0);
     }
 
     private ComponentRenderer<Container, AssetData> columnNameRenderer() {
@@ -191,6 +184,10 @@ public class AssetsGrid extends Div {
     private NumberRenderer<AssetData> columnPriceRenderer(ValueProvider<AssetData, Number> priceProvider) {
         NumberFormat nf = NumberFormat.getCurrencyInstance(Locale.US);
         return new NumberRenderer<>(priceProvider, nf, "$0.00");
+    }
+
+    private void initializeSyncButton() {
+        syncButton.addClickListener(event -> animateSyncButtonIcon());
     }
 
     private void animateSyncButtonIcon() {

@@ -132,3 +132,19 @@ vaadin-button.modal-close-btn > vaadin-icon {
     cursor: pointer;
 }
 
+#table {
+    right: -15px;
+}
+
+#outerscroller {
+    right: -15px;
+}
+
+#scroller {
+    left: -15px;
+    overflow: hidden;
+}
+
+vaadin-grid {
+    overflow: hidden;
+}

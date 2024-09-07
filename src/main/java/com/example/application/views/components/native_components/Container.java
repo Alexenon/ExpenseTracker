@@ -3,7 +3,6 @@ package com.example.application.views.components.native_components;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.dom.Element;
 
 import java.util.Arrays;
@@ -11,7 +10,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 @Tag(Tag.DIV)
-public class Container extends Div implements FlexComponent {
+public class Container extends Div {
 
     public Container() {
         super();
@@ -90,26 +89,6 @@ public class Container extends Div implements FlexComponent {
             return this;
         }
 
-        public Builder setDisplayType(String type) {
-            instance.getStyle().set("display", type);
-            return this;
-        }
-
-        public Builder setAlignItems(FlexComponent.Alignment alignment) {
-            instance.setAlignItems(alignment);
-            return this;
-        }
-
-        public Builder setJustifyContentMode(JustifyContentMode mode) {
-            instance.setJustifyContentMode(mode);
-            return this;
-        }
-
-        public Builder setAlignSelf(FlexComponent.Alignment alignment) {
-            instance.setAlignSelf(alignment);
-            return this;
-        }
-
         public Builder setStyle(String property, String value) {
             instance.getStyle().set(property, value);
             return this;
@@ -123,11 +102,6 @@ public class Container extends Div implements FlexComponent {
                 instance.getStyle().set(propertyName, propertyValue);
             });
 
-            return this;
-        }
-
-        public Builder setGap(String value) {
-            instance.getStyle().set("gap", value);
             return this;
         }
 
