@@ -6,6 +6,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.dom.Element;
 
+import java.util.Arrays;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -89,13 +90,18 @@ public class Container extends Div implements FlexComponent {
             return this;
         }
 
-        public Builder setDisplay(String type) {
+        public Builder setDisplayType(String type) {
             instance.getStyle().set("display", type);
             return this;
         }
 
         public Builder setAlignItems(FlexComponent.Alignment alignment) {
             instance.setAlignItems(alignment);
+            return this;
+        }
+
+        public Builder setJustifyContentMode(JustifyContentMode mode) {
+            instance.setJustifyContentMode(mode);
             return this;
         }
 
@@ -106,6 +112,17 @@ public class Container extends Div implements FlexComponent {
 
         public Builder setStyle(String property, String value) {
             instance.getStyle().set(property, value);
+            return this;
+        }
+
+        public Builder setStyle(String values) {
+            Arrays.stream(values.split("\n")).forEach(property -> {
+                String[] parts = property.split(":");
+                String propertyName = parts[0];
+                String propertyValue = parts[1].replace(" ", "").replace(";", "");
+                instance.getStyle().set(propertyName, propertyValue);
+            });
+
             return this;
         }
 

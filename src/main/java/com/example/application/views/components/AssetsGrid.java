@@ -1,5 +1,6 @@
 package com.example.application.views.components;
 
+import com.example.application.data.enums.Symbols;
 import com.example.application.data.models.NumberType;
 import com.example.application.data.models.crypto.AssetData;
 import com.example.application.views.components.complex_components.PriceBadge;
@@ -30,13 +31,14 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Consumer;
 
 /*
     TODO:
      - Think about column header style(maybe align item center)
      - Add sync button functionality(don't forget about checkbox value)
-     - Maybe display -> Hidden (≈17)
-
+     - Display -> Hidden (≈17 assets) <> bottom of grid
+     - Display footer statistics details for certain columns
     _______________________________________________________________________________________________________________________________________
     | Name | Price  | 24h Changes | Amount | Avg buy | Avg sell | All-time low | All-time high | Total Worth | Total Invested | Realized  |
     | BTC  | $64000 | 2%          | 0.0034 | $60000  |    -     | $10          | $73000        | $230        | $200           | $30 / 10% |
@@ -49,6 +51,7 @@ public class AssetsGrid extends Div {
     private final Checkbox checkbox = new Checkbox("Hide 0 amount assets");
     private final Button syncButton = new Button("Sync", LumoIcon.RELOAD.create());
     private final GridListDataView<AssetData> dataView = grid.setItems();
+    private final Span hiddenRowsCounterField = new Span();
 
     private MultiSelectComboBox<String> columnSelector;
     private List<Grid.Column<AssetData>> listColumnsToSelect;
@@ -59,10 +62,12 @@ public class AssetsGrid extends Div {
         initializeFilteringBySearch();
         initializeFilteringNonZeroValues();
         initializeSyncButton();
+        updateHiddenRowsCounter();
 
         add(
                 gridHeader(),
-                grid
+                grid,
+                hiddenRowsContainer()
         );
     }
 
@@ -97,6 +102,13 @@ public class AssetsGrid extends Div {
             System.out.println(row.getItem());
             UI.getCurrent().navigate(AssetDetailsView.class, row.getItem().getAsset().getSymbol().toUpperCase());
         });
+
+        grid.getElement().getStyle().set("overflow", "hidden");
+
+//        dataProvider.addDataProviderListener(changeEvent -> {
+//            quantityColumn.setFooter("Total Quantity: " + calculateTotalQuantityOnGrid(dataProvider));
+//            priceColumn.setFooter("Total Price: "+ calculateTotalPriceOnGrid(dataProvider));
+//        });
     }
 
     private void initializeColumnSelector() {
@@ -122,15 +134,22 @@ public class AssetsGrid extends Div {
                 String name = assetData.getName().toLowerCase();
                 return searchTerm.isEmpty() || symbol.contains(searchTerm) || name.contains(searchTerm);
             });
+
+            updateHiddenRowsCounter();
         });
     }
 
     private void initializeFilteringNonZeroValues() {
         checkbox.addClickListener(e -> {
-            dataView.setFilter(checkbox.getValue().equals(true)
-                    ? (assetData -> assetData.getAsset().getAmount() > 0)
-                    : (assetData -> true)); // resets the default grid data
+            if (checkbox.getValue().equals(true)) {
+                dataView.setFilter(assetData -> assetData.getAsset().getAmount() > 0);
+            } else {
+                resetGridFilteredItems();
+            }
+
+            updateHiddenRowsCounter();
         });
+
     }
 
     // TODO: Add sync functionality
@@ -196,6 +215,35 @@ public class AssetsGrid extends Div {
     public void setItems(List<AssetData> assets) {
         Objects.requireNonNull(assets, "Grid items cannot be null");
         grid.setItems(assets);
+    }
+
+    public void addClickSyncBtnListener(Consumer<?> listener) {
+        syncButton.addClickListener(e -> listener.accept(null));
+    }
+
+    private Div hiddenRowsContainer() {
+        return Container.builder()
+                .addComponent(new Paragraph("Hidden"))
+                .addComponent(hiddenRowsCounterField)
+                .addComponent(new Button("Show", e -> resetGridFilteredItems()))
+                .setStyle("""
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        """)
+                .build();
+    }
+
+    private void updateHiddenRowsCounter() {
+        int numberHiddenRows = Symbols.getAll().size() - dataView.getItemCount();
+        hiddenRowsCounterField.setText(String.format("(≈%d)", numberHiddenRows));
+    }
+
+    private void resetGridFilteredItems() {
+        dataView.setFilter(a -> true);
+        checkbox.setValue(false);
+        searchField.setValue("");
+        updateHiddenRowsCounter();
     }
 
 }

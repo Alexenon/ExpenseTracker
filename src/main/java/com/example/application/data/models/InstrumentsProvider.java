@@ -15,12 +15,12 @@ import java.math.BigDecimal;
 import java.util.List;
 
 /*
-* TODO:
-*  - Remove @Getters
-*  - Add update List<AssetData>, List<AssetInfo>
-*  - Rename AssetInfo -> AssetMeta (maybe)
-*  - Remove old implementation of currencies
-* */
+ * TODO:
+ *  - Remove @Getters
+ *  - Add update List<AssetData>, List<AssetInfo>
+ *  - Rename AssetInfo -> AssetMeta (maybe)
+ *  - Remove old implementation of currencies
+ * */
 
 @Component
 public class InstrumentsProvider {
@@ -54,6 +54,10 @@ public class InstrumentsProvider {
 
     private AssetInfo getAssetInfo(String name) {
         return CryptoCompareFetcher.getCoinMetaData(name).getData();
+    }
+
+    public void updateAssetData() {
+        listOfAssetData = initAssetsData();
     }
 
     public List<Currency> updateCurrencyList() {

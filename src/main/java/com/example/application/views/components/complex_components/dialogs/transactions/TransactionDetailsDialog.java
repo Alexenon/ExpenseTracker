@@ -44,7 +44,7 @@ public class TransactionDetailsDialog extends Dialog {
     }
 
     private void buildForm() {
-        addClassName("transaction-details-modal");
+        setClassName("transaction-details-modal");
         setHeaderTitle("Transaction");
 
         initializeFields();
@@ -67,14 +67,23 @@ public class TransactionDetailsDialog extends Dialog {
         editBtn.addClickListener(e -> {
             EditTransactionDialog editTransactionDialog = new EditTransactionDialog(assetData,
                     transaction, instrumentsService, instrumentsProvider);
+
+            editTransactionDialog.addClickSaveBtnListener(dialog -> close());
+            editTransactionDialog.addClickCancelBtnListener(dialog -> {
+                this.close();
+                CryptoTransaction newTransaction = editTransactionDialog.getTransaction();
+                TransactionDetailsDialog newDetailsDialog = new TransactionDetailsDialog(newTransaction,
+                        instrumentsService, instrumentsProvider);
+                newDetailsDialog.open();
+            });
             editTransactionDialog.open();
-            this.close();
         });
     }
 
     private Div detailsTransaction() {
         String formattedPrice = NumberType.CURRENCY.parse(transaction.getMarketPrice());
-        String formattedAmount = NumberType.AMOUNT.parse(transaction.getOrderQuantity(), transaction.getAsset().getSymbol());
+        String formattedAmount = NumberType.AMOUNT.parse(transaction.getOrderQuantity())
+                                 + " " + transaction.getAsset().getSymbol();
         Paragraph pricePerTokenField = new Paragraph(String.format("(1 %s = %s)", assetData.getSymbol(), formattedPrice));
         Paragraph totalPriceField = new Paragraph(NumberType.CURRENCY.parse(transaction.getOrderTotalCost()));
 

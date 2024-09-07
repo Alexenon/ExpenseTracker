@@ -29,10 +29,6 @@ public enum NumberType {
                     ? String.format("%.6f", value)
                     : String.format("%.2f", value);
         }
-
-        public String parse(double value, String symbol) {
-            return parse(value) + " " + symbol;
-        }
     },
     PERCENT {
         @Override

@@ -119,7 +119,7 @@ vaadin-button.no-background {
 }
 
 /*
-    Modal Close Button [X]
+    Modal Form -> close button [X]
 */
 vaadin-button.modal-close-btn {
     color: var(--o40Color);
@@ -129,5 +129,6 @@ vaadin-button.modal-close-btn {
 vaadin-button.modal-close-btn > vaadin-icon {
     height: 40px;
     width: 40px;
+    cursor: pointer;
 }
 

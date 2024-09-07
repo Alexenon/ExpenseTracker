@@ -2,9 +2,9 @@ package com.example.application.views.pages;
 
 import com.example.application.data.models.InstrumentsProvider;
 import com.example.application.data.models.NumberType;
-import com.example.application.services.crypto.AssetWatcherService;
 import com.example.application.services.SecurityService;
 import com.example.application.services.UserService;
+import com.example.application.services.crypto.AssetWatcherService;
 import com.example.application.views.components.AssetsGrid;
 import com.example.application.views.components.complex_components.PriceBadge;
 import com.example.application.views.components.native_components.Container;
@@ -17,18 +17,17 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /*
-* TODO:
-*   - Add SYNC button
-*   - Finish performance Section
-* */
+ * TODO:
+ *   - Finish performance Section
+ * */
 
 @AnonymousAllowed
 @PageTitle("Assets Dashboard")
 @Route(value = "assets-dashboard", layout = MainLayout.class)
 public class AssetsDashboardView extends Main {
 
-    private final InstrumentsProvider instrumentsProvider;
     private final AssetWatcherService assetWatcherService;
+    private final InstrumentsProvider instrumentsProvider;
     private final SecurityService securityService;
     private final UserService userService;
 
@@ -45,16 +44,18 @@ public class AssetsDashboardView extends Main {
         this.securityService = securityService;
         this.userService = userService;
 
-        getStyle().set("margin-top", "100px");
+        initialize();
+        add(performanceSection(), assetsGrid);
+    }
 
-
-        updateAssets();
+    private void initialize() {
+        getStyle().set("margin", "100px 30px 30px 30px");
         assetsGrid.setItems(instrumentsProvider.getListOfAssetData());
+        assetsGrid.addClickSyncBtnListener(grid -> {
+            instrumentsProvider.updateAssetData();
+            assetsGrid.setItems(instrumentsProvider.getListOfAssetData());
+        });
 
-        add(
-                performanceSection(),
-                assetsGrid
-        );
     }
 
     // TODO: Replace with actual values
@@ -96,10 +97,6 @@ public class AssetsDashboardView extends Main {
         valueComponent.addClassName("stats-item");
         div.addClassName("stats-details-wrapper");
         return div;
-    }
-
-    public void updateAssets() {
-
     }
 
 }

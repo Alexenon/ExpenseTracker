@@ -22,6 +22,8 @@ import com.vaadin.flow.data.converter.Converter;
 import com.vaadin.flow.data.converter.StringToDoubleConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.function.Consumer;
+
 public class EditTransactionDialog extends Dialog {
 
     private final AssetData assetData;
@@ -150,5 +152,16 @@ public class EditTransactionDialog extends Dialog {
         return assetSymbolField.getValue() != null ? assetSymbolField.getValue().getPrice() : 0;
     }
 
+    public void addClickSaveBtnListener(Consumer<?> listener) {
+        saveButton.addClickListener(e -> listener.accept(null));
+    }
+
+    public void addClickCancelBtnListener(Consumer<?> listener) {
+        cancelButton.addClickListener(e -> listener.accept(null));
+    }
+
+    public CryptoTransaction getTransaction() {
+        return transaction;
+    }
 
 }

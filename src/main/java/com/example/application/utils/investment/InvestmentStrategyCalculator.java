@@ -189,7 +189,6 @@ public class InvestmentStrategyCalculator {
                 .collect(Collectors.toCollection(LinkedList::new));
     }
 
-    // TODO: Think more about this
     private static List<Double> customStrategy(double startPrice, double endPrice, double decreasePriceStep, double increasePriceStep) {
         return null;
     }
