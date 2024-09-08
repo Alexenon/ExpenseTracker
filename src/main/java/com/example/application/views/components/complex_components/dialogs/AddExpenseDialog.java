@@ -5,7 +5,6 @@ import com.example.application.data.requests.ExpenseRequest;
 import com.example.application.entities.Expense;
 import com.example.application.services.CategoryService;
 import com.example.application.services.ExpenseService;
-import com.example.application.utils.ExpenseConvertor;
 import com.example.application.views.components.utils.HasNotifications;
 import com.example.application.views.pages.ExpensesView;
 import com.vaadin.flow.component.Component;
@@ -40,7 +39,6 @@ public class AddExpenseDialog extends Dialog implements HasNotifications {
 
     private final ExpenseService expenseService;
     private final CategoryService categoryService;
-    private final ExpenseConvertor expenseConvertor;
     private final DatePicker.DatePickerI18n singleFormatI18n;
 
     private final TextField nameField = new TextField("Expense Name");
@@ -58,11 +56,9 @@ public class AddExpenseDialog extends Dialog implements HasNotifications {
     @Autowired
     public AddExpenseDialog(ExpenseService expenseService,
                             CategoryService categoryService,
-                            ExpenseConvertor expenseConvertor,
                             DatePicker.DatePickerI18n singleFormatI18n) {
         this.expenseService = expenseService;
         this.categoryService = categoryService;
-        this.expenseConvertor = expenseConvertor;
         this.singleFormatI18n = singleFormatI18n;
 
         setHeaderTitle("Add New Expense");
@@ -170,7 +166,7 @@ public class AddExpenseDialog extends Dialog implements HasNotifications {
     }
 
     private Expense getExpenseFromBinder() {
-        return expenseConvertor.convertToExpense(binder.getBean());
+        return expenseService.convertToExpense(binder.getBean());
     }
 
     @Override

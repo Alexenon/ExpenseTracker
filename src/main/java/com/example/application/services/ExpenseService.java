@@ -2,8 +2,12 @@ package com.example.application.services;
 
 import com.example.application.data.dtos.ExpenseDTO;
 import com.example.application.data.enums.Timestamps;
+import com.example.application.data.requests.ExpenseRequest;
 import com.example.application.entities.Expense;
+import com.example.application.entities.User;
 import com.example.application.repositories.ExpenseRepository;
+import com.example.application.utils.ExpenseConvertor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -12,11 +16,11 @@ import java.util.List;
 @Service
 public class ExpenseService {
 
-    private final ExpenseRepository repository;
+    @Autowired
+    private ExpenseRepository repository;
 
-    public ExpenseService(ExpenseRepository repository) {
-        this.repository = repository;
-    }
+    @Autowired
+    private ExpenseConvertor expenseConvertor;
 
     public List<ExpenseDTO> getAllExpenses() {
         return repository.getAll();
@@ -87,6 +91,14 @@ public class ExpenseService {
 
     public List<Object[]> getMonthlyCategoriesTotalSum(String userEmailOrUsername, int year, int month) {
         return repository.findMonthlyCategoriesTotalSum(userEmailOrUsername, year, month);
+    }
+
+    public Expense convertToExpense(ExpenseRequest expenseRequest) {
+        return expenseConvertor.convertToExpense(expenseRequest);
+    }
+
+    public Expense convertToExpense(ExpenseRequest expenseRequest, User user) {
+        return expenseConvertor.convertToExpense(expenseRequest, user);
     }
 
 }

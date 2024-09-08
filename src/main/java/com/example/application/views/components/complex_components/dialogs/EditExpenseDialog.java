@@ -6,7 +6,6 @@ import com.example.application.data.requests.ExpenseRequest;
 import com.example.application.entities.Expense;
 import com.example.application.services.CategoryService;
 import com.example.application.services.ExpenseService;
-import com.example.application.utils.ExpenseConvertor;
 import com.example.application.views.components.utils.HasNotifications;
 import com.example.application.views.pages.ExpensesView;
 import com.vaadin.flow.component.Component;
@@ -40,7 +39,6 @@ public class EditExpenseDialog extends Dialog implements HasNotifications {
     private final ExpenseDTO expenseDTO;
     private final ExpenseService expenseService;
     private final CategoryService categoryService;
-    private final ExpenseConvertor expenseConvertor;
     private final DatePicker.DatePickerI18n singleFormatI18n;
 
     private final TextField nameField = new TextField("Expense Name");
@@ -59,12 +57,10 @@ public class EditExpenseDialog extends Dialog implements HasNotifications {
     public EditExpenseDialog(ExpenseDTO expenseDTO,
                              ExpenseService expenseService,
                              CategoryService categoryService,
-                             ExpenseConvertor expenseConvertor,
                              DatePicker.DatePickerI18n singleFormatI18n) {
         this.expenseDTO = expenseDTO;
         this.expenseService = expenseService;
         this.categoryService = categoryService;
-        this.expenseConvertor = expenseConvertor;
         this.singleFormatI18n = singleFormatI18n;
 
         setHeaderTitle("Edit Expense");
@@ -182,7 +178,7 @@ public class EditExpenseDialog extends Dialog implements HasNotifications {
     }
 
     private Expense getExpenseFromBinder() {
-        Expense expense = expenseConvertor.convertToExpense(binder.getBean());
+        Expense expense = expenseService.convertToExpense(binder.getBean());
         expense.setId(expenseDTO.getId()); // ID is set for replacing existing expense with this one
         return expense;
     }

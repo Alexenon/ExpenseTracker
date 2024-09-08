@@ -38,7 +38,6 @@ public class ExpensesView extends Main {
     private final ExpenseService expenseService;
     private final CategoryService categoryService;
     private final SecurityService securityService;
-    private final ExpenseConvertor expenseConvertor;
     private final DatePicker.DatePickerI18n singleFormatI18n;
 
     private final TextField filterText = new TextField();
@@ -54,7 +53,6 @@ public class ExpensesView extends Main {
         this.expenseService = expenseService;
         this.categoryService = categoryService;
         this.securityService = securityService;
-        this.expenseConvertor = expenseConvertor;
         this.singleFormatI18n = singleFormatI18n;
         addClassName("page-content");
         add(
@@ -74,7 +72,7 @@ public class ExpensesView extends Main {
         addBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         addBtn.addClickListener(event -> {
             logger.info("Clicked on Add button");
-            AddExpenseDialog dialog = new AddExpenseDialog(expenseService, categoryService, expenseConvertor, singleFormatI18n);
+            AddExpenseDialog dialog = new AddExpenseDialog(expenseService, categoryService, singleFormatI18n);
             dialog.open();
             dialog.addClickSaveBtnListener(grid -> updateGrid());
         });
@@ -101,7 +99,6 @@ public class ExpensesView extends Main {
                                 expense,
                                 expenseService,
                                 categoryService,
-                                expenseConvertor,
                                 singleFormatI18n
                         );
                         dialog.open();
