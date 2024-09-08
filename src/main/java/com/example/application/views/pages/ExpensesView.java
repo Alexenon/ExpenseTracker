@@ -1,6 +1,7 @@
 package com.example.application.views.pages;
 
 import com.example.application.data.dtos.ExpenseDTO;
+import com.example.application.services.CategoryService;
 import com.example.application.services.ExpenseService;
 import com.example.application.services.SecurityService;
 import com.example.application.utils.ExpenseConvertor;
@@ -35,6 +36,7 @@ public class ExpensesView extends Main {
     private static final Logger logger = LoggerFactory.getLogger(ExpensesView.class);
 
     private final ExpenseService expenseService;
+    private final CategoryService categoryService;
     private final SecurityService securityService;
     private final ExpenseConvertor expenseConvertor;
     private final DatePicker.DatePickerI18n singleFormatI18n;
@@ -45,10 +47,12 @@ public class ExpensesView extends Main {
     @Autowired
     public ExpensesView(
             ExpenseService expenseService,
+            CategoryService categoryService,
             SecurityService securityService,
             ExpenseConvertor expenseConvertor,
             DatePicker.DatePickerI18n singleFormatI18n) {
         this.expenseService = expenseService;
+        this.categoryService = categoryService;
         this.securityService = securityService;
         this.expenseConvertor = expenseConvertor;
         this.singleFormatI18n = singleFormatI18n;
@@ -70,7 +74,7 @@ public class ExpensesView extends Main {
         addBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         addBtn.addClickListener(event -> {
             logger.info("Clicked on Add button");
-            AddExpenseDialog dialog = new AddExpenseDialog(expenseService, expenseConvertor, singleFormatI18n);
+            AddExpenseDialog dialog = new AddExpenseDialog(expenseService, categoryService, expenseConvertor, singleFormatI18n);
             dialog.open();
             dialog.addClickSaveBtnListener(grid -> updateGrid());
         });
@@ -96,6 +100,7 @@ public class ExpensesView extends Main {
                         EditExpenseDialog dialog = new EditExpenseDialog(
                                 expense,
                                 expenseService,
+                                categoryService,
                                 expenseConvertor,
                                 singleFormatI18n
                         );

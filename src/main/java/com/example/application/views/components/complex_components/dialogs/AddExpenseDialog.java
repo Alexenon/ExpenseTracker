@@ -1,9 +1,9 @@
 package com.example.application.views.components.complex_components.dialogs;
 
-import com.example.application.data.enums.Categories;
 import com.example.application.data.enums.Timestamps;
 import com.example.application.data.requests.ExpenseRequest;
 import com.example.application.entities.Expense;
+import com.example.application.services.CategoryService;
 import com.example.application.services.ExpenseService;
 import com.example.application.utils.ExpenseConvertor;
 import com.example.application.views.components.utils.HasNotifications;
@@ -39,6 +39,7 @@ public class AddExpenseDialog extends Dialog implements HasNotifications {
     private static final Logger logger = LoggerFactory.getLogger(AddExpenseDialog.class);
 
     private final ExpenseService expenseService;
+    private final CategoryService categoryService;
     private final ExpenseConvertor expenseConvertor;
     private final DatePicker.DatePickerI18n singleFormatI18n;
 
@@ -56,9 +57,11 @@ public class AddExpenseDialog extends Dialog implements HasNotifications {
 
     @Autowired
     public AddExpenseDialog(ExpenseService expenseService,
+                            CategoryService categoryService,
                             ExpenseConvertor expenseConvertor,
                             DatePicker.DatePickerI18n singleFormatI18n) {
         this.expenseService = expenseService;
+        this.categoryService = categoryService;
         this.expenseConvertor = expenseConvertor;
         this.singleFormatI18n = singleFormatI18n;
 
@@ -117,14 +120,13 @@ public class AddExpenseDialog extends Dialog implements HasNotifications {
 
     private void addStyleToElements() {
         List<String> timestampNames = Arrays.stream(Timestamps.values()).map(Timestamps::toString).toList();
-        List<String> categoryNames = Arrays.stream(Categories.values()).map(Categories::toString).toList();
 
         intervalField.setLabel("Interval");
         intervalField.setItems(timestampNames);
         intervalField.setHelperText("Select how often this expense will be triggered");
         intervalField.addValueChangeListener(e -> expireDateField.setEnabled(!Objects.equals(e.getValue(), "ONCE")));
 
-        categoryField.setItems(categoryNames);
+        categoryField.setItems(categoryService.getAllCategoryNames());
         categoryField.setHelperText("Select the category which fits this expense");
         amountField.setSuffixComponent(new Span("MDL"));
 
