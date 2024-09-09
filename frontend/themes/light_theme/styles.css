@@ -90,7 +90,9 @@ vaadin-button.no-background {
 }
 
 .page-content {
-    margin-top: 80px;
+    height: 100%;
+    margin-top: 60px;
+    padding: 50px;
 }
 
 

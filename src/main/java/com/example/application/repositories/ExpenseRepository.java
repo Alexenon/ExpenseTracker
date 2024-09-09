@@ -14,51 +14,46 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 
     @Query(value = """
             SELECT E.id, E.name, E.amount, C.name as 'Category',
-                E.description, T.name as 'Timestamp', E.start_date
+                E.description, E.timestamp, E.start_date
             FROM expense E
             INNER JOIN category C ON C.id = E.category_id
-            INNER JOIN timestamp T ON T.id = E.timestamp_id
             """, nativeQuery = true)
     List<ExpenseDTO> getAll();
 
     // TODO: ADD VIEW TO EXCLUDE ADDING ALIASES EVERYWHERE
     @Query(value = """
             SELECT E.id, E.name, E.amount, C.name as 'Category',
-                E.description, T.name as 'Timestamp', E.start_date as 'startDate', E.expire_date as 'expireDate'
+                E.description, E.timestamp, E.start_date as 'startDate', E.expire_date as 'expireDate'
             FROM expense E
                 INNER JOIN users U ON U.id = E.user_id
                 INNER JOIN category C ON C.id = E.category_id
-                INNER JOIN timestamp T ON T.id = E.timestamp_id
             WHERE U.username = :userEmailOrUsername OR U.email = :userEmailOrUsername
             """, nativeQuery = true)
     List<ExpenseDTO> getAll(@Param("userEmailOrUsername") String userEmailOrUsername);
 
     @Query(value = """
             SELECT E.id, E.name, E.amount, C.name AS 'Category',
-                E.description, T.name AS 'Timestamp', E.start_date
+                E.description, E.timestamp, E.start_date
             FROM expense E
             INNER JOIN category C ON C.id = E.category_id
-            INNER JOIN timestamp T ON T.id = E.timestamp_id
             WHERE MONTH(E.start_date) = :month
             """, nativeQuery = true)
     List<ExpenseDTO> findExpensesPerMonth(@Param("month") int month);
 
     @Query(value = """
             SELECT E.id, E.name, E.amount, C.name AS 'Category',
-                E.description, T.name AS 'Timestamp', E.start_date
+                E.description, E.timestamp, E.start_date
             FROM expense E
             INNER JOIN category C ON C.id = E.category_id
-            INNER JOIN timestamp T ON T.id = E.timestamp_id
             WHERE YEAR(E.start_date) = :year
             """, nativeQuery = true)
     List<ExpenseDTO> findExpensesPerYear(@Param("year") int year);
 
     @Query(value = """
             SELECT E.id, E.name, E.amount, C.name AS 'Category',
-                E.description, T.name AS 'Timestamp', E.start_date
+                E.description, E.timestamp, E.start_date
             FROM expense E
             INNER JOIN category C ON C.id = E.category_id
-            INNER JOIN timestamp T ON T.id = E.timestamp_id
             WHERE C.name LIKE CONCAT('%', :categoryName, '%')
             """, nativeQuery = true)
     List<ExpenseDTO> findByCategory(@Param("categoryName") String categoryName);
@@ -66,9 +61,9 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
     @Query(value = """
             SELECT C.name, SUM(
             	CASE
-            		WHEN T.name = 'DAILY' THEN FLOOR(E.amount * days)
-            		WHEN T.name = 'WEEKLY' THEN FLOOR(E.amount * (days / 7))
-            		WHEN T.name = 'MONTHLY' THEN FLOOR(E.amount)
+            		WHEN E.timestamp = 'DAILY' THEN FLOOR(E.amount * days)
+            		WHEN E.timestamp = 'WEEKLY' THEN FLOOR(E.amount * (days / 7))
+            		WHEN E.timestamp = 'MONTHLY' THEN FLOOR(E.amount)
             		ELSE FLOOR(E.amount)
             	END
             ) as totalSpentPerMonth
@@ -78,11 +73,10 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
                 FROM expense E
             ) AS E
             INNER JOIN users U ON U.id = E.user_id
-            INNER JOIN timestamp T ON T.id = E.timestamp_id
             INNER JOIN category C ON C.id = E.category_id
             WHERE
                 (U.username = ?1 OR U.email = ?1)
-                AND NOT (T.name = 'ONCE' AND MONTH(E.start_date) != ?3)
+                AND NOT (E.timestamp = 'ONCE' AND MONTH(E.start_date) != ?3)
                 AND (E.expire_date IS NULL OR E.expire_date > DATE_FORMAT(CONCAT(?2, '-', ?3, '-01'), '%Y-%m-%d'))
             GROUP BY C.name
             """, nativeQuery = true)
@@ -91,10 +85,10 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
     @Query(value = """
         SELECT C.name, SUM(
             CASE
-                WHEN T.name = 'DAILY' THEN E.amount * DAYOFYEAR(LAST_DAY(year_date))
-                WHEN T.name = 'WEEKLY' THEN E.amount * FLOOR(DAYOFYEAR(LAST_DAY(year_date)) / 7)
-                WHEN T.name = 'MONTHLY' THEN E.amount * 12
-                WHEN T.name = 'YEARLY' THEN E.amount
+                WHEN E.timestamp = 'DAILY' THEN E.amount * DAYOFYEAR(LAST_DAY(year_date))
+                WHEN E.timestamp = 'WEEKLY' THEN E.amount * FLOOR(DAYOFYEAR(LAST_DAY(year_date)) / 7)
+                WHEN E.timestamp = 'MONTHLY' THEN E.amount * 12
+                WHEN E.timestamp = 'YEARLY' THEN E.amount
                 ELSE E.amount
             END
         ) as totalSpent
@@ -105,7 +99,6 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
         ) AS E
             INNER JOIN users U ON U.id = E.user_id
             INNER JOIN category C ON C.id = E.category_id
-            INNER JOIN timestamp T ON T.id = E.timestamp_id
         WHERE (E.expire_date IS NULL OR E.expire_date > year_date)
             AND (U.username = ?1 OR U.email = ?1)
         GROUP BY C.name
@@ -115,16 +108,15 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
     @Query(value = """
             SELECT C.name, SUM(
                 CASE
-                    WHEN T.name = 'DAILY' THEN E.amount * DAY(LAST_DAY(month_date))
-                    WHEN T.name = 'WEEKLY' THEN E.amount * FLOOR(DAY(LAST_DAY(month_date)) / 7)
-                    WHEN T.name = 'MONTHLY' THEN E.amount
+                    WHEN E.timestamp = 'DAILY' THEN E.amount * DAY(LAST_DAY(month_date))
+                    WHEN E.timestamp = 'WEEKLY' THEN E.amount * FLOOR(DAY(LAST_DAY(month_date)) / 7)
+                    WHEN E.timestamp = 'MONTHLY' THEN E.amount
                     ELSE E.amount
                 END
             ) as totalSpent
             FROM expense E
                 INNER JOIN users U ON U.id = E.user_id
                 INNER JOIN category C ON C.id = E.category_id
-                INNER JOIN timestamp T ON T.id = E.timestamp_id
             WHERE (E.expire_date IS NULL OR E.expire_date > month_date)
                 AND (U.username = ?1 OR U.email = ?1)
             GROUP BY C.name
