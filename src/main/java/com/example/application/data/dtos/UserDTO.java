@@ -1,8 +1,8 @@
 package com.example.application.data.dtos;
 
-import com.example.application.entities.Role;
+import com.example.application.entities.User;
 
-import java.util.List;
+import java.util.Set;
 
 public interface UserDTO {
     Long getId();
@@ -13,5 +13,5 @@ public interface UserDTO {
 
     String getEmail();
 
-    List<Role> getRoles();
+    Set<User.Role> getRoles();
 }

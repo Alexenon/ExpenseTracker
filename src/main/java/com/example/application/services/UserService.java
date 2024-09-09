@@ -2,9 +2,8 @@ package com.example.application.services;
 
 import com.example.application.data.requests.RegisterUserRequest;
 import com.example.application.entities.User;
-import com.example.application.utils.exceptions.UserExistException;
-import com.example.application.repositories.RoleRepository;
 import com.example.application.repositories.UserRepository;
+import com.example.application.utils.exceptions.UserExistException;
 import jakarta.transaction.Transactional;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,19 +12,17 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.Collections;
 import java.util.Optional;
 
 @Service
 public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -55,7 +52,7 @@ public class UserService implements UserDetailsService {
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 user.getPassword(),
-                user.getRoles().stream().map(role -> new SimpleGrantedAuthority(role.getName())).toList()
+                user.getRoles().stream().map(role -> new SimpleGrantedAuthority(role.name())).toList()
         );
     }
 
@@ -68,7 +65,7 @@ public class UserService implements UserDetailsService {
         user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setRoles(List.of(roleRepository.findByName("ROLE_USER").orElseThrow()));
+        user.setRoles(Collections.singleton(User.Role.USER_ROLE));
 
         return createNewUser(user);
     }
@@ -82,7 +79,7 @@ public class UserService implements UserDetailsService {
         }
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setRoles(List.of(roleRepository.findByName("ROLE_USER").orElseThrow()));
+        user.setRoles(Collections.singleton(User.Role.USER_ROLE));
         user.setEmail(user.getEmail().toLowerCase());
 
         return userRepository.save(user);
