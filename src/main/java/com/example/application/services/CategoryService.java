@@ -1,6 +1,5 @@
 package com.example.application.services;
 
-import com.example.application.data.enums.Categories;
 import com.example.application.entities.Category;
 import com.example.application.repositories.CategoryRepository;
 import org.springframework.stereotype.Service;
@@ -20,12 +19,12 @@ public class CategoryService {
         return repository.findAll();
     }
 
-    public Category getCategoryByName(String name) {
-        return repository.getByName(name);
+    public List<String> getAllCategoryNames() {
+        return getAllCategories().stream().map(Category::getName).toList();
     }
 
-    public Category getCategory(Categories category) {
-        return repository.getByName(category.name());
+    public Category getCategoryByName(String name) {
+        return repository.getByName(name);
     }
 
 }

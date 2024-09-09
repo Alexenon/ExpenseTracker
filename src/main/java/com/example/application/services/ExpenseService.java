@@ -1,9 +1,12 @@
 package com.example.application.services;
 
 import com.example.application.data.dtos.ExpenseDTO;
-import com.example.application.data.enums.Timestamps;
+import com.example.application.data.requests.ExpenseRequest;
 import com.example.application.entities.Expense;
+import com.example.application.entities.User;
 import com.example.application.repositories.ExpenseRepository;
+import com.example.application.utils.ExpenseConvertor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -12,11 +15,11 @@ import java.util.List;
 @Service
 public class ExpenseService {
 
-    private final ExpenseRepository repository;
+    @Autowired
+    private ExpenseRepository repository;
 
-    public ExpenseService(ExpenseRepository repository) {
-        this.repository = repository;
-    }
+    @Autowired
+    private ExpenseConvertor expenseConvertor;
 
     public List<ExpenseDTO> getAllExpenses() {
         return repository.getAll();
@@ -27,8 +30,14 @@ public class ExpenseService {
     }
 
     public Expense saveExpense(Expense expense) {
-        updateExpireDateIfNeeded(expense);
+        replaceExpireDateForOneTimeExpenses(expense);
+        System.out.println("Saving " + expense);
+
         return repository.save(expense);
+    }
+
+    public void saveExpenses(List<Expense> expenseList) {
+        expenseList.forEach(this::saveExpense);
     }
 
     public void updateExpense(Expense expense) {
@@ -43,22 +52,21 @@ public class ExpenseService {
         expenseToUpdate.setTimestamp(expense.getTimestamp());
         expenseToUpdate.setCategory(expense.getCategory());
 
-        updateExpireDateIfNeeded(expense);
+        replaceExpireDateForOneTimeExpenses(expense);
 
         repository.save(expenseToUpdate);
     }
 
-    public void saveExpenses(List<Expense> expenseList) {
-        expenseList.forEach(this::updateExpireDateIfNeeded);
-        repository.saveAll(expenseList);
-    }
-
-    private void updateExpireDateIfNeeded(Expense expense) {
-        String timestampName = expense.getTimestamp().getName();
-        if (timestampName.equals(Timestamps.ONCE.toString())) {
-            LocalDate startDate = expense.getStartDate();
-            expense.setExpireDate(startDate.plusDays(1));
+    /**
+     * Updates the expireDate to be startDate + 1 day, if the expense timestamp is ONCE
+     */
+    private void replaceExpireDateForOneTimeExpenses(Expense expense) {
+        if (!expense.getTimestamp().equals(Expense.Timestamp.ONCE)) {
+            return;
         }
+
+        LocalDate startDate = expense.getStartDate();
+        expense.setExpireDate(startDate.plusDays(1));
     }
 
     public void deleteExpense(Expense expense) {
@@ -87,6 +95,14 @@ public class ExpenseService {
 
     public List<Object[]> getMonthlyCategoriesTotalSum(String userEmailOrUsername, int year, int month) {
         return repository.findMonthlyCategoriesTotalSum(userEmailOrUsername, year, month);
+    }
+
+    public Expense convertToExpense(ExpenseRequest expenseRequest) {
+        return expenseConvertor.convertToExpense(expenseRequest);
+    }
+
+    public Expense convertToExpense(ExpenseRequest expenseRequest, User user) {
+        return expenseConvertor.convertToExpense(expenseRequest, user);
     }
 
 }
