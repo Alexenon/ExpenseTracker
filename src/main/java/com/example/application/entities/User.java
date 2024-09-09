@@ -22,10 +22,10 @@ public class User {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "email", unique = true)
+    @Column(name = "email", unique = true, nullable = false)
     private String email;
 
-    @Column(name = "role")
+    @Column(name = "role", nullable = false)
     @Enumerated(EnumType.STRING)
     @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
