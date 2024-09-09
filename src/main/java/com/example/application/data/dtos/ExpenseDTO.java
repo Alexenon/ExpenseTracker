@@ -1,5 +1,6 @@
 package com.example.application.data.dtos;
 
+import com.example.application.entities.Expense;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.time.LocalDate;
@@ -15,7 +16,7 @@ public interface ExpenseDTO {
 
     String getDescription();
 
-    String getTimestamp();
+    Expense.Timestamp getTimestamp();
 
     @JsonFormat(pattern = "yyyy-MM-dd")
     LocalDate getStartDate();

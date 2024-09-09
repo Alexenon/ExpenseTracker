@@ -2,30 +2,20 @@ package com.example.application.entities;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
+import lombok.ToString;
 
+@Data
 @Entity
-@NoArgsConstructor
-@AllArgsConstructor
+@ToString
 public class Category {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Getter
-    @Setter
     private long id;
 
-    @Getter
-    @Setter
-    @JsonProperty(required = true)
     @Column(unique = true, nullable = false)
+    @JsonProperty(required = true)
     private String name;
 
-    @Override
-    public String toString() {
-        return name;
-    }
 }

@@ -1,6 +1,6 @@
 package com.example.application.data.requests;
 
-import com.example.application.entities.Role;
+import com.example.application.entities.User;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
@@ -21,5 +21,5 @@ public class UserRequest {
     @NotNull
     private String email;
 
-    private Collection<Role> roles;
+    private Collection<User.Role> roles;
 }
