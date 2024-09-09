@@ -2,15 +2,16 @@ package com.example.application.entities;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.List;
 
+@Data
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,62 +19,59 @@ public class Expense {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Getter
-    @Setter
     private long id;
 
-    @NotNull
-    @Getter
-    @Setter
+    @Column(name = "name", nullable = false)
     private String name;
 
-    @Getter
-    @Setter
+    @Column(name = "amount", nullable = false)
     private double amount;
 
-    @Getter
-    @Setter
+    @Column(name = "description")
     private String description;
 
-    @Getter
-    @Setter
+    @Column(name = "start_date", nullable = false)
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate startDate;
+    private LocalDate startDate = LocalDate.now();
 
-    @Getter
-    @Setter
+    @Column(name = "expire_date")
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate expireDate;
 
-    @NotNull
-    @ManyToOne
-    @JoinColumn(name = "timestamp_id")
-    @Getter
-    @Setter
-    private Timestamp timestamp;
+    @Column(name = "timestamp", unique = true, nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Timestamp timestamp = Timestamp.ONCE;
 
-    @NotNull
     @ManyToOne
-    @JoinColumn(name = "category_id")
-    @Getter
-    @Setter
+    @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
-    @NotNull
     @ManyToOne
-    @JoinColumn(name = "user_id")
-    @Getter
-    @Setter
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @Override
     public String toString() {
         DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         return String.format(
-                "%d, %s, %f, %s, %s, %s, %s, %s %s",
-                id, name, amount, timestamp.getName(), category.getName(),
-                dateFormat.format(startDate), description, dateFormat.format(expireDate), user.getUsername()
+                "Expense{%d, %s, %f, %s, %s, %s, %s, %s %s}",
+                id, name, amount, timestamp, category.getName(),
+                dateFormat.format(startDate),
+                (expireDate != null) ? dateFormat.format(expireDate) : "N/A",
+                description, user.getUsername()
         );
+    }
+
+    public enum Timestamp {
+        ONCE,
+        DAILY,
+        WEEKLY,
+        MONTHLY,
+        YEARLY;
+
+        public static List<String> getTimestampNames() {
+            return Arrays.stream(values()).map(Timestamp::name).toList();
+        }
     }
 
 }

@@ -1,7 +1,6 @@
 package com.example.application.services;
 
 import com.example.application.data.dtos.ExpenseDTO;
-import com.example.application.data.enums.Timestamps;
 import com.example.application.data.requests.ExpenseRequest;
 import com.example.application.entities.Expense;
 import com.example.application.entities.User;
@@ -31,8 +30,14 @@ public class ExpenseService {
     }
 
     public Expense saveExpense(Expense expense) {
-        updateExpireDateIfNeeded(expense);
+        replaceExpireDateForOneTimeExpenses(expense);
+        System.out.println("Saving " + expense);
+
         return repository.save(expense);
+    }
+
+    public void saveExpenses(List<Expense> expenseList) {
+        expenseList.forEach(this::saveExpense);
     }
 
     public void updateExpense(Expense expense) {
@@ -47,22 +52,21 @@ public class ExpenseService {
         expenseToUpdate.setTimestamp(expense.getTimestamp());
         expenseToUpdate.setCategory(expense.getCategory());
 
-        updateExpireDateIfNeeded(expense);
+        replaceExpireDateForOneTimeExpenses(expense);
 
         repository.save(expenseToUpdate);
     }
 
-    public void saveExpenses(List<Expense> expenseList) {
-        expenseList.forEach(this::updateExpireDateIfNeeded);
-        repository.saveAll(expenseList);
-    }
-
-    private void updateExpireDateIfNeeded(Expense expense) {
-        String timestampName = expense.getTimestamp().getName();
-        if (timestampName.equals(Timestamps.ONCE.toString())) {
-            LocalDate startDate = expense.getStartDate();
-            expense.setExpireDate(startDate.plusDays(1));
+    /**
+     * Updates the expireDate to be startDate + 1 day, if the expense timestamp is ONCE
+     */
+    private void replaceExpireDateForOneTimeExpenses(Expense expense) {
+        if (!expense.getTimestamp().equals(Expense.Timestamp.ONCE)) {
+            return;
         }
+
+        LocalDate startDate = expense.getStartDate();
+        expense.setExpireDate(startDate.plusDays(1));
     }
 
     public void deleteExpense(Expense expense) {

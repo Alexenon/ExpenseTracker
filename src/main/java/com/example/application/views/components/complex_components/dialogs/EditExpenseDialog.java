@@ -1,7 +1,6 @@
 package com.example.application.views.components.complex_components.dialogs;
 
 import com.example.application.data.dtos.ExpenseDTO;
-import com.example.application.data.enums.Timestamps;
 import com.example.application.data.requests.ExpenseRequest;
 import com.example.application.entities.Expense;
 import com.example.application.services.CategoryService;
@@ -28,8 +27,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
 import java.util.function.Consumer;
 
 public class EditExpenseDialog extends Dialog implements HasNotifications {
@@ -44,7 +41,7 @@ public class EditExpenseDialog extends Dialog implements HasNotifications {
     private final TextField nameField = new TextField("Expense Name");
     private final TextArea descriptionField = new TextArea("Description");
     private final NumberField amountField = new NumberField("Amount");
-    private final Select<String> intervalField = new Select<>();
+    private final Select<Expense.Timestamp> timestampField = new Select<>();
     private final ComboBox<String> categoryField = new ComboBox<>("Category");
     private final DatePicker startDateField = new DatePicker("Start Date");
     private final DatePicker expireDateField = new DatePicker("Expire Date");
@@ -71,7 +68,7 @@ public class EditExpenseDialog extends Dialog implements HasNotifications {
     }
 
     private VerticalLayout createDialogLayout() {
-        Component[] components = {nameField, descriptionField, amountField, categoryField, startDateField, intervalField, expireDateField};
+        Component[] components = {nameField, descriptionField, amountField, categoryField, startDateField, timestampField, expireDateField};
         VerticalLayout dialogLayout = new VerticalLayout(components);
         dialogLayout.setPadding(false);
         dialogLayout.setSpacing(false);
@@ -99,9 +96,9 @@ public class EditExpenseDialog extends Dialog implements HasNotifications {
                 .asRequired("Please fill this field")
                 .bind(ExpenseRequest::getCategoryName, ExpenseRequest::setCategoryName);
 
-        binder.forField(intervalField)
+        binder.forField(timestampField)
                 .asRequired("Please fill this field")
-                .bind(ExpenseRequest::getTimestampName, ExpenseRequest::setTimestampName);
+                .bind(ExpenseRequest::getTimestamp, ExpenseRequest::setTimestamp);
 
         binder.forField(startDateField)
                 .asRequired("Please fill this field")
@@ -118,12 +115,13 @@ public class EditExpenseDialog extends Dialog implements HasNotifications {
     }
 
     private void addStyleToElements() {
-        List<String> timestampNames = Arrays.stream(Timestamps.values()).map(Timestamps::toString).toList();
-
-        intervalField.setLabel("Interval");
-        intervalField.setItems(timestampNames);
-        intervalField.setHelperText("Select how often this expense will be triggered");
-        intervalField.addValueChangeListener(e -> expireDateField.setEnabled(!Objects.equals(e.getValue(), "ONCE")));
+        timestampField.setLabel("Interval");
+        timestampField.setItems(Expense.Timestamp.values());
+        timestampField.setHelperText("Select how often this expense will be triggered");
+        timestampField.addValueChangeListener(timestamp -> {
+            boolean timestampIsNotOnce = !timestamp.getValue().equals(Expense.Timestamp.ONCE);
+            expireDateField.setEnabled(timestampIsNotOnce);
+        });
 
         categoryField.setItems(categoryService.getAllCategoryNames());
         categoryField.setHelperText("Select the category which fits this expense");
@@ -156,7 +154,7 @@ public class EditExpenseDialog extends Dialog implements HasNotifications {
         amountField.setValue(expenseDTO.getAmount());
         categoryField.setValue(expenseDTO.getCategory());
         startDateField.setValue(expenseDTO.getStartDate());
-        intervalField.setValue(expenseDTO.getTimestamp());
+        timestampField.setValue(expenseDTO.getTimestamp());
         expireDateField.setValue(expenseDTO.getExpireDate());
     }
 
