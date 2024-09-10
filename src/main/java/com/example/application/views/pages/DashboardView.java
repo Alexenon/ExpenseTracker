@@ -1,12 +1,14 @@
 package com.example.application.views.pages;
 
-import com.example.application.data.dtos.projections.ExpensesSumGroupedByCategory;
+import com.example.application.data.dtos.projections.MonthlyExpensesProjection;
+import com.example.application.data.dtos.projections.TotalMonthlyExpensesSumGroupedByCategory;
 import com.example.application.services.ExpenseService;
 import com.example.application.services.SecurityService;
 import com.example.application.views.layouts.MainLayout;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.component.html.Paragraph;
@@ -19,7 +21,12 @@ import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 import jakarta.annotation.security.PermitAll;
 
+import java.time.LocalDate;
 import java.util.List;
+
+/*
+ * TODO: Integrate userSecurity service directly into the expense service
+ * */
 
 @PermitAll
 @PageTitle("Dashboard")
@@ -30,6 +37,8 @@ public class DashboardView extends Main {
 
     private final SecurityService securityService;
     private final ExpenseService expenseService;
+
+    private final Grid<?> detailsGrid = new Grid<>();
 
     private String selectedCategory;
 
@@ -48,6 +57,9 @@ public class DashboardView extends Main {
 
         Paragraph selectedCategoryField = new Paragraph();
 
+        String username = securityService.getAuthenticatedUser().getUsername();
+        Div div = new Div();
+
 
         // TODO: Display table with selected category
         chartPie.getElement().addEventListener("click", event -> chartPie.getElement()
@@ -59,21 +71,34 @@ public class DashboardView extends Main {
 
                     selectedCategory = selectedValue;
                     selectedCategoryField.setText(selectedCategory);
+
+                    List<MonthlyExpensesProjection> monthlyExpenses = expenseService.getMonthlyExpenses(username, LocalDate.now(), selectedCategory);
+                    div.removeAll();
+
+                    monthlyExpenses.forEach(e -> {
+                        String text = e.getName() + "   " + e.getCategoryName() + "   " + e.getDescription() + "   " + e.getTimestamp()
+                                      + "   " + e.getStartDate() + "   " + e.getExpireDate() + "   " + e.getTimesTriggered();
+                        div.add(new Paragraph(text));
+                    });
+
                 }));
+
+
+
 
         HorizontalLayout container = new HorizontalLayout(chartPie);
         container.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
-        add(container, selectedCategoryField);
+        add(container, selectedCategoryField, div);
     }
 
     private void initMonthlyExpensesChart() {
         String username = securityService.getAuthenticatedUser().getUsername();
-        List<ExpensesSumGroupedByCategory> sumGroupedByCategory = expenseService.getExpensesTotalSumGroupedByCategory(username);
+        List<TotalMonthlyExpensesSumGroupedByCategory> sumGroupedByCategory = expenseService.getTotalSpentPerMonthByCategory(username);
 
         JsonArray jsonOptionData = Json.createArray();
         for (int i = 0; i < sumGroupedByCategory.size(); i++) {
             JsonObject jsonObject = Json.createObject();
-            ExpensesSumGroupedByCategory item = sumGroupedByCategory.get(i);
+            TotalMonthlyExpensesSumGroupedByCategory item = sumGroupedByCategory.get(i);
 
             System.out.println("name: " + item.getCategoryName());
             System.out.println("value: " + item.getTotalSpentPerMonth().orElse(0.0));
@@ -86,6 +111,9 @@ public class DashboardView extends Main {
         System.out.println("Dashboard Data -> " + jsonOptionData.toJson());
         UI.getCurrent().getPage().executeJs("fillChartPie($0);", jsonOptionData.toJson());
     }
+
+
+
 
 
 }

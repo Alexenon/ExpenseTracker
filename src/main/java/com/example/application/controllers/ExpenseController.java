@@ -1,7 +1,7 @@
 package com.example.application.controllers;
 
 import com.example.application.data.dtos.ExpenseDTO;
-import com.example.application.data.dtos.projections.ExpensesSumGroupedByCategory;
+import com.example.application.data.dtos.projections.TotalMonthlyExpensesSumGroupedByCategory;
 import com.example.application.data.requests.ExpenseRequest;
 import com.example.application.entities.Expense;
 import com.example.application.services.ExpenseService;
@@ -108,7 +108,7 @@ public class ExpenseController {
     }
 
     @GetMapping("/grouped")
-    public List<ExpensesSumGroupedByCategory> getExpensesTotalSumGroupedByCategory(
+    public List<TotalMonthlyExpensesSumGroupedByCategory> getExpensesTotalSumGroupedByCategory(
             @RequestParam(value = "user") String userEmailOrUsername,
             @RequestParam(value = "year", required = false) Integer year,
             @RequestParam(value = "month", required = false) Integer month
@@ -120,7 +120,7 @@ public class ExpenseController {
             throw new IllegalArgumentException();
         }
 
-        return expenseService.getExpensesTotalSumGroupedByCategory(userEmailOrUsername, year, month);
+        return expenseService.getTotalSpentPerMonthByCategory(userEmailOrUsername, year, month);
     }
 
 }
