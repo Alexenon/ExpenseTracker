@@ -96,5 +96,90 @@ SELECT
 
 ------------------------------------------------ [] --------------------------------------------------
 
+DELIMITER $$
 
+CREATE FUNCTION FIRST_DAY(input_date DATE)
+RETURNS DATE
+DETERMINISTIC
+BEGIN
+    RETURN DATE_FORMAT(input_date, '%Y-%m-01');
+END$$
+
+DELIMITER ;
+
+------------------------------------------------ [] --------------------------------------------------
+
+DROP FUNCTION IF EXISTS END_DATE_FOR_MONTH;
+DELIMITER $$
+
+CREATE FUNCTION END_DATE_FOR_MONTH(
+    date_to_check DATE,
+    start_date DATE,
+    expire_date DATE
+)
+RETURNS DATE
+DETERMINISTIC
+BEGIN
+    DECLARE first_day_of_month DATE DEFAULT DATE_FORMAT(date_to_check, '%Y-%m-01');
+    DECLARE result_date DATE;
+
+    -- If start_date is in the future
+    IF start_date > date_to_check THEN
+        RETURN NULL;
+    END IF;
+
+    -- If start_date is in past and expire_date too
+	IF start_date < date_to_check AND expire_date < first_day_of_month THEN
+        RETURN NULL;
+    END IF;
+
+    -- If expire_date exists and is before or on date_to_check, return expire_date
+    IF expire_date IS NOT NULL AND expire_date <= date_to_check THEN
+        RETURN expire_date;
+    END IF;
+
+    -- In all other cases, return date_to_check (today)
+    RETURN date_to_check;
+END$$
+
+DELIMITER ;
+
+-- ---------------------------------------------------
+
+DROP FUNCTION IF EXISTS DAYS_PASSED_FOR_MONTH;
+DELIMITER $$
+
+CREATE FUNCTION DAYS_PASSED_FOR_MONTH(
+    date_to_check DATE,
+    start_date DATE,
+    expire_date DATE
+)
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE first_day_of_month DATE DEFAULT DATE_FORMAT(date_to_check, '%Y-%m-01');
+    DECLARE last_day_of_month DATE DEFAULT LAST_DAY(date_to_check);
+    DECLARE days_passed INT DEFAULT 0;
+    DECLARE end_date DATE;
+
+    SET end_date = END_DATE_FOR_MONTH(date_to_check, start_date, expire_date);
+
+    -- If the end date is NULL, no days have passed
+    IF end_date IS NULL THEN
+        RETURN 0;
+    END IF;
+
+    -- If the start_date is before the start of the month, use the first day of the month
+    IF start_date < first_day_of_month THEN
+        SET start_date = first_day_of_month;
+    END IF;
+
+    -- Calculate days between start_date and the end date within this month
+    RETURN DATEDIFF(end_date, start_date);
+END$$
+
+DELIMITER ;
+
+
+-- ---------------------------------------------------
 
