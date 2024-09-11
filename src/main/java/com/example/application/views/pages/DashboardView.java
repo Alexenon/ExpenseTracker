@@ -9,6 +9,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.dataview.GridListDataView;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.component.html.Paragraph;
@@ -26,6 +27,7 @@ import java.util.List;
 
 /*
  * TODO: Integrate userSecurity service directly into the expense service
+ *  - Add filter by excluded category
  * */
 
 @PermitAll
@@ -38,60 +40,67 @@ public class DashboardView extends Main {
     private final SecurityService securityService;
     private final ExpenseService expenseService;
 
-    private final Grid<?> detailsGrid = new Grid<>();
+    private final Div chartPie = new Div();
+    private final Grid<MonthlyExpensesProjection> grid = new Grid<>();
+    private final GridListDataView<MonthlyExpensesProjection> dataView = grid.setItems();
 
-    private String selectedCategory;
+    Paragraph selectedCategoryField = new Paragraph();
 
     public DashboardView(SecurityService securityService, ExpenseService expenseService) {
         this.securityService = securityService;
         this.expenseService = expenseService;
-        addStyle();
+        initialize();
+        initializeGrid();
+        initializeChart();
     }
 
-    private void addStyle() {
+    private void initialize() {
         addClassName("page-content");
 
-        Div chartPie = new Div();
-        chartPie.setId("chart-pie");
-        initMonthlyExpensesChart();
+        HorizontalLayout container = new HorizontalLayout(chartPie, grid);
+        container.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
+        add(container, selectedCategoryField);
+    }
 
-        Paragraph selectedCategoryField = new Paragraph();
+    private void initializeGrid() {
+        chartPie.setId("chart-pie");
 
         String username = securityService.getAuthenticatedUser().getUsername();
-        Div div = new Div();
+        grid.setItems(expenseService.getMonthlyExpenses(username, LocalDate.now()));
 
+        grid.addColumn(MonthlyExpensesProjection::getName).setKey("Expense Name").setHeader("Expense Name");
+        grid.addColumn(MonthlyExpensesProjection::getCategoryName).setKey("Category Name").setHeader("Category Name");
+        grid.addColumn(MonthlyExpensesProjection::getTimestamp).setKey("Interval").setHeader("Interval");
+        grid.addColumn(MonthlyExpensesProjection::getAmount).setKey("Amount").setHeader("Amount");
+        grid.addColumn(MonthlyExpensesProjection::getTimesTriggered).setKey("Times Triggered").setHeader("Times Triggered");
+        grid.addColumn(MonthlyExpensesProjection::getStartDate).setKey("Start Date").setHeader("Start Date");
+        grid.addColumn(MonthlyExpensesProjection::getEndDate).setKey("End Date").setHeader("End Date");
 
-        // TODO: Display table with selected category
-        chartPie.getElement().addEventListener("click", event -> chartPie.getElement()
+        grid.getColumns().forEach(c -> {
+            c.setSortable(true);
+            c.setAutoWidth(true);
+        });
+        grid.setColumnReorderingAllowed(true);
+
+        chartPie.getElement().addEventListener("click", event -> filterBySelectedCategory());
+    }
+
+    private void filterBySelectedCategory() {
+        chartPie.getElement()
                 .executeJs("return this.getAttribute('data-selected');")
-                .then(String.class, selectedValue -> {
-                    if (selectedValue == null || selectedValue.isEmpty() || selectedValue.equals(selectedCategory)) {
+                .then(String.class, selectedCategoryName -> {
+                    if (selectedCategoryName == null || selectedCategoryName.isEmpty()) {
+                        selectedCategoryField.setText("Unselected");
+                        dataView.setFilter(e -> true);
                         return;
                     }
 
-                    selectedCategory = selectedValue;
-                    selectedCategoryField.setText(selectedCategory);
-
-                    List<MonthlyExpensesProjection> monthlyExpenses = expenseService.getMonthlyExpenses(username, LocalDate.now(), selectedCategory);
-                    div.removeAll();
-
-                    monthlyExpenses.forEach(e -> {
-                        String text = e.getName() + "   " + e.getCategoryName() + "   " + e.getDescription() + "   " + e.getTimestamp()
-                                      + "   " + e.getStartDate() + "   " + e.getExpireDate() + "   " + e.getTimesTriggered();
-                        div.add(new Paragraph(text));
-                    });
-
-                }));
-
-
-
-
-        HorizontalLayout container = new HorizontalLayout(chartPie);
-        container.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
-        add(container, selectedCategoryField, div);
+                    selectedCategoryField.setText(selectedCategoryName);
+                    dataView.setFilter(projection -> projection.getCategoryName().equalsIgnoreCase(selectedCategoryName));
+                });
     }
 
-    private void initMonthlyExpensesChart() {
+    private void initializeChart() {
         String username = securityService.getAuthenticatedUser().getUsername();
         List<TotalMonthlyExpensesSumGroupedByCategory> sumGroupedByCategory = expenseService.getTotalSpentPerMonthByCategory(username);
 
@@ -111,9 +120,6 @@ public class DashboardView extends Main {
         System.out.println("Dashboard Data -> " + jsonOptionData.toJson());
         UI.getCurrent().getPage().executeJs("fillChartPie($0);", jsonOptionData.toJson());
     }
-
-
-
 
 
 }

@@ -113,7 +113,7 @@ public class ExpenseService {
     }
 
     @Transactional
-    public List<MonthlyExpensesProjection> getMonthlyExpensesProjections(String username, LocalDate date) {
+    public List<MonthlyExpensesProjection> getMonthlyExpenses(String username, LocalDate date) {
         return repository.findMonthlyExpenses(username, date);
     }
 
