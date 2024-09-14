@@ -80,14 +80,21 @@ window.fillChartPie = function fillChartPie(jsonDataString) {
         if (params.fromAction == 'select') {
             let selectedIndex = params.selected[0].dataIndex[0];
             let selectedItem = option.series[0].data[selectedIndex].name;
-            console.log("Selected: " + selectedItem);
             element.setAttribute('data-selected', selectedItem);
-        }
-
-        if (params.fromAction == 'unselect') {
+        } else {
             element.removeAttribute("data-selected");
         }
     });
 
+    chart.on('legendselectchanged', function (params) {
+        const legendHiddenItems = Object.entries(params.selected)
+            .filter(([_, value]) => !value)
+            .map(([key]) => key);
+
+        element.setAttribute('legend-hidden', JSON.stringify(legendHiddenItems));
+    });
+
 };
+
+
 

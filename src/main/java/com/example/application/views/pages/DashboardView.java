@@ -12,7 +12,6 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Main;
-import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.router.PageTitle;
@@ -23,7 +22,10 @@ import elemental.json.JsonObject;
 import jakarta.annotation.security.PermitAll;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 
 /*
  * TODO: Integrate userSecurity service directly into the expense service
@@ -44,7 +46,8 @@ public class DashboardView extends Main {
     private final Grid<MonthlyExpensesProjection> grid = new Grid<>();
     private final GridListDataView<MonthlyExpensesProjection> dataView = grid.setItems();
 
-    Paragraph selectedCategoryField = new Paragraph();
+    private final AtomicReference<String> selectedCategoryName = new AtomicReference<>();
+    private final AtomicReference<List<String>> legendHiddenCategories = new AtomicReference<>();
 
     public DashboardView(SecurityService securityService, ExpenseService expenseService) {
         this.securityService = securityService;
@@ -59,7 +62,7 @@ public class DashboardView extends Main {
 
         HorizontalLayout container = new HorizontalLayout(chartPie, grid);
         container.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
-        add(container, selectedCategoryField);
+        add(container);
     }
 
     private void initializeGrid() {
@@ -82,22 +85,58 @@ public class DashboardView extends Main {
         });
         grid.setColumnReorderingAllowed(true);
 
-        chartPie.getElement().addEventListener("click", event -> filterBySelectedCategory());
+        chartPie.getElement().addEventListener("click", event -> filterByChartSelection());
     }
 
-    private void filterBySelectedCategory() {
+    private void filterByChartSelection() {
         chartPie.getElement()
                 .executeJs("return this.getAttribute('data-selected');")
-                .then(String.class, selectedCategoryName -> {
-                    if (selectedCategoryName == null || selectedCategoryName.isEmpty()) {
-                        selectedCategoryField.setText("Unselected");
-                        dataView.setFilter(e -> true);
-                        return;
-                    }
-
-                    selectedCategoryField.setText(selectedCategoryName);
-                    dataView.setFilter(projection -> projection.getCategoryName().equalsIgnoreCase(selectedCategoryName));
+                .then(String.class, selected -> {
+                    selected = Objects.requireNonNullElse(selected, "");
+                    selectedCategoryName.set(selected);
+                    applyFilter();
                 });
+
+        chartPie.getElement()
+                .executeJs("return this.getAttribute('legend-hidden');")
+                .then(String.class, legendHiddenItems -> {
+                    legendHiddenCategories.set(getLegendHiddenCategories(legendHiddenItems));
+                    applyFilter();
+                });
+    }
+
+    private void applyFilter() {
+        dataView.setFilter(projection -> {
+            String categoryName = projection.getCategoryName();
+            boolean filterByNonHiddenCategories = !legendHiddenCategories.get().contains(categoryName);
+            boolean filterBySelectedCategory = selectedCategoryName.get().equalsIgnoreCase(categoryName);
+
+            if (selectedCategoryName.get().isEmpty() && legendHiddenCategories.get().isEmpty()) {
+                return true; // No filter is applied, display all
+            }
+
+            if (legendHiddenCategories.get().isEmpty()) {
+                return filterBySelectedCategory;
+            }
+
+            if (selectedCategoryName.get().isEmpty()) {
+                return filterByNonHiddenCategories;
+            }
+
+            return filterBySelectedCategory && filterByNonHiddenCategories;
+        });
+    }
+
+
+    private List<String> getLegendHiddenCategories(String legendHiddenStr) {
+        if (legendHiddenStr == null || legendHiddenStr.isEmpty()) {
+            return List.of();
+        }
+
+        return Arrays.asList(legendHiddenStr.replace("[", "")
+                .replace("]", "")
+                .replace("\"", "")
+                .split(","));
     }
 
     private void initializeChart() {
