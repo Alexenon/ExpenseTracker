@@ -1,9 +1,8 @@
 package com.example.application.views.pages;
 
 import com.example.application.data.dtos.projections.MonthlyExpensesProjection;
-import com.example.application.data.dtos.projections.TotalMonthlyExpensesSumGroupedByCategory;
+import com.example.application.data.dtos.projections.MonthlyTotalSpentGroupedByCategory;
 import com.example.application.services.ExpenseService;
-import com.example.application.services.SecurityService;
 import com.example.application.views.layouts.MainLayout;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JavaScript;
@@ -20,6 +19,7 @@ import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 import jakarta.annotation.security.PermitAll;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -29,7 +29,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 /*
  * TODO: Integrate userSecurity service directly into the expense service
- *  - Add filter by excluded category
  * */
 
 @PermitAll
@@ -39,7 +38,6 @@ import java.util.concurrent.atomic.AtomicReference;
 @JavaScript("https://fastly.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js")
 public class DashboardView extends Main {
 
-    private final SecurityService securityService;
     private final ExpenseService expenseService;
 
     private final Div chartPie = new Div();
@@ -49,8 +47,8 @@ public class DashboardView extends Main {
     private final AtomicReference<String> selectedCategoryName = new AtomicReference<>();
     private final AtomicReference<List<String>> legendHiddenCategories = new AtomicReference<>();
 
-    public DashboardView(SecurityService securityService, ExpenseService expenseService) {
-        this.securityService = securityService;
+    @Autowired
+    public DashboardView(ExpenseService expenseService) {
         this.expenseService = expenseService;
         initialize();
         initializeGrid();
@@ -68,9 +66,7 @@ public class DashboardView extends Main {
     private void initializeGrid() {
         chartPie.setId("chart-pie");
 
-        String username = securityService.getAuthenticatedUser().getUsername();
-        grid.setItems(expenseService.getMonthlyExpenses(username, LocalDate.now()));
-
+        grid.setItems(expenseService.getMonthlyExpensesByUser(LocalDate.now()));
         grid.addColumn(MonthlyExpensesProjection::getName).setKey("Expense Name").setHeader("Expense Name");
         grid.addColumn(MonthlyExpensesProjection::getCategoryName).setKey("Category Name").setHeader("Category Name");
         grid.addColumn(MonthlyExpensesProjection::getTimestamp).setKey("Interval").setHeader("Interval");
@@ -140,13 +136,12 @@ public class DashboardView extends Main {
     }
 
     private void initializeChart() {
-        String username = securityService.getAuthenticatedUser().getUsername();
-        List<TotalMonthlyExpensesSumGroupedByCategory> sumGroupedByCategory = expenseService.getTotalSpentPerMonthByCategory(username);
+        List<MonthlyTotalSpentGroupedByCategory> sumGroupedByCategory = expenseService.getMonthlyTotalSpentGroupedByCategory();
 
         JsonArray jsonOptionData = Json.createArray();
         for (int i = 0; i < sumGroupedByCategory.size(); i++) {
             JsonObject jsonObject = Json.createObject();
-            TotalMonthlyExpensesSumGroupedByCategory item = sumGroupedByCategory.get(i);
+            MonthlyTotalSpentGroupedByCategory item = sumGroupedByCategory.get(i);
 
             System.out.println("name: " + item.getCategoryName());
             System.out.println("value: " + item.getTotalSpentPerMonth().orElse(0.0));

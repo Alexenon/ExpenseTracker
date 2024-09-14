@@ -9,10 +9,15 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class MainLayout extends AppLayout {
 
-    public MainLayout() {
+    private final SecurityService securityService;
+
+    @Autowired
+    public MainLayout(SecurityService securityService) {
+        this.securityService = securityService;
         addHeader();
         addFooter();
     }
@@ -27,10 +32,7 @@ public class MainLayout extends AppLayout {
 
         Icon personIcon = new Icon(VaadinIcon.USER);
         personIcon.addClassName("user-icon");
-        personIcon.addClickListener(e -> {
-            SecurityService securityService = new SecurityService();
-            securityService.logout();
-        });
+        personIcon.addClickListener(e -> securityService.logout());
 
         NavigationBar navbar = new NavigationBar();
         navbar.add(personIcon);

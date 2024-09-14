@@ -3,7 +3,7 @@ package com.example.application.repositories;
 import com.example.application.data.dtos.ExpenseDTO;
 import com.example.application.data.dtos.projections.MonthlyExpensesGroupedByName;
 import com.example.application.data.dtos.projections.MonthlyExpensesProjection;
-import com.example.application.data.dtos.projections.TotalMonthlyExpensesSumGroupedByCategory;
+import com.example.application.data.dtos.projections.MonthlyTotalSpentGroupedByCategory;
 import com.example.application.entities.Expense;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -98,7 +98,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
                 AND (E.expire_date IS NULL OR E.expire_date > DATE_FORMAT(CONCAT(?2, '-', ?3, '-01'), '%Y-%m-%d'))
             GROUP BY C.name
             """, nativeQuery = true)
-    List<TotalMonthlyExpensesSumGroupedByCategory> totalSpentPerMonthGroupedByCategory(String userEmailOrUsername, int year, int month);
+    List<MonthlyTotalSpentGroupedByCategory> totalSpentPerMonthGroupedByCategory(String userEmailOrUsername, int year, int month);
 
     @Query(value = """
             SELECT C.name, SUM(
@@ -177,10 +177,6 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
             ORDER BY expenseName, occurrence
             """, nativeQuery = true)
     List<MonthlyExpensesGroupedByName> totalSpentPerMonthGroupedByExpenseName(String userEmailOrUsername, Integer year, Integer month);
-
-
-
-
 
     @Procedure(procedureName = "GetMonthlyExpenses")
     List<MonthlyExpensesProjection> findMonthlyExpenses(@Param("username") String username,

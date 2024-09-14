@@ -2,7 +2,7 @@ package com.example.application.data.dtos.projections;
 
 import java.util.Optional;
 
-public interface TotalMonthlyExpensesSumGroupedByCategory {
+public interface MonthlyTotalSpentGroupedByCategory {
     String getCategoryName();
 
     Optional<Double> getTotalSpentPerMonth();
