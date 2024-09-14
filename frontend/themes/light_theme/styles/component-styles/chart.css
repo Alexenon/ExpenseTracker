@@ -28,9 +28,9 @@
     border-radius: 5px;
 }
 
-.tooltip-category,
 .tooltip-value,
-.tooltip-currency,
-.tooltip-percent {
+.tooltip-percent,
+.tooltip-category,
+.tooltip-currency {
     margin-right: 5px;
 }

@@ -1,22 +1,29 @@
 package com.example.application.services;
 
 import com.example.application.data.dtos.ExpenseDTO;
+import com.example.application.data.dtos.projections.MonthlyExpensesProjection;
 import com.example.application.data.requests.ExpenseRequest;
 import com.example.application.entities.Expense;
 import com.example.application.entities.User;
 import com.example.application.repositories.ExpenseRepository;
+import com.example.application.utils.DateUtils;
 import com.example.application.utils.ExpenseConvertor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class ExpenseService {
 
     @Autowired
     private ExpenseRepository repository;
+
+    @Autowired
+    private SecurityService securityService;
 
     @Autowired
     private ExpenseConvertor expenseConvertor;
@@ -27,6 +34,10 @@ public class ExpenseService {
 
     public List<ExpenseDTO> getAllExpensesByUser(String userEmailOrUsername) {
         return repository.getAll(userEmailOrUsername);
+    }
+
+    public List<ExpenseDTO> getAllExpensesByUser() {
+        return getAllExpensesByUser(securityService.getAuthenticatedUser().getUsername());
     }
 
     public Expense saveExpense(Expense expense) {
@@ -93,8 +104,31 @@ public class ExpenseService {
         return repository.findExpensesPerYear(year);
     }
 
-    public List<Object[]> getMonthlyCategoriesTotalSum(String userEmailOrUsername, int year, int month) {
-        return repository.findMonthlyCategoriesTotalSum(userEmailOrUsername, year, month);
+
+    /**
+     * @param date is converted if it's:
+     *             <ul>
+     *                  <li>CURRENT MONTH -> remains same
+     *                  <li>PREVIOUS MONTH ->  into another date with its last day of month
+     *                  <li>NEXT MONTH ->  into another date with its first day of month
+     *              </ul>
+     */
+    @Transactional
+    public List<MonthlyExpensesProjection> getMonthlyExpensesByUser(String username, LocalDate date) {
+        date = Objects.requireNonNullElse(date, LocalDate.now());
+
+        if (!DateUtils.isInSameMonthAndYear(date, LocalDate.now())) {
+            date = date.isBefore(LocalDate.now())
+                    ? DateUtils.lastDayOfMonth(date)
+                    : DateUtils.firstDayOfMonth(date);
+        }
+
+        return repository.findMonthlyExpenses(username, date);
+    }
+
+    @Transactional
+    public List<MonthlyExpensesProjection> getMonthlyExpensesByUser(LocalDate date) {
+        return getMonthlyExpensesByUser(securityService.getAuthenticatedUser().getUsername(), date);
     }
 
     public Expense convertToExpense(ExpenseRequest expenseRequest) {

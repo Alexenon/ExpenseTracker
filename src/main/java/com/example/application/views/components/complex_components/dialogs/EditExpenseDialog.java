@@ -29,6 +29,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
+import static java.time.temporal.ChronoUnit.DAYS;
+
 public class EditExpenseDialog extends Dialog implements HasNotifications {
 
     private static final Logger logger = LoggerFactory.getLogger(EditExpenseDialog.class);
@@ -61,14 +63,14 @@ public class EditExpenseDialog extends Dialog implements HasNotifications {
         this.singleFormatI18n = singleFormatI18n;
 
         setHeaderTitle("Edit Expense");
+        initFields();
         initBinder();
-        add(createDialogLayout());
-        addStyleToElements();
         fillFieldsWithValues();
+        add(createDialogLayout());
     }
 
     private VerticalLayout createDialogLayout() {
-        Component[] components = {nameField, descriptionField, amountField, categoryField, startDateField, timestampField, expireDateField};
+        Component[] components = {nameField, descriptionField, amountField, categoryField, timestampField, startDateField, expireDateField};
         VerticalLayout dialogLayout = new VerticalLayout(components);
         dialogLayout.setPadding(false);
         dialogLayout.setSpacing(false);
@@ -77,6 +79,44 @@ public class EditExpenseDialog extends Dialog implements HasNotifications {
         Arrays.stream(components).forEach(e -> e.getStyle().set("margin-bottom", "1rem"));
 
         return dialogLayout;
+    }
+
+    private void initFields() {
+        timestampField.setLabel("Interval");
+        timestampField.setItems(Expense.Timestamp.values());
+        timestampField.setHelperText("Select how often this expense will be triggered");
+        timestampField.addValueChangeListener(timestamp -> {
+            boolean timestampIsOnce = timestamp.getValue().equals(Expense.Timestamp.ONCE);
+
+            if (timestampIsOnce)
+                expireDateField.setValue(null);
+
+            expireDateField.setVisible(!timestampIsOnce);
+        });
+
+        categoryField.setItems(categoryService.getAllCategoryNames());
+        categoryField.setHelperText("Select the category which fits this expense");
+        amountField.setSuffixComponent(new Span("MDL"));
+
+        startDateField.setI18n(singleFormatI18n);
+        startDateField.setHelperText("Format: YYYY-MM-DD");
+
+        expireDateField.setVisible(expenseDTO.getExpireDate() != null); // Expire date field initial is disabled
+        expireDateField.setI18n(singleFormatI18n);
+        expireDateField.setTooltipText("Select expire date");
+        expireDateField.setPlaceholder("Optional: Choose expire date");
+        expireDateField.setHelperText("Format: YYYY-MM-DD");
+
+        cancelButton.addClickShortcut(Key.ESCAPE);
+        cancelButton.addClickListener(e -> {
+            logger.info("Exited `Edit Expense` form");
+            this.close();
+        });
+
+        saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
+        saveButton.addClickListener(e -> defaultClickSaveBtnListener());
+
+        this.getFooter().add(cancelButton, saveButton);
     }
 
     private void initBinder() {
@@ -105,47 +145,17 @@ public class EditExpenseDialog extends Dialog implements HasNotifications {
                 .bind(ExpenseRequest::getStartDate, ExpenseRequest::setStartDate);
 
         binder.forField(expireDateField)
-                .withValidator(
-                        expireDate -> expireDate == null || expireDate.isAfter(startDateField.getValue()),
-                        "Expire date should be after start date"
-                )
+                .withValidator(expireDate -> expireDate == null || expireDate.isAfter(startDateField.getValue()),
+                        "Expire date should be after start date")
+                .withValidator(expireDate -> !timestampField.getValue().equals(Expense.Timestamp.WEEKLY)
+                                             || DAYS.between(startDateField.getValue(), expireDate) >= 7,
+                        "Should pass at least 7 days to end subscription")
+                .withValidator(expireDate -> !timestampField.getValue().equals(Expense.Timestamp.MONTHLY)
+                                             || DAYS.between(startDateField.getValue(), expireDate) >= 30,
+                        "Should pass at least 1 month to end subscription")
                 .bind(ExpenseRequest::getExpireDate, ExpenseRequest::setExpireDate);
 
         binder.bind(descriptionField, ExpenseRequest::getDescription, ExpenseRequest::setDescription);
-    }
-
-    private void addStyleToElements() {
-        timestampField.setLabel("Interval");
-        timestampField.setItems(Expense.Timestamp.values());
-        timestampField.setHelperText("Select how often this expense will be triggered");
-        timestampField.addValueChangeListener(timestamp -> {
-            boolean timestampIsNotOnce = !timestamp.getValue().equals(Expense.Timestamp.ONCE);
-            expireDateField.setEnabled(timestampIsNotOnce);
-        });
-
-        categoryField.setItems(categoryService.getAllCategoryNames());
-        categoryField.setHelperText("Select the category which fits this expense");
-        amountField.setSuffixComponent(new Span("MDL"));
-
-        startDateField.setI18n(singleFormatI18n);
-        startDateField.setHelperText("Format: YYYY-MM-DD");
-
-        expireDateField.setEnabled(false); // Expire date field initial is disabled
-        expireDateField.setI18n(singleFormatI18n);
-        expireDateField.setTooltipText("Select expire date");
-        expireDateField.setPlaceholder("Optional: Choose expire date");
-        expireDateField.setHelperText("Format: YYYY-MM-DD");
-
-        cancelButton.addClickShortcut(Key.ESCAPE);
-        cancelButton.addClickListener(e -> {
-            logger.info("Exited `Edit Expense` form");
-            this.close();
-        });
-
-        saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
-        saveButton.addClickListener(e -> defaultClickSaveBtnListener());
-
-        this.getFooter().add(cancelButton, saveButton);
     }
 
     private void fillFieldsWithValues() {
