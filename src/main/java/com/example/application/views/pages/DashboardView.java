@@ -1,7 +1,6 @@
 package com.example.application.views.pages;
 
 import com.example.application.data.dtos.projections.MonthlyExpensesProjection;
-import com.example.application.data.dtos.projections.MonthlyTotalSpentGroupedByCategory;
 import com.example.application.services.ExpenseService;
 import com.example.application.views.layouts.MainLayout;
 import com.vaadin.flow.component.UI;
@@ -24,8 +23,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 /*
  * TODO: Integrate userSecurity service directly into the expense service
@@ -53,6 +55,24 @@ public class DashboardView extends Main {
         initialize();
         initializeGrid();
         initializeChart();
+
+
+        List<MonthlyExpensesProjection> all = expenseService.getMonthlyExpensesByUser(LocalDate.now());
+
+
+        all.stream()
+                .collect(Collectors.groupingBy(
+                        MonthlyExpensesProjection::getCategoryName,
+                        Collectors.summingDouble(p -> p.getAmount() * p.getTimesTriggered())
+                )).forEach((category, total) ->
+                        System.out.println("Category: " + category + ", Total Spent: " + total)
+                );
+
+
+        double total = all.stream().mapToDouble(p -> p.getTimesTriggered() * p.getAmount()).sum();
+        System.out.println("Total = " + total);
+
+
     }
 
     private void initialize() {
@@ -71,6 +91,7 @@ public class DashboardView extends Main {
         grid.addColumn(MonthlyExpensesProjection::getCategoryName).setKey("Category Name").setHeader("Category Name");
         grid.addColumn(MonthlyExpensesProjection::getTimestamp).setKey("Interval").setHeader("Interval");
         grid.addColumn(MonthlyExpensesProjection::getAmount).setKey("Amount").setHeader("Amount");
+        grid.addColumn(MonthlyExpensesProjection::getDaysPassed).setKey("Days Passed").setHeader("Days Passed");
         grid.addColumn(MonthlyExpensesProjection::getTimesTriggered).setKey("Times Triggered").setHeader("Times Triggered");
         grid.addColumn(MonthlyExpensesProjection::getStartDate).setKey("Start Date").setHeader("Start Date");
         grid.addColumn(MonthlyExpensesProjection::getEndDate).setKey("End Date").setHeader("End Date");
@@ -80,6 +101,8 @@ public class DashboardView extends Main {
             c.setAutoWidth(true);
         });
         grid.setColumnReorderingAllowed(true);
+
+        grid.getElement().executeJs("this.shadowRoot.querySelector('table').style.overflow = 'hidden';");
 
         chartPie.getElement().addEventListener("click", event -> filterByChartSelection());
     }
@@ -136,22 +159,25 @@ public class DashboardView extends Main {
     }
 
     private void initializeChart() {
-        List<MonthlyTotalSpentGroupedByCategory> sumGroupedByCategory = expenseService.getMonthlyTotalSpentGroupedByCategory();
+        Map<String, Double> totalMonthlyExpensesGroupedByCategory = expenseService.getMonthlyExpensesByUser(LocalDate.now())
+                .stream()
+                .collect(Collectors.groupingBy(
+                        MonthlyExpensesProjection::getCategoryName,
+                        Collectors.summingDouble(p -> p.getAmount() * p.getTimesTriggered())
+                ));
 
+        AtomicInteger index = new AtomicInteger(0);
         JsonArray jsonOptionData = Json.createArray();
-        for (int i = 0; i < sumGroupedByCategory.size(); i++) {
+
+        totalMonthlyExpensesGroupedByCategory.forEach((categoryName, totalSum) -> {
             JsonObject jsonObject = Json.createObject();
-            MonthlyTotalSpentGroupedByCategory item = sumGroupedByCategory.get(i);
+            jsonObject.put("name", categoryName);
+            jsonObject.put("value", totalSum);
+            jsonOptionData.set(index.get(), jsonObject);
 
-            System.out.println("name: " + item.getCategoryName());
-            System.out.println("value: " + item.getTotalSpentPerMonth().orElse(0.0));
+            index.addAndGet(1);
+        });
 
-            jsonObject.put("name", item.getCategoryName());
-            jsonObject.put("value", item.getTotalSpentPerMonth().orElse(0.0));
-            jsonOptionData.set(i, jsonObject);
-        }
-
-        System.out.println("Dashboard Data -> " + jsonOptionData.toJson());
         UI.getCurrent().getPage().executeJs("fillChartPie($0);", jsonOptionData.toJson());
     }
 

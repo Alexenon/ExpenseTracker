@@ -1,13 +1,12 @@
 package com.example.application.services;
 
 import com.example.application.data.dtos.ExpenseDTO;
-import com.example.application.data.dtos.projections.MonthlyExpensesGroupedByName;
 import com.example.application.data.dtos.projections.MonthlyExpensesProjection;
-import com.example.application.data.dtos.projections.MonthlyTotalSpentGroupedByCategory;
 import com.example.application.data.requests.ExpenseRequest;
 import com.example.application.entities.Expense;
 import com.example.application.entities.User;
 import com.example.application.repositories.ExpenseRepository;
+import com.example.application.utils.DateUtils;
 import com.example.application.utils.ExpenseConvertor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,10 +23,10 @@ public class ExpenseService {
     private ExpenseRepository repository;
 
     @Autowired
-    private ExpenseConvertor expenseConvertor;
+    private SecurityService securityService;
 
     @Autowired
-    private SecurityService securityService;
+    private ExpenseConvertor expenseConvertor;
 
     public List<ExpenseDTO> getAllExpenses() {
         return repository.getAll();
@@ -105,31 +104,25 @@ public class ExpenseService {
         return repository.findExpensesPerYear(year);
     }
 
-    public List<MonthlyTotalSpentGroupedByCategory> getMonthlyTotalSpentGroupedByCategory(String userEmailOrUsername) {
-        return repository.totalSpentPerMonthGroupedByCategory(userEmailOrUsername, LocalDate.now().getYear(), LocalDate.now().getMonthValue());
-    }
 
-    public List<MonthlyTotalSpentGroupedByCategory> getMonthlyTotalSpentGroupedByCategory() {
-        return getMonthlyTotalSpentGroupedByCategory(securityService.getAuthenticatedUser().getUsername());
-    }
-
-    public List<MonthlyTotalSpentGroupedByCategory> getMonthlyTotalSpentGroupedByCategory(String userEmailOrUsername, int year, int month) {
-        return repository.totalSpentPerMonthGroupedByCategory(userEmailOrUsername, year, month);
-    }
-
-    public List<MonthlyExpensesGroupedByName> getMonthlyExpensesByUser(String userEmailOrUsername, Integer year, Integer month) {
-        year = Objects.requireNonNullElse(year, LocalDate.now().getYear());
-        month = Objects.requireNonNullElse(month, LocalDate.now().getMonthValue());
-        return repository.totalSpentPerMonthGroupedByExpenseName(userEmailOrUsername, year, month);
-    }
-
-    public List<MonthlyExpensesGroupedByName> getMonthlyExpensesByUser(Integer year, Integer month) {
-        return getMonthlyExpensesByUser(securityService.getAuthenticatedUser().getUsername(), year, month);
-    }
-
+    /**
+     * @param date is converted if it's:
+     *             <ul>
+     *                  <li>CURRENT MONTH -> remains same
+     *                  <li>PREVIOUS MONTH ->  into another date with its last day of month
+     *                  <li>NEXT MONTH ->  into another date with its first day of month
+     *              </ul>
+     */
     @Transactional
     public List<MonthlyExpensesProjection> getMonthlyExpensesByUser(String username, LocalDate date) {
         date = Objects.requireNonNullElse(date, LocalDate.now());
+
+        if (!DateUtils.isInSameMonthAndYear(date, LocalDate.now())) {
+            date = date.isBefore(LocalDate.now())
+                    ? DateUtils.lastDayOfMonth(date)
+                    : DateUtils.firstDayOfMonth(date);
+        }
+
         return repository.findMonthlyExpenses(username, date);
     }
 

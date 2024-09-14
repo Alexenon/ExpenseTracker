@@ -94,7 +94,7 @@ SELECT
     MonthValidDays('2023-08-01', '2022-01-01', NULL) as 'Result DAYS' -- starts ago without expiration
 ;
 
------------------------------------------------- [] --------------------------------------------------
+---------------------------------------------[ FIRST_DAY ]-----------------------------------------------
 
 DELIMITER $$
 
@@ -107,7 +107,7 @@ END$$
 
 DELIMITER ;
 
------------------------------------------------- [] --------------------------------------------------
+-----------------------------------------[ END_DATE_FOR_MONTH ]------------------------------------------
 
 DROP FUNCTION IF EXISTS END_DATE_FOR_MONTH;
 DELIMITER $$
@@ -144,7 +144,7 @@ END$$
 
 DELIMITER ;
 
--- ---------------------------------------------------
+-----------------------------------------[ DAYS_PASSED_FOR_MONTH ]---------------------------------------
 
 DROP FUNCTION IF EXISTS DAYS_PASSED_FOR_MONTH;
 DELIMITER $$
@@ -181,5 +181,46 @@ END$$
 DELIMITER ;
 
 
--- ---------------------------------------------------
+------------------------------------------[ GetMonthlyExpenses ]-----------------------------------------
 
+DROP PROCEDURE IF EXISTS GetMonthlyExpenses;
+
+DELIMITER $$
+
+CREATE PROCEDURE GetMonthlyExpenses(
+	IN username VARCHAR(255),
+    IN date DATE
+)
+BEGIN
+    SELECT
+        E.name,
+        E.description,
+        C.name AS categoryName,
+        E.timestamp,
+        E.amount,
+        E.start_date AS startDate,
+        E.expire_date AS expireDate,
+        DAYS_PASSED_FOR_MONTH(date, E.start_date, E.expire_date) AS daysPassed,
+        END_DATE_FOR_MONTH(date, E.start_date, E.expire_date) AS endDate,
+        CASE
+            WHEN E.timestamp = 'MONTHLY' OR E.timestamp = 'YEARLY' THEN 1
+            WHEN E.timestamp = 'WEEKLY' THEN FLOOR(DAYS_PASSED_FOR_MONTH(date, E.start_date, E.expire_date) / 7) + 1
+            ELSE DAYS_PASSED_FOR_MONTH(date, E.start_date, E.expire_date)
+        END AS timesTriggered
+    FROM expense E
+    INNER JOIN users U ON U.id = E.user_id
+    INNER JOIN category C ON C.id = E.category_id
+    WHERE (U.username = username OR U.email = username)
+      -- AND E.timestamp = 'ONCE' AND C.name = 'Others' -- HERE
+      AND (E.start_date < END_DATE_FOR_MONTH(date, E.start_date, E.expire_date))
+      AND (DAYS_PASSED_FOR_MONTH(date, E.start_date, E.expire_date) > 0)
+      AND (
+          (E.timestamp = 'WEEKLY' AND FLOOR(DAYS_PASSED_FOR_MONTH(date, E.start_date, E.expire_date) / 7) > 0)
+          OR (E.timestamp = 'MONTHLY' AND (E.expire_date IS NULL OR E.expire_date > DAYS_PASSED_FOR_MONTH(date, E.start_date, E.expire_date)))
+          OR (E.timestamp != 'WEEKLY' AND E.timestamp != 'MONTHLY')
+      );
+END$$
+
+DELIMITER ;
+
+-------------------------------------------------------------------------------------------------------

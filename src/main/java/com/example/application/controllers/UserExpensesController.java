@@ -13,10 +13,10 @@ import java.util.stream.Collectors;
 
 /*
   TODO: Use logged user to retrieve data, because this controller is used only by logged user
-   - Add verification that user is logged in
+   - Add verification that user is logged in + add this endpoint as secured
    - Add a separate controller for admin that can retrieve any data
+   - Remove endpoints that user cannot access to
 */
-
 
 /**
  * This controller contains just endpoints that a simple user can access
