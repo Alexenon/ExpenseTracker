@@ -17,12 +17,15 @@ public class SecurityService {
 
     private static final String LOGOUT_SUCCESS_URL = "/";
 
-    public UserDetails getAuthenticatedUserDetails() {
+    public UserDetails getAuthenticatedUser() {
         SecurityContext context = SecurityContextHolder.getContext();
         Object principal = context.getAuthentication().getPrincipal();
-        return principal instanceof UserDetails
-                ? (UserDetails) context.getAuthentication().getPrincipal()
-                : null;
+
+        if (principal instanceof UserDetails userDetails) {
+            return userDetails;
+        }
+
+        return null;
     }
 
     public void logout() {

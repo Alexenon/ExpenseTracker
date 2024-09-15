@@ -44,11 +44,11 @@ public class AssetsDashboardView extends Main {
         this.securityService = securityService;
         this.userService = userService;
 
-        initialize();
+        initializeGrid();
         add(performanceSection(), assetsGrid);
     }
 
-    private void initialize() {
+    private void initializeGrid() {
         getStyle().set("margin", "100px 30px 30px 30px");
         assetsGrid.setItems(instrumentsProvider.getListOfAssetData());
         assetsGrid.addClickSyncBtnListener(grid -> {

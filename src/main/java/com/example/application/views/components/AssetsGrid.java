@@ -60,7 +60,6 @@ public class AssetsGrid extends Div {
         initializeFilteringBySearch();
         initializeFilteringNonZeroValues();
         initializeSyncButton();
-        updateHiddenRowsCounter();
 
         add(
                 gridHeader(),
@@ -101,12 +100,16 @@ public class AssetsGrid extends Div {
             UI.getCurrent().navigate(AssetDetailsView.class, row.getItem().getAsset().getSymbol().toUpperCase());
         });
 
+        grid.setAllRowsVisible(true);
+
         grid.getElement().executeJs("this.shadowRoot.querySelector('table').style.overflow = 'hidden';");
 
 //        dataProvider.addDataProviderListener(changeEvent -> {
 //            quantityColumn.setFooter("Total Quantity: " + calculateTotalQuantityOnGrid(dataProvider));
 //            priceColumn.setFooter("Total Price: "+ calculateTotalPriceOnGrid(dataProvider));
 //        });
+
+        setHiddenRowCount(0);
     }
 
     private void initializeColumnSelector() {
@@ -233,13 +236,17 @@ public class AssetsGrid extends Div {
 
     private void updateHiddenRowsCounter() {
         int numberHiddenRows = Symbols.getAll().size() - dataView.getItemCount();
-        hiddenRowsCounterField.setText(String.format("(≈%d)", numberHiddenRows));
+        setHiddenRowCount(numberHiddenRows);
+    }
+
+    private void setHiddenRowCount(int count) {
+        hiddenRowsCounterField.setText(String.format("(≈%d)", count));
     }
 
     private void resetGridFilteredItems() {
         dataView.setFilter(a -> true);
-        checkbox.setValue(false);
         searchField.setValue("");
+        checkbox.setValue(false);
         updateHiddenRowsCounter();
     }
 
