@@ -37,7 +37,6 @@ public class ExpensesView extends Main {
 
     private final ExpenseService expenseService;
     private final CategoryService categoryService;
-    private final SecurityService securityService;
     private final DatePicker.DatePickerI18n singleFormatI18n;
 
     private final TextField filterText = new TextField();
@@ -52,7 +51,6 @@ public class ExpensesView extends Main {
             DatePicker.DatePickerI18n singleFormatI18n) {
         this.expenseService = expenseService;
         this.categoryService = categoryService;
-        this.securityService = securityService;
         this.singleFormatI18n = singleFormatI18n;
         addClassName("page-content");
         add(
@@ -135,8 +133,7 @@ public class ExpensesView extends Main {
 
     private void updateGrid() {
         logger.info("Updated Expense Table");
-        String username = securityService.getAuthenticatedUserDetails().getUsername();
-        grid.setItems(expenseService.getAllExpensesByUser(username));
+        grid.setItems(expenseService.getAllExpensesByUser());
     }
 
     private ConfirmDialog getConfirmationDialog(String text) {

@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @AnonymousAllowed
-@PageTitle("Registation")
+@PageTitle("Registration")
 @Route(value = "register")
 @CssImport("./themes/light_theme/styles/page-styles/auth-pages.css")
 public class RegistrationView extends Main implements HasNotifications {
@@ -59,11 +59,11 @@ public class RegistrationView extends Main implements HasNotifications {
         registerForm.getSubmitBtn().addClickListener(e -> {
             logger.info("Clicked");
             if (binder.validate().isOk()) {
+                showSuccessfulNotification("User created successfully!");
                 User user = binder.getBean();
-                logger.info("User '{}' created succesfully", user.getUsername());
+                logger.info("User '{}' created successfully", user.getUsername());
                 userService.createNewUser(user);
-                showSuccessfulNotification("User created succesfully!");
-                // UI.getCurrent().navigate(LoginView.class);
+                getUI().ifPresent(ui -> ui.navigate(LoginView.class));
             } else {
                 logger.warn("Submitted Registration Form with validation errors");
                 showErrorNotification("Submitted Registration Form with validation errors");

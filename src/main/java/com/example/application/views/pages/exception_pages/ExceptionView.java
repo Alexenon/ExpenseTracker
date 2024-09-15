@@ -23,7 +23,8 @@ public abstract class ExceptionView<T extends Exception> extends Main implements
         errorContainer.setErrorTitle(errorTitle());
         errorContainer.setErrorDescription(getErrorDescription(parameter));
         errorContainer.setImageSource(imageSource());
-        
+        parameter.getException().printStackTrace();
+
         return httpStatus();
     }
 

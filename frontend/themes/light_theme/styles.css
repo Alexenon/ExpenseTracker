@@ -95,8 +95,6 @@ vaadin-button.no-background {
     padding: 50px;
 }
 
-
-
 /* TODO: Check this */
 .button-radio-group vaadin-radio-button::part(radio) {
     display: none;
