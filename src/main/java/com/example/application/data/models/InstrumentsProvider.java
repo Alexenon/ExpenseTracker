@@ -6,7 +6,6 @@ import com.example.application.entities.crypto.Asset;
 import com.example.application.repositories.crypto.AssetRepository;
 import com.example.application.utils.fetchers.BinanceFetcher;
 import com.example.application.utils.fetchers.CryptoCompareFetcher;
-import com.example.application.utils.fetchers.api_responses.AssetInfo;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -48,12 +47,8 @@ public class InstrumentsProvider {
 
     private List<AssetData> initAssetsData() {
         return assets.stream()
-                .map(asset -> new AssetData(asset, getAssetInfo(asset.getSymbol())))
+                .map(asset -> new AssetData(asset, CryptoCompareFetcher.getCoinMetaData(asset.getSymbol()).getData()))
                 .toList();
-    }
-
-    private AssetInfo getAssetInfo(String name) {
-        return CryptoCompareFetcher.getCoinMetaData(name).getData();
     }
 
     public void updateAssetData() {
@@ -79,6 +74,11 @@ public class InstrumentsProvider {
                 .filter(c -> c.getName().equals(name))
                 .findFirst()
                 .orElse(null);
+    }
+
+
+    public String getAssetLogoUrl() {
+        return "";
     }
 
 }

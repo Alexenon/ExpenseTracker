@@ -74,6 +74,25 @@ img {
     -webkit-user-drag: none;
 }
 
+/*img.rounded {
+*//*
+    object-fit: cover;
+    border-radius: 50%;
+*//*
+
+*//*    border-radius: 100%;
+    background: #eee no-repeat center;
+    background-size: cover;*//*
+
+
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    -ms-border-radius: 50%;
+    -o-border-radius: 50%;
+    border-radius: 50%;
+    background-size:cover;
+}*/
+
 vaadin-text-area::part(input-field),
 vaadin-number-field::part(input-field) {
 /*    background: white;

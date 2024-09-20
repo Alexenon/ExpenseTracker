@@ -37,6 +37,8 @@ import java.util.function.Consumer;
     TODO:
      - [?] Think about column header style(maybe align item center)
      - [?] Display footer statistics details for certain columns
+     - [!] Fix sortable criteria for certain columns
+     - [?] Add column tooltipComponent -> .setTooltipGenerator(a -> "Name is " + a.getName());
     _______________________________________________________________________________________________________________________________________
     | Name | Price  | 24h Changes | Amount | Avg buy | Avg sell | All-time low | All-time high | Total Worth | Total Invested | Realized  |
     | BTC  | $64000 | 2%          | 0.0034 | $60000  |    -     | $10          | $73000        | $230        | $200           | $30 / 10% |
@@ -161,7 +163,7 @@ public class AssetsGrid extends Div {
                 Container.builder("coin-overview-name-container")
                         .addComponent(() -> {
                             Image image = new Image(a.getAssetInfo().getLogoUrl(), a.getAssetInfo().getName());
-                            image.setClassName("coin-overview-image");
+                            image.addClassNames("rounded", "coin-overview-image");
                             return image;
                         })
                         .addComponent(new Paragraph(a.getAssetInfo().getName()))
