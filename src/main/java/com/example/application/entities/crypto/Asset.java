@@ -20,19 +20,17 @@ public class Asset {
     @Column(nullable = false)
     private String symbol;
 
-    @Column(nullable = false)
-    private double amount;
-
+    @Column(name = "comment")
     private String comment;
 
     @Column(nullable = false)
     private boolean markedAsFavorite;
 
     @Column(nullable = false)
-    private LocalDateTime lastTimeUpdated;
+    private LocalDateTime lastTimeUpdated = LocalDateTime.now();
 
     public Asset(String symbol) {
-        this(0, symbol, 0.0, null, false, LocalDateTime.now());
+        this(0, symbol, "", false, LocalDateTime.now());
     }
 
 }

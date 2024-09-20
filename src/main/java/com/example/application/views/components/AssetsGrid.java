@@ -35,9 +35,9 @@ import java.util.function.Consumer;
 
 /*
     TODO:
+     - [!] Fix sortable criteria for certain columns
      - [?] Think about column header style(maybe align item center)
      - [?] Display footer statistics details for certain columns
-     - [!] Fix sortable criteria for certain columns
      - [?] Add column tooltipComponent -> .setTooltipGenerator(a -> "Name is " + a.getName());
     _______________________________________________________________________________________________________________________________________
     | Name | Price  | 24h Changes | Amount | Avg buy | Avg sell | All-time low | All-time high | Total Worth | Total Invested | Realized  |
@@ -87,10 +87,10 @@ public class AssetsGrid extends Div {
         Grid.Column<AssetData> changes24hCol = grid.addColumn(columnChanges24hRenderer()).setKey("Changes 24h").setHeader("Changes 24h");
         Grid.Column<AssetData> avgBuyCol = grid.addColumn(columnPriceRenderer(AssetData::getAverageBuyPrice)).setKey("Avg Buy").setHeader("Avg Buy");
         Grid.Column<AssetData> avgSellCol = grid.addColumn(columnPriceRenderer(AssetData::getAverageSellPrice)).setKey("Avg Sell").setHeader("Avg Sell");
-        Grid.Column<AssetData> amountCol = grid.addColumn(a -> a.getAsset().getAmount()).setKey("Amount").setHeader("Amount");
+//        Grid.Column<AssetData> amountCol = grid.addColumn(a -> a.getAsset().getAmount()).setKey("Amount").setHeader("Amount");
 //        Grid.Column<AssetData> profitChangesCol = grid.addColumn(new ComponentRenderer<>(this::renderProfitChanges)).setKey("Profit Changes").setHeader("Profit Changes");
         grid.addColumn(new ComponentRenderer<>(this::threeDotsBtn)).setHeader(columnSelector);
-        listColumnsToSelect = List.of(nameCol, priceCol, changes24hCol, avgBuyCol, avgSellCol, amountCol);
+        listColumnsToSelect = List.of(nameCol, priceCol, changes24hCol, avgBuyCol, avgSellCol);
 
         grid.getColumns().forEach(c -> {
             c.setSortable(true);
@@ -155,7 +155,7 @@ public class AssetsGrid extends Div {
     }
 
     private void hideZeroAmountItems() {
-        dataView.setFilter(assetData -> assetData.getAsset().getAmount() > 0);
+//        dataView.setFilter(assetData -> assetData.getAsset().getAmount() > 0);
     }
 
     private ComponentRenderer<Container, AssetData> columnNameRenderer() {

@@ -2,10 +2,9 @@ package com.example.application.views.components.complex_components.dialogs;
 
 import com.example.application.data.models.InstrumentsProvider;
 import com.example.application.data.models.crypto.Currency;
-import com.example.application.entities.crypto.Asset;
-import com.example.application.services.crypto.AssetWatcherService;
 import com.example.application.services.SecurityService;
 import com.example.application.services.UserService;
+import com.example.application.services.crypto.AssetWatcherService;
 import com.example.application.views.components.utils.HasNotifications;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
@@ -87,11 +86,11 @@ public class AddAssetDialog extends Dialog implements HasNotifications {
 
 
 
-    // TODO: Refactor
-    public Asset getAsset() {
-        Currency currency = instrumentsProvider.getCurrencyByName(nameField.getValue());
-        return new Asset(currency.getName());
-    }
+//    // TODO: Refactor
+//    public Asset getAsset() {
+//        Currency currency = instrumentsProvider.getCurrencyByName(nameField.getValue());
+//        return new Asset(currency.getName());
+//    }
 
     public void addClickSaveBtnListener(Consumer<?> listener) {
         saveButton.addClickListener(e -> listener.accept(null));
