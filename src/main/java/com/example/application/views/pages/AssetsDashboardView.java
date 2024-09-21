@@ -13,7 +13,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.server.auth.AnonymousAllowed;
+import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /*
@@ -21,7 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  *   - Finish performance Section
  * */
 
-@AnonymousAllowed
+@PermitAll
 @PageTitle("Assets Dashboard")
 @Route(value = "assets-dashboard", layout = MainLayout.class)
 public class AssetsDashboardView extends Main {

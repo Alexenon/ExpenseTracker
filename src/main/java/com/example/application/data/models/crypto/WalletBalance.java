@@ -2,18 +2,22 @@ package com.example.application.data.models.crypto;
 
 import com.example.application.entities.crypto.Asset;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @Entity
 @Table(name = "Wallet_Balances")
+@NoArgsConstructor
+@AllArgsConstructor
 public class WalletBalance {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long balanceId;
+    private long id;
 
     @ManyToOne
     @JoinColumn(name = "wallet_id", nullable = false)
@@ -27,6 +31,6 @@ public class WalletBalance {
     private double amount = 0.0;
 
     @Column(nullable = false, updatable = false)
-    private LocalDate createdAt = LocalDate.now();
+    private LocalDateTime createdAt = LocalDateTime.now();
 
 }

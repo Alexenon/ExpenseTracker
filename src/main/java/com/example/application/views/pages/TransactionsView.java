@@ -11,7 +11,7 @@ import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @PermitAll
-@PageTitle("Yearly expenses")
+@PageTitle("Transactions")
 @Route(value = "transactions", layout = MainLayout.class)
 public class TransactionsView extends Main {
 

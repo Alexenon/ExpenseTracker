@@ -25,8 +25,8 @@ import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.theme.lumo.LumoIcon;
+import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigInteger;
@@ -36,7 +36,7 @@ import java.math.BigInteger;
  *  - cursor: not-allowed;    - style something
  * */
 
-@AnonymousAllowed
+@PermitAll
 @PageTitle("Asset Details")
 @Route(value = "details", layout = MainLayout.class)
 public class AssetDetailsView extends Main implements HasUrlParameter<String> {

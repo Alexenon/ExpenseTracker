@@ -1,8 +1,13 @@
 package com.example.application.services;
 
+import com.example.application.data.models.crypto.Wallet;
+import com.example.application.data.models.crypto.WalletBalance;
 import com.example.application.data.requests.RegisterUserRequest;
 import com.example.application.entities.User;
 import com.example.application.repositories.UserRepository;
+import com.example.application.repositories.crypto.AssetRepository;
+import com.example.application.repositories.crypto.WalletBalanceRepository;
+import com.example.application.repositories.crypto.WalletRepository;
 import com.example.application.utils.exceptions.UserExistException;
 import jakarta.transaction.Transactional;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -19,10 +24,20 @@ import java.util.Optional;
 public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
+    private final AssetRepository assetRepository;
+    private final WalletRepository walletRepository;
+    private final WalletBalanceRepository walletBalanceRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository,
+                       AssetRepository assetRepository,
+                       WalletRepository walletRepository,
+                       WalletBalanceRepository walletBalanceRepository,
+                       PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.assetRepository = assetRepository;
+        this.walletRepository = walletRepository;
+        this.walletBalanceRepository = walletBalanceRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -70,6 +85,7 @@ public class UserService implements UserDetailsService {
         return createNewUser(user);
     }
 
+    @Transactional
     public User createNewUser(User user) {
         if (findByUsernameIgnoreCase(user.getUsername()).isPresent()) {
             throw new UserExistException("There is already a user with this username");
@@ -80,9 +96,23 @@ public class UserService implements UserDetailsService {
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setRoles(Collections.singleton(User.Role.USER_ROLE));
-        user.setEmail(user.getEmail().toLowerCase());
+        user.setEmail(user.getEmail().trim().toLowerCase());
+        User savedUser = userRepository.save(user);
 
-        return userRepository.save(user);
+        // Create and attach a new wallet to this user
+        Wallet wallet = new Wallet();
+        wallet.setUser(savedUser);
+        walletRepository.save(wallet);
+
+        // Creating new Wallet Balance for each asset with value 0.0
+        assetRepository.findAll().forEach(asset -> {
+            WalletBalance walletBalance = new WalletBalance();
+            walletBalance.setWallet(wallet);
+            walletBalance.setAsset(asset);
+            walletBalanceRepository.save(walletBalance);
+        });
+
+        return savedUser;
     }
 
 }

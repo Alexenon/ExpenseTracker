@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @Entity
@@ -23,6 +23,6 @@ public class Wallet {
     private User user;
 
     @Column(nullable = false)
-    private LocalDate dateCreated;
+    private LocalDateTime dateCreated = LocalDateTime.now();
 
 }

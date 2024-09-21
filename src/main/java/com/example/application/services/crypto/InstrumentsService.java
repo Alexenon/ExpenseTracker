@@ -6,13 +6,12 @@ import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.AssetWatcher;
 import com.example.application.repositories.crypto.AssetRepository;
 import com.example.application.repositories.crypto.AssetWatcherRepository;
-import com.example.application.repositories.crypto.CryptoTransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Component
+@Service
 public class InstrumentsService {
 
     @Autowired
@@ -22,7 +21,7 @@ public class InstrumentsService {
     private AssetWatcherRepository assetWatcherRepository;
 
     @Autowired
-    private CryptoTransactionRepository transactionRepository;
+    private CryptoTransactionService transactionService;
 
     public Asset getAssetBySymbol(String symbolName) {
         return assetRepository.findBySymbol(symbolName.toUpperCase());
@@ -57,22 +56,19 @@ public class InstrumentsService {
      * */
 
     public List<CryptoTransaction> getTransactions() {
-        return transactionRepository.findAll();
+        return transactionService.getTransactions();
     }
 
     public List<CryptoTransaction> getTransactionsByAsset(Asset asset) {
-        return transactionRepository.findByAsset(asset);
+        return transactionService.getTransactionsByAsset(asset);
     }
 
     public CryptoTransaction saveTransaction(CryptoTransaction transaction) {
-        transaction.setOrderQuantity(transaction.getOrderTotalCost() / transaction.getMarketPrice());
-        CryptoTransaction savedTransaction = transactionRepository.save(transaction);
-        System.out.printf("Saved -> %s\n", savedTransaction);
-        return savedTransaction;
+        return transactionService.saveTransaction(transaction);
     }
 
     public void deleteTransaction(CryptoTransaction transaction) {
-        transactionRepository.delete(transaction);
+        transactionService.deleteTransaction(transaction);
     }
 
     /*
