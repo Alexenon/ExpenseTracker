@@ -46,11 +46,13 @@ import java.util.function.Consumer;
 */
 public class AssetsGrid extends Div {
 
-    private final Grid<AssetData> grid = new Grid<>();
     private final TextField searchField = new TextField();
-    private final Checkbox checkbox = new Checkbox("Hide 0 amount assets");
+    private final Checkbox hideAssetsCheckbox = new Checkbox("Hide 0 amount assets");
     private final Button syncButton = new Button("Sync", LumoIcon.RELOAD.create());
+
+    private final Grid<AssetData> grid = new Grid<>();
     private final GridListDataView<AssetData> dataView = grid.setItems();
+
     private final Span hiddenRowsCounterField = new Span();
 
     private MultiSelectComboBox<String> columnSelector;
@@ -71,7 +73,7 @@ public class AssetsGrid extends Div {
     }
 
     private Div gridHeader() {
-        Div syncContainer = new Div(syncButton, checkbox);
+        Div syncContainer = new Div(syncButton, hideAssetsCheckbox);
         syncContainer.addClassName("sync-container");
 
         Div header = new Div(searchField, syncContainer);
@@ -143,8 +145,8 @@ public class AssetsGrid extends Div {
     }
 
     private void initializeFilteringNonZeroValues() {
-        checkbox.addClickListener(e -> {
-            if (checkbox.getValue().equals(true)) {
+        hideAssetsCheckbox.addClickListener(e -> {
+            if (hideAssetsCheckbox.getValue().equals(true)) {
                 hideZeroAmountItems();
             } else {
                 resetGridFilteredItems();
@@ -248,7 +250,7 @@ public class AssetsGrid extends Div {
     private void resetGridFilteredItems() {
         dataView.setFilter(a -> true);
         searchField.setValue("");
-        checkbox.setValue(false);
+        hideAssetsCheckbox.setValue(false);
         updateHiddenRowsCounter();
     }
 

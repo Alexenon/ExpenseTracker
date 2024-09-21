@@ -1,13 +1,10 @@
 package com.example.application.services;
 
 import com.example.application.data.models.crypto.Wallet;
-import com.example.application.data.models.crypto.WalletBalance;
 import com.example.application.data.requests.RegisterUserRequest;
 import com.example.application.entities.User;
 import com.example.application.repositories.UserRepository;
-import com.example.application.repositories.crypto.AssetRepository;
-import com.example.application.repositories.crypto.WalletBalanceRepository;
-import com.example.application.repositories.crypto.WalletRepository;
+import com.example.application.services.crypto.WalletService;
 import com.example.application.utils.exceptions.UserExistException;
 import jakarta.transaction.Transactional;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -24,20 +21,14 @@ import java.util.Optional;
 public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
-    private final AssetRepository assetRepository;
-    private final WalletRepository walletRepository;
-    private final WalletBalanceRepository walletBalanceRepository;
+    private final WalletService walletService;
     private final PasswordEncoder passwordEncoder;
 
     public UserService(UserRepository userRepository,
-                       AssetRepository assetRepository,
-                       WalletRepository walletRepository,
-                       WalletBalanceRepository walletBalanceRepository,
+                       WalletService walletService,
                        PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
-        this.assetRepository = assetRepository;
-        this.walletRepository = walletRepository;
-        this.walletBalanceRepository = walletBalanceRepository;
+        this.walletService = walletService;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -102,15 +93,7 @@ public class UserService implements UserDetailsService {
         // Create and attach a new wallet to this user
         Wallet wallet = new Wallet();
         wallet.setUser(savedUser);
-        walletRepository.save(wallet);
-
-        // Creating new Wallet Balance for each asset with value 0.0
-        assetRepository.findAll().forEach(asset -> {
-            WalletBalance walletBalance = new WalletBalance();
-            walletBalance.setWallet(wallet);
-            walletBalance.setAsset(asset);
-            walletBalanceRepository.save(walletBalance);
-        });
+        walletService.saveWallet(wallet);
 
         return savedUser;
     }

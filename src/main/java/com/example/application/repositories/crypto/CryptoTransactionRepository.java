@@ -1,6 +1,7 @@
 package com.example.application.repositories.crypto;
 
 import com.example.application.data.models.crypto.CryptoTransaction;
+import com.example.application.data.models.crypto.Wallet;
 import com.example.application.entities.crypto.Asset;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -10,11 +11,14 @@ import java.util.List;
 @Repository
 public interface CryptoTransactionRepository extends JpaRepository<CryptoTransaction, Long> {
 
-    List<CryptoTransaction> findByAsset(Asset asset);
+    List<CryptoTransaction> findBy(Wallet wallet);
 
-    List<CryptoTransaction> findByType(CryptoTransaction.TransactionType type);
+    List<CryptoTransaction> findBy(Asset asset);
 
-    List<CryptoTransaction> findByAssetAndType(Asset asset, CryptoTransaction.TransactionType type);
+    List<CryptoTransaction> findBy(CryptoTransaction.TransactionType type);
 
+    List<CryptoTransaction> findBy(Wallet wallet, Asset asset);
+
+    List<CryptoTransaction> findBy(Wallet wallet, Asset asset, CryptoTransaction.TransactionType type);
 
 }

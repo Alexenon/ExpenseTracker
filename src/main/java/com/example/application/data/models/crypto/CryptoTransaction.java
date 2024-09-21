@@ -80,12 +80,7 @@ public class CryptoTransaction {
 
     public enum TransactionType {
         BUY,
-        SELL;
-
-        public boolean isBuyTransaction() {
-            return this.equals(TransactionType.BUY);
-        }
-
+        SELL
     }
 
     @Override

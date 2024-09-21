@@ -1,6 +1,7 @@
 package com.example.application.services.crypto;
 
 import com.example.application.data.models.crypto.CryptoTransaction;
+import com.example.application.data.models.crypto.Wallet;
 import com.example.application.data.models.crypto.WalletBalance;
 import com.example.application.entities.crypto.Asset;
 import com.example.application.repositories.crypto.CryptoTransactionRepository;
@@ -21,13 +22,26 @@ public class CryptoTransactionService {
         this.transactionRepository = transactionRepository;
     }
 
-    public List<CryptoTransaction> getTransactions() {
-        return transactionRepository.findAll();
+    public List<CryptoTransaction> findBy(Wallet wallet) {
+        return transactionRepository.findBy(wallet);
     }
 
-    public List<CryptoTransaction> getTransactionsByAsset(Asset asset) {
-        return transactionRepository.findByAsset(asset);
+    public List<CryptoTransaction> findBy(Asset asset) {
+        return transactionRepository.findBy(asset);
     }
+
+    public List<CryptoTransaction> findBy(CryptoTransaction.TransactionType type) {
+        return transactionRepository.findBy(type);
+    }
+
+    public List<CryptoTransaction> findBy(Wallet wallet, Asset asset) {
+        return transactionRepository.findBy(wallet, asset);
+    }
+
+    public List<CryptoTransaction> findBy(Wallet wallet, Asset asset, CryptoTransaction.TransactionType type) {
+        return transactionRepository.findBy(wallet, asset, type);
+    }
+
 
     public CryptoTransaction saveTransaction(CryptoTransaction transaction) {
         transaction.setOrderQuantity(transaction.getOrderTotalCost() / transaction.getMarketPrice());

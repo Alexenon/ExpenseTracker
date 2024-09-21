@@ -25,6 +25,7 @@ public class SecurityService {
             return userDetails;
         }
 
+        // TODO: Throw a custom unauthenticated user exception instead of null -> Create separate exception page
         return null;
     }
 
