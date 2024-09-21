@@ -1,7 +1,7 @@
 package com.example.application.views.pages;
 
 import com.example.application.data.models.InstrumentsProvider;
-import com.example.application.services.crypto.InstrumentsService;
+import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.views.components.TransactionsGrid;
 import com.example.application.views.layouts.MainLayout;
 import com.vaadin.flow.component.html.Main;
@@ -15,21 +15,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Route(value = "transactions", layout = MainLayout.class)
 public class TransactionsView extends Main {
 
-    private final InstrumentsService instrumentService;
+    private final InstrumentsFacadeService instrumentsFacadeService;
     private final InstrumentsProvider instrumentsProvider;
 
     private final TransactionsGrid transactionsGrid;
 
     @Autowired
-    public TransactionsView(InstrumentsService instrumentService, InstrumentsProvider instrumentsProvider) {
-        this.instrumentService = instrumentService;
+    public TransactionsView(InstrumentsFacadeService instrumentsFacadeService, InstrumentsProvider instrumentsProvider) {
+        this.instrumentsFacadeService = instrumentsFacadeService;
         this.instrumentsProvider = instrumentsProvider;
-        this.transactionsGrid = new TransactionsGrid(instrumentService, instrumentsProvider);
+        this.transactionsGrid = new TransactionsGrid(instrumentsFacadeService, instrumentsProvider);
         buildPage();
     }
 
     private void buildPage() {
-        transactionsGrid.setItems(instrumentService.getTransactions());
+        transactionsGrid.setItems(instrumentsFacadeService.getAllTransactions());
         add(transactionsGrid);
     }
 

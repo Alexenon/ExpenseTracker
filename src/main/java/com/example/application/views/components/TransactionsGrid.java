@@ -13,7 +13,7 @@ package com.example.application.views.components;
 import com.example.application.data.models.InstrumentsProvider;
 import com.example.application.data.models.crypto.AssetData;
 import com.example.application.data.models.crypto.CryptoTransaction;
-import com.example.application.services.crypto.InstrumentsService;
+import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.views.components.complex_components.dialogs.transactions.TransactionDetailsDialog;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
@@ -34,7 +34,7 @@ import java.util.Set;
 
 public class TransactionsGrid extends Div {
 
-    private final InstrumentsService instrumentsService;
+    private final InstrumentsFacadeService instrumentsFacadeService;
     private final InstrumentsProvider instrumentsProvider;
 
     private final ComboBox<AssetData> nameSearchField = new ComboBox<>();
@@ -43,8 +43,8 @@ public class TransactionsGrid extends Div {
     private final GridListDataView<CryptoTransaction> dataView = grid.setItems();
 
     @Autowired
-    public TransactionsGrid(InstrumentsService instrumentsService, InstrumentsProvider instrumentsProvider) {
-        this.instrumentsService = instrumentsService;
+    public TransactionsGrid(InstrumentsFacadeService instrumentsFacadeService, InstrumentsProvider instrumentsProvider) {
+        this.instrumentsFacadeService = instrumentsFacadeService;
         this.instrumentsProvider = instrumentsProvider;
         initializeGrid();
         initializeFilteringBySearch();
@@ -70,7 +70,7 @@ public class TransactionsGrid extends Div {
 
         grid.addItemClickListener(row -> {
             TransactionDetailsDialog detailsDialog =
-                    new TransactionDetailsDialog(row.getItem(), instrumentsService, instrumentsProvider);
+                    new TransactionDetailsDialog(row.getItem(), instrumentsFacadeService, instrumentsProvider);
             detailsDialog.open();
         });
     }

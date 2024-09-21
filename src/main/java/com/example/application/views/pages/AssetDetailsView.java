@@ -4,7 +4,7 @@ import com.example.application.data.models.InstrumentsProvider;
 import com.example.application.data.models.NumberType;
 import com.example.application.data.models.crypto.AssetData;
 import com.example.application.entities.crypto.AssetWatcher;
-import com.example.application.services.crypto.InstrumentsService;
+import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.utils.common.MathUtils;
 import com.example.application.utils.common.StringUtils;
 import com.example.application.views.components.*;
@@ -48,7 +48,7 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
     private InstrumentsProvider instrumentsProvider;
 
     @Autowired
-    private InstrumentsService instrumentsService;
+    private InstrumentsFacadeService instrumentsFacadeService;
 
     @Override
     public void setParameter(BeforeEvent beforeEvent, String symbol) {
@@ -57,7 +57,7 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
                 .findFirst()
                 .orElseThrow();
 
-        this.addTransactionDialog = new AddTransactionDialog(assetData, instrumentsService, instrumentsProvider);
+        this.addTransactionDialog = new AddTransactionDialog(assetData, instrumentsFacadeService, instrumentsProvider);
 
         buildPage();
         getElement().executeJs("window.scrollTo(0,0)"); // Scroll to top of the page, on initialization
@@ -376,15 +376,15 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
 
         Button seeAllTransactionsBtn = new Button("See more transactions");
 
-        TransactionsGrid transactionsGrid = new TransactionsGrid(instrumentsService, instrumentsProvider);
-        transactionsGrid.setItems(instrumentsService.getTransactionsByAsset(assetData.getAsset()));
+        TransactionsGrid transactionsGrid = new TransactionsGrid(instrumentsFacadeService, instrumentsProvider);
+        transactionsGrid.setItems(instrumentsFacadeService.getTransactionsByAsset(assetData.getAsset()));
         transactionsGrid.setPageSize(10);
         return new Section(header, transactionsGrid);
     }
 
     private Section createWatchlistSection(AssetWatcher.ActionType actionType) {
         PriceWatchlistComponent watchlistComponent = new PriceWatchlistComponent(assetData.getAsset(),
-                actionType, instrumentsService);
+                actionType, instrumentsFacadeService);
 
         Container header = Container.builder("section-header")
                 .addComponent(() -> {

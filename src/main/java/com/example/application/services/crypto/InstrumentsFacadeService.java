@@ -19,16 +19,16 @@ import java.util.List;
  * and hides other information that user is not supposed to have
  */
 @Service
-public class InstrumentFacadeService {
+public class InstrumentsFacadeService {
 
     private final UserService userService;
     private final SecurityService securityService;
     private final InstrumentsService instrumentsService;
 
     @Autowired
-    public InstrumentFacadeService(UserService userService,
-                                   SecurityService securityService,
-                                   InstrumentsService instrumentsService) {
+    public InstrumentsFacadeService(UserService userService,
+                                    SecurityService securityService,
+                                    InstrumentsService instrumentsService) {
         this.userService = userService;
         this.securityService = securityService;
         this.instrumentsService = instrumentsService;

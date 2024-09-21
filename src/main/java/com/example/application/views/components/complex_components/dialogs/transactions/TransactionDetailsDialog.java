@@ -4,7 +4,7 @@ import com.example.application.data.models.InstrumentsProvider;
 import com.example.application.data.models.NumberType;
 import com.example.application.data.models.crypto.AssetData;
 import com.example.application.data.models.crypto.CryptoTransaction;
-import com.example.application.services.crypto.InstrumentsService;
+import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.views.components.complex_components.PriceBadge;
 import com.example.application.views.components.native_components.Container;
 import com.vaadin.flow.component.Key;
@@ -25,7 +25,7 @@ public class TransactionDetailsDialog extends Dialog {
 
     private final AssetData assetData;
     private final CryptoTransaction transaction;
-    private final InstrumentsService instrumentsService;
+    private final InstrumentsFacadeService instrumentsFacadeService;
     private final InstrumentsProvider instrumentsProvider;
 
     private final Paragraph editBtn = new Paragraph("Edit");
@@ -33,10 +33,10 @@ public class TransactionDetailsDialog extends Dialog {
 
     @Autowired
     public TransactionDetailsDialog(CryptoTransaction transaction,
-                                    InstrumentsService instrumentsService,
+                                    InstrumentsFacadeService instrumentsFacadeService,
                                     InstrumentsProvider instrumentsProvider) {
         this.transaction = transaction;
-        this.instrumentsService = instrumentsService;
+        this.instrumentsFacadeService = instrumentsFacadeService;
         this.instrumentsProvider = instrumentsProvider;
         this.assetData = instrumentsProvider.getAssetDataBySymbol(transaction.getAsset().getSymbol());
 
@@ -66,14 +66,14 @@ public class TransactionDetailsDialog extends Dialog {
         editBtn.addClassName("edit-btn");
         editBtn.addClickListener(e -> {
             EditTransactionDialog editTransactionDialog = new EditTransactionDialog(assetData,
-                    transaction, instrumentsService, instrumentsProvider);
+                    transaction, instrumentsFacadeService, instrumentsProvider);
 
             editTransactionDialog.addClickSaveBtnListener(dialog -> close());
             editTransactionDialog.addClickCancelBtnListener(dialog -> {
                 this.close();
                 CryptoTransaction newTransaction = editTransactionDialog.getTransaction();
                 TransactionDetailsDialog newDetailsDialog = new TransactionDetailsDialog(newTransaction,
-                        instrumentsService, instrumentsProvider);
+                        instrumentsFacadeService, instrumentsProvider);
                 newDetailsDialog.open();
             });
             editTransactionDialog.open();
@@ -97,7 +97,7 @@ public class TransactionDetailsDialog extends Dialog {
 
         Div body = Container.builder()
                 .addComponent(() -> {
-                    String text = transaction.getType().isBuyTransaction() ? "Bought" : "Sold";
+                    String text = transaction.isBuyTransaction() ? "Bought" : "Sold";
                     Span typeField = new Span(text);
                     typeField.addClassName("transaction-profit-loss-badge-label");
                     return typeField;

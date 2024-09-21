@@ -4,7 +4,7 @@ import com.example.application.data.models.InstrumentsProvider;
 import com.example.application.data.models.crypto.AssetData;
 import com.example.application.data.models.crypto.CryptoTransaction;
 import com.example.application.entities.crypto.Asset;
-import com.example.application.services.crypto.InstrumentsService;
+import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.views.components.CurrencyField;
 import com.example.application.views.components.native_components.Container;
 import com.vaadin.flow.component.Key;
@@ -33,7 +33,7 @@ public class AddTransactionDialog extends Dialog {
     private final AssetData assetData;
     private final CryptoTransaction transaction;
     private final InstrumentsProvider instrumentsProvider;
-    private final InstrumentsService instrumentsService;
+    private final InstrumentsFacadeService instrumentsFacadeService;
     private final Binder<CryptoTransaction> binder = new Binder<>(CryptoTransaction.class);
 
     private final ComboBox<AssetData> assetSymbolField = new ComboBox<>("Asset");
@@ -46,18 +46,18 @@ public class AddTransactionDialog extends Dialog {
     private final Button saveButton = new Button("Save");
     private final Button cancelButton = new Button("Cancel");
 
-    public AddTransactionDialog(InstrumentsService instrumentsService,
+    public AddTransactionDialog(InstrumentsFacadeService instrumentsFacadeService,
                                 InstrumentsProvider instrumentsProvider) {
-        this(null, instrumentsService, instrumentsProvider);
+        this(null, instrumentsFacadeService, instrumentsProvider);
     }
 
 
     @Autowired
     public AddTransactionDialog(AssetData assetData,
-                                InstrumentsService instrumentsService,
+                                InstrumentsFacadeService instrumentsFacadeService,
                                 InstrumentsProvider instrumentsProvider) {
         this.assetData = assetData;
-        this.instrumentsService = instrumentsService;
+        this.instrumentsFacadeService = instrumentsFacadeService;
         this.instrumentsProvider = instrumentsProvider;
         this.transaction = new CryptoTransaction();
 
@@ -82,7 +82,7 @@ public class AddTransactionDialog extends Dialog {
         saveButton.addClickShortcut(Key.ENTER);
         saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
         saveButton.addClickListener(e -> {
-            CryptoTransaction savedTransaction = instrumentsService.saveTransaction(binder.getBean());
+            CryptoTransaction savedTransaction = instrumentsFacadeService.saveTransaction(binder.getBean());
             this.close();
             System.out.printf("Saved -> %s\n", savedTransaction);
         }); // TODO: HERE

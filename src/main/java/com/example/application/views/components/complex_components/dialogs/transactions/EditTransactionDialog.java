@@ -4,7 +4,7 @@ import com.example.application.data.models.InstrumentsProvider;
 import com.example.application.data.models.crypto.AssetData;
 import com.example.application.data.models.crypto.CryptoTransaction;
 import com.example.application.entities.crypto.Asset;
-import com.example.application.services.crypto.InstrumentsService;
+import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.views.components.CurrencyField;
 import com.example.application.views.components.native_components.Container;
 import com.vaadin.flow.component.Key;
@@ -28,7 +28,7 @@ public class EditTransactionDialog extends Dialog {
 
     private final AssetData assetData;
     private final InstrumentsProvider instrumentsProvider;
-    private final InstrumentsService instrumentsService;
+    private final InstrumentsFacadeService instrumentsFacadeService;
     private final Binder<CryptoTransaction> binder = new Binder<>(CryptoTransaction.class);
 
     private final ComboBox<AssetData> assetSymbolField = new ComboBox<>("Asset");
@@ -46,11 +46,11 @@ public class EditTransactionDialog extends Dialog {
     @Autowired
     public EditTransactionDialog(AssetData assetData,
                                  CryptoTransaction transaction,
-                                 InstrumentsService instrumentsService,
+                                 InstrumentsFacadeService instrumentsFacadeService,
                                  InstrumentsProvider instrumentsProvider) {
         this.assetData = assetData;
         this.transaction = transaction;
-        this.instrumentsService = instrumentsService;
+        this.instrumentsFacadeService = instrumentsFacadeService;
         this.instrumentsProvider = instrumentsProvider;
         buildForm();
     }
@@ -74,8 +74,8 @@ public class EditTransactionDialog extends Dialog {
         saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
         saveButton.addClickListener(e -> {
             transaction = binder.getBean();
-            instrumentsService.saveTransaction(transaction);
-            TransactionDetailsDialog detailsDialog = new TransactionDetailsDialog(transaction, instrumentsService, instrumentsProvider);
+            instrumentsFacadeService.saveTransaction(transaction);
+            TransactionDetailsDialog detailsDialog = new TransactionDetailsDialog(transaction, instrumentsFacadeService, instrumentsProvider);
             detailsDialog.open();
             this.close();
         });
