@@ -1,7 +1,7 @@
 package com.example.application.data.models.crypto;
 
 import com.example.application.entities.crypto.Asset;
-import com.example.application.utils.fetchers.api_responses.AssetInfo;
+import com.example.application.utils.fetchers.api_responses.AssetMetadata;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -11,29 +11,29 @@ import java.util.List;
 public class AssetData {
 
     private Asset asset;
-    private AssetInfo assetInfo;
+    private AssetMetadata assetMetadata;
     private List<CryptoTransaction> transactions;
 
-    public AssetData(Asset asset, AssetInfo assetInfo) {
+    public AssetData(Asset asset, AssetMetadata assetMetadata) {
         this.asset = asset;
-        this.assetInfo = assetInfo;
+        this.assetMetadata = assetMetadata;
         this.transactions = new ArrayList<>();
     }
 
     public String getName() {
-        return assetInfo.getName();
+        return assetMetadata.getName();
     }
 
     public String getSymbol() {
-        return assetInfo.getSymbol();
+        return assetMetadata.getSymbol();
     }
 
     public double getPrice() {
-        return assetInfo.getPriceUsd();
+        return assetMetadata.getPriceUsd();
     }
 
     public double getChangesLast24hPercentage() {
-        return assetInfo.getSpotMoving24HourChangePercentageUsd();
+        return assetMetadata.getSpotMoving24HourChangePercentageUsd();
     }
 
     public double getAverageBuyPrice() {

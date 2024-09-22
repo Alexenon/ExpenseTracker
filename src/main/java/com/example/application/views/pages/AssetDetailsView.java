@@ -86,7 +86,7 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
 
         Container coinNameContainer = Container.builder("coin-overview-name-container")
                 .addComponent(() -> {
-                    Image image = new Image(assetData.getAssetInfo().getLogoUrl(), assetData.getName());
+                    Image image = new Image(assetData.getAssetMetadata().getLogoUrl(), assetData.getName());
                     image.setClassName("coin-overview-image");
                     return image;
                 })
@@ -96,17 +96,17 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
                     dot.setClassName("dot");
                     return dot;
                 })
-                .addComponent(new Span(assetData.getAssetInfo().getSymbol()))
+                .addComponent(new Span(assetData.getAssetMetadata().getSymbol()))
                 .build();
 
         Container priceWrapper = Container.builder()
                 .addClassName("price-wrapper")
                 .addComponent(() -> {
-                    String assetPrice = NumberType.CURRENCY.parse(assetData.getAssetInfo().getPriceUsd());
+                    String assetPrice = NumberType.CURRENCY.parse(assetData.getAssetMetadata().getPriceUsd());
                     return new Paragraph(assetPrice);
                 })
                 .addComponent(() -> {
-                    double percentageChangeLast24H = assetData.getAssetInfo().getSpotMoving24HourChangePercentageUsd();
+                    double percentageChangeLast24H = assetData.getAssetMetadata().getSpotMoving24HourChangePercentageUsd();
                     return new PriceBadge(percentageChangeLast24H, NumberType.PERCENT);
                 })
                 .build();
@@ -190,14 +190,14 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         H3 title = new H3("Crypto Convertor");
         title.setClassName("section-title");
 
-        Image inputImage = new Image(assetData.getAssetInfo().getLogoUrl(), assetData.getName());
+        Image inputImage = new Image(assetData.getAssetMetadata().getLogoUrl(), assetData.getName());
         inputImage.setClassName("coin-overview-image");
 
         CurrencyField tokenAmountField = new CurrencyField();
         tokenAmountField.setValue(1);
 
         CurrencyField usdAmountField = new CurrencyField();
-        usdAmountField.setValue(assetData.getAssetInfo().getPriceUsd());
+        usdAmountField.setValue(assetData.getAssetMetadata().getPriceUsd());
 
         Container inputContainer = Container.builder()
                 .addComponent(inputImage)
@@ -227,14 +227,14 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         // TODO: setValue() should be same formatter as default
         tokenAmountField.setValueChangeMode(ValueChangeMode.EAGER);
         tokenAmountField.addKeyUpListener(e -> {
-            double calculatedPrice = tokenAmountField.doubleValue() * assetData.getAssetInfo().getPriceUsd();
+            double calculatedPrice = tokenAmountField.doubleValue() * assetData.getAssetMetadata().getPriceUsd();
             usdAmountField.setValue(calculatedPrice);
             System.out.println("usdAmountField = " + calculatedPrice);
         });
 
         usdAmountField.setValueChangeMode(ValueChangeMode.EAGER);
         usdAmountField.addKeyUpListener(e -> {
-            double calculatedPrice = usdAmountField.doubleValue() / assetData.getAssetInfo().getPriceUsd();
+            double calculatedPrice = usdAmountField.doubleValue() / assetData.getAssetMetadata().getPriceUsd();
             tokenAmountField.setValue(calculatedPrice);
             System.out.println("tokenAmountField = " + calculatedPrice);
         });
@@ -291,10 +291,10 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         title.setClassName("section-title");
 
         Div marketCap = createStatsItem("Market Cap",
-                MathUtils.formatBigNumber(assetData.getAssetInfo().getTotalMktCapUsd()));
+                MathUtils.formatBigNumber(assetData.getAssetMetadata().getTotalMktCapUsd()));
 
-        BigInteger totalSupplyValue = assetData.getAssetInfo().getSupplyTotal();
-        BigInteger circulationSupplyValue = assetData.getAssetInfo().getSupplyCirculating();
+        BigInteger totalSupplyValue = assetData.getAssetMetadata().getSupplyTotal();
+        BigInteger circulationSupplyValue = assetData.getAssetMetadata().getSupplyCirculating();
         int percentageUseOfCirculationSupply = MathUtils.percentageOf(circulationSupplyValue, totalSupplyValue);
         ProgressBar bar = new ProgressBar(0, 100, percentageUseOfCirculationSupply);
 
@@ -311,9 +311,9 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         Div circulationSupply = createStatsItem("Circulation Supply", circulationSupplyContainer);
 
         Div totalSupply = createStatsItem("Total Supply",
-                MathUtils.formatBigNumber(assetData.getAssetInfo().getSupplyTotal()));
+                MathUtils.formatBigNumber(assetData.getAssetMetadata().getSupplyTotal()));
         Div volume24Hour = createStatsItem("Volume 24h",
-                MathUtils.formatBigNumber(assetData.getAssetInfo().getSpotMoving24HourQuoteVolumeUsd()));
+                MathUtils.formatBigNumber(assetData.getAssetMetadata().getSpotMoving24HourQuoteVolumeUsd()));
 
         Div body = new Div(marketCap, circulationSupply, totalSupply, volume24Hour);
         body.addClassNames("section-card-wrapper", "market-stats-section");
@@ -325,7 +325,7 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
     private Section aboutSection() {
         H3 title = new H3("About " + assetData.getName());
         title.setClassName("section-title");
-        Paragraph description = new Paragraph(assetData.getAssetInfo().getAssetDescriptionSummary());
+        Paragraph description = new Paragraph(assetData.getAssetMetadata().getAssetDescriptionSummary());
         Container body = new Container("section-card-wrapper", description);
         return new Section(title, body);
     }

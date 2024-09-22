@@ -1,6 +1,7 @@
 package com.example.application.services.crypto;
 
 import com.example.application.data.enums.Symbols;
+import com.example.application.data.models.InstrumentsProvider;
 import com.example.application.data.models.crypto.CryptoTransaction;
 import com.example.application.data.models.crypto.Wallet;
 import com.example.application.data.models.crypto.WalletBalance;
@@ -9,6 +10,7 @@ import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.AssetWatcher;
 import com.example.application.services.SecurityService;
 import com.example.application.services.UserService;
+import com.example.application.utils.fetchers.api_responses.AssetMetadata;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,14 +26,17 @@ public class InstrumentsFacadeService {
     private final UserService userService;
     private final SecurityService securityService;
     private final InstrumentsService instrumentsService;
+    private final InstrumentsProvider instrumentsProvider;
 
     @Autowired
     public InstrumentsFacadeService(UserService userService,
                                     SecurityService securityService,
-                                    InstrumentsService instrumentsService) {
+                                    InstrumentsService instrumentsService,
+                                    InstrumentsProvider instrumentsProvider) {
         this.userService = userService;
         this.securityService = securityService;
         this.instrumentsService = instrumentsService;
+        this.instrumentsProvider = instrumentsProvider;
     }
 
     //<editor-fold desc="ASSET">
@@ -93,6 +98,11 @@ public class InstrumentsFacadeService {
         return instrumentsService.getWalletBalancesByWalletAndAsset(getAuthenticatedUserWallet(), asset);
     }
     //</editor-fold>
+
+    public AssetMetadata getAssetMetadata(Asset asset) {
+        return instrumentsProvider.getMetadata().get(asset);
+    }
+
 
     private Wallet getAuthenticatedUserWallet() {
         String username = securityService.getAuthenticatedUser().getUsername();

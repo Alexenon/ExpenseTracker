@@ -164,17 +164,17 @@ public class AssetsGrid extends Div {
         return new ComponentRenderer<>(a ->
                 Container.builder("coin-overview-name-container")
                         .addComponent(() -> {
-                            Image image = new Image(a.getAssetInfo().getLogoUrl(), a.getAssetInfo().getName());
+                            Image image = new Image(a.getAssetMetadata().getLogoUrl(), a.getAssetMetadata().getName());
                             image.addClassNames("rounded", "coin-overview-image");
                             return image;
                         })
-                        .addComponent(new Paragraph(a.getAssetInfo().getName()))
+                        .addComponent(new Paragraph(a.getAssetMetadata().getName()))
                         .addComponent(() -> {
                             Span dot = new Span("•");
                             dot.setClassName("dot");
                             return dot;
                         })
-                        .addComponent(new Span(a.getAssetInfo().getSymbol()))
+                        .addComponent(new Span(a.getAssetMetadata().getSymbol()))
                         .build()
         );
     }

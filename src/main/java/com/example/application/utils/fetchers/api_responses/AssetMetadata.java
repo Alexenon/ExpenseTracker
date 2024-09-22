@@ -10,7 +10,7 @@ import java.util.List;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AssetInfo {
+public class AssetMetadata {
     @JsonProperty("ID")
     private int id;
 

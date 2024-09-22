@@ -1,81 +1,69 @@
 package com.example.application.data.models;
 
-import com.example.application.data.models.crypto.AssetData;
-import com.example.application.data.models.crypto.Currency;
 import com.example.application.entities.crypto.Asset;
 import com.example.application.repositories.crypto.AssetRepository;
-import com.example.application.utils.fetchers.BinanceFetcher;
 import com.example.application.utils.fetchers.CryptoCompareFetcher;
-import lombok.Getter;
+import com.example.application.utils.fetchers.api_responses.AssetMetadata;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
-import java.util.List;
-
-/*
- * TODO:
- *  - Remove @Getters
- *  - Add update List<AssetData>, List<AssetInfo>
- *  - Rename AssetInfo -> AssetMeta (maybe)
- *  - Remove old implementation of currencies
- * */
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class InstrumentsProvider {
 
-    private final List<Asset> assets;
+    private final AssetRepository assetRepository;
 
-    @Getter
-    private List<Currency> currencyList;
-
-    @Getter
-    private List<AssetData> listOfAssetData;
+    private Map<Asset, AssetMetadata> metadataPerAsset;
 
     @Autowired
     private InstrumentsProvider(AssetRepository assetRepository) {
-        this.assets = assetRepository.findAll();
-        this.listOfAssetData = initAssetsData();
+        this.assetRepository = assetRepository;
+        this.metadataPerAsset = fetchMetadata();
     }
 
-    public AssetData getAssetDataBySymbol(String symbol) {
-        return listOfAssetData.stream()
-                .filter(assetData -> assetData.getSymbol().equalsIgnoreCase(symbol))
-                .findFirst()
-                .orElseThrow();
+    private Map<Asset, AssetMetadata> fetchMetadata() {
+        Map<Asset, AssetMetadata> map = new HashMap<>();
+
+        assetRepository.findAll().forEach(asset -> {
+            try {
+                String symbolName = asset.getSymbol();
+                AssetMetadata assetMetadata = CryptoCompareFetcher.getCoinMetaData(symbolName).getData();
+                map.put(asset, assetMetadata);
+            } catch (Exception e) {
+                System.out.printf("Failed to fetch metadata for asset: %s. Error: %s\n", asset.getSymbol(), e.getMessage());
+            }
+        });
+
+        return map;
     }
 
-    private List<AssetData> initAssetsData() {
-        return assets.stream()
-                .map(asset -> new AssetData(asset, CryptoCompareFetcher.getCoinMetaData(asset.getSymbol()).getData()))
-                .toList();
+    // Fetch metadata in parallel for performance improvement
+    // TODO: Compare results
+    private Map<Asset, AssetMetadata> fetchMetadataInParallel() {
+        Map<Asset, AssetMetadata> map = new ConcurrentHashMap<>();
+        assetRepository.findAll().parallelStream().forEach(asset -> {
+            try {
+                String symbolName = asset.getSymbol();
+                AssetMetadata assetMetadata = CryptoCompareFetcher.getCoinMetaData(symbolName).getData();
+                map.put(asset, assetMetadata);
+            } catch (Exception e) {
+                System.out.printf("Failed to fetch metadata for asset: %s. Error: %s\n", asset.getSymbol(), e.getMessage());
+            }
+        });
+        return map;
     }
 
-    public void updateAssetData() {
-        listOfAssetData = initAssetsData();
+    public Map<Asset, AssetMetadata> getMetadata() {
+        return metadataPerAsset;
     }
 
-    public List<Currency> updateCurrencyList() {
-        List<Currency> currencyList = BinanceFetcher.getCryptoPrices("USDT")
-                .stream()
-                .map(cryptoCurrency -> {
-                    String name = cryptoCurrency.getSymbol();
-                    BigDecimal price = BigDecimal.valueOf(cryptoCurrency.getPrice());
-                    return new Currency(name, price, BigDecimal.ZERO);
-                })
-                .toList();
-
-        this.currencyList = currencyList;
-        return currencyList;
+    public Map<Asset, AssetMetadata> getUpdatedMetadata() {
+        metadataPerAsset = fetchMetadata();
+        return metadataPerAsset;
     }
-
-    public Currency getCurrencyByName(String name) {
-        return currencyList.stream()
-                .filter(c -> c.getName().equals(name))
-                .findFirst()
-                .orElse(null);
-    }
-
 
     public String getAssetLogoUrl() {
         return "";

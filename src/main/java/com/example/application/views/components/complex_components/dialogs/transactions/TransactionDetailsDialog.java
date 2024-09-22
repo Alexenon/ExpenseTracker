@@ -92,7 +92,7 @@ public class TransactionDetailsDialog extends Dialog {
                 .addComponent(new HorizontalLayout(totalPriceField, pricePerTokenField))
                 .build();
 
-        Image symbolImage = new Image(assetData.getAssetInfo().getLogoUrl(), assetData.getName());
+        Image symbolImage = new Image(assetData.getAssetMetadata().getLogoUrl(), assetData.getName());
         symbolImage.setClassName("coin-overview-image");
 
         Div body = Container.builder()
