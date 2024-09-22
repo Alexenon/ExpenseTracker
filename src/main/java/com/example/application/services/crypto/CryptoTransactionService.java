@@ -6,6 +6,7 @@ import com.example.application.entities.crypto.Wallet;
 import com.example.application.entities.crypto.WalletBalance;
 import com.example.application.repositories.crypto.CryptoTransactionRepository;
 import com.example.application.repositories.crypto.WalletBalanceRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,6 +17,7 @@ public class CryptoTransactionService {
     private final WalletBalanceRepository walletBalanceRepository;
     private final CryptoTransactionRepository transactionRepository;
 
+    @Autowired
     public CryptoTransactionService(WalletBalanceRepository walletBalanceRepository,
                                     CryptoTransactionRepository transactionRepository) {
         this.walletBalanceRepository = walletBalanceRepository;
@@ -23,23 +25,15 @@ public class CryptoTransactionService {
     }
 
     public List<CryptoTransaction> findBy(Wallet wallet) {
-        return transactionRepository.findBy(wallet);
-    }
-
-    public List<CryptoTransaction> findBy(Asset asset) {
-        return transactionRepository.findBy(asset);
-    }
-
-    public List<CryptoTransaction> findBy(CryptoTransaction.TransactionType type) {
-        return transactionRepository.findBy(type);
+        return transactionRepository.findByWallet(wallet);
     }
 
     public List<CryptoTransaction> findBy(Wallet wallet, Asset asset) {
-        return transactionRepository.findBy(wallet, asset);
+        return transactionRepository.findByWalletAndAsset(wallet, asset);
     }
 
     public List<CryptoTransaction> findBy(Wallet wallet, Asset asset, CryptoTransaction.TransactionType type) {
-        return transactionRepository.findBy(wallet, asset, type);
+        return transactionRepository.findByWalletAndAssetAndType(wallet, asset, type);
     }
 
 

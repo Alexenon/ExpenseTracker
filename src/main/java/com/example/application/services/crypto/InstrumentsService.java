@@ -4,7 +4,6 @@ import com.example.application.data.enums.Symbols;
 import com.example.application.entities.User;
 import com.example.application.entities.crypto.*;
 import com.example.application.repositories.crypto.AssetRepository;
-import com.example.application.repositories.crypto.AssetWatcherRepository;
 import com.example.application.repositories.crypto.WalletBalanceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,21 +15,21 @@ public class InstrumentsService {
 
     private final WalletService walletService;
     private final AssetRepository assetRepository;
+    private final AssetWatcherService assetWatcherService;
     private final CryptoTransactionService transactionService;
-    private final AssetWatcherRepository assetWatcherRepository;
     private final WalletBalanceRepository walletBalanceRepository;
 
     @Autowired
     public InstrumentsService(WalletService walletService,
                               AssetRepository assetRepository,
                               CryptoTransactionService transactionService,
-                              AssetWatcherRepository assetWatcherRepository,
+                              AssetWatcherService assetWatcherService,
                               WalletBalanceRepository walletBalanceRepository
     ) {
         this.walletService = walletService;
         this.assetRepository = assetRepository;
         this.transactionService = transactionService;
-        this.assetWatcherRepository = assetWatcherRepository;
+        this.assetWatcherService = assetWatcherService;
         this.walletBalanceRepository = walletBalanceRepository;
     }
 
@@ -55,23 +54,23 @@ public class InstrumentsService {
      * */
 
     public AssetWatcher saveAssetWatcher(AssetWatcher assetWatcher) {
-        return assetWatcherRepository.save(assetWatcher);
+        return assetWatcherService.save(assetWatcher);
     }
 
     public void deleteAssetWatcher(AssetWatcher assetWatcher) {
-        assetWatcherRepository.delete(assetWatcher);
+        assetWatcherService.delete(assetWatcher);
     }
 
     public List<AssetWatcher> getAssetWatchersByAsset(Asset asset) {
-        return assetWatcherRepository.findBy(asset);
+        return assetWatcherService.findBy(asset);
     }
 
     public List<AssetWatcher> getAssetWatchersByAsset(Wallet wallet, Asset asset) {
-        return assetWatcherRepository.findBy(wallet, asset);
+        return assetWatcherService.findBy(wallet, asset);
     }
 
     public List<AssetWatcher> getAssetWatchersByAssetAndActionType(Wallet wallet, Asset asset, AssetWatcher.ActionType actionType) {
-        return assetWatcherRepository.findBy(wallet, asset, actionType);
+        return assetWatcherService.findBy(wallet, asset, actionType);
     }
 
     /*
@@ -88,14 +87,6 @@ public class InstrumentsService {
 
     public List<CryptoTransaction> getTransactionsBy(Wallet wallet) {
         return transactionService.findBy(wallet);
-    }
-
-    public List<CryptoTransaction> getTransactionsBy(Asset asset) {
-        return transactionService.findBy(asset);
-    }
-
-    public List<CryptoTransaction> getTransactionsBy(CryptoTransaction.TransactionType type) {
-        return transactionService.findBy(type);
     }
 
     public List<CryptoTransaction> getTransactionsBy(Wallet wallet, Asset asset) {

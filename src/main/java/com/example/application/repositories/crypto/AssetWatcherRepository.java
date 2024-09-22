@@ -11,12 +11,12 @@ import java.util.List;
 @Repository
 public interface AssetWatcherRepository extends JpaRepository<AssetWatcher, Long> {
 
-    List<AssetWatcher> findBy(Wallet wallet);
+    List<AssetWatcher> findByWallet(Wallet wallet);
 
-    List<AssetWatcher> findBy(Asset asset);
+    List<AssetWatcher> findByAsset(Asset asset);
 
-    List<AssetWatcher> findBy(Wallet wallet, Asset asset);
+    List<AssetWatcher> findByWalletAndAsset(Wallet wallet, Asset asset);
 
-    List<AssetWatcher> findBy(Wallet wallet, Asset asset, AssetWatcher.ActionType actionType);
+    List<AssetWatcher> findByWalletAndAssetAndActionType(Wallet wallet, Asset asset, AssetWatcher.ActionType actionType);
 
 }

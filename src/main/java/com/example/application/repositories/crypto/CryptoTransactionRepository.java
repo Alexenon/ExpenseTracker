@@ -11,14 +11,10 @@ import java.util.List;
 @Repository
 public interface CryptoTransactionRepository extends JpaRepository<CryptoTransaction, Long> {
 
-    List<CryptoTransaction> findBy(Wallet wallet);
+    List<CryptoTransaction> findByWallet(Wallet wallet);
 
-    List<CryptoTransaction> findBy(Asset asset);
+    List<CryptoTransaction> findByWalletAndAsset(Wallet wallet, Asset asset);
 
-    List<CryptoTransaction> findBy(CryptoTransaction.TransactionType type);
-
-    List<CryptoTransaction> findBy(Wallet wallet, Asset asset);
-
-    List<CryptoTransaction> findBy(Wallet wallet, Asset asset, CryptoTransaction.TransactionType type);
+    List<CryptoTransaction> findByWalletAndAssetAndType(Wallet wallet, Asset asset, CryptoTransaction.TransactionType type);
 
 }
