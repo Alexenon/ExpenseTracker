@@ -1,8 +1,8 @@
 package com.example.application.services;
 
-import com.example.application.data.models.crypto.Wallet;
 import com.example.application.data.requests.RegisterUserRequest;
 import com.example.application.entities.User;
+import com.example.application.entities.crypto.Wallet;
 import com.example.application.repositories.UserRepository;
 import com.example.application.services.crypto.WalletService;
 import com.example.application.utils.exceptions.UserExistException;

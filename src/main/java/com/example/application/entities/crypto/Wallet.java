@@ -1,4 +1,4 @@
-package com.example.application.data.models.crypto;
+package com.example.application.entities.crypto;
 
 import com.example.application.entities.User;
 import jakarta.persistence.*;

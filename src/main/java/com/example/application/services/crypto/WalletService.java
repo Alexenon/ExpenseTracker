@@ -1,8 +1,8 @@
 package com.example.application.services.crypto;
 
-import com.example.application.data.models.crypto.Wallet;
-import com.example.application.data.models.crypto.WalletBalance;
 import com.example.application.entities.User;
+import com.example.application.entities.crypto.Wallet;
+import com.example.application.entities.crypto.WalletBalance;
 import com.example.application.repositories.crypto.AssetRepository;
 import com.example.application.repositories.crypto.WalletBalanceRepository;
 import com.example.application.repositories.crypto.WalletRepository;

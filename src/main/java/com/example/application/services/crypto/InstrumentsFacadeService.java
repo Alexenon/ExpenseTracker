@@ -2,12 +2,8 @@ package com.example.application.services.crypto;
 
 import com.example.application.data.enums.Symbols;
 import com.example.application.data.models.InstrumentsProvider;
-import com.example.application.data.models.crypto.CryptoTransaction;
-import com.example.application.data.models.crypto.Wallet;
-import com.example.application.data.models.crypto.WalletBalance;
 import com.example.application.entities.User;
-import com.example.application.entities.crypto.Asset;
-import com.example.application.entities.crypto.AssetWatcher;
+import com.example.application.entities.crypto.*;
 import com.example.application.services.SecurityService;
 import com.example.application.services.UserService;
 import com.example.application.utils.fetchers.api_responses.AssetMetadata;
@@ -15,6 +11,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
+/*
+    TODO: Components
+        - AssetPerformanceTracker => tracking performance through its transactions, average buy/sell, and other indicators.
+            - UserPortfolio => Gives the overall performance
+            - AssetPortfolio => Gives performance per a certain asset
+* */
 
 /**
  * Service that provides information just for authenticated user and guest user

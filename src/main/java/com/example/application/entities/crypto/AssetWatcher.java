@@ -1,6 +1,5 @@
 package com.example.application.entities.crypto;
 
-import com.example.application.data.models.crypto.Wallet;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

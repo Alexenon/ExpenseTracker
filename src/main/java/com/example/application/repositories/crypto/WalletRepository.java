@@ -1,7 +1,7 @@
 package com.example.application.repositories.crypto;
 
-import com.example.application.data.models.crypto.Wallet;
 import com.example.application.entities.User;
+import com.example.application.entities.crypto.Wallet;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

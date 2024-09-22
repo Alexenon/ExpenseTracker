@@ -1,6 +1,7 @@
 package com.example.application.data.models.crypto;
 
 import com.example.application.entities.crypto.Asset;
+import com.example.application.entities.crypto.CryptoTransaction;
 import com.example.application.utils.fetchers.api_responses.AssetMetadata;
 import lombok.Data;
 

@@ -1,6 +1,5 @@
-package com.example.application.data.models.crypto;
+package com.example.application.entities.crypto;
 
-import com.example.application.entities.crypto.Asset;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import lombok.Data;

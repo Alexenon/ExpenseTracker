@@ -1,6 +1,5 @@
 package com.example.application.views.pages;
 
-import com.example.application.data.models.InstrumentsProvider;
 import com.example.application.data.models.NumberType;
 import com.example.application.data.models.crypto.AssetData;
 import com.example.application.entities.crypto.AssetWatcher;
@@ -43,9 +42,6 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
 
     private AssetData assetData;
     private AddTransactionDialog addTransactionDialog;
-
-    @Autowired
-    private InstrumentsProvider instrumentsProvider;
 
     @Autowired
     private InstrumentsFacadeService instrumentsFacadeService;

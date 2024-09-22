@@ -40,8 +40,11 @@ public class InstrumentsProvider {
         return map;
     }
 
-    // Fetch metadata in parallel for performance improvement
     // TODO: Compare results
+
+    /**
+     * @return fetched metadata in parallel for performance improvement
+     */
     private Map<Asset, AssetMetadata> fetchMetadataInParallel() {
         Map<Asset, AssetMetadata> map = new ConcurrentHashMap<>();
         assetRepository.findAll().parallelStream().forEach(asset -> {

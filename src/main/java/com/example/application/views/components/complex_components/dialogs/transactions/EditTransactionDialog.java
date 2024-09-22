@@ -2,8 +2,8 @@ package com.example.application.views.components.complex_components.dialogs.tran
 
 import com.example.application.data.models.InstrumentsProvider;
 import com.example.application.data.models.crypto.AssetData;
-import com.example.application.data.models.crypto.CryptoTransaction;
 import com.example.application.entities.crypto.Asset;
+import com.example.application.entities.crypto.CryptoTransaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.views.components.CurrencyField;
 import com.example.application.views.components.native_components.Container;
