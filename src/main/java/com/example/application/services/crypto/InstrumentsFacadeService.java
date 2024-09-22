@@ -10,6 +10,7 @@ import com.example.application.utils.fetchers.api_responses.AssetMetadata;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigInteger;
 import java.util.List;
 
 /*
@@ -43,6 +44,10 @@ public class InstrumentsFacadeService {
     }
 
     //<editor-fold desc="ASSET">
+    public List<Asset> getAllAssets() {
+        return instrumentsService.getAllAssets();
+    }
+
     public Asset getAssetBySymbol(String symbolName) {
         return instrumentsService.getAssetBySymbol(symbolName);
     }
@@ -102,9 +107,52 @@ public class InstrumentsFacadeService {
     }
     //</editor-fold>
 
+    //<editor-fold desc="METADATA">
     public AssetMetadata getAssetMetadata(Asset asset) {
         return instrumentsProvider.getMetadata().get(asset);
     }
+
+    public String getAssetFullName(Asset asset) {
+        return instrumentsProvider.getMetadata().get(asset).getName();
+    }
+
+    public double getAssetPrice(Asset asset) {
+        return instrumentsProvider.getMetadata().get(asset).getPriceUsd();
+    }
+
+    public String getAssetDescriptionSummary(Asset asset) {
+        return instrumentsProvider.getMetadata().get(asset).getAssetDescriptionSummary();
+    }
+
+    public double getAssetTotalMarketCap(Asset asset) {
+        return instrumentsProvider.getMetadata().get(asset).getTotalMktCapUsd();
+    }
+
+    public BigInteger getAssetSupplyTotal(Asset asset) {
+        return instrumentsProvider.getMetadata().get(asset).getSupplyTotal();
+    }
+
+    public BigInteger getAssetSupplyCirculating(Asset asset) {
+        return instrumentsProvider.getMetadata().get(asset).getSupplyCirculating();
+    }
+
+    public double getAsset24HourChangePercentage(Asset asset) {
+        return instrumentsProvider.getMetadata().get(asset).getSpotMoving24HourChangePercentageUsd();
+    }
+
+    public double getAsset24HourVolume(Asset asset) {
+        return instrumentsProvider.getMetadata().get(asset).getSpotMoving24HourQuoteVolumeUsd();
+    }
+
+    public String getAssetImgUrl(Asset asset) {
+        return instrumentsProvider.getMetadata().get(asset).getLogoUrl();
+    }
+
+    public void updateAssetMetadata() {
+        instrumentsProvider.getUpdatedMetadata();
+    }
+
+    //</editor-fold>
 
 
     private Wallet getAuthenticatedUserWallet() {

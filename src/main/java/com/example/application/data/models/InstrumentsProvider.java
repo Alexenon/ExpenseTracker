@@ -68,8 +68,4 @@ public class InstrumentsProvider {
         return metadataPerAsset;
     }
 
-    public String getAssetLogoUrl() {
-        return "";
-    }
-
 }

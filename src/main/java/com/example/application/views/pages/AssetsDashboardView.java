@@ -1,10 +1,7 @@
 package com.example.application.views.pages;
 
-import com.example.application.data.models.InstrumentsProvider;
 import com.example.application.data.models.NumberType;
-import com.example.application.services.SecurityService;
-import com.example.application.services.UserService;
-import com.example.application.services.crypto.AssetWatcherService;
+import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.views.components.AssetsGrid;
 import com.example.application.views.components.complex_components.PriceBadge;
 import com.example.application.views.components.native_components.Container;
@@ -26,23 +23,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Route(value = "assets-dashboard", layout = MainLayout.class)
 public class AssetsDashboardView extends Main {
 
-    private final AssetWatcherService assetWatcherService;
-    private final InstrumentsProvider instrumentsProvider;
-    private final SecurityService securityService;
-    private final UserService userService;
-
-    private final AssetsGrid assetsGrid = new AssetsGrid();
+    private final InstrumentsFacadeService instrumentsFacadeService;
+    private final AssetsGrid assetsGrid;
 
     @Autowired
-    public AssetsDashboardView(
-            InstrumentsProvider instrumentsProvider,
-            AssetWatcherService assetWatcherService,
-            SecurityService securityService,
-            UserService userService) {
-        this.instrumentsProvider = instrumentsProvider;
-        this.assetWatcherService = assetWatcherService;
-        this.securityService = securityService;
-        this.userService = userService;
+    public AssetsDashboardView(InstrumentsFacadeService instrumentsFacadeService) {
+        this.instrumentsFacadeService = instrumentsFacadeService;
+        this.assetsGrid = new AssetsGrid(instrumentsFacadeService);
 
         initializeGrid();
         add(performanceSection(), assetsGrid);
@@ -50,12 +37,6 @@ public class AssetsDashboardView extends Main {
 
     private void initializeGrid() {
         getStyle().set("margin", "100px 30px 30px 30px");
-        assetsGrid.setItems(instrumentsProvider.getListOfAssetData());
-        assetsGrid.addClickSyncBtnListener(grid -> {
-            instrumentsProvider.updateAssetData();
-            assetsGrid.setItems(instrumentsProvider.getListOfAssetData());
-        });
-
     }
 
     // TODO: Replace with actual values

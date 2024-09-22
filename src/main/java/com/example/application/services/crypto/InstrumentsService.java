@@ -34,6 +34,14 @@ public class InstrumentsService {
         this.walletBalanceRepository = walletBalanceRepository;
     }
 
+    /*
+    * ASSETS
+    * */
+
+    public List<Asset> getAllAssets() {
+        return assetRepository.findAll();
+    }
+
     public Asset getAssetBySymbol(String symbolName) {
         return assetRepository.findBySymbol(symbolName.toUpperCase());
     }

@@ -247,7 +247,7 @@ public class AssetMetadata {
 
     @Override
     public String toString() {
-        return "AssetData{id=%d, symbol='%s', name='%s', priceUsd=%s, uri='%s'}"
+        return "AssetMetadata{id=%d, symbol='%s', name='%s', priceUsd=%s, uri='%s'}"
                 .formatted(id, symbol, name, priceUsd, uri);
     }
 

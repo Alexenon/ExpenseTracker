@@ -1,8 +1,7 @@
 package com.example.application.views.components.complex_components.dialogs.transactions;
 
-import com.example.application.data.models.InstrumentsProvider;
 import com.example.application.data.models.NumberType;
-import com.example.application.data.models.crypto.AssetData;
+import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.CryptoTransaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.views.components.complex_components.PriceBadge;
@@ -23,22 +22,18 @@ import java.time.temporal.ChronoField;
 
 public class TransactionDetailsDialog extends Dialog {
 
-    private final AssetData assetData;
+    private final Asset asset;
     private final CryptoTransaction transaction;
     private final InstrumentsFacadeService instrumentsFacadeService;
-    private final InstrumentsProvider instrumentsProvider;
 
     private final Paragraph editBtn = new Paragraph("Edit");
     private final Button closeBtn = new Button(LumoIcon.CROSS.create(), e -> this.close());
 
     @Autowired
-    public TransactionDetailsDialog(CryptoTransaction transaction,
-                                    InstrumentsFacadeService instrumentsFacadeService,
-                                    InstrumentsProvider instrumentsProvider) {
+    public TransactionDetailsDialog(CryptoTransaction transaction, InstrumentsFacadeService instrumentsFacadeService) {
         this.transaction = transaction;
         this.instrumentsFacadeService = instrumentsFacadeService;
-        this.instrumentsProvider = instrumentsProvider;
-        this.assetData = instrumentsProvider.getAssetDataBySymbol(transaction.getAsset().getSymbol());
+        this.asset = transaction.getAsset();
 
         buildForm();
     }
@@ -65,15 +60,13 @@ public class TransactionDetailsDialog extends Dialog {
 
         editBtn.addClassName("edit-btn");
         editBtn.addClickListener(e -> {
-            EditTransactionDialog editTransactionDialog = new EditTransactionDialog(assetData,
-                    transaction, instrumentsFacadeService, instrumentsProvider);
+            EditTransactionDialog editTransactionDialog = new EditTransactionDialog(asset, transaction, instrumentsFacadeService);
 
             editTransactionDialog.addClickSaveBtnListener(dialog -> close());
             editTransactionDialog.addClickCancelBtnListener(dialog -> {
                 this.close();
                 CryptoTransaction newTransaction = editTransactionDialog.getTransaction();
-                TransactionDetailsDialog newDetailsDialog = new TransactionDetailsDialog(newTransaction,
-                        instrumentsFacadeService, instrumentsProvider);
+                TransactionDetailsDialog newDetailsDialog = new TransactionDetailsDialog(newTransaction, instrumentsFacadeService);
                 newDetailsDialog.open();
             });
             editTransactionDialog.open();
@@ -84,7 +77,7 @@ public class TransactionDetailsDialog extends Dialog {
         String formattedPrice = NumberType.CURRENCY.parse(transaction.getMarketPrice());
         String formattedAmount = NumberType.AMOUNT.parse(transaction.getOrderQuantity())
                                  + " " + transaction.getAsset().getSymbol();
-        Paragraph pricePerTokenField = new Paragraph(String.format("(1 %s = %s)", assetData.getSymbol(), formattedPrice));
+        Paragraph pricePerTokenField = new Paragraph(String.format("(1 %s = %s)", asset.getSymbol(), formattedPrice));
         Paragraph totalPriceField = new Paragraph(NumberType.CURRENCY.parse(transaction.getOrderTotalCost()));
 
         Div priceDetails = Container.builder()
@@ -92,7 +85,7 @@ public class TransactionDetailsDialog extends Dialog {
                 .addComponent(new HorizontalLayout(totalPriceField, pricePerTokenField))
                 .build();
 
-        Image symbolImage = new Image(assetData.getAssetMetadata().getLogoUrl(), assetData.getName());
+        Image symbolImage = new Image(instrumentsFacadeService.getAssetImgUrl(asset), asset.getSymbol());
         symbolImage.setClassName("coin-overview-image");
 
         Div body = Container.builder()
@@ -133,7 +126,7 @@ public class TransactionDetailsDialog extends Dialog {
                 .addComponent(() -> Container.builder()
                         .addClassName("transaction-profit-loss-badge-item")
                         .addComponent(new Paragraph("Current Value"))
-                        .addComponent(new Paragraph(NumberType.CURRENCY.parse(assetData.getPrice())))
+                        .addComponent(new Paragraph(NumberType.CURRENCY.parse(instrumentsFacadeService.getAssetPrice(asset))))
                         .build())
                 .build();
     }

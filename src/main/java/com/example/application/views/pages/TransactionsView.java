@@ -1,6 +1,5 @@
 package com.example.application.views.pages;
 
-import com.example.application.data.models.InstrumentsProvider;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.views.components.TransactionsGrid;
 import com.example.application.views.layouts.MainLayout;
@@ -16,15 +15,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class TransactionsView extends Main {
 
     private final InstrumentsFacadeService instrumentsFacadeService;
-    private final InstrumentsProvider instrumentsProvider;
 
     private final TransactionsGrid transactionsGrid;
 
     @Autowired
-    public TransactionsView(InstrumentsFacadeService instrumentsFacadeService, InstrumentsProvider instrumentsProvider) {
+    public TransactionsView(InstrumentsFacadeService instrumentsFacadeService) {
         this.instrumentsFacadeService = instrumentsFacadeService;
-        this.instrumentsProvider = instrumentsProvider;
-        this.transactionsGrid = new TransactionsGrid(instrumentsFacadeService, instrumentsProvider);
+        this.transactionsGrid = new TransactionsGrid(instrumentsFacadeService);
         buildPage();
     }
 

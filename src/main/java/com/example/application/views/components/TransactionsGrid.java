@@ -10,8 +10,7 @@ package com.example.application.views.components;
     _______________________________________________________________________________________________________________________________________
 */
 
-import com.example.application.data.models.InstrumentsProvider;
-import com.example.application.data.models.crypto.AssetData;
+import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.CryptoTransaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.views.components.complex_components.dialogs.transactions.TransactionDetailsDialog;
@@ -35,17 +34,15 @@ import java.util.Set;
 public class TransactionsGrid extends Div {
 
     private final InstrumentsFacadeService instrumentsFacadeService;
-    private final InstrumentsProvider instrumentsProvider;
 
-    private final ComboBox<AssetData> nameSearchField = new ComboBox<>();
+    private final ComboBox<Asset> nameSearchField = new ComboBox<>();
     private final MultiSelectComboBox<CryptoTransaction.TransactionType> typeSearchField = new MultiSelectComboBox<>("Transaction Type");
     private final Grid<CryptoTransaction> grid = new Grid<>();
     private final GridListDataView<CryptoTransaction> dataView = grid.setItems();
 
     @Autowired
-    public TransactionsGrid(InstrumentsFacadeService instrumentsFacadeService, InstrumentsProvider instrumentsProvider) {
+    public TransactionsGrid(InstrumentsFacadeService instrumentsFacadeService) {
         this.instrumentsFacadeService = instrumentsFacadeService;
-        this.instrumentsProvider = instrumentsProvider;
         initializeGrid();
         initializeFilteringBySearch();
         add(gridHeader(), grid);
@@ -70,7 +67,7 @@ public class TransactionsGrid extends Div {
 
         grid.addItemClickListener(row -> {
             TransactionDetailsDialog detailsDialog =
-                    new TransactionDetailsDialog(row.getItem(), instrumentsFacadeService, instrumentsProvider);
+                    new TransactionDetailsDialog(row.getItem(), instrumentsFacadeService);
             detailsDialog.open();
         });
     }
@@ -81,15 +78,16 @@ public class TransactionsGrid extends Div {
         nameSearchField.setPrefixComponent(new Icon(VaadinIcon.SEARCH));
         nameSearchField.setAllowCustomValue(false);
 
-        ComboBox.ItemFilter<AssetData> nameSearchFilter = (assetData, filterString) -> {
+        ComboBox.ItemFilter<Asset> nameSearchFilter = (asset, filterString) -> {
             String lowercaseInput = filterString.toLowerCase();
+            String lowercaseSymbol = asset.getSymbol().toLowerCase();
+            String lowercaseName = instrumentsFacadeService.getAssetFullName(asset).toLowerCase();
 
-            return assetData.getSymbol().toLowerCase().startsWith(lowercaseInput)
-                   || assetData.getName().toLowerCase().startsWith(lowercaseInput);
+            return lowercaseSymbol.startsWith(lowercaseInput) || lowercaseName.startsWith(lowercaseInput);
         };
 
-        nameSearchField.setItems(nameSearchFilter, instrumentsProvider.getListOfAssetData());
-        nameSearchField.setItemLabelGenerator(AssetData::getName); // TODO: Icon + Full Name
+        nameSearchField.setItems(nameSearchFilter, instrumentsFacadeService.getAllAssets());
+        nameSearchField.setItemLabelGenerator(instrumentsFacadeService::getAssetFullName); // TODO: Icon + Full Name
         nameSearchField.addValueChangeListener(e -> applyFilter());
 
         typeSearchField.setItems(CryptoTransaction.TransactionType.values());
@@ -98,12 +96,12 @@ public class TransactionsGrid extends Div {
     }
 
     private void applyFilter() {
-        AssetData selectedAssetData = nameSearchField.getValue();
+        Asset selectedAsset = nameSearchField.getValue();
         Set<CryptoTransaction.TransactionType> selectedTypes = typeSearchField.getSelectedItems();
 
         dataView.setFilter(transaction -> {
-            boolean nameFilter = selectedAssetData == null
-                                 || transaction.getAsset().equals(selectedAssetData.getAsset());
+            boolean nameFilter = selectedAsset == null
+                                 || transaction.getAsset().equals(selectedAsset);
 
             boolean typeFilter = selectedTypes.isEmpty()
                                  || selectedTypes.contains(transaction.getType());

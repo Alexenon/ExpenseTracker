@@ -1,6 +1,5 @@
 package com.example.application.views.components.complex_components.dialogs.transactions;
 
-import com.example.application.data.models.InstrumentsProvider;
 import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.CryptoTransaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
@@ -15,9 +14,6 @@ import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.data.binder.Result;
-import com.vaadin.flow.data.binder.ValueContext;
-import com.vaadin.flow.data.converter.Converter;
 import com.vaadin.flow.data.converter.StringToDoubleConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -29,13 +25,12 @@ import java.time.LocalDate;
 //  - private final CurrencyField quantityField = new CurrencyField("Order Quantity");
 public class AddTransactionDialog extends Dialog {
 
-    private final AssetData assetData;
+    private final Asset asset;
     private final CryptoTransaction transaction;
-    private final InstrumentsProvider instrumentsProvider;
     private final InstrumentsFacadeService instrumentsFacadeService;
     private final Binder<CryptoTransaction> binder = new Binder<>(CryptoTransaction.class);
 
-    private final ComboBox<AssetData> assetSymbolField = new ComboBox<>("Asset");
+    private final ComboBox<Asset> assetSymbolField = new ComboBox<>("Asset");
     private final Select<CryptoTransaction.TransactionType> typeField = new Select<>();
     private final CurrencyField marketPriceField = new CurrencyField("Market Price");
     private final CurrencyField totalPriceField = new CurrencyField("Order Total Price");
@@ -45,19 +40,15 @@ public class AddTransactionDialog extends Dialog {
     private final Button saveButton = new Button("Save");
     private final Button cancelButton = new Button("Cancel");
 
-    public AddTransactionDialog(InstrumentsFacadeService instrumentsFacadeService,
-                                InstrumentsProvider instrumentsProvider) {
-        this(null, instrumentsFacadeService, instrumentsProvider);
+    public AddTransactionDialog(InstrumentsFacadeService instrumentsFacadeService) {
+        this(null, instrumentsFacadeService);
     }
 
 
     @Autowired
-    public AddTransactionDialog(AssetData assetData,
-                                InstrumentsFacadeService instrumentsFacadeService,
-                                InstrumentsProvider instrumentsProvider) {
-        this.assetData = assetData;
+    public AddTransactionDialog(Asset asset, InstrumentsFacadeService instrumentsFacadeService) {
+        this.asset = asset;
         this.instrumentsFacadeService = instrumentsFacadeService;
-        this.instrumentsProvider = instrumentsProvider;
         this.transaction = new CryptoTransaction();
 
         buildForm();
@@ -93,15 +84,15 @@ public class AddTransactionDialog extends Dialog {
     }
 
     private void initializeFields() {
-        assetSymbolField.setItems(instrumentsProvider.getListOfAssetData());
-        assetSymbolField.setItemLabelGenerator(AssetData::getSymbol); // TODO: Icon + Name + Symbol
+        assetSymbolField.setItems(instrumentsFacadeService.getAllAssets());
+        assetSymbolField.setItemLabelGenerator(Asset::getSymbol); // TODO: Icon + Name + Symbol
         assetSymbolField.addValueChangeListener(l -> marketPriceField.setValue(getMarketPriceDefaultValue()));
 
         typeField.setLabel("Transaction Type");
         typeField.setItems(CryptoTransaction.TransactionType.values());
 
         // Initializing with default values
-        assetSymbolField.setValue(assetData);
+        assetSymbolField.setValue(asset);
         typeField.setValue(CryptoTransaction.TransactionType.BUY);
         totalPriceField.setValue(0);
         marketPriceField.setValue(getMarketPriceDefaultValue());
@@ -113,20 +104,6 @@ public class AddTransactionDialog extends Dialog {
 
         binder.forField(assetSymbolField)
                 .asRequired("Please fill this field")
-                .withConverter(new Converter<AssetData, Asset>() {
-                    @Override
-                    public Result<Asset> convertToModel(AssetData assetData, ValueContext valueContext) {
-                        return Result.ok(assetData.getAsset());
-                    }
-
-                    @Override
-                    public AssetData convertToPresentation(Asset asset, ValueContext valueContext) {
-                        if (asset == null)
-                            return null;
-
-                        return instrumentsProvider.getAssetDataBySymbol(asset.getSymbol());
-                    }
-                })
                 .bind(CryptoTransaction::getAsset, CryptoTransaction::setAsset);
 
         binder.forField(typeField)
@@ -153,7 +130,13 @@ public class AddTransactionDialog extends Dialog {
     }
 
     private double getMarketPriceDefaultValue() {
-        return assetSymbolField.getValue() != null ? assetSymbolField.getValue().getPrice() : 0;
+        Asset selectedAsset = assetSymbolField.getValue();
+
+        if (selectedAsset == null)
+            return 0;
+
+        return instrumentsFacadeService.getAssetPrice(selectedAsset);
+
     }
 
 

@@ -2,7 +2,8 @@ package com.example.application.views.components;
 
 import com.example.application.data.enums.Symbols;
 import com.example.application.data.models.NumberType;
-import com.example.application.data.models.crypto.AssetData;
+import com.example.application.entities.crypto.Asset;
+import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.views.components.complex_components.PriceBadge;
 import com.example.application.views.components.native_components.Container;
 import com.example.application.views.pages.AssetDetailsView;
@@ -31,7 +32,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Consumer;
 
 /*
     TODO:
@@ -46,24 +46,34 @@ import java.util.function.Consumer;
 */
 public class AssetsGrid extends Div {
 
+    private final InstrumentsFacadeService instrumentsFacadeService;
+
     private final TextField searchField = new TextField();
     private final Checkbox hideAssetsCheckbox = new Checkbox("Hide 0 amount assets");
     private final Button syncButton = new Button("Sync", LumoIcon.RELOAD.create());
 
-    private final Grid<AssetData> grid = new Grid<>();
-    private final GridListDataView<AssetData> dataView = grid.setItems();
+    private final Grid<Asset> grid = new Grid<>();
+    private final GridListDataView<Asset> dataView = grid.setItems();
 
     private final Span hiddenRowsCounterField = new Span();
 
     private MultiSelectComboBox<String> columnSelector;
-    private List<Grid.Column<AssetData>> listColumnsToSelect;
+    private List<Grid.Column<Asset>> listColumnsToSelect;
 
-    public AssetsGrid() {
+    public AssetsGrid(InstrumentsFacadeService instrumentsFacadeService) {
+        this.instrumentsFacadeService = instrumentsFacadeService;
+
         initializeGrid();
         initializeColumnSelector();
         initializeFilteringBySearch();
         initializeFilteringNonZeroValues();
         initializeSyncButton();
+
+        grid.setItems(instrumentsFacadeService.getAllAssets());
+        syncButton.addClickListener(e -> {
+            instrumentsFacadeService.updateAssetMetadata();
+            // TODO: The columns should be re-rendered again after updating metadata
+        });
 
         add(
                 gridHeader(),
@@ -84,14 +94,16 @@ public class AssetsGrid extends Div {
     private void initializeGrid() {
         columnSelector = new MultiSelectComboBox<>();
 
-        Grid.Column<AssetData> nameCol = grid.addColumn(columnNameRenderer()).setKey("Name").setHeader("Name");
-        Grid.Column<AssetData> priceCol = grid.addColumn(columnPriceRenderer(AssetData::getPrice)).setKey("Price").setHeader("Price");
-        Grid.Column<AssetData> changes24hCol = grid.addColumn(columnChanges24hRenderer()).setKey("Changes 24h").setHeader("Changes 24h");
-        Grid.Column<AssetData> avgBuyCol = grid.addColumn(columnPriceRenderer(AssetData::getAverageBuyPrice)).setKey("Avg Buy").setHeader("Avg Buy");
-        Grid.Column<AssetData> avgSellCol = grid.addColumn(columnPriceRenderer(AssetData::getAverageSellPrice)).setKey("Avg Sell").setHeader("Avg Sell");
-//        Grid.Column<AssetData> amountCol = grid.addColumn(a -> a.getAsset().getAmount()).setKey("Amount").setHeader("Amount");
-//        Grid.Column<AssetData> profitChangesCol = grid.addColumn(new ComponentRenderer<>(this::renderProfitChanges)).setKey("Profit Changes").setHeader("Profit Changes");
+        Grid.Column<Asset> nameCol = grid.addColumn(columnNameRenderer()).setKey("Name").setHeader("Name");
+        Grid.Column<Asset> priceCol = grid.addColumn(columnPriceRenderer(instrumentsFacadeService::getAssetPrice)).setKey("Price").setHeader("Price");
+        Grid.Column<Asset> changes24hCol = grid.addColumn(columnChanges24hRenderer()).setKey("Changes 24h").setHeader("Changes 24h");
+        Grid.Column<Asset> avgBuyCol = grid.addColumn(columnPriceRenderer(instrumentsFacadeService::getAssetPrice)).setKey("Avg Buy").setHeader("Avg Buy");
+        Grid.Column<Asset> avgSellCol = grid.addColumn(columnPriceRenderer(instrumentsFacadeService::getAssetPrice)).setKey("Avg Sell").setHeader("Avg Sell");
+//        Grid.Column<Asset> amountCol = grid.addColumn(a -> a.getAsset().getAmount()).setKey("Amount").setHeader("Amount");
+//        Grid.Column<Asset> profitChangesCol = grid.addColumn(new ComponentRenderer<>(this::renderProfitChanges)).setKey("Profit Changes").setHeader("Profit Changes");
         grid.addColumn(new ComponentRenderer<>(this::threeDotsBtn)).setHeader(columnSelector);
+
+        // TODO: Columns -> Avg Buy Remaining Tokens,
         listColumnsToSelect = List.of(nameCol, priceCol, changes24hCol, avgBuyCol, avgSellCol);
 
         grid.getColumns().forEach(c -> {
@@ -101,7 +113,7 @@ public class AssetsGrid extends Div {
         grid.setColumnReorderingAllowed(true);
         grid.addItemClickListener(row -> {
             System.out.println(row.getItem());
-            UI.getCurrent().navigate(AssetDetailsView.class, row.getItem().getAsset().getSymbol().toUpperCase());
+            UI.getCurrent().navigate(AssetDetailsView.class, row.getItem().getSymbol().toUpperCase());
         });
 
         grid.setAllRowsVisible(true);
@@ -134,9 +146,9 @@ public class AssetsGrid extends Div {
         searchField.addValueChangeListener(e -> {
             String searchTerm = searchField.getValue().trim().toLowerCase();
 
-            dataView.setFilter(assetData -> {
-                String symbol = assetData.getAsset().getSymbol().toLowerCase();
-                String name = assetData.getName().toLowerCase();
+            dataView.setFilter(assetProvided -> {
+                String symbol = assetProvided.getSymbol().toLowerCase();
+                String name = instrumentsFacadeService.getAssetFullName(assetProvided);
                 return searchTerm.isEmpty() || symbol.contains(searchTerm) || name.contains(searchTerm);
             });
 
@@ -157,38 +169,38 @@ public class AssetsGrid extends Div {
     }
 
     private void hideZeroAmountItems() {
-//        dataView.setFilter(assetData -> assetData.getAsset().getAmount() > 0);
+        dataView.setFilter(asset -> instrumentsFacadeService.getAssetPrice(asset) > 0);
     }
 
-    private ComponentRenderer<Container, AssetData> columnNameRenderer() {
+    private ComponentRenderer<Container, Asset> columnNameRenderer() {
         return new ComponentRenderer<>(a ->
                 Container.builder("coin-overview-name-container")
                         .addComponent(() -> {
-                            Image image = new Image(a.getAssetMetadata().getLogoUrl(), a.getAssetMetadata().getName());
+                            Image image = new Image(instrumentsFacadeService.getAssetImgUrl(a), instrumentsFacadeService.getAssetFullName(a));
                             image.addClassNames("rounded", "coin-overview-image");
                             return image;
                         })
-                        .addComponent(new Paragraph(a.getAssetMetadata().getName()))
+                        .addComponent(new Paragraph(instrumentsFacadeService.getAssetFullName(a)))
                         .addComponent(() -> {
                             Span dot = new Span("•");
                             dot.setClassName("dot");
                             return dot;
                         })
-                        .addComponent(new Span(a.getAssetMetadata().getSymbol()))
+                        .addComponent(new Span(a.getSymbol()))
                         .build()
         );
     }
 
-    private ComponentRenderer<Component, AssetData> columnChanges24hRenderer() {
+    private ComponentRenderer<Component, Asset> columnChanges24hRenderer() {
         return new ComponentRenderer<>(a -> {
-            PriceBadge percentageBadge = new PriceBadge(a.getChangesLast24hPercentage(), NumberType.PERCENT);
+            PriceBadge percentageBadge = new PriceBadge(instrumentsFacadeService.getAsset24HourChangePercentage(a), NumberType.PERCENT);
             percentageBadge.getStyle().set("margin-bottom", "0px");
             percentageBadge.setBackgroundColor(PriceBadge.Color.DEFAULT_BACKGROUND_COLOR);
             return percentageBadge;
         });
     }
 
-    private NumberRenderer<AssetData> columnPriceRenderer(ValueProvider<AssetData, Number> priceProvider) {
+    private NumberRenderer<Asset> columnPriceRenderer(ValueProvider<Asset, Number> priceProvider) {
         NumberFormat nf = NumberFormat.getCurrencyInstance(Locale.US);
         return new NumberRenderer<>(priceProvider, nf, "$0.00");
     }
@@ -216,13 +228,9 @@ public class AssetsGrid extends Div {
         return new Button();
     }
 
-    public void setItems(List<AssetData> assets) {
+    public void setItems(List<Asset> assets) {
         Objects.requireNonNull(assets, "Grid items cannot be null");
         grid.setItems(assets);
-    }
-
-    public void addClickSyncBtnListener(Consumer<?> listener) {
-        syncButton.addClickListener(e -> listener.accept(null));
     }
 
     private Div hiddenRowsContainer() {
