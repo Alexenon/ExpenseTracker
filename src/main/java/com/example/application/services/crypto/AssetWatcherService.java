@@ -20,7 +20,7 @@ public class AssetWatcherService {
     private AssetWatcherRepository assetWatcherRepository;
 
     public AssetWatcher save(AssetWatcher assetWatcher) {
-        return assetWatcherRepository.save(assetWatcher);
+         return assetWatcherRepository.save(assetWatcher);
     }
 
     public void delete(AssetWatcher assetWatcher) {

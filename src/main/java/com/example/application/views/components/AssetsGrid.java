@@ -143,13 +143,15 @@ public class AssetsGrid extends Div {
         searchField.setSuffixComponent(new Icon(VaadinIcon.SEARCH));
         searchField.setValueChangeMode(ValueChangeMode.EAGER);
 
-        searchField.addValueChangeListener(e -> {
-            String searchTerm = searchField.getValue().trim().toLowerCase();
-
+        searchField.addValueChangeListener(field -> {
             dataView.setFilter(assetProvided -> {
-                String symbol = assetProvided.getSymbol().toLowerCase();
-                String name = instrumentsFacadeService.getAssetFullName(assetProvided);
-                return searchTerm.isEmpty() || symbol.contains(searchTerm) || name.contains(searchTerm);
+                String lowercaseSearchTerm = field.getValue().trim().toLowerCase();
+                String lowercaseSymbol = assetProvided.getSymbol().toLowerCase();
+                String lowercaseFullName = instrumentsFacadeService.getAssetFullName(assetProvided).toLowerCase();
+
+                return lowercaseSearchTerm.isEmpty()
+                       || lowercaseSymbol.contains(lowercaseSearchTerm)
+                       || lowercaseFullName.contains(lowercaseSearchTerm);
             });
 
             updateHiddenRowsCounter();

@@ -353,6 +353,10 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
     }
 
     private Section transactionHistorySection() {
+        TransactionsGrid transactionsGrid = new TransactionsGrid(instrumentsFacadeService);
+        transactionsGrid.setItems(instrumentsFacadeService.getTransactionsByAsset(asset));
+        transactionsGrid.setPageSize(10);
+
         Container header = Container.builder("section-header")
                 .addComponent(() -> {
                     H3 title = new H3("Transactions");
@@ -360,18 +364,18 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
                     return title;
                 })
                 .addComponent(() -> {
-                    Button addHoldingBtn = new Button("Add Transaction", LumoIcon.PLUS.create());
-                    addHoldingBtn.setIconAfterText(false);
-                    addHoldingBtn.addClickListener(e -> addTransactionDialog.open());
-                    return addHoldingBtn;
+                    Button addTransactionBtn = new Button("Add Transaction", LumoIcon.PLUS.create());
+                    addTransactionBtn.setIconAfterText(false);
+                    addTransactionBtn.addClickListener(e -> {
+                        addTransactionDialog.open();
+                        transactionsGrid.setItems(instrumentsFacadeService.getTransactionsByAsset(asset));
+                    });
+                    return addTransactionBtn;
                 })
                 .build();
 
         Button seeAllTransactionsBtn = new Button("See more transactions");
 
-        TransactionsGrid transactionsGrid = new TransactionsGrid(instrumentsFacadeService);
-        transactionsGrid.setItems(instrumentsFacadeService.getTransactionsByAsset(asset));
-        transactionsGrid.setPageSize(10);
         return new Section(header, transactionsGrid);
     }
 
