@@ -4,6 +4,7 @@ import com.example.application.data.models.NumberType;
 import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.AssetWatcher;
 import com.example.application.services.crypto.InstrumentsFacadeService;
+import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.utils.common.MathUtils;
 import com.example.application.utils.common.StringUtils;
 import com.example.application.views.components.*;
@@ -46,6 +47,9 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
 
     @Autowired
     private InstrumentsFacadeService instrumentsFacadeService;
+
+    @Autowired
+    private PortfolioPerformanceTracker portfolioPerformanceTracker;
 
     @Override
     public void setParameter(BeforeEvent beforeEvent, String symbol) {
@@ -257,21 +261,27 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         body.addClassName("section-card-wrapper");
 
         // TODO: Add actual values
-        PriceBadge diversityValue = new PriceBadge(8, NumberType.PERCENT, true, false, false);
-        ProgressBar diversityBar = new ProgressBar(0, 100, 100.0 / 8);
+
+        double diversityPercentage = portfolioPerformanceTracker.getAssetDiversityPercentage(asset);
+        PriceBadge diversityBadge = new PriceBadge(diversityPercentage, NumberType.PERCENT, true, false, false);
+        ProgressBar diversityBar = new ProgressBar(0, 100, 100.0 / diversityPercentage);
         Container diversityContainer = Container.builder("portfolio-diversity")
-                .addComponent(diversityValue)
+                .addComponent(diversityBadge)
                 .addComponent(diversityBar)
                 .build();
 
-        PriceBadge worthValue = new PriceBadge(200, NumberType.CURRENCY, false, false, false);
-        PriceBadge costValue = new PriceBadge(180, NumberType.CURRENCY, false, false, false);
-        PriceBadge profitLossValue = new PriceBadge(20, NumberType.CURRENCY, true, false, false);
+        double assetCostValue = portfolioPerformanceTracker.getTotalAssetWorth(asset);
+        double assetWorthValue = portfolioPerformanceTracker.getTotalAssetWorth(asset);
+        double assetProfitLossValue = assetWorthValue - assetCostValue;
 
-        Div diversity = createStatsItem("Portfolio Diversity", diversityContainer);
-        Div totalWorth = createStatsItem("Total Worth", worthValue);
+        PriceBadge costValue = new PriceBadge(assetCostValue, NumberType.CURRENCY, false, false, false);
+        PriceBadge worthValue = new PriceBadge(assetWorthValue, NumberType.CURRENCY, false, false, false);
+        PriceBadge profitLossValue = new PriceBadge(assetProfitLossValue, NumberType.CURRENCY, true, false, false);
+
         Div totalCost = createStatsItem("Total Cost", costValue);
+        Div totalWorth = createStatsItem("Total Worth", worthValue);
         Div profitLoss = createStatsItem("Profit Loss", profitLossValue);
+        Div diversity = createStatsItem("Portfolio Diversity", diversityContainer);
 
         body.add(diversity, totalWorth, totalCost, profitLoss);
 

@@ -13,13 +13,6 @@ import org.springframework.stereotype.Service;
 import java.math.BigInteger;
 import java.util.List;
 
-/*
-    TODO: Components
-        - AssetPerformanceTracker => tracking performance through its transactions, average buy/sell, and other indicators.
-            - UserPortfolio => Gives the overall performance
-            - AssetPortfolio => Gives performance per a certain asset
-* */
-
 /**
  * Service that provides information just for authenticated user and guest user
  * and hides other information that user is not supposed to have
@@ -107,6 +100,10 @@ public class InstrumentsFacadeService {
     public WalletBalance getWalletBalanceByAsset(Asset asset) {
         return instrumentsService.getWalletBalancesByWalletAndAsset(getAuthenticatedUserWallet(), asset);
     }
+
+    public double getAmountOfTokens(Asset asset) {
+        return instrumentsService.getWalletBalancesByWalletAndAsset(getAuthenticatedUserWallet(), asset).getAmount();
+    }
     //</editor-fold>
 
     //<editor-fold desc="METADATA">
@@ -155,7 +152,6 @@ public class InstrumentsFacadeService {
     }
 
     //</editor-fold>
-
 
     private Wallet getAuthenticatedUserWallet() {
         String username = securityService.getAuthenticatedUser().getUsername();
