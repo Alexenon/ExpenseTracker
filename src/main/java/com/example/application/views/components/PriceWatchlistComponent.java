@@ -2,7 +2,7 @@ package com.example.application.views.components;
 
 import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.AssetWatcher;
-import com.example.application.services.crypto.InstrumentsService;
+import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.utils.common.StringUtils;
 import com.example.application.views.components.native_components.Container;
 import com.vaadin.flow.component.UI;
@@ -28,18 +28,18 @@ public class PriceWatchlistComponent extends Div {
 
     private final Asset asset;
     private final AssetWatcher.ActionType actionType;
-    private final InstrumentsService instrumentsService;
+    private final InstrumentsFacadeService instrumentsFacadeService;
 
-    private final List<AssetWatcher> targets;
+    private final List<AssetWatcher> assetWatchers;
 
     private final Div priceLayoutContainer = new Div();
 
     @Autowired
-    public PriceWatchlistComponent(Asset asset, AssetWatcher.ActionType actionType, InstrumentsService instrumentsService) {
+    public PriceWatchlistComponent(Asset asset, AssetWatcher.ActionType actionType, InstrumentsFacadeService instrumentsFacadeService) {
         this.asset = asset;
         this.actionType = actionType;
-        this.instrumentsService = instrumentsService;
-        this.targets = instrumentsService.getAssetWatchersByAssetAndActionType(asset, actionType);
+        this.instrumentsFacadeService = instrumentsFacadeService;
+        this.assetWatchers = instrumentsFacadeService.getAssetWatchersByAssetAndActionType(asset, actionType);
 
         initialize();
         fillComponent();
@@ -50,10 +50,10 @@ public class PriceWatchlistComponent extends Div {
     }
 
     private void fillComponent() {
-        if (targets.isEmpty()) {
+        if (assetWatchers.isEmpty()) {
             addNewPriceLayout();
         } else {
-            targets.forEach(assetWatcher -> priceLayoutContainer.add(new WatchlistLayout(assetWatcher)));
+            assetWatchers.forEach(assetWatcher -> priceLayoutContainer.add(new WatchlistLayout(assetWatcher)));
         }
     }
 
@@ -131,7 +131,7 @@ public class PriceWatchlistComponent extends Div {
             saveBtn.addClickListener(event -> {
                 if (binder.writeBeanIfValid(assetWatcher)) {
                     System.out.println("Saving " + assetWatcher);
-                    instrumentsService.saveAssetWatcher(assetWatcher);
+                    instrumentsFacadeService.saveAssetWatcher(assetWatcher);
                     setEditMode(false);
                 } else {
                     System.out.println("Validation failed.");

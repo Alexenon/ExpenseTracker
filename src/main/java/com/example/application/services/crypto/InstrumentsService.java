@@ -1,28 +1,45 @@
 package com.example.application.services.crypto;
 
 import com.example.application.data.enums.Symbols;
-import com.example.application.data.models.crypto.CryptoTransaction;
-import com.example.application.entities.crypto.Asset;
-import com.example.application.entities.crypto.AssetWatcher;
+import com.example.application.entities.User;
+import com.example.application.entities.crypto.*;
 import com.example.application.repositories.crypto.AssetRepository;
-import com.example.application.repositories.crypto.AssetWatcherRepository;
-import com.example.application.repositories.crypto.CryptoTransactionRepository;
+import com.example.application.repositories.crypto.WalletBalanceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Component
+@Service
 public class InstrumentsService {
 
-    @Autowired
-    private AssetRepository assetRepository;
+    private final WalletService walletService;
+    private final AssetRepository assetRepository;
+    private final AssetWatcherService assetWatcherService;
+    private final CryptoTransactionService transactionService;
+    private final WalletBalanceRepository walletBalanceRepository;
 
     @Autowired
-    private AssetWatcherRepository assetWatcherRepository;
+    public InstrumentsService(WalletService walletService,
+                              AssetRepository assetRepository,
+                              CryptoTransactionService transactionService,
+                              AssetWatcherService assetWatcherService,
+                              WalletBalanceRepository walletBalanceRepository
+    ) {
+        this.walletService = walletService;
+        this.assetRepository = assetRepository;
+        this.transactionService = transactionService;
+        this.assetWatcherService = assetWatcherService;
+        this.walletBalanceRepository = walletBalanceRepository;
+    }
 
-    @Autowired
-    private CryptoTransactionRepository transactionRepository;
+    /*
+    * ASSETS
+    * */
+
+    public List<Asset> getAllAssets() {
+        return assetRepository.findAll();
+    }
 
     public Asset getAssetBySymbol(String symbolName) {
         return assetRepository.findBySymbol(symbolName.toUpperCase());
@@ -36,43 +53,68 @@ public class InstrumentsService {
      * AssetWatcher
      * */
 
-    public List<AssetWatcher> getAssetWatchersByAsset(Asset asset) {
-        return assetWatcherRepository.findByAsset(asset);
-    }
-
-    public List<AssetWatcher> getAssetWatchersByAssetAndActionType(Asset asset, AssetWatcher.ActionType actionType) {
-        return assetWatcherRepository.findByAssetAndActionType(asset, actionType);
-    }
-
     public AssetWatcher saveAssetWatcher(AssetWatcher assetWatcher) {
-        return assetWatcherRepository.save(assetWatcher);
+        return assetWatcherService.save(assetWatcher);
     }
 
     public void deleteAssetWatcher(AssetWatcher assetWatcher) {
-        assetWatcherRepository.delete(assetWatcher);
+        assetWatcherService.delete(assetWatcher);
+    }
+
+    public List<AssetWatcher> getAssetWatchersByAsset(Asset asset) {
+        return assetWatcherService.findBy(asset);
+    }
+
+    public List<AssetWatcher> getAssetWatchersByAsset(Wallet wallet, Asset asset) {
+        return assetWatcherService.findBy(wallet, asset);
+    }
+
+    public List<AssetWatcher> getAssetWatchersByAssetAndActionType(Wallet wallet, Asset asset, AssetWatcher.ActionType actionType) {
+        return assetWatcherService.findBy(wallet, asset, actionType);
     }
 
     /*
      * Transactions
      * */
 
-    public List<CryptoTransaction> getTransactions() {
-        return transactionRepository.findAll();
-    }
-
-    public List<CryptoTransaction> getTransactionsByAsset(Asset asset) {
-        return transactionRepository.findByAsset(asset);
-    }
-
     public CryptoTransaction saveTransaction(CryptoTransaction transaction) {
-        transaction.setOrderQuantity(transaction.getOrderTotalCost() / transaction.getMarketPrice());
-        CryptoTransaction savedTransaction = transactionRepository.save(transaction);
-        System.out.printf("Saved -> %s\n", savedTransaction);
-        return savedTransaction;
+        return transactionService.saveTransaction(transaction);
     }
 
     public void deleteTransaction(CryptoTransaction transaction) {
-        transactionRepository.delete(transaction);
+        transactionService.deleteTransaction(transaction);
+    }
+
+    public List<CryptoTransaction> getTransactionsBy(Wallet wallet) {
+        return transactionService.findBy(wallet);
+    }
+
+    public List<CryptoTransaction> getTransactionsBy(Wallet wallet, Asset asset) {
+        return transactionService.findBy(wallet, asset);
+    }
+
+    public List<CryptoTransaction> getTransactionsBy(Wallet wallet, Asset asset, CryptoTransaction.TransactionType type) {
+        return transactionService.findBy(wallet, asset, type);
+    }
+
+    /*
+     * WALLETS
+     * */
+
+    public Wallet getWalletByUser(User user) {
+        return walletService.getWalletByUser(user);
+    }
+
+    /*
+    * WALLET BALANCES
+    * */
+
+    public WalletBalance getWalletBalancesByWalletAndAsset(Wallet wallet, Asset asset) {
+        return walletBalanceRepository.findByWalletAndAsset(wallet, asset).orElseThrow();
+    }
+
+    public List<WalletBalance> getWalletBalancesByWallet(Wallet wallet) {
+        return walletBalanceRepository.findByWallet(wallet);
     }
 
     /*

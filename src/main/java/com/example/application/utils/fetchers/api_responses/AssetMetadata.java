@@ -10,7 +10,7 @@ import java.util.List;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AssetInfo {
+public class AssetMetadata {
     @JsonProperty("ID")
     private int id;
 
@@ -247,7 +247,7 @@ public class AssetInfo {
 
     @Override
     public String toString() {
-        return "AssetData{id=%d, symbol='%s', name='%s', priceUsd=%s, uri='%s'}"
+        return "AssetMetadata{id=%d, symbol='%s', name='%s', priceUsd=%s, uri='%s'}"
                 .formatted(id, symbol, name, priceUsd, uri);
     }
 

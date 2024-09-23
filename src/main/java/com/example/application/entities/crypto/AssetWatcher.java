@@ -18,6 +18,10 @@ public class AssetWatcher {
     private long id;
 
     @ManyToOne
+    @JoinColumn(name = "wallet_id", nullable = false)
+    private Wallet wallet;
+
+    @ManyToOne
     @JoinColumn(name = "asset_id", nullable = false)
     private Asset asset;
 
@@ -42,6 +46,7 @@ public class AssetWatcher {
      * @param target       represents the price target or percentage target of the asset price
      * @param targetAmount represents the amount to invest when the target is reached
      * @param targetType   represents the type of the target - price / percentage
+     * @param actionType   represents the type of the watcher - buy / sell
      * //@param isCompleted  represents if the target was achieved
      */
     public AssetWatcher(Asset asset, double target, double targetAmount, TargetType targetType, ActionType actionType) {

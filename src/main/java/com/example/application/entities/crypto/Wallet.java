@@ -1,5 +1,6 @@
 package com.example.application.entities.crypto;
 
+import com.example.application.entities.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,27 +12,17 @@ import java.time.LocalDateTime;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-public class Asset {
+public class Wallet {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(nullable = false)
-    private String symbol;
-
-    @Column(name = "comment")
-    private String comment;
+    @OneToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Column(nullable = false)
-    private boolean markedAsFavorite;
-
-    @Column(nullable = false)
-    private LocalDateTime lastTimeUpdated = LocalDateTime.now();
-
-    public Asset(String symbol) {
-        this(0, symbol, "", false, LocalDateTime.now());
-    }
+    private LocalDateTime dateCreated = LocalDateTime.now();
 
 }
-

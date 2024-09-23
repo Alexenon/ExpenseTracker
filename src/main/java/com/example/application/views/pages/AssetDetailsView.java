@@ -1,10 +1,9 @@
 package com.example.application.views.pages;
 
-import com.example.application.data.models.InstrumentsProvider;
 import com.example.application.data.models.NumberType;
-import com.example.application.data.models.crypto.AssetData;
+import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.AssetWatcher;
-import com.example.application.services.crypto.InstrumentsService;
+import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.utils.common.MathUtils;
 import com.example.application.utils.common.StringUtils;
 import com.example.application.views.components.*;
@@ -25,39 +24,33 @@ import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.theme.lumo.LumoIcon;
+import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigInteger;
+import java.util.Objects;
 
 /*
  * TODO:
  *  - cursor: not-allowed;    - style something
  * */
 
-@AnonymousAllowed
+@PermitAll
 @PageTitle("Asset Details")
 @Route(value = "details", layout = MainLayout.class)
 public class AssetDetailsView extends Main implements HasUrlParameter<String> {
 
-    private AssetData assetData;
+    private Asset asset;
     private AddTransactionDialog addTransactionDialog;
 
     @Autowired
-    private InstrumentsProvider instrumentsProvider;
-
-    @Autowired
-    private InstrumentsService instrumentsService;
+    private InstrumentsFacadeService instrumentsFacadeService;
 
     @Override
     public void setParameter(BeforeEvent beforeEvent, String symbol) {
-        this.assetData = instrumentsProvider.getListOfAssetData().stream()
-                .filter(a -> a.getAsset().getSymbol().equalsIgnoreCase(symbol))
-                .findFirst()
-                .orElseThrow();
-
-        this.addTransactionDialog = new AddTransactionDialog(assetData, instrumentsService, instrumentsProvider);
+        this.asset = Objects.requireNonNull(instrumentsFacadeService.getAssetBySymbol(symbol));
+        this.addTransactionDialog = new AddTransactionDialog(asset, instrumentsFacadeService);
 
         buildPage();
         getElement().executeJs("window.scrollTo(0,0)"); // Scroll to top of the page, on initialization
@@ -86,38 +79,38 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
 
         Container coinNameContainer = Container.builder("coin-overview-name-container")
                 .addComponent(() -> {
-                    Image image = new Image(assetData.getAssetInfo().getLogoUrl(), assetData.getName());
+                    Image image = new Image(instrumentsFacadeService.getAssetImgUrl(asset), asset.getSymbol());
                     image.setClassName("coin-overview-image");
                     return image;
                 })
-                .addComponent(new H1(assetData.getName()))
+                .addComponent(new H1(instrumentsFacadeService.getAssetFullName(asset)))
                 .addComponent(() -> {
                     Span dot = new Span("•");
                     dot.setClassName("dot");
                     return dot;
                 })
-                .addComponent(new Span(assetData.getAssetInfo().getSymbol()))
+                .addComponent(new Span(asset.getSymbol()))
                 .build();
 
         Container priceWrapper = Container.builder()
                 .addClassName("price-wrapper")
                 .addComponent(() -> {
-                    String assetPrice = NumberType.CURRENCY.parse(assetData.getAssetInfo().getPriceUsd());
+                    String assetPrice = NumberType.CURRENCY.parse(instrumentsFacadeService.getAssetPrice(asset));
                     return new Paragraph(assetPrice);
                 })
                 .addComponent(() -> {
-                    double percentageChangeLast24H = assetData.getAssetInfo().getSpotMoving24HourChangePercentageUsd();
+                    double percentageChangeLast24H = instrumentsFacadeService.getAsset24HourChangePercentage(asset);
                     return new PriceBadge(percentageChangeLast24H, NumberType.PERCENT);
                 })
                 .build();
 
         Div coinInfoContainer = new Div(rank, coinNameContainer, priceWrapper);
 
-        Button markAsFavorite = new Button(getStarIcon(assetData.getAsset().isMarkedAsFavorite()));
+        Button markAsFavorite = new Button(getStarIcon(asset.isMarkedAsFavorite()));
         markAsFavorite.addClassName("rounded-button");
         markAsFavorite.addClickListener(e -> {
-            boolean isFavorite = assetData.getAsset().isMarkedAsFavorite();
-            assetData.getAsset().setMarkedAsFavorite(!isFavorite);
+            boolean isFavorite = asset.isMarkedAsFavorite();
+            asset.setMarkedAsFavorite(!isFavorite);
             markAsFavorite.setIcon(getStarIcon(!isFavorite));
         });
 
@@ -190,18 +183,18 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         H3 title = new H3("Crypto Convertor");
         title.setClassName("section-title");
 
-        Image inputImage = new Image(assetData.getAssetInfo().getLogoUrl(), assetData.getName());
+        Image inputImage = new Image(instrumentsFacadeService.getAssetImgUrl(asset), asset.getSymbol());
         inputImage.setClassName("coin-overview-image");
 
         CurrencyField tokenAmountField = new CurrencyField();
         tokenAmountField.setValue(1);
 
         CurrencyField usdAmountField = new CurrencyField();
-        usdAmountField.setValue(assetData.getAssetInfo().getPriceUsd());
+        usdAmountField.setValue(instrumentsFacadeService.getAssetPrice(asset));
 
         Container inputContainer = Container.builder()
                 .addComponent(inputImage)
-                .addComponent(new Paragraph(assetData.getAsset().getSymbol()))
+                .addComponent(new Paragraph(asset.getSymbol()))
                 .addComponent(tokenAmountField)
                 .build();
 
@@ -227,14 +220,14 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         // TODO: setValue() should be same formatter as default
         tokenAmountField.setValueChangeMode(ValueChangeMode.EAGER);
         tokenAmountField.addKeyUpListener(e -> {
-            double calculatedPrice = tokenAmountField.doubleValue() * assetData.getAssetInfo().getPriceUsd();
+            double calculatedPrice = tokenAmountField.doubleValue() * instrumentsFacadeService.getAssetPrice(asset);
             usdAmountField.setValue(calculatedPrice);
             System.out.println("usdAmountField = " + calculatedPrice);
         });
 
         usdAmountField.setValueChangeMode(ValueChangeMode.EAGER);
         usdAmountField.addKeyUpListener(e -> {
-            double calculatedPrice = usdAmountField.doubleValue() / assetData.getAssetInfo().getPriceUsd();
+            double calculatedPrice = usdAmountField.doubleValue() / instrumentsFacadeService.getAssetPrice(asset);
             tokenAmountField.setValue(calculatedPrice);
             System.out.println("tokenAmountField = " + calculatedPrice);
         });
@@ -291,10 +284,10 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         title.setClassName("section-title");
 
         Div marketCap = createStatsItem("Market Cap",
-                MathUtils.formatBigNumber(assetData.getAssetInfo().getTotalMktCapUsd()));
+                MathUtils.formatBigNumber(instrumentsFacadeService.getAssetTotalMarketCap(asset)));
 
-        BigInteger totalSupplyValue = assetData.getAssetInfo().getSupplyTotal();
-        BigInteger circulationSupplyValue = assetData.getAssetInfo().getSupplyCirculating();
+        BigInteger totalSupplyValue = instrumentsFacadeService.getAssetSupplyTotal(asset);
+        BigInteger circulationSupplyValue = instrumentsFacadeService.getAssetSupplyCirculating(asset);
         int percentageUseOfCirculationSupply = MathUtils.percentageOf(circulationSupplyValue, totalSupplyValue);
         ProgressBar bar = new ProgressBar(0, 100, percentageUseOfCirculationSupply);
 
@@ -311,9 +304,9 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         Div circulationSupply = createStatsItem("Circulation Supply", circulationSupplyContainer);
 
         Div totalSupply = createStatsItem("Total Supply",
-                MathUtils.formatBigNumber(assetData.getAssetInfo().getSupplyTotal()));
+                MathUtils.formatBigNumber(instrumentsFacadeService.getAssetSupplyTotal(asset)));
         Div volume24Hour = createStatsItem("Volume 24h",
-                MathUtils.formatBigNumber(assetData.getAssetInfo().getSpotMoving24HourQuoteVolumeUsd()));
+                MathUtils.formatBigNumber(instrumentsFacadeService.getAsset24HourVolume(asset)));
 
         Div body = new Div(marketCap, circulationSupply, totalSupply, volume24Hour);
         body.addClassNames("section-card-wrapper", "market-stats-section");
@@ -323,9 +316,9 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
     }
 
     private Section aboutSection() {
-        H3 title = new H3("About " + assetData.getName());
+        H3 title = new H3("About " + instrumentsFacadeService.getAssetFullName(asset));
         title.setClassName("section-title");
-        Paragraph description = new Paragraph(assetData.getAssetInfo().getAssetDescriptionSummary());
+        Paragraph description = new Paragraph(instrumentsFacadeService.getAssetDescriptionSummary(asset));
         Container body = new Container("section-card-wrapper", description);
         return new Section(title, body);
     }
@@ -360,6 +353,10 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
     }
 
     private Section transactionHistorySection() {
+        TransactionsGrid transactionsGrid = new TransactionsGrid(instrumentsFacadeService);
+        transactionsGrid.setItems(instrumentsFacadeService.getTransactionsByAsset(asset));
+        transactionsGrid.setPageSize(10);
+
         Container header = Container.builder("section-header")
                 .addComponent(() -> {
                     H3 title = new H3("Transactions");
@@ -367,24 +364,23 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
                     return title;
                 })
                 .addComponent(() -> {
-                    Button addHoldingBtn = new Button("Add Transaction", LumoIcon.PLUS.create());
-                    addHoldingBtn.setIconAfterText(false);
-                    addHoldingBtn.addClickListener(e -> addTransactionDialog.open());
-                    return addHoldingBtn;
+                    Button addTransactionBtn = new Button("Add Transaction", LumoIcon.PLUS.create());
+                    addTransactionBtn.setIconAfterText(false);
+                    addTransactionBtn.addClickListener(e -> {
+                        addTransactionDialog.open();
+                        transactionsGrid.setItems(instrumentsFacadeService.getTransactionsByAsset(asset));
+                    });
+                    return addTransactionBtn;
                 })
                 .build();
 
         Button seeAllTransactionsBtn = new Button("See more transactions");
 
-        TransactionsGrid transactionsGrid = new TransactionsGrid(instrumentsService, instrumentsProvider);
-        transactionsGrid.setItems(instrumentsService.getTransactionsByAsset(assetData.getAsset()));
-        transactionsGrid.setPageSize(10);
         return new Section(header, transactionsGrid);
     }
 
     private Section createWatchlistSection(AssetWatcher.ActionType actionType) {
-        PriceWatchlistComponent watchlistComponent = new PriceWatchlistComponent(assetData.getAsset(),
-                actionType, instrumentsService);
+        PriceWatchlistComponent watchlistComponent = new PriceWatchlistComponent(asset, actionType, instrumentsFacadeService);
 
         Container header = Container.builder("section-header")
                 .addComponent(() -> {
