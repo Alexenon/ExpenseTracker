@@ -71,6 +71,7 @@ public class InstrumentsFacadeService {
     }
 
     public CryptoTransaction saveTransaction(CryptoTransaction transaction) {
+        transaction.setWallet(getAuthenticatedUserWallet());
         return instrumentsService.saveTransaction(transaction);
     }
 
@@ -81,6 +82,7 @@ public class InstrumentsFacadeService {
 
     //<editor-fold desc="ASSET WATCHERS">
     public AssetWatcher saveAssetWatcher(AssetWatcher assetWatcher) {
+        assetWatcher.setWallet(getAuthenticatedUserWallet());
         return instrumentsService.saveAssetWatcher(assetWatcher);
     }
 
