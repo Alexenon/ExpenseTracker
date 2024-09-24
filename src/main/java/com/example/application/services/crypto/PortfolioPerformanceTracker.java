@@ -90,6 +90,14 @@ public class PortfolioPerformanceTracker {
                 .values().stream().mapToDouble(Double::doubleValue).sum();
     }
 
+    public double getPortfolioProfit() {
+        return getPortfolioWorth() - getPortfolioCost();
+    }
+
+    public double getPortfolioProfitPercentage() {
+        return getPortfolioWorth() / getPortfolioCost() * 100 - 100;
+    }
+
     /**
      * @return the asset diversity percentage in the portfolio, range (0 - 100)%
      */

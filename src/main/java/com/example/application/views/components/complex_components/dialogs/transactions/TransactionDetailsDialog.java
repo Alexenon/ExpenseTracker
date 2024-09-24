@@ -4,6 +4,7 @@ import com.example.application.data.models.NumberType;
 import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.CryptoTransaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
+import com.example.application.utils.common.MathUtils;
 import com.example.application.views.components.complex_components.AssetValueParagraph;
 import com.example.application.views.components.complex_components.PriceBadge;
 import com.example.application.views.components.native_components.Container;
@@ -104,8 +105,12 @@ public class TransactionDetailsDialog extends Dialog {
     }
 
     private Div detailsProfitLoss() {
-        double usdProfit = 123.34;
-        double percentageProfit = 17.23;
+        double buyPrice = transaction.getMarketPrice();
+        double sellPrice = instrumentsFacadeService.getAssetPrice(transaction.getAsset());
+        double totalCost = transaction.getOrderTotalCost();
+
+        double usdProfit = MathUtils.profit(buyPrice, sellPrice, totalCost);
+        double percentageProfit = MathUtils.profitPercentage(buyPrice, sellPrice) - 100;
 
         Div profitLossContainer = Container.builder()
                 .addComponent(() -> {

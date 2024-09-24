@@ -164,7 +164,7 @@ public class AssetsGrid extends Div {
     private void initializeFilteringNonZeroValues() {
         hideAssetsCheckbox.addClickListener(e -> {
             if (hideAssetsCheckbox.getValue().equals(true)) {
-                hideZeroAmountItems();
+                hideZeroAmountAssets();
             } else {
                 resetGridFilteredItems();
             }
@@ -173,8 +173,8 @@ public class AssetsGrid extends Div {
         });
     }
 
-    private void hideZeroAmountItems() {
-        dataView.setFilter(asset -> instrumentsFacadeService.getAssetPrice(asset) > 0);
+    private void hideZeroAmountAssets() {
+        dataView.setFilter(asset -> instrumentsFacadeService.getAmountOfTokens(asset) > 0);
     }
 
     private ComponentRenderer<Container, Asset> columnNameRenderer() {

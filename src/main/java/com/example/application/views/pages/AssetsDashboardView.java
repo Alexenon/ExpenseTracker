@@ -4,6 +4,7 @@ import com.example.application.data.models.NumberType;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.views.components.AssetsGrid;
+import com.example.application.views.components.complex_components.AssetValueParagraph;
 import com.example.application.views.components.complex_components.PriceBadge;
 import com.example.application.views.components.native_components.Container;
 import com.example.application.views.layouts.MainLayout;
@@ -44,32 +45,26 @@ public class AssetsDashboardView extends Main {
         getStyle().set("margin", "100px 30px 30px 30px");
     }
 
-    // TODO: Replace with actual values
     private Section performanceSection() {
         Section section = new Section();
         H3 title = new H3("Portfolio Statistics");
         title.setClassName("section-title");
 
-        Div body = new Div();
-        body.addClassNames("section-card-wrapper");
+        double profitLoss = portfolioPerformanceTracker.getPortfolioProfit();
+        double profitLossPercentage = portfolioPerformanceTracker.getPortfolioProfitPercentage();
+        Div profitLossContainer = Container.builder()
+                .addClassName("price-profit-wrapper")
+                .addComponent(new AssetValueParagraph(profitLoss, NumberType.CURRENCY))
+                .addComponent(new PriceBadge(profitLossPercentage, NumberType.PERCENT, true, true, false))
+                .build();
 
         // TODO: Add hints for help
         Div totalWorth = createStatsItem("Total Worth", NumberType.CURRENCY.parse(portfolioPerformanceTracker.getPortfolioWorth()));
         Div totalCost = createStatsItem("Total Cost", NumberType.CURRENCY.parse(portfolioPerformanceTracker.getPortfolioCost()));
+        Div profitStats = createStatsItem("Profit", profitLossContainer);
 
-        Container profitWrapper = Container.builder()
-                .addComponent(() -> {
-                    String profit = NumberType.CURRENCY.parse(6250);
-                    return new Paragraph(profit);
-                })
-                // TODO: When should compare percent change ???
-                //  Previous month ?
-                //  Previous transaction ?
-                .addComponent(() -> new PriceBadge(34.23, NumberType.PERCENT))
-                .build();
-
-        Div profitStats = createStatsItem("Profit", profitWrapper);
-
+        Div body = new Div();
+        body.addClassNames("section-card-wrapper");
         body.add(totalWorth, totalCost, profitStats);
         section.add(body);
         return section;
