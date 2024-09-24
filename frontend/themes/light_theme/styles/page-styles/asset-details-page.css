@@ -406,3 +406,10 @@ vaadin-number-field {
     background: #c0ced3;
 }
 
+.value-increase {
+    color: #34b349;
+}
+
+.value-decrease {
+    color: #f02934;
+}

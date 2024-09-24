@@ -45,13 +45,12 @@ public class PortfolioPerformanceTracker {
     }
 
     public double getAveragePriceForRemainingTokens(Asset asset) {
-        List<CryptoTransaction> transactions = instrumentsFacadeService.getTransactionsByAsset(asset);
         double totalCost = 0;
         double totalQuantity = 0;
 
-        for (CryptoTransaction transaction : transactions) {
+        for (CryptoTransaction transaction : instrumentsFacadeService.getTransactionsByAsset(asset)) {
             if (transaction.isBuyTransaction()) {
-                totalCost += calculateCost(transaction);
+                totalCost += transactionCost(transaction);
                 totalQuantity += transaction.getOrderQuantity();
             } else if (transaction.isSellTransaction()) {
                 totalCost = adjustCostForSale(transaction, totalCost, totalQuantity);
@@ -62,23 +61,20 @@ public class PortfolioPerformanceTracker {
         return calculateAveragePrice(totalCost, totalQuantity);
     }
 
-    public double getPortfolioCost(List<CryptoTransaction> transactions) {
-        return transactions.stream()
-                .collect(Collectors.groupingBy(CryptoTransaction::getAsset,
-                        Collectors.summingDouble(t -> (t.isBuyTransaction() ? 1 : -1) * t.getOrderQuantity() * t.getMarketPrice())))
-                .values().stream().mapToDouble(Double::doubleValue).sum();
-    }
-
-    public double getTotalAssetCost(List<CryptoTransaction> transactions) {
-        return calculateTotalCostForBuyTransactions(transactions);
-    }
-
-    public double getTotalAssetWorth(Asset asset) {
+    public double getAssetWorth(Asset asset) {
         return instrumentsFacadeService.getAmountOfTokens(asset) * instrumentsFacadeService.getAssetPrice(asset);
     }
 
-    public double getAssetDiversityPercentage(Asset asset) {
-        return 0;
+    public double getAssetCost(Asset asset) {
+        return calculateTotalCostForBuyTransactions(instrumentsFacadeService.getTransactionsByAsset(asset));
+    }
+
+    public double getAssetProfit(Asset asset) {
+        return getAssetWorth(asset) - getAssetCost(asset);
+    }
+
+    public double getAssetProfitPercentage(Asset asset) {
+        return getAssetWorth(asset) / getAssetCost(asset) * 100 - 100;
     }
 
     public double getPortfolioWorth() {
@@ -87,9 +83,18 @@ public class PortfolioPerformanceTracker {
                 .sum();
     }
 
-    // TODO: getPortfolioCost
     public double getPortfolioCost() {
-        return 0;
+        return instrumentsFacadeService.getAllTransactions().stream()
+                .collect(Collectors.groupingBy(CryptoTransaction::getAsset,
+                        Collectors.summingDouble(t -> (t.isBuyTransaction() ? 1 : -1) * transactionCost(t))))
+                .values().stream().mapToDouble(Double::doubleValue).sum();
+    }
+
+    /**
+     * @return the asset diversity percentage in the portfolio, range (0 - 100)%
+     */
+    public int getAssetDiversityPercentage(Asset asset) {
+        return Math.toIntExact(Math.round(getAssetWorth(asset) / getPortfolioWorth() * 100));
     }
 
     /*
@@ -99,7 +104,7 @@ public class PortfolioPerformanceTracker {
     private double calculateTotalCostForBuyTransactions(List<CryptoTransaction> transactions) {
         return transactions.stream()
                 .filter(CryptoTransaction::isBuyTransaction)
-                .mapToDouble(this::calculateCost)
+                .mapToDouble(this::transactionCost)
                 .sum();
     }
 
@@ -113,7 +118,7 @@ public class PortfolioPerformanceTracker {
     private double calculateTotalCostForSellTransactions(List<CryptoTransaction> transactions) {
         return transactions.stream()
                 .filter(CryptoTransaction::isSellTransaction)
-                .mapToDouble(this::calculateCost)
+                .mapToDouble(this::transactionCost)
                 .sum();
     }
 
@@ -124,7 +129,7 @@ public class PortfolioPerformanceTracker {
                 .sum();
     }
 
-    private double calculateCost(CryptoTransaction transaction) {
+    private double transactionCost(CryptoTransaction transaction) {
         return transaction.getOrderQuantity() * transaction.getMarketPrice();
     }
 
