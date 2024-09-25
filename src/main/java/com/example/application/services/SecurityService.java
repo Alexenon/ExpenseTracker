@@ -1,10 +1,13 @@
 package com.example.application.services;
 
+import com.example.application.entities.User;
+import com.example.application.utils.exceptions.UnauthenticatedUserException;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.server.VaadinServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.core.context.SecurityContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
@@ -14,19 +17,27 @@ import org.springframework.stereotype.Service;
 public class SecurityService {
 
     private static final Logger logger = LoggerFactory.getLogger(SecurityService.class);
-
     private static final String LOGOUT_SUCCESS_URL = "/";
 
-    public UserDetails getAuthenticatedUser() {
-        SecurityContext context = SecurityContextHolder.getContext();
-        Object principal = context.getAuthentication().getPrincipal();
+    private final UserService userService;
 
-        if (principal instanceof UserDetails userDetails) {
+    @Autowired
+    public SecurityService(UserService userService) {
+        this.userService = userService;
+    }
+
+    public User getAuthenticatedUser() {
+        return userService.findByUsername(getAuthenticatedUserDetails().getUsername());
+    }
+
+    private UserDetails getAuthenticatedUserDetails() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication.getPrincipal() instanceof UserDetails userDetails) {
             return userDetails;
         }
 
-        // TODO: Throw a custom unauthenticated user exception instead of null -> Create separate exception page
-        return null;
+        throw new UnauthenticatedUserException("User is not authenticated. Please log in to access this resource.");
     }
 
     public void logout() {

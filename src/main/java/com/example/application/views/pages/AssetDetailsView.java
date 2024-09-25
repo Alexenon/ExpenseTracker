@@ -4,9 +4,11 @@ import com.example.application.data.models.NumberType;
 import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.AssetWatcher;
 import com.example.application.services.crypto.InstrumentsFacadeService;
+import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.utils.common.MathUtils;
 import com.example.application.utils.common.StringUtils;
 import com.example.application.views.components.*;
+import com.example.application.views.components.complex_components.AssetValueParagraph;
 import com.example.application.views.components.complex_components.PriceBadge;
 import com.example.application.views.components.complex_components.dialogs.transactions.AddTransactionDialog;
 import com.example.application.views.components.native_components.Container;
@@ -47,6 +49,9 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
     @Autowired
     private InstrumentsFacadeService instrumentsFacadeService;
 
+    @Autowired
+    private PortfolioPerformanceTracker portfolioPerformanceTracker;
+
     @Override
     public void setParameter(BeforeEvent beforeEvent, String symbol) {
         this.asset = Objects.requireNonNull(instrumentsFacadeService.getAssetBySymbol(symbol));
@@ -61,8 +66,8 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
 
         add(
                 headerDetailsSection(),
-                notesAndConvertorSection(),
                 holdingsSection(),
+                notesAndConvertorSection(),
                 createWatchlistSection(AssetWatcher.ActionType.BUY),
                 createWatchlistSection(AssetWatcher.ActionType.SELL),
                 priceMonitorSection(),
@@ -116,23 +121,6 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
 
         section.addClassName("asset-details-header");
         section.add(coinInfoContainer, markAsFavorite);
-
-        return section;
-    }
-
-    private Section investedDetailsSection() {
-        Section section = new Section();
-        H3 title = new H3("Portfolio Statistics");
-        title.setClassName("section-title");
-
-        Div body = new Div();
-        body.addClassNames("section-card-wrapper");
-
-
-        Div totalInvestedParagraph = createStatsItem("Total Invested in BTC", "$50000");
-        Div dollarProfitParagraph = createStatsItem("Total Invested in BTC", "$50000");
-        Div percentageProfitParagraph = createStatsItem("", "");
-
 
         return section;
     }
@@ -253,27 +241,37 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
                 })
                 .build();
 
-        Div body = new Div();
-        body.addClassName("section-card-wrapper");
+        double assetCost = portfolioPerformanceTracker.getAssetCost(asset);
+        double assetWorth = portfolioPerformanceTracker.getAssetWorth(asset);
+        double assetProfitLoss = portfolioPerformanceTracker.getAssetProfit(asset);
+        double profitLossPercentage = portfolioPerformanceTracker.getAssetProfitPercentage(asset);
+        int assetDiversityPercentage = portfolioPerformanceTracker.getAssetDiversityPercentage(asset);
 
-        // TODO: Add actual values
-        PriceBadge diversityValue = new PriceBadge(8, NumberType.PERCENT, true, false, false);
-        ProgressBar diversityBar = new ProgressBar(0, 100, 100.0 / 8);
-        Container diversityContainer = Container.builder("portfolio-diversity")
-                .addComponent(diversityValue)
-                .addComponent(diversityBar)
+        AssetValueParagraph costValue = new AssetValueParagraph(assetCost, NumberType.CURRENCY);
+        AssetValueParagraph worthValue = new AssetValueParagraph(assetWorth, NumberType.CURRENCY);
+        Div profitLossContainer = Container.builder()
+                .addClassName("price-profit-wrapper")
+                .addComponent(new AssetValueParagraph(assetProfitLoss, NumberType.CURRENCY))
+                .addComponent(new PriceBadge(profitLossPercentage, NumberType.PERCENT, true, true, false))
                 .build();
 
-        PriceBadge worthValue = new PriceBadge(200, NumberType.CURRENCY, false, false, false);
-        PriceBadge costValue = new PriceBadge(180, NumberType.CURRENCY, false, false, false);
-        PriceBadge profitLossValue = new PriceBadge(20, NumberType.CURRENCY, true, false, false);
+        Container diversityContainer = Container.builder("portfolio-diversity")
+                .addComponent(() -> {
+                    AssetValueParagraph valueParagraph = new AssetValueParagraph(assetDiversityPercentage, NumberType.PERCENT);
+                    valueParagraph.setColor("blue");
+                    return valueParagraph;
+                })
+                .addComponent(new ProgressBar(0, 100, assetDiversityPercentage))
+                .build();
 
-        Div diversity = createStatsItem("Portfolio Diversity", diversityContainer);
-        Div totalWorth = createStatsItem("Total Worth", worthValue);
         Div totalCost = createStatsItem("Total Cost", costValue);
-        Div profitLoss = createStatsItem("Profit Loss", profitLossValue);
+        Div totalWorth = createStatsItem("Total Worth", worthValue);
+        Div profitLoss = createStatsItem("Profit Loss", profitLossContainer);
+        Div diversity = createStatsItem("Portfolio Diversity", diversityContainer);
 
-        body.add(diversity, totalWorth, totalCost, profitLoss);
+        Div body = new Div();
+        body.addClassName("section-card-wrapper");
+        body.add(totalWorth, profitLoss, totalCost, diversity);
 
         return new Section(header, body);
     }
@@ -376,7 +374,7 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
 
         Button seeAllTransactionsBtn = new Button("See more transactions");
 
-        return new Section(header, transactionsGrid);
+        return new Section(header, transactionsGrid, seeAllTransactionsBtn);
     }
 
     private Section createWatchlistSection(AssetWatcher.ActionType actionType) {

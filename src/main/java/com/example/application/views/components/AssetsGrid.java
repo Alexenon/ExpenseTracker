@@ -4,6 +4,7 @@ import com.example.application.data.enums.Symbols;
 import com.example.application.data.models.NumberType;
 import com.example.application.entities.crypto.Asset;
 import com.example.application.services.crypto.InstrumentsFacadeService;
+import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.views.components.complex_components.PriceBadge;
 import com.example.application.views.components.native_components.Container;
 import com.example.application.views.pages.AssetDetailsView;
@@ -35,10 +36,16 @@ import java.util.Set;
 
 /*
     TODO:
-     - [!] Fix sortable criteria for certain columns
-     - [?] Think about column header style(maybe align item center)
-     - [?] Display footer statistics details for certain columns
+     - [!] Add columns -> Total Worth, Total Cost, Realized / Unrealized, Realized Profit, Next Buy / Next Sell
+     - [!] Fix sortable criteria for certain columns, make other columns not movable(left/right)
+     - [?] Think about column header style(maybe align item center), column style maybe align left/right
+     - [?] Display footer statistics details for certain columns -> Average, Total, ....
+            dataProvider.addDataProviderListener(changeEvent -> {
+                quantityColumn.setFooter("Total Quantity: " + calculateTotalQuantityOnGrid(dataProvider));
+                priceColumn.setFooter("Total Price: "+ calculateTotalPriceOnGrid(dataProvider));
+            });
      - [?] Add column tooltipComponent -> .setTooltipGenerator(a -> "Name is " + a.getName());
+
     _______________________________________________________________________________________________________________________________________
     | Name | Price  | 24h Changes | Amount | Avg buy | Avg sell | All-time low | All-time high | Total Worth | Total Invested | Realized  |
     | BTC  | $64000 | 2%          | 0.0034 | $60000  |    -     | $10          | $73000        | $230        | $200           | $30 / 10% |
@@ -47,6 +54,7 @@ import java.util.Set;
 public class AssetsGrid extends Div {
 
     private final InstrumentsFacadeService instrumentsFacadeService;
+    private final PortfolioPerformanceTracker portfolioPerformanceTracker;
 
     private final TextField searchField = new TextField();
     private final Checkbox hideAssetsCheckbox = new Checkbox("Hide 0 amount assets");
@@ -60,8 +68,10 @@ public class AssetsGrid extends Div {
     private MultiSelectComboBox<String> columnSelector;
     private List<Grid.Column<Asset>> listColumnsToSelect;
 
-    public AssetsGrid(InstrumentsFacadeService instrumentsFacadeService) {
+    public AssetsGrid(InstrumentsFacadeService instrumentsFacadeService,
+                      PortfolioPerformanceTracker portfolioPerformanceTracker) {
         this.instrumentsFacadeService = instrumentsFacadeService;
+        this.portfolioPerformanceTracker = portfolioPerformanceTracker;
 
         initializeGrid();
         initializeColumnSelector();
@@ -97,14 +107,13 @@ public class AssetsGrid extends Div {
         Grid.Column<Asset> nameCol = grid.addColumn(columnNameRenderer()).setKey("Name").setHeader("Name");
         Grid.Column<Asset> priceCol = grid.addColumn(columnPriceRenderer(instrumentsFacadeService::getAssetPrice)).setKey("Price").setHeader("Price");
         Grid.Column<Asset> changes24hCol = grid.addColumn(columnChanges24hRenderer()).setKey("Changes 24h").setHeader("Changes 24h");
-        Grid.Column<Asset> avgBuyCol = grid.addColumn(columnPriceRenderer(instrumentsFacadeService::getAssetPrice)).setKey("Avg Buy").setHeader("Avg Buy");
-        Grid.Column<Asset> avgSellCol = grid.addColumn(columnPriceRenderer(instrumentsFacadeService::getAssetPrice)).setKey("Avg Sell").setHeader("Avg Sell");
-//        Grid.Column<Asset> amountCol = grid.addColumn(a -> a.getAsset().getAmount()).setKey("Amount").setHeader("Amount");
-//        Grid.Column<Asset> profitChangesCol = grid.addColumn(new ComponentRenderer<>(this::renderProfitChanges)).setKey("Profit Changes").setHeader("Profit Changes");
+        Grid.Column<Asset> avgBuyCol = grid.addColumn(columnPriceRenderer(portfolioPerformanceTracker::getAverageBuyPrice)).setKey("Avg Buy").setHeader("Avg Buy");
+        Grid.Column<Asset> avgSellCol = grid.addColumn(columnPriceRenderer(portfolioPerformanceTracker::getAverageSellPrice)).setKey("Avg Sell").setHeader("Avg Sell");
+        Grid.Column<Asset> amountCol = grid.addColumn(instrumentsFacadeService::getAmountOfTokens).setKey("Amount").setHeader("Amount");
         grid.addColumn(new ComponentRenderer<>(this::threeDotsBtn)).setHeader(columnSelector);
+//        Grid.Column<Asset> profitChangesCol = grid.addColumn(new ComponentRenderer<>(this::renderProfitChanges)).setKey("Profit Changes").setHeader("Profit Changes");
 
-        // TODO: Columns -> Avg Buy Remaining Tokens,
-        listColumnsToSelect = List.of(nameCol, priceCol, changes24hCol, avgBuyCol, avgSellCol);
+        listColumnsToSelect = List.of(nameCol, priceCol, changes24hCol, avgBuyCol, avgSellCol, amountCol);
 
         grid.getColumns().forEach(c -> {
             c.setSortable(true);
@@ -119,11 +128,6 @@ public class AssetsGrid extends Div {
         grid.setAllRowsVisible(true);
 
         grid.getElement().executeJs("this.shadowRoot.querySelector('table').style.overflow = 'hidden';");
-
-//        dataProvider.addDataProviderListener(changeEvent -> {
-//            quantityColumn.setFooter("Total Quantity: " + calculateTotalQuantityOnGrid(dataProvider));
-//            priceColumn.setFooter("Total Price: "+ calculateTotalPriceOnGrid(dataProvider));
-//        });
 
         setHiddenRowCount(0);
     }
@@ -161,7 +165,7 @@ public class AssetsGrid extends Div {
     private void initializeFilteringNonZeroValues() {
         hideAssetsCheckbox.addClickListener(e -> {
             if (hideAssetsCheckbox.getValue().equals(true)) {
-                hideZeroAmountItems();
+                hideZeroAmountAssets();
             } else {
                 resetGridFilteredItems();
             }
@@ -170,8 +174,8 @@ public class AssetsGrid extends Div {
         });
     }
 
-    private void hideZeroAmountItems() {
-        dataView.setFilter(asset -> instrumentsFacadeService.getAssetPrice(asset) > 0);
+    private void hideZeroAmountAssets() {
+        dataView.setFilter(asset -> instrumentsFacadeService.getAmountOfTokens(asset) > 0);
     }
 
     private ComponentRenderer<Container, Asset> columnNameRenderer() {

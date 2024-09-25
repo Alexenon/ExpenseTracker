@@ -2,7 +2,9 @@ package com.example.application.views.pages;
 
 import com.example.application.data.models.NumberType;
 import com.example.application.services.crypto.InstrumentsFacadeService;
+import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.views.components.AssetsGrid;
+import com.example.application.views.components.complex_components.AssetValueParagraph;
 import com.example.application.views.components.complex_components.PriceBadge;
 import com.example.application.views.components.native_components.Container;
 import com.example.application.views.layouts.MainLayout;
@@ -24,12 +26,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class AssetsDashboardView extends Main {
 
     private final InstrumentsFacadeService instrumentsFacadeService;
+    private final PortfolioPerformanceTracker portfolioPerformanceTracker;
     private final AssetsGrid assetsGrid;
 
     @Autowired
-    public AssetsDashboardView(InstrumentsFacadeService instrumentsFacadeService) {
+    public AssetsDashboardView(InstrumentsFacadeService instrumentsFacadeService,
+                               PortfolioPerformanceTracker portfolioPerformanceTracker) {
         this.instrumentsFacadeService = instrumentsFacadeService;
-        this.assetsGrid = new AssetsGrid(instrumentsFacadeService);
+        this.portfolioPerformanceTracker = portfolioPerformanceTracker;
+
+        this.assetsGrid = new AssetsGrid(instrumentsFacadeService, portfolioPerformanceTracker);
 
         initializeGrid();
         add(performanceSection(), assetsGrid);
@@ -39,29 +45,26 @@ public class AssetsDashboardView extends Main {
         getStyle().set("margin", "100px 30px 30px 30px");
     }
 
-    // TODO: Replace with actual values
     private Section performanceSection() {
         Section section = new Section();
         H3 title = new H3("Portfolio Statistics");
         title.setClassName("section-title");
 
-        Div body = new Div();
-        body.addClassNames("section-card-wrapper");
-
-        // TODO: Add hints for help
-        Div totalWorth = createStatsItem("Total Worth", "$16,250"); // How much costs your assets now
-        Div totalCost = createStatsItem("Total Cost", "$10,000");   // Total cost of your assets
-
-        Container profitWrapper = Container.builder()
-                .addComponent(() -> {
-                    String profit = NumberType.CURRENCY.parse(6250);
-                    return new Paragraph(profit);
-                })
-                .addComponent(() -> new PriceBadge(34.23, NumberType.PERCENT))
+        double profitLoss = portfolioPerformanceTracker.getPortfolioProfit();
+        double profitLossPercentage = portfolioPerformanceTracker.getPortfolioProfitPercentage();
+        Div profitLossContainer = Container.builder()
+                .addClassName("price-profit-wrapper")
+                .addComponent(new AssetValueParagraph(profitLoss, NumberType.CURRENCY))
+                .addComponent(new PriceBadge(profitLossPercentage, NumberType.PERCENT, true, true, false))
                 .build();
 
-        Div profitStats = createStatsItem("Profit", profitWrapper);
+        // TODO: Add hints for help
+        Div totalWorth = createStatsItem("Total Worth", NumberType.CURRENCY.parse(portfolioPerformanceTracker.getPortfolioWorth()));
+        Div totalCost = createStatsItem("Total Cost", NumberType.CURRENCY.parse(portfolioPerformanceTracker.getPortfolioCost()));
+        Div profitStats = createStatsItem("Profit", profitLossContainer);
 
+        Div body = new Div();
+        body.addClassNames("section-card-wrapper");
         body.add(totalWorth, totalCost, profitStats);
         section.add(body);
         return section;

@@ -16,6 +16,13 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
+/*
+    TODO: Add Facade Service
+        - Fix convertToExpense
+        - Fix updateExpense
+        - Remove old implementations of monthly expenses
+* */
+
 @Service
 public class ExpenseService {
 
@@ -36,8 +43,12 @@ public class ExpenseService {
         return repository.getAll(userEmailOrUsername);
     }
 
+    public List<ExpenseDTO> getAllExpensesByUser(User user) {
+        return getAllExpensesByUser(user.getUsername());
+    }
+
     public List<ExpenseDTO> getAllExpensesByUser() {
-        return getAllExpensesByUser(securityService.getAuthenticatedUser().getUsername());
+        return getAllExpensesByUser(securityService.getAuthenticatedUser());
     }
 
     public Expense saveExpense(Expense expense) {
@@ -127,8 +138,13 @@ public class ExpenseService {
     }
 
     @Transactional
+    public List<MonthlyExpensesProjection> getMonthlyExpensesByUser(User user, LocalDate date) {
+        return getMonthlyExpensesByUser(user.getUsername(), date);
+    }
+
+    @Transactional
     public List<MonthlyExpensesProjection> getMonthlyExpensesByUser(LocalDate date) {
-        return getMonthlyExpensesByUser(securityService.getAuthenticatedUser().getUsername(), date);
+        return getMonthlyExpensesByUser(securityService.getAuthenticatedUser(), date);
     }
 
     public Expense convertToExpense(ExpenseRequest expenseRequest) {

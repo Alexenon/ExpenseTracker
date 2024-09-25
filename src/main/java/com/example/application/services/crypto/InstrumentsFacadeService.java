@@ -14,11 +14,12 @@ import java.math.BigInteger;
 import java.util.List;
 
 /*
-    TODO: Components
-        - AssetPerformanceTracker => tracking performance through its transactions, average buy/sell, and other indicators.
-            - UserPortfolio => Gives the overall performance
-            - AssetPortfolio => Gives performance per a certain asset
-* */
+    TODO: Rename
+        - Assets -> AssetServiceFacade         UserAssetsService
+        - Expenses -> ExpensesServiceFacade    UserExpensesService
+    
+    TODO: Place UserService into Security service, and retrieve authenticated user/ its username
+*/
 
 /**
  * Service that provides information just for authenticated user and guest user
@@ -27,7 +28,6 @@ import java.util.List;
 @Service
 public class InstrumentsFacadeService {
 
-    private final UserService userService;
     private final SecurityService securityService;
     private final InstrumentsService instrumentsService;
     private final InstrumentsProvider instrumentsProvider;
@@ -37,7 +37,6 @@ public class InstrumentsFacadeService {
                                     SecurityService securityService,
                                     InstrumentsService instrumentsService,
                                     InstrumentsProvider instrumentsProvider) {
-        this.userService = userService;
         this.securityService = securityService;
         this.instrumentsService = instrumentsService;
         this.instrumentsProvider = instrumentsProvider;
@@ -64,10 +63,6 @@ public class InstrumentsFacadeService {
 
     public List<CryptoTransaction> getTransactionsByAsset(Asset asset) {
         return instrumentsService.getTransactionsBy(getAuthenticatedUserWallet(), asset);
-    }
-
-    public List<CryptoTransaction> getTransactionsByAssetAndType(Asset asset, CryptoTransaction.TransactionType type) {
-        return instrumentsService.getTransactionsBy(getAuthenticatedUserWallet(), asset, type);
     }
 
     public CryptoTransaction saveTransaction(CryptoTransaction transaction) {
@@ -106,6 +101,10 @@ public class InstrumentsFacadeService {
 
     public WalletBalance getWalletBalanceByAsset(Asset asset) {
         return instrumentsService.getWalletBalancesByWalletAndAsset(getAuthenticatedUserWallet(), asset);
+    }
+
+    public double getAmountOfTokens(Asset asset) {
+        return instrumentsService.getWalletBalancesByWalletAndAsset(getAuthenticatedUserWallet(), asset).getAmount();
     }
     //</editor-fold>
 
@@ -156,11 +155,9 @@ public class InstrumentsFacadeService {
 
     //</editor-fold>
 
-
     private Wallet getAuthenticatedUserWallet() {
-        String username = securityService.getAuthenticatedUser().getUsername();
-        User user = userService.findByUsernameIgnoreCase(username).orElseThrow();
-        return instrumentsService.getWalletByUser(user);
+        User authenticatedUser = securityService.getAuthenticatedUser();
+        return instrumentsService.getWalletByUser(authenticatedUser);
     }
 
 
