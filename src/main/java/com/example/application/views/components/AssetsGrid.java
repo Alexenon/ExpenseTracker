@@ -36,10 +36,16 @@ import java.util.Set;
 
 /*
     TODO:
-     - [!] Fix sortable criteria for certain columns
-     - [?] Think about column header style(maybe align item center)
-     - [?] Display footer statistics details for certain columns
+     - [!] Add columns -> Total Worth, Total Cost, Realized / Unrealized, Realized Profit, Next Buy / Next Sell
+     - [!] Fix sortable criteria for certain columns, make other columns not movable(left/right)
+     - [?] Think about column header style(maybe align item center), column style maybe align left/right
+     - [?] Display footer statistics details for certain columns -> Average, Total, ....
+            dataProvider.addDataProviderListener(changeEvent -> {
+                quantityColumn.setFooter("Total Quantity: " + calculateTotalQuantityOnGrid(dataProvider));
+                priceColumn.setFooter("Total Price: "+ calculateTotalPriceOnGrid(dataProvider));
+            });
      - [?] Add column tooltipComponent -> .setTooltipGenerator(a -> "Name is " + a.getName());
+
     _______________________________________________________________________________________________________________________________________
     | Name | Price  | 24h Changes | Amount | Avg buy | Avg sell | All-time low | All-time high | Total Worth | Total Invested | Realized  |
     | BTC  | $64000 | 2%          | 0.0034 | $60000  |    -     | $10          | $73000        | $230        | $200           | $30 / 10% |
@@ -122,11 +128,6 @@ public class AssetsGrid extends Div {
         grid.setAllRowsVisible(true);
 
         grid.getElement().executeJs("this.shadowRoot.querySelector('table').style.overflow = 'hidden';");
-
-//        dataProvider.addDataProviderListener(changeEvent -> {
-//            quantityColumn.setFooter("Total Quantity: " + calculateTotalQuantityOnGrid(dataProvider));
-//            priceColumn.setFooter("Total Price: "+ calculateTotalPriceOnGrid(dataProvider));
-//        });
 
         setHiddenRowCount(0);
     }

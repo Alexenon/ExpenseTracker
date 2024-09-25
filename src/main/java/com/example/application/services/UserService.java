@@ -32,12 +32,14 @@ public class UserService implements UserDetailsService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public Optional<User> findByUsernameIgnoreCase(String username) {
-        return userRepository.findByUsernameIgnoreCase(username);
+    public User findByUsername(String username) {
+        return userRepository.findByUsernameIgnoreCase(username)
+                .orElseThrow(() -> new UserExistException("There is already a user with this username"));
     }
 
-    public Optional<User> findByEmailIgnoreCase(String email) {
-        return userRepository.findByEmailIgnoreCase(email);
+    public User findByEmail(String email) {
+        return userRepository.findByEmailIgnoreCase(email)
+                .orElseThrow(() -> new UserExistException("There is already a user with this email"));
     }
 
     public Optional<User> findByUsernameOrEmailIgnoreCase(String usernameOrEmail) {
@@ -78,10 +80,10 @@ public class UserService implements UserDetailsService {
 
     @Transactional
     public User createNewUser(User user) {
-        if (findByUsernameIgnoreCase(user.getUsername()).isPresent()) {
+        if (checkIfUsernameExists(user.getUsername())) {
             throw new UserExistException("There is already a user with this username");
         }
-        if (findByEmailIgnoreCase(user.getEmail()).isPresent()) {
+        if (checkIfEmailExists(user.getEmail())) {
             throw new UserExistException("There is already a user with this email");
         }
 
@@ -97,5 +99,14 @@ public class UserService implements UserDetailsService {
 
         return savedUser;
     }
+
+    public boolean checkIfUsernameExists(String username) {
+        return userRepository.findByUsernameIgnoreCase(username).isPresent();
+    }
+
+    public boolean checkIfEmailExists(String email) {
+        return userRepository.findByEmailIgnoreCase(email).isPresent();
+    }
+
 
 }
