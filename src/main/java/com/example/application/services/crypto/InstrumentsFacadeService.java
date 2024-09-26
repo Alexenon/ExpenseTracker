@@ -17,8 +17,6 @@ import java.util.List;
     TODO: Rename
         - Assets -> AssetServiceFacade         UserAssetsService
         - Expenses -> ExpensesServiceFacade    UserExpensesService
-    
-    TODO: Place UserService into Security service, and retrieve authenticated user/ its username
 */
 
 /**

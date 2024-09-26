@@ -21,7 +21,7 @@ public class ComponentBuilder<T extends Component> {
     }
 
     public static void main(String[] args) {
-        // TODO: FIX THE BUG
+        // FIXME: FIX THE BUG
         Component parentDiv = new ComponentBuilder<>(Div.class)
                 .add(childDiv -> {
                     childDiv.addClassName("child");

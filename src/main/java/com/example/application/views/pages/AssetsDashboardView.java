@@ -15,11 +15,6 @@ import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 
-/*
- * TODO:
- *   - Finish performance Section
- * */
-
 @PermitAll
 @PageTitle("Assets Dashboard")
 @Route(value = "assets-dashboard", layout = MainLayout.class)
