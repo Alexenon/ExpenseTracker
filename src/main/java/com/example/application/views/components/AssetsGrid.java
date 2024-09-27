@@ -17,14 +17,13 @@ import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
-import com.vaadin.flow.data.renderer.NumberRenderer;
+import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.theme.lumo.LumoIcon;
@@ -61,8 +60,8 @@ public class AssetsGrid extends Div {
     private final PortfolioPerformanceTracker portfolioPerformanceTracker;
 
     private final TextField searchField = new TextField();
-    private final Checkbox hideAssetsCheckbox = new Checkbox("Hide 0 amount assets");
     private final Button syncButton = new Button("Sync", LumoIcon.RELOAD.create());
+    private final Checkbox hideAssetsCheckbox = new Checkbox("Hide 0 amount assets");
 
     private final Grid<Asset> grid = new Grid<>();
     private final GridListDataView<Asset> dataView = grid.setItems();
@@ -109,7 +108,7 @@ public class AssetsGrid extends Div {
                 .setFrozen(true)
                 .setComparator(Asset::getSymbol);
 
-        Grid.Column<Asset> priceCol = grid.addColumn(columnPriceRenderer(instrumentsFacadeService::getAssetPrice))
+        Grid.Column<Asset> priceCol = grid.addColumn(columnCurrencyRenderer(instrumentsFacadeService::getAssetPrice))
                 .setKey("Price")
                 .setHeader("Price")
                 .setSortable(true)
@@ -121,11 +120,11 @@ public class AssetsGrid extends Div {
                 .setSortable(true)
                 .setComparator(instrumentsFacadeService::getAsset24HourVolume);
 
-        Grid.Column<Asset> avgBuyCol = grid.addColumn(columnPriceRenderer(portfolioPerformanceTracker::getAverageBuyPrice))
+        Grid.Column<Asset> avgBuyCol = grid.addColumn(columnCurrencyRenderer(portfolioPerformanceTracker::getAverageBuyPrice))
                 .setKey("Avg Buy")
                 .setHeader("Avg Buy");
 
-        Grid.Column<Asset> avgSellCol = grid.addColumn(columnPriceRenderer(portfolioPerformanceTracker::getAverageSellPrice))
+        Grid.Column<Asset> avgSellCol = grid.addColumn(columnCurrencyRenderer(portfolioPerformanceTracker::getAverageSellPrice))
                 .setKey("Avg Sell")
                 .setHeader("Avg Sell");
 
@@ -135,14 +134,14 @@ public class AssetsGrid extends Div {
                 .setSortable(true)
                 .setComparator(instrumentsFacadeService::getAmountOfTokens);
 
-        Grid.Column<Asset> totalWorthCol = grid.addColumn(columnPriceRenderer(portfolioPerformanceTracker::getAssetWorth))
+        Grid.Column<Asset> totalWorthCol = grid.addColumn(columnCurrencyRenderer(portfolioPerformanceTracker::getAssetWorth))
                 .setKey("Total Worth")
                 .setHeader("Total Worth")
                 .setSortable(true)
                 .setComparator(portfolioPerformanceTracker::getAssetWorth)
                 .setTooltipGenerator(a -> "Total value of your %s holdings based on the latest price.".formatted(a.getSymbol()));
 
-        Grid.Column<Asset> totalCostCol = grid.addColumn(columnPriceRenderer(portfolioPerformanceTracker::getAssetCost))
+        Grid.Column<Asset> totalCostCol = grid.addColumn(columnCurrencyRenderer(portfolioPerformanceTracker::getAssetCost))
                 .setKey("Total Cost")
                 .setHeader("Total Cost")
                 .setSortable(true)
@@ -156,26 +155,26 @@ public class AssetsGrid extends Div {
                 .setComparator(portfolioPerformanceTracker::getAssetProfit)
                 .setTooltipGenerator(a -> "The percentage contribution of %s to your portfolio's total value.".formatted(a.getSymbol()));
 
-        Grid.Column<Asset> realizedCol = grid.addColumn(columnPriceRenderer(portfolioPerformanceTracker::getAssetProfit))
+        Grid.Column<Asset> realizedCol = grid.addColumn(columnCurrencyRenderer(portfolioPerformanceTracker::getAssetProfit))
                 .setKey("Realized")
                 .setHeader("Realized")
                 .setSortable(true)
                 .setComparator(portfolioPerformanceTracker::getAssetProfit)
                 .setTooltipGenerator(a -> "Profit or loss from your sold %s holdings.".formatted(a.getSymbol()));
 
-        Grid.Column<Asset> unrealizedCol = grid.addColumn(columnPriceRenderer(instrumentsFacadeService::getAmountOfTokens))
+        Grid.Column<Asset> unrealizedCol = grid.addColumn(columnCurrencyRenderer(instrumentsFacadeService::getAmountOfTokens))
                 .setKey("Unrealized")
                 .setHeader("Unrealized")
                 .setSortable(true)
                 .setComparator(portfolioPerformanceTracker::getAssetProfit)
                 .setTooltipGenerator(a -> "Potential profit or loss if you were to sell %s now.".formatted(a.getSymbol()));
 
-        Grid.Column<Asset> nextBuyCol = grid.addColumn(columnPriceRenderer(instrumentsFacadeService::getAmountOfTokens))
+        Grid.Column<Asset> nextBuyCol = grid.addColumn(columnCurrencyRenderer(instrumentsFacadeService::getAmountOfTokens))
                 .setKey("Next Buy")
                 .setHeader("Next Buy");
         //.setTooltipGenerator(a -> "The next price point for purchasing more %s is $%s".formatted(a.getSymbol()));
 
-        Grid.Column<Asset> nextSellCol = grid.addColumn(columnPriceRenderer(instrumentsFacadeService::getAmountOfTokens))
+        Grid.Column<Asset> nextSellCol = grid.addColumn(columnCurrencyRenderer(instrumentsFacadeService::getAmountOfTokens))
                 .setKey("Next Sell")
                 .setHeader("Next Sell");
         //.setTooltipGenerator(a -> "The next price point for purchasing more %s is $%s".formatted(a.getSymbol()));
@@ -196,7 +195,6 @@ public class AssetsGrid extends Div {
                 .setHeader(menuButton)
                 .setFrozenToEnd(true);
 
-
         grid.setColumnReorderingAllowed(true);
         grid.getColumns().forEach(c -> c.setAutoWidth(true));
         grid.addItemClickListener(row -> {
@@ -209,6 +207,19 @@ public class AssetsGrid extends Div {
         grid.getElement().executeJs("this.shadowRoot.querySelector('table').style.overflow = 'hidden';");
 
         setHiddenRowCount(0);
+    }
+
+    private LitRenderer<Asset> columnNameRenderer() {
+        return LitRenderer.<Asset>of(
+                        "<div class='coin-overview-name-container'>" +
+                        "  <img class='rounded coin-overview-image' src='${item.imgUrl}' alt='${item.fullName}'/>" +
+                        "  <p>${item.fullName}</p>" +
+                        "  <span class='dot'>•</span>" +
+                        "  <span>${item.symbol}</span>" +
+                        "</div>")
+                .withProperty("imgUrl", instrumentsFacadeService::getAssetImgUrl)
+                .withProperty("fullName", instrumentsFacadeService::getAssetFullName)
+                .withProperty("symbol", Asset::getSymbol);
     }
 
     private void initializeFilteringBySearch() {
@@ -248,25 +259,6 @@ public class AssetsGrid extends Div {
         dataView.setFilter(asset -> instrumentsFacadeService.getAmountOfTokens(asset) > 0);
     }
 
-    private ComponentRenderer<Container, Asset> columnNameRenderer() {
-        return new ComponentRenderer<>(a ->
-                Container.builder("coin-overview-name-container")
-                        .addComponent(() -> {
-                            Image image = new Image(instrumentsFacadeService.getAssetImgUrl(a), instrumentsFacadeService.getAssetFullName(a));
-                            image.addClassNames("rounded", "coin-overview-image");
-                            return image;
-                        })
-                        .addComponent(new Paragraph(instrumentsFacadeService.getAssetFullName(a)))
-                        .addComponent(() -> {
-                            Span dot = new Span("•");
-                            dot.setClassName("dot");
-                            return dot;
-                        })
-                        .addComponent(new Span(a.getSymbol()))
-                        .build()
-        );
-    }
-
     private ComponentRenderer<Component, Asset> columnChanges24hRenderer() {
         return new ComponentRenderer<>(a -> {
             PriceBadge percentageBadge = new PriceBadge(instrumentsFacadeService.getAsset24HourChangePercentage(a), NumberType.PERCENT);
@@ -276,15 +268,21 @@ public class AssetsGrid extends Div {
         });
     }
 
-    private NumberRenderer<Asset> columnAmountRenderer(ValueProvider<Asset, Number> priceProvider) {
-        NumberFormat nf = NumberFormat.getNumberInstance();
-        nf.setMaximumFractionDigits(6);
-        return new NumberRenderer<>(priceProvider, nf, "0");
+    private LitRenderer<Asset> columnAmountRenderer(ValueProvider<Asset, Number> priceProvider) {
+        return LitRenderer.<Asset>of("${item.amount}")
+                .withProperty("amount", asset -> {
+                    NumberFormat nf = NumberFormat.getNumberInstance();
+                    nf.setMaximumFractionDigits(6);
+                    return nf.format(priceProvider.apply(asset));
+                });
     }
 
-    private NumberRenderer<Asset> columnPriceRenderer(ValueProvider<Asset, Number> priceProvider) {
-        NumberFormat nf = NumberFormat.getCurrencyInstance(Locale.US);
-        return new NumberRenderer<>(priceProvider, nf, "$0.00");
+    private LitRenderer<Asset> columnCurrencyRenderer(ValueProvider<Asset, Number> currencyProvider) {
+        return LitRenderer.<Asset>of("${item.currency}")
+                .withProperty("currency", asset -> {
+                    NumberFormat nf = NumberFormat.getCurrencyInstance(Locale.US);
+                    return nf.format(currencyProvider.apply(asset));
+                });
     }
 
     private void initializeSyncButton() {
