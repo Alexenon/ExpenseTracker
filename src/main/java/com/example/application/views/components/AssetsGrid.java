@@ -2,7 +2,6 @@ package com.example.application.views.components;
 
 import com.example.application.data.enums.Symbols;
 import com.example.application.data.models.NumberType;
-import com.example.application.entities.crypto.Asset;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.views.components.complex_components.PriceBadge;
@@ -27,6 +26,8 @@ import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.theme.lumo.LumoIcon;
+import lombok.Builder;
+import lombok.Data;
 
 import java.text.NumberFormat;
 import java.util.List;
@@ -36,8 +37,7 @@ import java.util.Objects;
 /*
     TODO:
      - [!!!] Optimize sorting columns, by using https://vaadin.com/blog/using-the-right-r
-     - [!!!] Optimize hiding certain columns with ColumnSelector
-     - [!!] Fix sortable criteria for certain columns, make other columns not movable(left/right)
+     - [!!!] Optimize -> REMOVE certain columns from ColumnSelector instead of HIDING
      - [?] Think about column header style(maybe align item center), column style maybe align left/right
      - [?] Display footer statistics details for certain columns -> Average, Total, ....
             dataProvider.addDataProviderListener(changeEvent -> {
@@ -63,8 +63,8 @@ public class AssetsGrid extends Div {
     private final Button syncButton = new Button("Sync", LumoIcon.RELOAD.create());
     private final Checkbox hideAssetsCheckbox = new Checkbox("Hide 0 amount assets");
 
-    private final Grid<Asset> grid = new Grid<>();
-    private final GridListDataView<Asset> dataView = grid.setItems();
+    private final Grid<AssetGridItem> grid = new Grid<>();
+    private final GridListDataView<AssetGridItem> dataView = grid.setItems();
 
     private final Span hiddenRowsCounterField = new Span();
 
@@ -78,7 +78,7 @@ public class AssetsGrid extends Div {
         initializeFilteringNonZeroValues();
         initializeSyncButton();
 
-        grid.setItems(instrumentsFacadeService.getAllAssets());
+        grid.setItems(getConvertedGridItems());
         syncButton.addClickListener(e -> {
             instrumentsFacadeService.updateAssetMetadata();
             // TODO: The columns should be re-rendered again after updating metadata
@@ -101,86 +101,86 @@ public class AssetsGrid extends Div {
     }
 
     private void initializeGrid() {
-        Grid.Column<Asset> nameCol = grid.addColumn(columnNameRenderer())
+        Grid.Column<AssetGridItem> nameCol = grid.addColumn(columnNameRenderer())
                 .setKey("Name")
                 .setHeader("Name")
                 .setSortable(true)
                 .setFrozen(true)
-                .setComparator(Asset::getSymbol);
+                .setComparator(AssetGridItem::getSymbol);
 
-        Grid.Column<Asset> priceCol = grid.addColumn(columnCurrencyRenderer(instrumentsFacadeService::getAssetPrice))
+        Grid.Column<AssetGridItem> priceCol = grid.addColumn(columnCurrencyRenderer(AssetGridItem::getPrice))
                 .setKey("Price")
                 .setHeader("Price")
                 .setSortable(true)
-                .setComparator(instrumentsFacadeService::getAssetPrice);
+                .setComparator(AssetGridItem::getPrice);
 
-        Grid.Column<Asset> changes24hCol = grid.addColumn(columnChanges24hRenderer())
+        Grid.Column<AssetGridItem> changes24hCol = grid.addColumn(columnChanges24hRenderer())
                 .setKey("Changes 24h")
                 .setHeader("Changes 24h")
                 .setSortable(true)
-                .setComparator(instrumentsFacadeService::getAsset24HourVolume);
+                .setComparator(AssetGridItem::getPriceChangesPercentage24h);
 
-        Grid.Column<Asset> avgBuyCol = grid.addColumn(columnCurrencyRenderer(portfolioPerformanceTracker::getAverageBuyPrice))
+        Grid.Column<AssetGridItem> avgBuyCol = grid.addColumn(columnCurrencyRenderer(AssetGridItem::getAvgBuy))
                 .setKey("Avg Buy")
                 .setHeader("Avg Buy");
 
-        Grid.Column<Asset> avgSellCol = grid.addColumn(columnCurrencyRenderer(portfolioPerformanceTracker::getAverageSellPrice))
+        Grid.Column<AssetGridItem> avgSellCol = grid.addColumn(columnCurrencyRenderer(AssetGridItem::getAvgSell))
                 .setKey("Avg Sell")
                 .setHeader("Avg Sell");
 
-        Grid.Column<Asset> amountCol = grid.addColumn(columnAmountRenderer(instrumentsFacadeService::getAmountOfTokens))
+        Grid.Column<AssetGridItem> amountCol = grid.addColumn(columnAmountRenderer(AssetGridItem::getTokenAmount))
                 .setKey("Amount")
                 .setHeader("Amount")
                 .setSortable(true)
-                .setComparator(instrumentsFacadeService::getAmountOfTokens);
+                .setComparator(AssetGridItem::getTokenAmount);
 
-        Grid.Column<Asset> totalWorthCol = grid.addColumn(columnCurrencyRenderer(portfolioPerformanceTracker::getAssetWorth))
+        Grid.Column<AssetGridItem> totalWorthCol = grid.addColumn(columnCurrencyRenderer(AssetGridItem::getTotalWorth))
                 .setKey("Total Worth")
                 .setHeader("Total Worth")
                 .setSortable(true)
-                .setComparator(portfolioPerformanceTracker::getAssetWorth)
+                .setComparator(AssetGridItem::getTotalWorth)
                 .setTooltipGenerator(a -> "Total value of your %s holdings based on the latest price.".formatted(a.getSymbol()));
 
-        Grid.Column<Asset> totalCostCol = grid.addColumn(columnCurrencyRenderer(portfolioPerformanceTracker::getAssetCost))
+        Grid.Column<AssetGridItem> totalCostCol = grid.addColumn(columnCurrencyRenderer(AssetGridItem::getTotalCost))
                 .setKey("Total Cost")
                 .setHeader("Total Cost")
                 .setSortable(true)
-                .setComparator(portfolioPerformanceTracker::getAssetCost)
+                .setComparator(AssetGridItem::getTotalCost)
                 .setTooltipGenerator(a -> "Total cost of your %s holdings based on the latest price.".formatted(a.getSymbol()));
 
-        Grid.Column<Asset> diversityCol = grid.addColumn(portfolioPerformanceTracker::getAssetDiversityPercentage)
+        Grid.Column<AssetGridItem> diversityCol = grid.addColumn(AssetGridItem::getDiversityPercentage)
                 .setKey("Diversity")
                 .setHeader("Diversity")
                 .setSortable(true)
-                .setComparator(portfolioPerformanceTracker::getAssetProfit)
+                .setComparator(AssetGridItem::getDiversityPercentage)
                 .setTooltipGenerator(a -> "The percentage contribution of %s to your portfolio's total value.".formatted(a.getSymbol()));
 
-        Grid.Column<Asset> realizedCol = grid.addColumn(columnCurrencyRenderer(portfolioPerformanceTracker::getAssetProfit))
+        Grid.Column<AssetGridItem> realizedCol = grid.addColumn(columnCurrencyRenderer(AssetGridItem::getRealizedProfit))
                 .setKey("Realized")
                 .setHeader("Realized")
                 .setSortable(true)
-                .setComparator(portfolioPerformanceTracker::getAssetProfit)
+                .setComparator(AssetGridItem::getRealizedProfit)
                 .setTooltipGenerator(a -> "Profit or loss from your sold %s holdings.".formatted(a.getSymbol()));
 
-        Grid.Column<Asset> unrealizedCol = grid.addColumn(columnCurrencyRenderer(instrumentsFacadeService::getAmountOfTokens))
+        Grid.Column<AssetGridItem> unrealizedCol = grid.addColumn(columnCurrencyRenderer(AssetGridItem::getUnrealizedProfit))
                 .setKey("Unrealized")
                 .setHeader("Unrealized")
                 .setSortable(true)
-                .setComparator(portfolioPerformanceTracker::getAssetProfit)
+                .setComparator(AssetGridItem::getUnrealizedProfit)
                 .setTooltipGenerator(a -> "Potential profit or loss if you were to sell %s now.".formatted(a.getSymbol()));
 
-        Grid.Column<Asset> nextBuyCol = grid.addColumn(columnCurrencyRenderer(instrumentsFacadeService::getAmountOfTokens))
+        Grid.Column<AssetGridItem> nextBuyCol = grid.addColumn(columnCurrencyRenderer(AssetGridItem::getNextBuy))
                 .setKey("Next Buy")
                 .setHeader("Next Buy");
         //.setTooltipGenerator(a -> "The next price point for purchasing more %s is $%s".formatted(a.getSymbol()));
 
-        Grid.Column<Asset> nextSellCol = grid.addColumn(columnCurrencyRenderer(instrumentsFacadeService::getAmountOfTokens))
+        Grid.Column<AssetGridItem> nextSellCol = grid.addColumn(columnCurrencyRenderer(AssetGridItem::getNextSell))
                 .setKey("Next Sell")
                 .setHeader("Next Sell");
         //.setTooltipGenerator(a -> "The next price point for purchasing more %s is $%s".formatted(a.getSymbol()));
 
 
-        List<Grid.Column<Asset>> listColumnsToSelect = List.of(nameCol, priceCol, changes24hCol, avgBuyCol, avgSellCol, amountCol,
+        List<Grid.Column<AssetGridItem>> listColumnsToSelect = List.of(nameCol, priceCol, changes24hCol, avgBuyCol, avgSellCol, amountCol,
                 totalWorthCol, totalCostCol, diversityCol, realizedCol, unrealizedCol, nextBuyCol, nextSellCol);
 
         // Display just the first columns, others should be selected to be displayed
@@ -209,17 +209,17 @@ public class AssetsGrid extends Div {
         setHiddenRowCount(0);
     }
 
-    private LitRenderer<Asset> columnNameRenderer() {
-        return LitRenderer.<Asset>of(
+    private LitRenderer<AssetGridItem> columnNameRenderer() {
+        return LitRenderer.<AssetGridItem>of(
                         "<div class='coin-overview-name-container'>" +
                         "  <img class='rounded coin-overview-image' src='${item.imgUrl}' alt='${item.fullName}'/>" +
                         "  <p>${item.fullName}</p>" +
                         "  <span class='dot'>•</span>" +
                         "  <span>${item.symbol}</span>" +
                         "</div>")
-                .withProperty("imgUrl", instrumentsFacadeService::getAssetImgUrl)
-                .withProperty("fullName", instrumentsFacadeService::getAssetFullName)
-                .withProperty("symbol", Asset::getSymbol);
+                .withProperty("imgUrl", AssetGridItem::getImageUrl)
+                .withProperty("fullName", AssetGridItem::getName)
+                .withProperty("symbol", AssetGridItem::getSymbol);
     }
 
     private void initializeFilteringBySearch() {
@@ -232,7 +232,7 @@ public class AssetsGrid extends Div {
             dataView.setFilter(assetProvided -> {
                 String lowercaseSearchTerm = field.getValue().trim().toLowerCase();
                 String lowercaseSymbol = assetProvided.getSymbol().toLowerCase();
-                String lowercaseFullName = instrumentsFacadeService.getAssetFullName(assetProvided).toLowerCase();
+                String lowercaseFullName = assetProvided.getName().toLowerCase();
 
                 return lowercaseSearchTerm.isEmpty()
                        || lowercaseSymbol.contains(lowercaseSearchTerm)
@@ -256,20 +256,20 @@ public class AssetsGrid extends Div {
     }
 
     private void hideZeroAmountAssets() {
-        dataView.setFilter(asset -> instrumentsFacadeService.getAmountOfTokens(asset) > 0);
+        dataView.setFilter(asset -> asset.getTokenAmount() > 0);
     }
 
-    private ComponentRenderer<Component, Asset> columnChanges24hRenderer() {
+    private ComponentRenderer<Component, AssetGridItem> columnChanges24hRenderer() {
         return new ComponentRenderer<>(a -> {
-            PriceBadge percentageBadge = new PriceBadge(instrumentsFacadeService.getAsset24HourChangePercentage(a), NumberType.PERCENT);
+            PriceBadge percentageBadge = new PriceBadge(a.getPriceChangesPercentage24h(), NumberType.PERCENT);
             percentageBadge.getStyle().set("margin-bottom", "0px");
             percentageBadge.setBackgroundColor(PriceBadge.Color.DEFAULT_BACKGROUND_COLOR);
             return percentageBadge;
         });
     }
 
-    private LitRenderer<Asset> columnAmountRenderer(ValueProvider<Asset, Number> priceProvider) {
-        return LitRenderer.<Asset>of("${item.amount}")
+    private LitRenderer<AssetGridItem> columnAmountRenderer(ValueProvider<AssetGridItem, Number> priceProvider) {
+        return LitRenderer.<AssetGridItem>of("${item.amount}")
                 .withProperty("amount", asset -> {
                     NumberFormat nf = NumberFormat.getNumberInstance();
                     nf.setMaximumFractionDigits(6);
@@ -277,8 +277,8 @@ public class AssetsGrid extends Div {
                 });
     }
 
-    private LitRenderer<Asset> columnCurrencyRenderer(ValueProvider<Asset, Number> currencyProvider) {
-        return LitRenderer.<Asset>of("${item.currency}")
+    private LitRenderer<AssetGridItem> columnCurrencyRenderer(ValueProvider<AssetGridItem, Number> currencyProvider) {
+        return LitRenderer.<AssetGridItem>of("${item.currency}")
                 .withProperty("currency", asset -> {
                     NumberFormat nf = NumberFormat.getCurrencyInstance(Locale.US);
                     return nf.format(currencyProvider.apply(asset));
@@ -308,7 +308,7 @@ public class AssetsGrid extends Div {
         return new Button();
     }
 
-    public void setItems(List<Asset> assets) {
+    public void setItems(List<AssetGridItem> assets) {
         Objects.requireNonNull(assets, "Grid items cannot be null");
         grid.setItems(assets);
     }
@@ -342,13 +342,56 @@ public class AssetsGrid extends Div {
         updateHiddenRowsCounter();
     }
 
+    private List<AssetGridItem> getConvertedGridItems() {
+        return instrumentsFacadeService.getAllAssets()
+                .stream()
+                .map(asset -> AssetGridItem.builder()
+                        .name(asset.getSymbol())
+                        .symbol(asset.getSymbol())
+                        .imageUrl(instrumentsFacadeService.getAssetImgUrl(asset))
+                        .price(instrumentsFacadeService.getAssetPrice(asset))
+                        .tokenAmount(instrumentsFacadeService.getAmountOfTokens(asset))
+                        .priceChangesPercentage24h(instrumentsFacadeService.getAsset24HourChangePercentage(asset))
+                        // TODO: Add volume column
+                        // Performance
+                        .avgBuy(portfolioPerformanceTracker.getAverageBuyPrice(asset))
+                        .avgSell(portfolioPerformanceTracker.getAverageSellPrice(asset))
+                        .realizedProfit(portfolioPerformanceTracker.getAssetProfit(asset))
+                        .unrealizedProfit(0) // TODO: Is Unrealized profit the same as TotalWorth ???
+                        .totalCost(portfolioPerformanceTracker.getAssetCost(asset))
+                        .totalWorth(portfolioPerformanceTracker.getAssetWorth(asset))
+                        .diversityPercentage(portfolioPerformanceTracker.getAssetDiversityPercentage(asset))
+                        .build())
+                .toList();
+    }
+
+    @Data
+    @Builder
+    public static class AssetGridItem {
+        private String name;
+        private String symbol;
+        private String imageUrl;
+        private double price;
+        private double priceChangesPercentage24h;
+        private double avgBuy;
+        private double avgSell;
+        private double tokenAmount;
+        private double totalWorth;
+        private double totalCost;
+        private double diversityPercentage;
+        private double realizedProfit;
+        private double unrealizedProfit;
+        private double nextBuy;
+        private double nextSell;
+    }
+
     private static class ColumnToggleContextMenu extends ContextMenu {
         public ColumnToggleContextMenu(Component target) {
             super(target);
             setOpenOnClick(true);
         }
 
-        void addColumnToggleItem(String label, Grid.Column<Asset> column) {
+        void addColumnToggleItem(String label, Grid.Column<AssetGridItem> column) {
             MenuItem menuItem = this.addItem(label, e -> column.setVisible(e.getSource().isChecked()));
             menuItem.setCheckable(true);
             menuItem.setChecked(column.isVisible());
