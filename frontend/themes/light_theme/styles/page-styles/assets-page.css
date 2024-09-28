@@ -57,3 +57,11 @@
 .sync-container > vaadin-checkbox {
     margin-top: 5px;
 }
+
+/*
+    TODO: This is from asset grid
+        - Style the other columns as well
+*/
+.asset-price {
+    color: rgb(37 99 235);
+}

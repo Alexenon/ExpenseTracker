@@ -1,6 +1,7 @@
 package com.example.application.utils.common;
 
 import java.math.BigInteger;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
@@ -56,6 +57,26 @@ public class MathUtils {
         }
 
         return String.format("%.2f", number);
+    }
+
+    // [34.000, 35.000, 36.000], 40.000  ->  36.000
+    // [34.000, 35.000, 36.000], 20.000  ->  34.000
+    // [34.000, 35.000, 36.000], 35.000  ->  35.000
+    // [34.000, 37.000, 40.000], 35.000  ->  34.000
+    // [34.000, 37.000, 40.000], 36.000  ->  37.000
+    // [34.000, 37.000, 40.000], 36.000  ->  37.000
+    private double closestPrice(List<Double> prices, double currentPrice) {
+        double closestPrice = 0;
+        double minDiff = Double.MAX_VALUE;
+
+        for (double buyPrice : prices) {
+            if(buyPrice == currentPrice)
+                return currentPrice;
+
+            double diff = Math.abs(currentPrice - buyPrice);
+        }
+
+        return closestPrice;
     }
 
 }

@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
+import java.util.Comparator;
 import java.util.List;
 
 /*
@@ -90,6 +91,25 @@ public class InstrumentsFacadeService {
     public List<AssetWatcher> getAssetWatchersByAssetAndActionType(Asset asset, AssetWatcher.ActionType actionType) {
         return instrumentsService.getAssetWatchersByAssetAndActionType(getAuthenticatedUserWallet(), asset, actionType);
     }
+
+    public double getClosestBuyWatcherPrice(Asset asset) {
+        return getAssetWatchersByAssetAndActionType(asset, AssetWatcher.ActionType.BUY)
+                .stream()
+                .filter(assetWatcher -> !assetWatcher.isCompleted())
+                .map(AssetWatcher::getTarget)
+                .min(Comparator.naturalOrder())
+                .orElse(0.0);
+    }
+
+    public double getClosestSellWatcherPrice(Asset asset) {
+        return getAssetWatchersByAssetAndActionType(asset, AssetWatcher.ActionType.SELL)
+                .stream()
+                .filter(assetWatcher -> !assetWatcher.isCompleted())
+                .map(AssetWatcher::getTarget)
+                .max(Comparator.naturalOrder())
+                .orElse(0.0);
+    }
+
     //</editor-fold>
 
     //<editor-fold desc="WALLET BALANCES">
@@ -157,6 +177,5 @@ public class InstrumentsFacadeService {
         User authenticatedUser = securityService.getAuthenticatedUser();
         return instrumentsService.getWalletByUser(authenticatedUser);
     }
-
 
 }

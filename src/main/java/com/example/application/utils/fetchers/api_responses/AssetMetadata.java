@@ -150,7 +150,7 @@ public class AssetMetadata {
     private BigInteger lastBlockHashesPerSecond;
 
     @JsonProperty("LAST_BLOCK_DIFFICULTY")
-    private long lastBlockDifficulty;
+    private BigInteger lastBlockDifficulty;
 
     @JsonProperty("SUPPORTED_STANDARDS")
     private List<Object> supportedStandards;

@@ -1,5 +1,6 @@
 package com.example.application.data.models;
 
+import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.Locale;
 
@@ -16,6 +17,7 @@ import java.util.Locale;
  * <li>currency - $250,300,00.05</li>
  */
 public enum NumberType {
+
     INTEGER {
         @Override
         public String parse(double value) {
@@ -40,6 +42,20 @@ public enum NumberType {
         @Override
         public String parse(double value) {
             return NumberFormat.getCurrencyInstance(Locale.US).format(value);
+        }
+    },
+    PRICE {
+        @Override
+        public String parse(double value) {
+            if (value > 1.00)
+                return String.format("$%.2f", value);
+
+            int decimalPlaces = (int) Math.abs(Math.floor(Math.log10(value))) + 3;
+            String shortedPrice = String.format("%." + decimalPlaces + "f", value);
+
+            return "$" + new BigDecimal(shortedPrice)
+                    .stripTrailingZeros()
+                    .toPlainString();
         }
     };
 
