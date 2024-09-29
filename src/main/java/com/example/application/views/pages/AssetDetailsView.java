@@ -35,6 +35,7 @@ import java.util.Objects;
 
 /*
  * TODO:
+ *  [!] Make watchers to be sorted on ADDING a new one
  *  - cursor: not-allowed;    - style something
  * */
 
@@ -204,7 +205,7 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
                 .addComponent(outputContainer)
                 .build();
 
-        // TODO: Deleting all from input looks strange
+        // FIXME: Deleting all from input looks strange
         // TODO: setValue() should be same formatter as default
         tokenAmountField.setValueChangeMode(ValueChangeMode.EAGER);
         tokenAmountField.addKeyUpListener(e -> {

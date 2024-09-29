@@ -13,6 +13,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.contextmenu.MenuItem;
+import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
 import com.vaadin.flow.component.html.Div;
@@ -36,20 +37,13 @@ import java.util.Objects;
 
 /*
     TODO:
-     - [!!!] Optimize sorting columns, by using https://vaadin.com/blog/using-the-right-r
-     - [!!!] Optimize -> REMOVE certain columns from ColumnSelector instead of HIDING
-     - [?] Think about column header style(maybe align item center), column style maybe align left/right
+     - [!!] Optimize -> REMOVE certain columns from ColumnSelector instead of HIDING
      - [?] Display footer statistics details for certain columns -> Average, Total, ....
             dataProvider.addDataProviderListener(changeEvent -> {
                 quantityColumn.setFooter("Total Quantity: " + calculateTotalQuantityOnGrid(dataProvider));
                 priceColumn.setFooter("Total Price: "+ calculateTotalPriceOnGrid(dataProvider));
             });
      - [?] grid.setMultiSort(true, MultiSortPriority.APPEND);
-     - [?] Make to display the closest asset to buy price / sell price
-
-     https://github.com/vaadin/flow-components/issues/1573
-
-     - select, sliders, sort, combobox
 
     _______________________________________________________________________________________________________________________________________
     | Name | Price  | 24h Changes | Amount | Avg buy | Avg sell | All-time low | All-time high | Total Worth | Total Invested | Realized  |
@@ -113,32 +107,38 @@ public class AssetsGrid extends Div {
         Grid.Column<AssetGridItem> priceCol = grid.addColumn(columnPriceRenderer())
                 .setKey("Price")
                 .setHeader("Price")
+                .setTextAlign(ColumnTextAlign.END)
                 .setSortable(true)
                 .setComparator(AssetGridItem::getPrice);
 
         Grid.Column<AssetGridItem> changes24hCol = grid.addColumn(columnChanges24hRenderer())
                 .setKey("Changes 24h")
                 .setHeader("Changes 24h")
+                .setTextAlign(ColumnTextAlign.CENTER)
                 .setSortable(true)
                 .setComparator(AssetGridItem::getPriceChangesPercentage24h);
 
         Grid.Column<AssetGridItem> avgBuyCol = grid.addColumn(columnPriceRenderer(AssetGridItem::getAvgBuy))
                 .setKey("Avg Buy")
-                .setHeader("Avg Buy");
+                .setHeader("Avg Buy")
+                .setTextAlign(ColumnTextAlign.CENTER);
 
         Grid.Column<AssetGridItem> avgSellCol = grid.addColumn(columnPriceRenderer(AssetGridItem::getAvgSell))
                 .setKey("Avg Sell")
-                .setHeader("Avg Sell");
+                .setHeader("Avg Sell")
+                .setTextAlign(ColumnTextAlign.CENTER);
 
         Grid.Column<AssetGridItem> amountCol = grid.addColumn(columnAmountRenderer(AssetGridItem::getTokenAmount))
                 .setKey("Amount")
                 .setHeader("Amount")
+                .setTextAlign(ColumnTextAlign.CENTER)
                 .setSortable(true)
                 .setComparator(AssetGridItem::getTokenAmount);
 
         Grid.Column<AssetGridItem> totalWorthCol = grid.addColumn(columnPriceRenderer(AssetGridItem::getTotalWorth))
                 .setKey("Total Worth")
                 .setHeader("Total Worth")
+                .setTextAlign(ColumnTextAlign.END)
                 .setSortable(true)
                 .setComparator(AssetGridItem::getTotalWorth)
                 .setTooltipGenerator(a -> "Total value of your %s holdings based on the latest price.".formatted(a.getSymbol()));
@@ -146,13 +146,15 @@ public class AssetsGrid extends Div {
         Grid.Column<AssetGridItem> totalCostCol = grid.addColumn(columnPriceRenderer(AssetGridItem::getTotalCost))
                 .setKey("Total Cost")
                 .setHeader("Total Cost")
+                .setTextAlign(ColumnTextAlign.END)
                 .setSortable(true)
                 .setComparator(AssetGridItem::getTotalCost)
                 .setTooltipGenerator(a -> "Total cost of your %s holdings based on the latest price.".formatted(a.getSymbol()));
 
-        Grid.Column<AssetGridItem> diversityCol = grid.addColumn(AssetGridItem::getDiversityPercentage)
+        Grid.Column<AssetGridItem> diversityCol = grid.addColumn(columnPercentageRenderer(AssetGridItem::getDiversityPercentage))
                 .setKey("Diversity")
                 .setHeader("Diversity")
+                .setTextAlign(ColumnTextAlign.CENTER)
                 .setSortable(true)
                 .setComparator(AssetGridItem::getDiversityPercentage)
                 .setTooltipGenerator(a -> "The percentage contribution of %s to your portfolio's total value.".formatted(a.getSymbol()));
@@ -160,6 +162,7 @@ public class AssetsGrid extends Div {
         Grid.Column<AssetGridItem> realizedCol = grid.addColumn(columnPriceRenderer(AssetGridItem::getRealizedProfit))
                 .setKey("Realized")
                 .setHeader("Realized")
+                .setTextAlign(ColumnTextAlign.CENTER)
                 .setSortable(true)
                 .setComparator(AssetGridItem::getRealizedProfit)
                 .setTooltipGenerator(a -> "Profit or loss from your sold %s holdings.".formatted(a.getSymbol()));
@@ -167,6 +170,7 @@ public class AssetsGrid extends Div {
         Grid.Column<AssetGridItem> unrealizedCol = grid.addColumn(columnPriceRenderer(AssetGridItem::getUnrealizedProfit))
                 .setKey("Unrealized")
                 .setHeader("Unrealized")
+                .setTextAlign(ColumnTextAlign.CENTER)
                 .setSortable(true)
                 .setComparator(AssetGridItem::getUnrealizedProfit)
                 .setTooltipGenerator(a -> "Potential profit or loss if you were to sell %s now.".formatted(a.getSymbol()));
@@ -174,11 +178,13 @@ public class AssetsGrid extends Div {
         Grid.Column<AssetGridItem> closestBuyCol = grid.addColumn(columnPriceRenderer(AssetGridItem::getClosestBuy))
                 .setKey("Closest Buy")
                 .setHeader("Closest Buy")
+                .setTextAlign(ColumnTextAlign.CENTER)
                 .setTooltipGenerator(a -> "The closest %s buy price that was added in the watcher".formatted(a.getSymbol()));
 
         Grid.Column<AssetGridItem> closestSellCol = grid.addColumn(columnPriceRenderer(AssetGridItem::getClosestSell))
                 .setKey("Closest Sell")
                 .setHeader("Closest Sell")
+                .setTextAlign(ColumnTextAlign.CENTER)
                 .setTooltipGenerator(a -> "The closest %s sell price that was added in the watcher".formatted(a.getSymbol()));
 
         List<Grid.Column<AssetGridItem>> listColumnsToSelect = List.of(nameCol, priceCol, changes24hCol, avgBuyCol, avgSellCol, amountCol,
@@ -187,13 +193,14 @@ public class AssetsGrid extends Div {
         // Display just the first columns, others should be selected to be displayed
         listColumnsToSelect.stream().skip(8).forEach(c -> c.setVisible(false));
 
-        Button menuButton = new Button(VaadinIcon.SELECT.create());
+        Icon menuButton = VaadinIcon.SLIDERS.create();
         ColumnToggleContextMenu columnToggleContextMenu = new ColumnToggleContextMenu(menuButton);
 
         listColumnsToSelect.forEach(a -> columnToggleContextMenu.addColumnToggleItem(a.getKey(), a));
 
         grid.addColumn(new ComponentRenderer<>(this::threeDotsBtn))
                 .setHeader(menuButton)
+                .setTextAlign(ColumnTextAlign.CENTER)
                 .setFrozenToEnd(true);
 
         grid.setColumnReorderingAllowed(true);
@@ -260,29 +267,6 @@ public class AssetsGrid extends Div {
                 .withProperty("symbol", AssetGridItem::getSymbol);
     }
 
-    private ComponentRenderer<Component, AssetGridItem> columnChanges24hRenderer() {
-        return new ComponentRenderer<>(a -> {
-            PriceBadge percentageBadge = new PriceBadge(a.getPriceChangesPercentage24h(), NumberType.PERCENT);
-            percentageBadge.getStyle().set("margin-bottom", "0px");
-            percentageBadge.setBackgroundColor(PriceBadge.Color.DEFAULT_BACKGROUND_COLOR);
-            return percentageBadge;
-        });
-    }
-
-    private LitRenderer<AssetGridItem> columnAmountRenderer(ValueProvider<AssetGridItem, Number> amountProvider) {
-        return LitRenderer.<AssetGridItem>of("<p>${item.amount}</p>")
-                .withProperty("amount", asset -> {
-                    NumberFormat nf = NumberFormat.getNumberInstance();
-                    nf.setMaximumFractionDigits(6);
-                    Number amount = amountProvider.apply(asset);
-
-                    if (amount.doubleValue() <= 0)
-                        return "-";
-
-                    return nf.format(amount);
-                });
-    }
-
     private LitRenderer<AssetGridItem> columnPriceRenderer() {
         return LitRenderer.<AssetGridItem>of("<p class='asset-price'>${item.price}</p>")
                 .withProperty("price", asset -> NumberType.PRICE.parse(asset.getPrice()));
@@ -291,14 +275,32 @@ public class AssetsGrid extends Div {
     private LitRenderer<AssetGridItem> columnPriceRenderer(ValueProvider<AssetGridItem, Number> priceProvider) {
         return LitRenderer.<AssetGridItem>of("<p>${item.price}</p>")
                 .withProperty("price", asset -> {
-                    NumberFormat nf = NumberFormat.getCurrencyInstance(Locale.US);
                     Number price = priceProvider.apply(asset);
+                    NumberFormat nf = NumberFormat.getCurrencyInstance(Locale.US);
 
-                    if (price.doubleValue() <= 0)
-                        return "-";
-
-                    return nf.format(price);
+                    return price.doubleValue() <= 0 ? "-" : nf.format(price);
                 });
+    }
+
+    private LitRenderer<AssetGridItem> columnAmountRenderer(ValueProvider<AssetGridItem, Number> amountProvider) {
+        return LitRenderer.<AssetGridItem>of("<p>${item.amount}</p>")
+                .withProperty("amount", asset -> {
+                    Number amount = amountProvider.apply(asset);
+                    NumberFormat nf = NumberFormat.getNumberInstance();
+                    nf.setMaximumFractionDigits(6);
+
+                    return amount.doubleValue() <= 0 ? "-" : nf.format(amount);
+                });
+    }
+
+    private LitRenderer<AssetGridItem> columnPercentageRenderer(ValueProvider<AssetGridItem, Number> percentageProvider) {
+        return LitRenderer.<AssetGridItem>of("<p>${item.percentage}</p>")
+                .withProperty("percentage", asset ->
+                        NumberType.PERCENT.parse(percentageProvider.apply(asset).doubleValue()));
+    }
+
+    private ComponentRenderer<Component, AssetGridItem> columnChanges24hRenderer() {
+        return new ComponentRenderer<>(a -> new PriceBadge(a.getPriceChangesPercentage24h(), NumberType.PERCENT));
     }
 
     private void initializeSyncButton() {
@@ -330,15 +332,10 @@ public class AssetsGrid extends Div {
     }
 
     private Div hiddenRowsContainer() {
-        return Container.builder()
+        return Container.builder("assets-grid-footer")
                 .addComponent(new Paragraph("Hidden"))
                 .addComponent(hiddenRowsCounterField)
                 .addComponent(new Button("Show", e -> resetGridFilteredItems()))
-                .setStyle("""
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        """)
                 .build();
     }
 

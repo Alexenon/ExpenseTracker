@@ -48,7 +48,7 @@ public enum NumberType {
         @Override
         public String parse(double value) {
             if (value > 1.00)
-                return String.format("$%.2f", value);
+                return NumberFormat.getCurrencyInstance(Locale.US).format(value);
 
             int decimalPlaces = (int) Math.abs(Math.floor(Math.log10(value))) + 3;
             String shortedPrice = String.format("%." + decimalPlaces + "f", value);

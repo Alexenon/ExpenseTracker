@@ -65,3 +65,55 @@
 .asset-price {
     color: rgb(37 99 235);
 }
+
+vaadin-grid::part(cell) {
+    margin: 2px 5px;
+}
+
+vaadin-grid-cell-content > div.coin-overview-name-container > img {
+    width: 30px;
+    height: 30px;
+}
+
+vaadin-grid-cell-content > div.price-change-badge {
+    background: white !important;
+    justify-content: center;
+}
+
+vaadin-grid-cell-content > vaadin-icon,
+vaadin-grid-cell-content > vaadin-button {
+    width: 50px;
+    background: white;
+}
+
+/*
+    Grid Footer
+*/
+
+div.assets-grid-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 18px 0px;
+}
+
+.assets-grid-footer > p {
+    color: var(--o60Color);
+}
+
+.assets-grid-footer > span {
+    font-weight: 500;
+    margin: 0px 8px 0px 4px;
+}
+
+.assets-grid-footer > vaadin-button {
+    color: black;
+    height: 34px;
+    font-size: 14px;
+    margin:
+    padding: 0 22px;
+    font-weight: 400;
+    border-radius: 16px;
+    background: var(--o5Color);
+}
+
