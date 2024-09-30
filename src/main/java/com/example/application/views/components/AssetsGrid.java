@@ -34,6 +34,7 @@ import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.function.ToDoubleFunction;
 
 /*
     TODO:
@@ -44,7 +45,9 @@ import java.util.Objects;
                 priceColumn.setFooter("Total Price: "+ calculateTotalPriceOnGrid(dataProvider));
             });
      - [?] grid.setMultiSort(true, MultiSortPriority.APPEND);
-
+     - ICONS: vaadin:trending-down | vaadin:trending-up
+     - Closest Buy ->  $34,000.00 ❗
+        -URGENT -> vaadin:exclamation vaadin:warning
     _______________________________________________________________________________________________________________________________________
     | Name | Price  | 24h Changes | Amount | Avg buy | Avg sell | All-time low | All-time high | Total Worth | Total Invested | Realized  |
     | BTC  | $64000 | 2%          | 0.0034 | $60000  |    -     | $10          | $73000        | $230        | $200           | $30 / 10% |
@@ -60,21 +63,34 @@ public class AssetsGrid extends Div {
     private final Checkbox hideAssetsCheckbox = new Checkbox("Hide 0 amount assets");
 
     private final Grid<AssetGridItem> grid = new Grid<>();
-    private final GridListDataView<AssetGridItem> dataView = grid.setItems();
-
     private final Span hiddenRowsCounterField = new Span();
+    private GridListDataView<AssetGridItem> dataView;
+
+    private Grid.Column<AssetGridItem> nameCol;
+    private Grid.Column<AssetGridItem> priceCol;
+    private Grid.Column<AssetGridItem> amountCol;
+    private Grid.Column<AssetGridItem> changes24hCol;
+    private Grid.Column<AssetGridItem> avgBuyCol;
+    private Grid.Column<AssetGridItem> avgSellCol;
+    private Grid.Column<AssetGridItem> diversityCol;
+    private Grid.Column<AssetGridItem> totalWorthCol;
+    private Grid.Column<AssetGridItem> totalCostCol;
+    private Grid.Column<AssetGridItem> realizedCol;
+    private Grid.Column<AssetGridItem> unrealizedCol;
+    private Grid.Column<AssetGridItem> closestBuyCol;
+    private Grid.Column<AssetGridItem> closestSellCol;
 
     public AssetsGrid(InstrumentsFacadeService instrumentsFacadeService,
                       PortfolioPerformanceTracker portfolioPerformanceTracker) {
         this.instrumentsFacadeService = instrumentsFacadeService;
         this.portfolioPerformanceTracker = portfolioPerformanceTracker;
 
+        this.dataView = grid.setItems(getConvertedGridItems());
         initializeGrid();
         initializeFilteringBySearch();
         initializeFilteringNonZeroValues();
         initializeSyncButton();
 
-        grid.setItems(getConvertedGridItems());
         syncButton.addClickListener(e -> {
             instrumentsFacadeService.updateAssetMetadata();
             // TODO: The columns should be re-rendered again after updating metadata
@@ -97,98 +113,10 @@ public class AssetsGrid extends Div {
     }
 
     private void initializeGrid() {
-        Grid.Column<AssetGridItem> nameCol = grid.addColumn(columnNameRenderer())
-                .setKey("Name")
-                .setHeader("Name")
-                .setSortable(true)
-                .setFrozen(true)
-                .setComparator(AssetGridItem::getSymbol);
-
-        Grid.Column<AssetGridItem> priceCol = grid.addColumn(columnPriceRenderer())
-                .setKey("Price")
-                .setHeader("Price")
-                .setTextAlign(ColumnTextAlign.END)
-                .setSortable(true)
-                .setComparator(AssetGridItem::getPrice);
-
-        Grid.Column<AssetGridItem> changes24hCol = grid.addColumn(columnChanges24hRenderer())
-                .setKey("Changes 24h")
-                .setHeader("Changes 24h")
-                .setTextAlign(ColumnTextAlign.CENTER)
-                .setSortable(true)
-                .setComparator(AssetGridItem::getPriceChangesPercentage24h);
-
-        Grid.Column<AssetGridItem> avgBuyCol = grid.addColumn(columnPriceRenderer(AssetGridItem::getAvgBuy))
-                .setKey("Avg Buy")
-                .setHeader("Avg Buy")
-                .setTextAlign(ColumnTextAlign.CENTER);
-
-        Grid.Column<AssetGridItem> avgSellCol = grid.addColumn(columnPriceRenderer(AssetGridItem::getAvgSell))
-                .setKey("Avg Sell")
-                .setHeader("Avg Sell")
-                .setTextAlign(ColumnTextAlign.CENTER);
-
-        Grid.Column<AssetGridItem> amountCol = grid.addColumn(columnAmountRenderer(AssetGridItem::getTokenAmount))
-                .setKey("Amount")
-                .setHeader("Amount")
-                .setTextAlign(ColumnTextAlign.CENTER)
-                .setSortable(true)
-                .setComparator(AssetGridItem::getTokenAmount);
-
-        Grid.Column<AssetGridItem> totalWorthCol = grid.addColumn(columnPriceRenderer(AssetGridItem::getTotalWorth))
-                .setKey("Total Worth")
-                .setHeader("Total Worth")
-                .setTextAlign(ColumnTextAlign.END)
-                .setSortable(true)
-                .setComparator(AssetGridItem::getTotalWorth)
-                .setTooltipGenerator(a -> "Total value of your %s holdings based on the latest price.".formatted(a.getSymbol()));
-
-        Grid.Column<AssetGridItem> totalCostCol = grid.addColumn(columnPriceRenderer(AssetGridItem::getTotalCost))
-                .setKey("Total Cost")
-                .setHeader("Total Cost")
-                .setTextAlign(ColumnTextAlign.END)
-                .setSortable(true)
-                .setComparator(AssetGridItem::getTotalCost)
-                .setTooltipGenerator(a -> "Total cost of your %s holdings based on the latest price.".formatted(a.getSymbol()));
-
-        Grid.Column<AssetGridItem> diversityCol = grid.addColumn(columnPercentageRenderer(AssetGridItem::getDiversityPercentage))
-                .setKey("Diversity")
-                .setHeader("Diversity")
-                .setTextAlign(ColumnTextAlign.CENTER)
-                .setSortable(true)
-                .setComparator(AssetGridItem::getDiversityPercentage)
-                .setTooltipGenerator(a -> "The percentage contribution of %s to your portfolio's total value.".formatted(a.getSymbol()));
-
-        Grid.Column<AssetGridItem> realizedCol = grid.addColumn(columnPriceRenderer(AssetGridItem::getRealizedProfit))
-                .setKey("Realized")
-                .setHeader("Realized")
-                .setTextAlign(ColumnTextAlign.CENTER)
-                .setSortable(true)
-                .setComparator(AssetGridItem::getRealizedProfit)
-                .setTooltipGenerator(a -> "Profit or loss from your sold %s holdings.".formatted(a.getSymbol()));
-
-        Grid.Column<AssetGridItem> unrealizedCol = grid.addColumn(columnPriceRenderer(AssetGridItem::getUnrealizedProfit))
-                .setKey("Unrealized")
-                .setHeader("Unrealized")
-                .setTextAlign(ColumnTextAlign.CENTER)
-                .setSortable(true)
-                .setComparator(AssetGridItem::getUnrealizedProfit)
-                .setTooltipGenerator(a -> "Potential profit or loss if you were to sell %s now.".formatted(a.getSymbol()));
-
-        Grid.Column<AssetGridItem> closestBuyCol = grid.addColumn(columnPriceRenderer(AssetGridItem::getClosestBuy))
-                .setKey("Closest Buy")
-                .setHeader("Closest Buy")
-                .setTextAlign(ColumnTextAlign.CENTER)
-                .setTooltipGenerator(a -> "The closest %s buy price that was added in the watcher".formatted(a.getSymbol()));
-
-        Grid.Column<AssetGridItem> closestSellCol = grid.addColumn(columnPriceRenderer(AssetGridItem::getClosestSell))
-                .setKey("Closest Sell")
-                .setHeader("Closest Sell")
-                .setTextAlign(ColumnTextAlign.CENTER)
-                .setTooltipGenerator(a -> "The closest %s sell price that was added in the watcher".formatted(a.getSymbol()));
-
-        List<Grid.Column<AssetGridItem>> listColumnsToSelect = List.of(nameCol, priceCol, changes24hCol, avgBuyCol, avgSellCol, amountCol,
-                totalWorthCol, totalCostCol, diversityCol, realizedCol, unrealizedCol, closestBuyCol, closestSellCol);
+        renderColumns();
+        List<Grid.Column<AssetGridItem>> listColumnsToSelect = List.of(nameCol, priceCol, changes24hCol, avgBuyCol,
+                avgSellCol, amountCol, totalWorthCol, totalCostCol, diversityCol,
+                realizedCol, unrealizedCol, closestBuyCol, closestSellCol);
 
         // Display just the first columns, others should be selected to be displayed
         listColumnsToSelect.stream().skip(8).forEach(c -> c.setVisible(false));
@@ -211,11 +139,105 @@ public class AssetsGrid extends Div {
         });
 
         grid.setAllRowsVisible(true);
-
         grid.getElement().executeJs("this.shadowRoot.querySelector('table').style.overflow = 'hidden';");
 
         setHiddenRowCount(0);
     }
+
+    private void renderColumns() {
+        nameCol = grid.addColumn(columnNameRenderer())
+                .setKey("Name")
+                .setHeader("Name")
+                .setSortable(true)
+                .setFrozen(true)
+                .setComparator(AssetGridItem::getSymbol);
+
+        priceCol = grid.addColumn(columnPriceRenderer())
+                .setKey("Price")
+                .setHeader("Price")
+                .setTextAlign(ColumnTextAlign.END)
+                .setSortable(true)
+                .setComparator(AssetGridItem::getPrice);
+
+        changes24hCol = grid.addColumn(columnChanges24hRenderer())
+                .setKey("Changes 24h")
+                .setHeader("Changes 24h")
+                .setTextAlign(ColumnTextAlign.CENTER)
+                .setSortable(true)
+                .setComparator(AssetGridItem::getPriceChangesPercentage24h);
+
+        avgBuyCol = grid.addColumn(columnPriceRenderer(AssetGridItem::getAvgBuy))
+                .setKey("Avg Buy")
+                .setHeader("Avg Buy")
+                .setTextAlign(ColumnTextAlign.CENTER);
+
+        avgSellCol = grid.addColumn(columnPriceRenderer(AssetGridItem::getAvgSell))
+                .setKey("Avg Sell")
+                .setHeader("Avg Sell")
+                .setTextAlign(ColumnTextAlign.CENTER);
+
+        amountCol = grid.addColumn(columnAmountRenderer(AssetGridItem::getTokenAmount))
+                .setKey("Amount")
+                .setHeader("Amount")
+                .setTextAlign(ColumnTextAlign.CENTER)
+                .setSortable(true)
+                .setComparator(AssetGridItem::getTokenAmount);
+
+        totalWorthCol = grid.addColumn(columnPriceRenderer(AssetGridItem::getTotalWorth))
+                .setKey("Total Worth")
+                .setHeader("Total Worth")
+                .setTextAlign(ColumnTextAlign.END)
+                .setSortable(true)
+                .setComparator(AssetGridItem::getTotalWorth)
+                .setTooltipGenerator(a -> "Total value of your %s holdings based on the latest price.".formatted(a.getSymbol()));
+
+        totalCostCol = grid.addColumn(columnPriceRenderer(AssetGridItem::getTotalCost))
+                .setKey("Total Cost")
+                .setHeader("Total Cost")
+                .setTextAlign(ColumnTextAlign.END)
+                .setSortable(true)
+                .setComparator(AssetGridItem::getTotalCost)
+                .setTooltipGenerator(a -> "Total cost of your %s holdings based on the latest price.".formatted(a.getSymbol()));
+
+        diversityCol = grid.addColumn(columnPercentageRenderer(AssetGridItem::getDiversityPercentage))
+                .setKey("Diversity")
+                .setHeader("Diversity")
+                .setTextAlign(ColumnTextAlign.CENTER)
+                .setSortable(true)
+                .setComparator(AssetGridItem::getDiversityPercentage)
+                .setTooltipGenerator(a -> "The percentage contribution of %s to your portfolio's total value.".formatted(a.getSymbol()));
+
+        realizedCol = grid.addColumn(columnPriceRenderer(AssetGridItem::getRealizedProfit))
+                .setKey("Realized")
+                .setHeader("Realized")
+                .setTextAlign(ColumnTextAlign.CENTER)
+                .setSortable(true)
+                .setComparator(AssetGridItem::getRealizedProfit)
+                .setTooltipGenerator(a -> "Profit or loss from your sold %s holdings.".formatted(a.getSymbol()));
+
+        unrealizedCol = grid.addColumn(columnPriceRenderer(AssetGridItem::getUnrealizedProfit))
+                .setKey("Unrealized")
+                .setHeader("Unrealized")
+                .setTextAlign(ColumnTextAlign.CENTER)
+                .setSortable(true)
+                .setComparator(AssetGridItem::getUnrealizedProfit)
+                .setTooltipGenerator(a -> "Potential profit or loss if you were to sell %s now.".formatted(a.getSymbol()));
+
+        closestBuyCol = grid.addColumn(columnPriceRenderer(AssetGridItem::getClosestBuy))
+                .setKey("Closest Buy")
+                .setHeader("Closest Buy")
+                .setTextAlign(ColumnTextAlign.CENTER)
+                .setTooltipGenerator(a -> "The closest %s buy price that was added in the watcher".formatted(a.getSymbol()));
+
+        closestSellCol = grid.addColumn(columnPriceRenderer(AssetGridItem::getClosestSell))
+                .setKey("Closest Sell")
+                .setHeader("Closest Sell")
+                .setTextAlign(ColumnTextAlign.CENTER)
+                .setTooltipGenerator(a -> "The closest %s sell price that was added in the watcher".formatted(a.getSymbol()));
+
+        updateColumnFooters();
+    }
+
 
     private void initializeFilteringBySearch() {
         searchField.addClassName("asset-search-field");
@@ -234,6 +256,7 @@ public class AssetsGrid extends Div {
                        || lowercaseFullName.contains(lowercaseSearchTerm);
             });
 
+            updateColumnFooters();
             updateHiddenRowsCounter();
         });
     }
@@ -246,6 +269,7 @@ public class AssetsGrid extends Div {
                 resetGridFilteredItems();
             }
 
+            updateColumnFooters();
             updateHiddenRowsCounter();
         });
     }
@@ -304,7 +328,12 @@ public class AssetsGrid extends Div {
     }
 
     private void initializeSyncButton() {
-        syncButton.addClickListener(event -> animateSyncButtonIcon());
+        syncButton.addClickListener(event -> {
+            animateSyncButtonIcon();
+            instrumentsFacadeService.updateAssetMetadata();
+            dataView = grid.setItems(getConvertedGridItems());
+            renderColumns();
+        });
     }
 
     private void animateSyncButtonIcon() {
@@ -340,8 +369,16 @@ public class AssetsGrid extends Div {
     }
 
     private void updateHiddenRowsCounter() {
-        int numberHiddenRows = Symbols.getAll().size() - dataView.getItemCount();
-        setHiddenRowCount(numberHiddenRows);
+        int numberOfHiddenRows = Symbols.getAll().size() - dataView.getItemCount();
+        setHiddenRowCount(numberOfHiddenRows);
+    }
+
+    private void updateColumnFooters() {
+        totalCostCol.setFooter("Total: $%.2f".formatted(getColumnSum(AssetGridItem::getTotalCost)));
+        totalWorthCol.setFooter("Total: $%.2f".formatted(getColumnSum(AssetGridItem::getTotalWorth)));
+        realizedCol.setFooter("Total: $%.2f".formatted(getColumnSum(AssetGridItem::getRealizedProfit)));
+        unrealizedCol.setFooter("Total: $%.2f".formatted(getColumnSum(AssetGridItem::getUnrealizedProfit)));
+        changes24hCol.setFooter("Average: %.0f%%".formatted(getColumnAverage(AssetGridItem::getPriceChangesPercentage24h)));
     }
 
     private void setHiddenRowCount(int count) {
@@ -352,6 +389,7 @@ public class AssetsGrid extends Div {
         dataView.setFilter(a -> true);
         searchField.setValue("");
         hideAssetsCheckbox.setValue(false);
+        updateColumnFooters();
         updateHiddenRowsCounter();
     }
 
@@ -368,7 +406,6 @@ public class AssetsGrid extends Div {
                         .closestBuy(instrumentsFacadeService.getClosestBuyWatcherPrice(asset))
                         .closestSell(instrumentsFacadeService.getClosestSellWatcherPrice(asset))
                         // TODO: Add volume column
-                        // Performance
                         .avgBuy(portfolioPerformanceTracker.getAverageBuyPrice(asset))
                         .avgSell(portfolioPerformanceTracker.getAverageSellPrice(asset))
                         .realizedProfit(portfolioPerformanceTracker.getAssetProfit(asset))
@@ -378,6 +415,19 @@ public class AssetsGrid extends Div {
                         .diversityPercentage(portfolioPerformanceTracker.getAssetDiversityPercentage(asset))
                         .build())
                 .toList();
+    }
+
+    private double getColumnAverage(ToDoubleFunction<AssetGridItem> function) {
+        return dataView.getItems().toList().stream()
+                .mapToDouble(function)
+                .average()
+                .orElse(0.0);
+    }
+
+    private double getColumnSum(ToDoubleFunction<AssetGridItem> function) {
+        return dataView.getItems().toList().stream()
+                .mapToDouble(function)
+                .sum();
     }
 
     @Data
