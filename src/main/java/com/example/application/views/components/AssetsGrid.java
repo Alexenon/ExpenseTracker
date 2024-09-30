@@ -33,7 +33,6 @@ import lombok.Data;
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.function.ToDoubleFunction;
 
 /*
@@ -91,11 +90,6 @@ public class AssetsGrid extends Div {
         initializeFilteringNonZeroValues();
         initializeSyncButton();
 
-        syncButton.addClickListener(e -> {
-            instrumentsFacadeService.updateAssetMetadata();
-            // TODO: The columns should be re-rendered again after updating metadata
-        });
-
         add(
                 gridHeader(),
                 grid,
@@ -114,25 +108,9 @@ public class AssetsGrid extends Div {
 
     private void initializeGrid() {
         renderColumns();
-        List<Grid.Column<AssetGridItem>> listColumnsToSelect = List.of(nameCol, priceCol, changes24hCol, avgBuyCol,
-                avgSellCol, amountCol, totalWorthCol, totalCostCol, diversityCol,
-                realizedCol, unrealizedCol, closestBuyCol, closestSellCol);
-
-        // Display just the first columns, others should be selected to be displayed
-        listColumnsToSelect.stream().skip(8).forEach(c -> c.setVisible(false));
-
-        Icon menuButton = VaadinIcon.SLIDERS.create();
-        ColumnToggleContextMenu columnToggleContextMenu = new ColumnToggleContextMenu(menuButton);
-
-        listColumnsToSelect.forEach(a -> columnToggleContextMenu.addColumnToggleItem(a.getKey(), a));
-
-        grid.addColumn(new ComponentRenderer<>(this::threeDotsBtn))
-                .setHeader(menuButton)
-                .setTextAlign(ColumnTextAlign.CENTER)
-                .setFrozenToEnd(true);
 
         grid.setColumnReorderingAllowed(true);
-        grid.getColumns().forEach(c -> c.setAutoWidth(true));
+        // grid.getColumns().forEach(c -> c.setAutoWidth(true));
         grid.addItemClickListener(row -> {
             System.out.println(row.getItem());
             UI.getCurrent().navigate(AssetDetailsView.class, row.getItem().getSymbol().toUpperCase());
@@ -146,94 +124,110 @@ public class AssetsGrid extends Div {
 
     private void renderColumns() {
         nameCol = grid.addColumn(columnNameRenderer())
-                .setKey("Name")
                 .setHeader("Name")
+                .setAutoWidth(true)
                 .setSortable(true)
                 .setFrozen(true)
                 .setComparator(AssetGridItem::getSymbol);
 
         priceCol = grid.addColumn(columnPriceRenderer())
-                .setKey("Price")
                 .setHeader("Price")
                 .setTextAlign(ColumnTextAlign.END)
+                .setAutoWidth(true)
                 .setSortable(true)
                 .setComparator(AssetGridItem::getPrice);
 
         changes24hCol = grid.addColumn(columnChanges24hRenderer())
-                .setKey("Changes 24h")
                 .setHeader("Changes 24h")
                 .setTextAlign(ColumnTextAlign.CENTER)
+                .setAutoWidth(true)
                 .setSortable(true)
                 .setComparator(AssetGridItem::getPriceChangesPercentage24h);
 
         avgBuyCol = grid.addColumn(columnPriceRenderer(AssetGridItem::getAvgBuy))
-                .setKey("Avg Buy")
                 .setHeader("Avg Buy")
+                .setAutoWidth(true)
                 .setTextAlign(ColumnTextAlign.CENTER);
 
         avgSellCol = grid.addColumn(columnPriceRenderer(AssetGridItem::getAvgSell))
-                .setKey("Avg Sell")
                 .setHeader("Avg Sell")
+                .setAutoWidth(true)
                 .setTextAlign(ColumnTextAlign.CENTER);
 
         amountCol = grid.addColumn(columnAmountRenderer(AssetGridItem::getTokenAmount))
-                .setKey("Amount")
                 .setHeader("Amount")
                 .setTextAlign(ColumnTextAlign.CENTER)
+                .setAutoWidth(true)
                 .setSortable(true)
                 .setComparator(AssetGridItem::getTokenAmount);
 
         totalWorthCol = grid.addColumn(columnPriceRenderer(AssetGridItem::getTotalWorth))
-                .setKey("Total Worth")
                 .setHeader("Total Worth")
                 .setTextAlign(ColumnTextAlign.END)
+                .setAutoWidth(true)
                 .setSortable(true)
                 .setComparator(AssetGridItem::getTotalWorth)
                 .setTooltipGenerator(a -> "Total value of your %s holdings based on the latest price.".formatted(a.getSymbol()));
 
         totalCostCol = grid.addColumn(columnPriceRenderer(AssetGridItem::getTotalCost))
-                .setKey("Total Cost")
                 .setHeader("Total Cost")
                 .setTextAlign(ColumnTextAlign.END)
+                .setAutoWidth(true)
                 .setSortable(true)
                 .setComparator(AssetGridItem::getTotalCost)
                 .setTooltipGenerator(a -> "Total cost of your %s holdings based on the latest price.".formatted(a.getSymbol()));
 
         diversityCol = grid.addColumn(columnPercentageRenderer(AssetGridItem::getDiversityPercentage))
-                .setKey("Diversity")
                 .setHeader("Diversity")
                 .setTextAlign(ColumnTextAlign.CENTER)
+                .setAutoWidth(true)
                 .setSortable(true)
                 .setComparator(AssetGridItem::getDiversityPercentage)
                 .setTooltipGenerator(a -> "The percentage contribution of %s to your portfolio's total value.".formatted(a.getSymbol()));
 
         realizedCol = grid.addColumn(columnPriceRenderer(AssetGridItem::getRealizedProfit))
-                .setKey("Realized")
                 .setHeader("Realized")
                 .setTextAlign(ColumnTextAlign.CENTER)
+                .setAutoWidth(true)
                 .setSortable(true)
                 .setComparator(AssetGridItem::getRealizedProfit)
                 .setTooltipGenerator(a -> "Profit or loss from your sold %s holdings.".formatted(a.getSymbol()));
 
         unrealizedCol = grid.addColumn(columnPriceRenderer(AssetGridItem::getUnrealizedProfit))
-                .setKey("Unrealized")
                 .setHeader("Unrealized")
                 .setTextAlign(ColumnTextAlign.CENTER)
+                .setAutoWidth(true)
                 .setSortable(true)
                 .setComparator(AssetGridItem::getUnrealizedProfit)
                 .setTooltipGenerator(a -> "Potential profit or loss if you were to sell %s now.".formatted(a.getSymbol()));
 
         closestBuyCol = grid.addColumn(columnPriceRenderer(AssetGridItem::getClosestBuy))
-                .setKey("Closest Buy")
                 .setHeader("Closest Buy")
                 .setTextAlign(ColumnTextAlign.CENTER)
+                .setAutoWidth(true)
                 .setTooltipGenerator(a -> "The closest %s buy price that was added in the watcher".formatted(a.getSymbol()));
 
         closestSellCol = grid.addColumn(columnPriceRenderer(AssetGridItem::getClosestSell))
-                .setKey("Closest Sell")
                 .setHeader("Closest Sell")
                 .setTextAlign(ColumnTextAlign.CENTER)
+                .setAutoWidth(true)
                 .setTooltipGenerator(a -> "The closest %s sell price that was added in the watcher".formatted(a.getSymbol()));
+
+        List<Grid.Column<AssetGridItem>> listColumnsToSelect = List.of(nameCol, priceCol, changes24hCol, avgBuyCol,
+                avgSellCol, amountCol, totalWorthCol, totalCostCol, diversityCol,
+                realizedCol, unrealizedCol, closestBuyCol, closestSellCol);
+
+        // Display just the first columns, others should be selected to be displayed
+        listColumnsToSelect.stream().skip(8).forEach(c -> c.setVisible(false));
+
+        Icon menuButton = VaadinIcon.SLIDERS.create();
+        ColumnToggleContextMenu columnToggleContextMenu = new ColumnToggleContextMenu(menuButton);
+        listColumnsToSelect.forEach(col -> columnToggleContextMenu.addColumnToggleItem(col.getHeaderText(), col));
+
+        grid.addColumn(new ComponentRenderer<>(this::threeDotsBtn))
+                .setHeader(menuButton)
+                .setTextAlign(ColumnTextAlign.CENTER)
+                .setFrozenToEnd(true);
 
         updateColumnFooters();
     }
@@ -332,7 +326,9 @@ public class AssetsGrid extends Div {
             animateSyncButtonIcon();
             instrumentsFacadeService.updateAssetMetadata();
             dataView = grid.setItems(getConvertedGridItems());
+            grid.removeAllColumns();
             renderColumns();
+            resetFilterValues();
         });
     }
 
@@ -353,11 +349,6 @@ public class AssetsGrid extends Div {
 
     private Button threeDotsBtn() {
         return new Button();
-    }
-
-    public void setItems(List<AssetGridItem> assets) {
-        Objects.requireNonNull(assets, "Grid items cannot be null");
-        grid.setItems(assets);
     }
 
     private Div hiddenRowsContainer() {
@@ -387,10 +378,14 @@ public class AssetsGrid extends Div {
 
     private void resetGridFilteredItems() {
         dataView.setFilter(a -> true);
+        resetFilterValues();
+        updateColumnFooters();
+    }
+
+    private void resetFilterValues() {
+        setHiddenRowCount(0);
         searchField.setValue("");
         hideAssetsCheckbox.setValue(false);
-        updateColumnFooters();
-        updateHiddenRowsCounter();
     }
 
     private List<AssetGridItem> getConvertedGridItems() {
