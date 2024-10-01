@@ -38,15 +38,10 @@ import java.util.function.ToDoubleFunction;
 /*
     TODO:
      - [!!] Optimize -> REMOVE certain columns from ColumnSelector instead of HIDING
-     - [?] Display footer statistics details for certain columns -> Average, Total, ....
-            dataProvider.addDataProviderListener(changeEvent -> {
-                quantityColumn.setFooter("Total Quantity: " + calculateTotalQuantityOnGrid(dataProvider));
-                priceColumn.setFooter("Total Price: "+ calculateTotalPriceOnGrid(dataProvider));
-            });
      - [?] grid.setMultiSort(true, MultiSortPriority.APPEND);
-     - ICONS: vaadin:trending-down | vaadin:trending-up
-     - Closest Buy ->  $34,000.00 ❗
-        -URGENT -> vaadin:exclamation vaadin:warning
+     - [!] ICONS: vaadin:trending-down | vaadin:trending-up
+     - [!] Closest Buy ->  $34,000.00 ❗
+            - URGENT -> vaadin:exclamation vaadin:warning
     _______________________________________________________________________________________________________________________________________
     | Name | Price  | 24h Changes | Amount | Avg buy | Avg sell | All-time low | All-time high | Total Worth | Total Invested | Realized  |
     | BTC  | $64000 | 2%          | 0.0034 | $60000  |    -     | $10          | $73000        | $230        | $200           | $30 / 10% |
@@ -65,19 +60,11 @@ public class AssetsGrid extends Div {
     private final Span hiddenRowsCounterField = new Span();
     private GridListDataView<AssetGridItem> dataView;
 
-    private Grid.Column<AssetGridItem> nameCol;
-    private Grid.Column<AssetGridItem> priceCol;
-    private Grid.Column<AssetGridItem> amountCol;
     private Grid.Column<AssetGridItem> changes24hCol;
-    private Grid.Column<AssetGridItem> avgBuyCol;
-    private Grid.Column<AssetGridItem> avgSellCol;
-    private Grid.Column<AssetGridItem> diversityCol;
     private Grid.Column<AssetGridItem> totalWorthCol;
     private Grid.Column<AssetGridItem> totalCostCol;
     private Grid.Column<AssetGridItem> realizedCol;
     private Grid.Column<AssetGridItem> unrealizedCol;
-    private Grid.Column<AssetGridItem> closestBuyCol;
-    private Grid.Column<AssetGridItem> closestSellCol;
 
     public AssetsGrid(InstrumentsFacadeService instrumentsFacadeService,
                       PortfolioPerformanceTracker portfolioPerformanceTracker) {
@@ -123,14 +110,14 @@ public class AssetsGrid extends Div {
     }
 
     private void renderColumns() {
-        nameCol = grid.addColumn(columnNameRenderer())
+        grid.addColumn(columnNameRenderer())
                 .setHeader("Name")
                 .setAutoWidth(true)
                 .setSortable(true)
                 .setFrozen(true)
                 .setComparator(AssetGridItem::getSymbol);
 
-        priceCol = grid.addColumn(columnPriceRenderer())
+        grid.addColumn(columnPriceRenderer())
                 .setHeader("Price")
                 .setTextAlign(ColumnTextAlign.END)
                 .setAutoWidth(true)
@@ -144,17 +131,17 @@ public class AssetsGrid extends Div {
                 .setSortable(true)
                 .setComparator(AssetGridItem::getPriceChangesPercentage24h);
 
-        avgBuyCol = grid.addColumn(columnPriceRenderer(AssetGridItem::getAvgBuy))
+        grid.addColumn(columnPriceRenderer(AssetGridItem::getAvgBuy))
                 .setHeader("Avg Buy")
                 .setAutoWidth(true)
                 .setTextAlign(ColumnTextAlign.CENTER);
 
-        avgSellCol = grid.addColumn(columnPriceRenderer(AssetGridItem::getAvgSell))
+        grid.addColumn(columnPriceRenderer(AssetGridItem::getAvgSell))
                 .setHeader("Avg Sell")
                 .setAutoWidth(true)
                 .setTextAlign(ColumnTextAlign.CENTER);
 
-        amountCol = grid.addColumn(columnAmountRenderer(AssetGridItem::getTokenAmount))
+        grid.addColumn(columnAmountRenderer(AssetGridItem::getTokenAmount))
                 .setHeader("Amount")
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setAutoWidth(true)
@@ -177,7 +164,7 @@ public class AssetsGrid extends Div {
                 .setComparator(AssetGridItem::getTotalCost)
                 .setTooltipGenerator(a -> "Total cost of your %s holdings based on the latest price.".formatted(a.getSymbol()));
 
-        diversityCol = grid.addColumn(columnPercentageRenderer(AssetGridItem::getDiversityPercentage))
+        grid.addColumn(columnPercentageRenderer(AssetGridItem::getDiversityPercentage))
                 .setHeader("Diversity")
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setAutoWidth(true)
@@ -201,33 +188,34 @@ public class AssetsGrid extends Div {
                 .setComparator(AssetGridItem::getUnrealizedProfit)
                 .setTooltipGenerator(a -> "Potential profit or loss if you were to sell %s now.".formatted(a.getSymbol()));
 
-        closestBuyCol = grid.addColumn(columnPriceRenderer(AssetGridItem::getClosestBuy))
+        grid.addColumn(columnPriceRenderer(AssetGridItem::getClosestBuy))
                 .setHeader("Closest Buy")
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setAutoWidth(true)
                 .setTooltipGenerator(a -> "The closest %s buy price that was added in the watcher".formatted(a.getSymbol()));
 
-        closestSellCol = grid.addColumn(columnPriceRenderer(AssetGridItem::getClosestSell))
+        grid.addColumn(columnPriceRenderer(AssetGridItem::getClosestSell))
                 .setHeader("Closest Sell")
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setAutoWidth(true)
                 .setTooltipGenerator(a -> "The closest %s sell price that was added in the watcher".formatted(a.getSymbol()));
 
-        List<Grid.Column<AssetGridItem>> listColumnsToSelect = List.of(nameCol, priceCol, changes24hCol, avgBuyCol,
-                avgSellCol, amountCol, totalWorthCol, totalCostCol, diversityCol,
-                realizedCol, unrealizedCol, closestBuyCol, closestSellCol);
 
-        // Display just the first columns, others should be selected to be displayed
-        listColumnsToSelect.stream().skip(8).forEach(c -> c.setVisible(false));
 
         Icon menuButton = VaadinIcon.SLIDERS.create();
-        ColumnToggleContextMenu columnToggleContextMenu = new ColumnToggleContextMenu(menuButton);
-        listColumnsToSelect.forEach(col -> columnToggleContextMenu.addColumnToggleItem(col.getHeaderText(), col));
-
         grid.addColumn(new ComponentRenderer<>(this::threeDotsBtn))
                 .setHeader(menuButton)
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setFrozenToEnd(true);
+
+        List<Grid.Column<AssetGridItem>> columnsWithData = grid.getColumns().subList(0, grid.getColumns().size() - 1);
+
+        // Display just the first columns, others should be selected to be displayed
+        columnsWithData.stream().skip(8).forEach(c -> c.setVisible(false));
+
+        // Creates the column selector menu based on column visibility
+        ColumnToggleContextMenu columnToggleContextMenu = new ColumnToggleContextMenu(menuButton);
+        columnsWithData.forEach(col -> columnToggleContextMenu.addColumnToggleItem(col.getHeaderText(), col));
 
         updateColumnFooters();
     }
@@ -450,6 +438,13 @@ public class AssetsGrid extends Div {
         public ColumnToggleContextMenu(Component target) {
             super(target);
             setOpenOnClick(true);
+
+//            addOpenedChangeListener(event -> {
+//                if (!event.isOpened()) {
+//                    updateAllMenuItemCheckmarks();
+//                }
+//            });
+
         }
 
         void addColumnToggleItem(String label, Grid.Column<AssetGridItem> column) {
@@ -472,10 +467,20 @@ public class AssetsGrid extends Div {
             if (isChecked) {
                 menuItem.getElement().setAttribute("menu-item-checked", "");
             } else {
-                menuItem.getElement().removeAttribute("aria-selected");
                 menuItem.getElement().removeAttribute("menu-item-checked");
             }
         }
+
+//        private void updateAllMenuItemCheckmarks() {
+//            this.getItems().forEach(item -> {
+//                if (item != null) {
+//                    boolean isVisible = item.getParent().orElse(null).isVisible();
+//                    item.setChecked(isVisible);
+//                    updateMenuItemCheckmark(item, isVisible);
+//                }
+//            });
+//        }
+
     }
 
 
