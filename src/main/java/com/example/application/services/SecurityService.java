@@ -20,6 +20,7 @@ public class SecurityService {
     public UserDetails getAuthenticatedUser() {
         SecurityContext context = SecurityContextHolder.getContext();
         Object principal = context.getAuthentication().getPrincipal();
+
         if (principal instanceof UserDetails) {
             return (UserDetails) context.getAuthentication().getPrincipal();
         }
