@@ -29,7 +29,8 @@
 }
 
 a,
-button {
+button,
+mono-icon {
     color: inherit;
     cursor: pointer;
 }
@@ -40,6 +41,10 @@ img {
     max-width: 100%;
     height: auto;
     -webkit-user-drag: none;
+}
+
+mono-icon {
+    font-size: 30px;
 }
 
 .page-content {

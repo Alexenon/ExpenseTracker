@@ -15,30 +15,26 @@ public class MainLayout extends AppLayout {
 
     private final SecurityService securityService;
 
+    private final NavigationBar navigationBar = new NavigationBar();
+    private final Header header = new Header(navigationBar);
+
     @Autowired
     public MainLayout(SecurityService securityService) {
         this.securityService = securityService;
-        addHeader();
-        addFooter();
+        build();
     }
 
-    private void addHeader() {
-        addToNavbar(getHeader());
-    }
-
-    private Header getHeader() {
-        Header header = new Header();
+    private void build() {
         header.setId("header");
 
         Icon personIcon = new Icon(VaadinIcon.USER);
         personIcon.addClassName("user-icon");
         personIcon.addClickListener(e -> securityService.logout());
 
-        NavigationBar navbar = new NavigationBar();
-        navbar.add(personIcon);
-        header.add(navbar);
+        navigationBar.add(personIcon);
 
-        return header;
+        addToNavbar(header);
+        addFooter();
     }
 
     private void addFooter() {

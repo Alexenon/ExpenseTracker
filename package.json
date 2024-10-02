@@ -3,6 +3,7 @@
   "license": "UNLICENSED",
   "type": "module",
   "dependencies": {
+    "@mdi/font": "^7.4.47",
     "@polymer/polymer": "3.5.1",
     "@vaadin/a11y-base": "24.2.4",
     "@vaadin/accordion": "24.2.4",
@@ -175,7 +176,7 @@
       "workbox-core": "7.0.0",
       "workbox-precaching": "7.0.0"
     },
-    "hash": "b1c99dc40f08e23c4ed4ea4f0b879f4a6a041e4fd0dc9b3c88c6ce6ef8181948"
+    "hash": "5579fa822fdbb5c1879c2cf55e2eca2acab00b63d2217f5be1aaab9b35d25ef0"
   },
   "overrides": {
     "@vaadin/bundles": "$@vaadin/bundles",
@@ -244,6 +245,7 @@
     "lit": "$lit",
     "@polymer/polymer": "$@polymer/polymer",
     "@vaadin/vaadin-themable-mixin": "$@vaadin/vaadin-themable-mixin",
-    "date-fns": "$date-fns"
+    "date-fns": "$date-fns",
+    "@mdi/font": "$@mdi/font"
   }
 }
