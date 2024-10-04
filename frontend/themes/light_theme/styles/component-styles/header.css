@@ -10,8 +10,12 @@ header {
 .navbar {
     display: flex;
     align-items: center;
-    padding: 1.6rem 3rem;
+    padding: 1.5rem 3rem;
     font-size: 1rem;
+}
+
+.navbar > mono-icon {
+    font-size: 2rem;
 }
 
 .logo {
@@ -54,8 +58,4 @@ header {
 
 .menu-inner a:hover::after {
     width: 100%;
-}
-
-.user-icon {
-    font-size: 1.2rem;
 }

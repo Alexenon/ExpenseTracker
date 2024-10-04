@@ -1,22 +1,11 @@
 package com.example.application.views.pages;
 
 import com.example.application.views.layouts.MainLayout;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.contextmenu.MenuItem;
-import com.vaadin.flow.component.contextmenu.SubMenu;
 import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.component.html.Paragraph;
-import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.menubar.MenuBar;
-import com.vaadin.flow.component.radiobutton.RadioButtonGroup;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
-import com.vaadin.flow.theme.lumo.LumoIcon;
-
-import java.util.List;
 
 @AnonymousAllowed
 @PageTitle("Home")
@@ -76,6 +65,8 @@ public class HomeView extends Main {
 
         // 3
 
+        Paragraph paragraph = new Paragraph("Welcome to Home page!");
+        add(paragraph);
     }
 }
 
