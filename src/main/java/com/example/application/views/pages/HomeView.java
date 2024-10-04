@@ -14,8 +14,8 @@ public class HomeView extends Main {
 
     public HomeView() {
         addClassName("page-content");
-        Paragraph text = new Paragraph("Welcome to Home page!");
-        add(text);
+        Paragraph paragraph = new Paragraph("Welcome to Home page!");
+        add(paragraph);
     }
 }
 

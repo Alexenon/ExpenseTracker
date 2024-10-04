@@ -25,7 +25,7 @@ public class NavigationBar extends Nav {
         addClassName("navbar");
         Div innerMenu = new Div();
         innerMenu.addClassName("menu-inner");
-        innerMenu.add(getRoutes());
+        innerMenu.add(getAllRoutes());
 
         Div menu = new Div(innerMenu);
         menu.setClassName("menu");
@@ -35,13 +35,17 @@ public class NavigationBar extends Nav {
     }
 
     private void addStyle() {
-        getRoutes().forEach(e -> e.setClassName("menu-item"));
+        getAllRoutes().forEach(e -> e.setClassName("menu-item"));
         logoImage.addClassNames("logo");
         logoImage.addClickListener(e -> getUI().ifPresent(ui -> ui.navigate(HomeView.class)));
     }
 
-    public List<Component> getRoutes() {
+    public List<Component> getAllRoutes() {
         return List.of(logoImage, expensesLink, dashboardLink, contactLink);
+    }
+
+    public List<Component> getTextLinks() {
+        return List.of(expensesLink, dashboardLink, contactLink);
     }
 
 }
