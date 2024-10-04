@@ -45,6 +45,7 @@ img {
 
 mono-icon {
     font-size: 30px;
+    line-height: 0px;
 }
 
 .page-content {
