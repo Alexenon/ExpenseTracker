@@ -392,8 +392,8 @@ public class AssetsGrid extends Div {
                         .avgSell(portfolioPerformanceTracker.getAverageSellPrice(asset))
                         .realizedProfit(portfolioPerformanceTracker.getAssetProfit(asset))
                         .unrealizedProfit(0) // TODO: Is Unrealized profit the same as TotalWorth ???
-                        .totalCost(portfolioPerformanceTracker.getAssetCost(asset))
-                        .totalWorth(portfolioPerformanceTracker.getAssetWorth(asset))
+                        .totalCost(portfolioPerformanceTracker.getAssetTotalCost(asset))
+                        .totalWorth(portfolioPerformanceTracker.getAssetTotalWorth(asset))
                         .diversityPercentage(portfolioPerformanceTracker.getAssetDiversityPercentage(asset))
                         .build())
                 .toList();

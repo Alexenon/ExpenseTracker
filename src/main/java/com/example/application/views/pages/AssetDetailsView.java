@@ -242,8 +242,8 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
                 })
                 .build();
 
-        double assetCost = portfolioPerformanceTracker.getAssetCost(asset);
-        double assetWorth = portfolioPerformanceTracker.getAssetWorth(asset);
+        double assetCost = portfolioPerformanceTracker.getAssetTotalCost(asset);
+        double assetWorth = portfolioPerformanceTracker.getAssetTotalWorth(asset);
         double assetProfitLoss = portfolioPerformanceTracker.getAssetProfit(asset);
         double profitLossPercentage = portfolioPerformanceTracker.getAssetProfitPercentage(asset);
         int assetDiversityPercentage = portfolioPerformanceTracker.getAssetDiversityPercentage(asset);

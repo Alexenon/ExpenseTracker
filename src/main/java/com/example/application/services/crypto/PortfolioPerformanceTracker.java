@@ -10,9 +10,6 @@ import java.util.stream.Collectors;
 
 /*
     TODO: LONG TERM -> Implement next methods
-       - Profit Loss of the assets compared to the CURRENT price (realized / unrealized)
-       - Profit Loss of the assets compared to the ALL TIME price (realized / unrealized) -> ALL TIME takes care all the bought/sold
-       - Portfolio Diversity
        - % in Market, how much tokens had been sold and how much are still holding
        - Time Holding + Portfolio Avg Time Holding
 * */
@@ -60,20 +57,20 @@ public class PortfolioPerformanceTracker {
         return calculateAveragePrice(totalCost, totalQuantity);
     }
 
-    public double getAssetWorth(Asset asset) {
+    public double getAssetTotalWorth(Asset asset) {
         return instrumentsFacadeService.getAmountOfTokens(asset) * instrumentsFacadeService.getAssetPrice(asset);
     }
 
-    public double getAssetCost(Asset asset) {
+    public double getAssetTotalCost(Asset asset) {
         return calculateTotalCostForBuyTransactions(instrumentsFacadeService.getTransactionsByAsset(asset));
     }
 
     public double getAssetProfit(Asset asset) {
-        return getAssetWorth(asset) - getAssetCost(asset);
+        return getAssetTotalWorth(asset) - getAssetTotalCost(asset);
     }
 
     public double getAssetProfitPercentage(Asset asset) {
-        return getAssetWorth(asset) / getAssetCost(asset) * 100 - 100;
+        return getAssetTotalWorth(asset) / getAssetTotalCost(asset) * 100 - 100;
     }
 
     public double getPortfolioWorth() {
@@ -101,7 +98,7 @@ public class PortfolioPerformanceTracker {
      * @return the asset diversity percentage in the portfolio, range (0 - 100)%
      */
     public int getAssetDiversityPercentage(Asset asset) {
-        return Math.toIntExact(Math.round(getAssetWorth(asset) / getPortfolioWorth() * 100));
+        return Math.toIntExact(Math.round(getAssetTotalWorth(asset) / getPortfolioWorth() * 100));
     }
 
     /*
