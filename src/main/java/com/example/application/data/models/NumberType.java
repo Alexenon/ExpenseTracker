@@ -50,6 +50,10 @@ public enum NumberType {
             if (value > 1.00)
                 return NumberFormat.getCurrencyInstance(Locale.US).format(value);
 
+            // TODO: 60_000 -> $60,100.00
+            //  Should be $60,100  - without decimal points at the end
+            //  When decimal points are 00, then remove them
+
             int decimalPlaces = (int) Math.abs(Math.floor(Math.log10(value))) + 3;
             String shortedPrice = String.format("%." + decimalPlaces + "f", value);
 

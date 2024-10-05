@@ -39,7 +39,6 @@ import java.util.function.ToDoubleFunction;
     TODO:
      - [!!] Optimize -> REMOVE certain columns from ColumnSelector instead of HIDING
      - [?] grid.setMultiSort(true, MultiSortPriority.APPEND);
-     - [!] ICONS: vaadin:trending-down | vaadin:trending-up
      - [!] Closest Buy ->  $34,000.00 ❗
             - URGENT -> vaadin:exclamation vaadin:warning
     _______________________________________________________________________________________________________________________________________

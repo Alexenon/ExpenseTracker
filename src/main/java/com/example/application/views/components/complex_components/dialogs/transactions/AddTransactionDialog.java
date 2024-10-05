@@ -75,7 +75,7 @@ public class AddTransactionDialog extends Dialog {
             CryptoTransaction savedTransaction = instrumentsFacadeService.saveTransaction(binder.getBean());
             this.close();
             System.out.printf("Saved -> %s\n", savedTransaction);
-        }); // TODO: HERE
+        });
 
         cancelButton.addClickShortcut(Key.ESCAPE);
         cancelButton.addClickListener(e -> this.close());

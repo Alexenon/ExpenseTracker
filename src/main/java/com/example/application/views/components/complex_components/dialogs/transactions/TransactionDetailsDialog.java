@@ -22,6 +22,9 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
 
+
+// TODO:
+//  - [!] ICONS: vaadin:trending-down | vaadin:trending-up
 public class TransactionDetailsDialog extends Dialog {
 
     private final Asset asset;

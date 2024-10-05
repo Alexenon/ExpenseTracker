@@ -14,8 +14,7 @@ import java.util.stream.Collectors;
        - Profit Loss of the assets compared to the ALL TIME price (realized / unrealized) -> ALL TIME takes care all the bought/sold
        - Portfolio Diversity
        - % in Market, how much tokens had been sold and how much are still holding
-       - Time Holding
-       - Portfolio Avg Time Holding
+       - Time Holding + Portfolio Avg Time Holding
 * */
 
 @Component
