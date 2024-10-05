@@ -2,7 +2,6 @@ package com.example.application.services.crypto;
 
 import com.example.application.data.enums.Symbols;
 import com.example.application.data.models.InstrumentsProvider;
-import com.example.application.entities.User;
 import com.example.application.entities.crypto.*;
 import com.example.application.services.SecurityService;
 import com.example.application.services.UserService;
@@ -174,8 +173,7 @@ public class InstrumentsFacadeService {
     //</editor-fold>
 
     private Wallet getAuthenticatedUserWallet() {
-        User authenticatedUser = securityService.getAuthenticatedUser();
-        return instrumentsService.getWalletByUser(authenticatedUser);
+        return instrumentsService.getWalletByUser(securityService.getAuthenticatedUser());
     }
 
 }

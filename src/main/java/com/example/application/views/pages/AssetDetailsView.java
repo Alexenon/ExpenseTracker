@@ -327,7 +327,7 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         paragraph.setId(labelText);
         paragraph.addClassName("stats-item");
 
-        Label label = new Label(labelText);
+        NativeLabel label = new NativeLabel(labelText);
         label.setFor(paragraph);
         label.addClassName("stats-title");
 

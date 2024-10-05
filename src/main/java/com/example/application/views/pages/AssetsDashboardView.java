@@ -22,7 +22,6 @@ public class AssetsDashboardView extends Main {
 
     private final InstrumentsFacadeService instrumentsFacadeService;
     private final PortfolioPerformanceTracker portfolioPerformanceTracker;
-    private final AssetsGrid assetsGrid;
 
     @Autowired
     public AssetsDashboardView(InstrumentsFacadeService instrumentsFacadeService,
@@ -30,7 +29,7 @@ public class AssetsDashboardView extends Main {
         this.instrumentsFacadeService = instrumentsFacadeService;
         this.portfolioPerformanceTracker = portfolioPerformanceTracker;
 
-        this.assetsGrid = new AssetsGrid(instrumentsFacadeService, portfolioPerformanceTracker);
+        AssetsGrid assetsGrid = new AssetsGrid(instrumentsFacadeService, portfolioPerformanceTracker);
 
         initializeGrid();
         add(performanceSection(), assetsGrid);

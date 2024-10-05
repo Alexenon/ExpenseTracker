@@ -68,6 +68,7 @@
     "@vaadin/vaadin-usage-statistics": "2.1.2",
     "@vaadin/vertical-layout": "24.2.4",
     "@vaadin/virtual-list": "24.2.4",
+    "cleave.js": "1.6.0",
     "construct-style-sheets-polyfill": "3.1.0",
     "date-fns": "2.29.3",
     "lit": "2.8.0"
@@ -155,6 +156,7 @@
       "@vaadin/vaadin-usage-statistics": "2.1.2",
       "@vaadin/vertical-layout": "24.2.4",
       "@vaadin/virtual-list": "24.2.4",
+      "cleave.js": "1.6.0",
       "construct-style-sheets-polyfill": "3.1.0",
       "date-fns": "2.29.3",
       "lit": "2.8.0"
@@ -176,7 +178,7 @@
       "workbox-core": "7.0.0",
       "workbox-precaching": "7.0.0"
     },
-    "hash": "5579fa822fdbb5c1879c2cf55e2eca2acab00b63d2217f5be1aaab9b35d25ef0"
+    "hash": "74c243bfabc0e00a5b1ea1fe2470c39d05c39b5cdcf51733f333161b563dc2b9"
   },
   "overrides": {
     "@vaadin/bundles": "$@vaadin/bundles",
@@ -246,6 +248,7 @@
     "@polymer/polymer": "$@polymer/polymer",
     "@vaadin/vaadin-themable-mixin": "$@vaadin/vaadin-themable-mixin",
     "date-fns": "$date-fns",
-    "@mdi/font": "$@mdi/font"
+    "@mdi/font": "$@mdi/font",
+    "cleave.js": "$cleave.js"
   }
 }
