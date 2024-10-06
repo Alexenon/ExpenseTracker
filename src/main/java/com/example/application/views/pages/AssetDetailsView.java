@@ -351,6 +351,30 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
                 : VaadinIcon.STAR_O.create();
     }
 
+    private Section createWatchlistSection(AssetWatcher.ActionType actionType) {
+        PriceWatchlistComponent watchlistComponent = new PriceWatchlistComponent(asset, actionType, instrumentsFacadeService);
+
+        Container header = Container.builder("section-header")
+                .addComponent(() -> {
+                    H3 title = new H3(StringUtils.uppercaseFirstLetter(actionType.name()) + " Watchlist");
+                    title.setClassName("section-title");
+                    return title;
+                })
+                .addComponent(() -> {
+                    Button addWatchlistBtn = new Button("Add Watchlist", LumoIcon.PLUS.create());
+                    addWatchlistBtn.setIconAfterText(false);
+                    addWatchlistBtn.addClickListener(e -> watchlistComponent.addNewPriceLayout());
+                    return addWatchlistBtn;
+                })
+                .build();
+
+        Container body = Container.builder("section-card-wrapper")
+                .addComponent(watchlistComponent)
+                .build();
+
+        return new Section(header, body);
+    }
+
     private Section transactionHistorySection() {
         TransactionsGrid transactionsGrid = new TransactionsGrid(instrumentsFacadeService);
         transactionsGrid.setItems(instrumentsFacadeService.getTransactionsByAsset(asset));
@@ -376,30 +400,6 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         Button seeAllTransactionsBtn = new Button("See more transactions");
 
         return new Section(header, transactionsGrid, seeAllTransactionsBtn);
-    }
-
-    private Section createWatchlistSection(AssetWatcher.ActionType actionType) {
-        PriceWatchlistComponent watchlistComponent = new PriceWatchlistComponent(asset, actionType, instrumentsFacadeService);
-
-        Container header = Container.builder("section-header")
-                .addComponent(() -> {
-                    H3 title = new H3(StringUtils.uppercaseFirstLetter(actionType.name()) + " Watchlist");
-                    title.setClassName("section-title");
-                    return title;
-                })
-                .addComponent(() -> {
-                    Button addWatchlistBtn = new Button("Add Watchlist", LumoIcon.PLUS.create());
-                    addWatchlistBtn.setIconAfterText(false);
-                    addWatchlistBtn.addClickListener(e -> watchlistComponent.addNewPriceLayout());
-                    return addWatchlistBtn;
-                })
-                .build();
-
-        Container body = Container.builder("section-card-wrapper")
-                .addComponent(watchlistComponent)
-                .build();
-
-        return new Section(header, body);
     }
 
 }

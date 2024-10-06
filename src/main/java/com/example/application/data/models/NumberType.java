@@ -1,5 +1,7 @@
 package com.example.application.data.models;
 
+import com.example.application.utils.common.StringUtils;
+
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.Locale;
@@ -27,9 +29,11 @@ public enum NumberType {
     AMOUNT {
         @Override
         public String parse(double value) {
-            return value < 1
+            String valueWithDecimalPoints = value < 1
                     ? String.format("%.6f", value)
                     : String.format("%.2f", value);
+
+            return StringUtils.stripTrailingZeroes(valueWithDecimalPoints);
         }
     },
     PERCENT {
@@ -47,12 +51,13 @@ public enum NumberType {
     PRICE {
         @Override
         public String parse(double value) {
-            if (value > 1.00)
-                return NumberFormat.getCurrencyInstance(Locale.US).format(value);
+            if (value == 0.0)
+                return "$0";
 
-            // TODO: 60_000 -> $60,100.00
-            //  Should be $60,100  - without decimal points at the end
-            //  When decimal points are 00, then remove them
+            if (value > 1.00){
+                String formattedPrice = NumberFormat.getCurrencyInstance(Locale.US).format(value);
+                return StringUtils.stripTrailingZeroes(formattedPrice);
+            }
 
             int decimalPlaces = (int) Math.abs(Math.floor(Math.log10(value))) + 3;
             String shortedPrice = String.format("%." + decimalPlaces + "f", value);

@@ -4,41 +4,48 @@ import java.util.Arrays;
 import java.util.List;
 
 public enum Symbols {
-    BTC,
-    ETH,
-    SOL,
-    BNB,
+    ARB("Arbitrum"),
+    OP("Optimism"),
+    SUI("Sui"),
+    APT("Aptos"),
+    ZK("zkSync"),
+    ALT("Altlayer"),
+    STRK("Starknet"),
+    W("Wormhole"),
+    MANTA("Manta Network"),
+    POL("Polygon"),
+    TIA("Celestia"),
+    LINK("Chainlink"),
+    TON("Toncoin"),
+    AEVO("Aevo"),
+    ATOM("Cosmos"),
+    ENA("Ethena"),
+    ZRO("LayerZero"),
+    AVAX("Avalanche"),
+    ICP("Internet Computer"),
+    MANTLE("Mantle"),
+    UNI("Uniswap"),
+    DOT("Polkadot"),
+    DYDX("dYdX"),
+    NOT("Notcoin"),
+    BTC("Bitcoin"),
+    ETH("Ethereum"),
+    SOL("Solana"),
 
-    // ALT COINS
-    TON,
-    NOT, // HERE
-    ENA,
-    SUI, // HERE
-    UNI,
-    ICP,
-    AEVO, // HERE
-    ARB,
-    ALT,
-    APT,
-    AVAX,
-    ATOM,
-    JUP,
-    STRK,
-    DOT,
-    LINK,
-    OP,
-    TIA,
-    MANTLE, // HERE
-    POL,
-    DYDX, // HERE
-    XRP, // HERE
-    ZK, // HERE
-    ZRO, // HERE
+    // STABLECOINS
+    USDT("Tether"),
+    USDC("USD Coin"),
+    DAI("Dai");
 
-    // STABLE COINS
-    USDT,
-    USDC,
-    DAI;
+    private final String fullName;
+
+    Symbols(String fullName) {
+        this.fullName = fullName;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
 
     public static List<String> getAll() {
         return Arrays.stream(Symbols.values()).map(Enum::name).toList();

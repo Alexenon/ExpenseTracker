@@ -5,6 +5,8 @@ import com.example.application.entities.User;
 import com.example.application.entities.crypto.*;
 import com.example.application.repositories.crypto.AssetRepository;
 import com.example.application.repositories.crypto.WalletBalanceRepository;
+import com.example.application.utils.fetchers.CryptoCompareFetcher;
+import com.example.application.utils.fetchers.api_responses.AssetMetaDataApiResp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -34,8 +36,8 @@ public class InstrumentsService {
     }
 
     /*
-    * ASSETS
-    * */
+     * ASSETS
+     * */
 
     public List<Asset> getAllAssets() {
         return assetRepository.findAll();
@@ -106,8 +108,8 @@ public class InstrumentsService {
     }
 
     /*
-    * WALLET BALANCES
-    * */
+     * WALLET BALANCES
+     * */
 
     public WalletBalance getWalletBalancesByWalletAndAsset(Wallet wallet, Asset asset) {
         return walletBalanceRepository.findByWalletAndAsset(wallet, asset).orElseThrow();
@@ -126,6 +128,10 @@ public class InstrumentsService {
             if (assetRepository.findBySymbol(symbol) == null) {
                 assetRepository.save(new Asset(symbol));
             }
+
+            AssetMetaDataApiResp metaData = CryptoCompareFetcher.getCoinMetaData(symbol);
+            System.out.printf("%s(\"%s\"),\n", metaData.getData().getSymbol(),
+                    metaData.getData().getName());
         });
 
         System.out.println("Filled database");

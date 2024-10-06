@@ -1,5 +1,7 @@
 package com.example.application.utils.common;
 
+import com.example.application.entities.crypto.CryptoTransaction;
+
 import java.math.BigInteger;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -39,6 +41,10 @@ public class MathUtils {
         return sellPrice * 100 / buyPrice;
     }
 
+    public static double profit(CryptoTransaction transaction, double currentPrice) {
+        return profit(transaction.getMarketPrice(), currentPrice, transaction.getOrderTotalCost());
+    }
+
     public static int percentageOf(BigInteger a, BigInteger b) {
         return a.multiply(BigInteger.valueOf(100)).divide(b).intValue();
     }
@@ -65,6 +71,7 @@ public class MathUtils {
     // [34.000, 37.000, 40.000], 35.000  ->  34.000
     // [34.000, 37.000, 40.000], 36.000  ->  37.000
     // [34.000, 37.000, 40.000], 36.000  ->  37.000
+    @SuppressWarnings("unused")
     private double closestPrice(List<Double> prices, double currentPrice) {
         double closestPrice = 0;
         double minDiff = Double.MAX_VALUE;

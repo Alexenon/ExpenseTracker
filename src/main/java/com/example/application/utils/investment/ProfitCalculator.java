@@ -1,6 +1,7 @@
 package com.example.application.utils.investment;
 
 import com.example.application.data.models.NumberType;
+import com.example.application.utils.common.MathUtils;
 
 public class ProfitCalculator {
 
@@ -10,8 +11,8 @@ public class ProfitCalculator {
 
     @SuppressWarnings("SameParameterValue")
     private static void printResult(String symbol, double assetBuyPrice, double assetSellPrice, double investedAmount) {
-        double profitUsd = profit(assetBuyPrice, assetSellPrice, investedAmount);
-        double profitPercentage = profitPercentage(assetBuyPrice, assetSellPrice);
+        double profitUsd = MathUtils.profit(assetBuyPrice, assetSellPrice, investedAmount);
+        double profitPercentage = MathUtils.profitPercentage(assetBuyPrice, assetSellPrice);
 
         System.out.printf("""
                         Invested in %s $%.0f
@@ -25,12 +26,4 @@ public class ProfitCalculator {
         System.out.println();
     }
 
-    public static double profit(double assetBuyPrice, double assetSellPrice, double investedAmount) {
-        double assetQuantity = investedAmount / assetBuyPrice;
-        return assetQuantity * (assetSellPrice - assetBuyPrice);
-    }
-
-    public static double profitPercentage(double assetBuyPrice, double assetSellPrice) {
-        return ((assetSellPrice - assetBuyPrice) / assetBuyPrice) * 100;
-    }
 }
