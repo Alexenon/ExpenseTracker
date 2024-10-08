@@ -19,6 +19,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.function.Consumer;
 
+/*
+    TODO: Maybe replace layout of view transsaction details with editing transaction details
+* */
 public class EditTransactionDialog extends Dialog {
 
     private final Asset asset;
@@ -48,9 +51,9 @@ public class EditTransactionDialog extends Dialog {
     }
 
     private void buildForm() {
+        setHeaderTitle("Transaction");
         initializeFields();
         initializeBinder();
-        setHeaderTitle("Transaction");
 
         Container formBody = Container.builder()
                 .addComponent(assetSymbolField)

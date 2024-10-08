@@ -15,6 +15,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.theme.lumo.LumoIcon;
+import com.vaadin.flow.theme.lumo.LumoUtility;
 
 import java.util.List;
 
@@ -26,6 +27,7 @@ public class HomeView extends Main {
     public HomeView() {
         addClassName("page-content");
         Paragraph text = new Paragraph("Welcome to Home page!");
+        text.addClassNames(LumoUtility.FontSize.SMALL);
         add(text);
 
         RadioButtonGroup<String> radioButtonGroup = new RadioButtonGroup<>();

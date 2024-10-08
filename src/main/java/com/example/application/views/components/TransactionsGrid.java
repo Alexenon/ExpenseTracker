@@ -123,16 +123,16 @@ public class TransactionsGrid extends Div {
     }
 
     private LitRenderer<CryptoTransaction> quantityColumnRenderer() {
-        return LitRenderer.<CryptoTransaction>of("<p class=${item.className}>+${item.quantity} ${item.symbol}</p>")
+        return LitRenderer.<CryptoTransaction>of("<p class='${item.className}'>+${item.quantity} ${item.symbol}</p>")
                 .withProperty("className", t -> t.isBuyTransaction() ? "value-increase" : "value-decrease")
                 .withProperty("quantity", t -> NumberType.AMOUNT.parse(t.getOrderQuantity()))
                 .withProperty("symbol", t -> t.getAsset().getSymbol());
     }
 
     private LitRenderer<CryptoTransaction> profitLossColumnRenderer() {
-        return LitRenderer.<CryptoTransaction>of("<div class=${item.className}>" +
-                                                 "  <p>${item.profit}</p>" +
-                                                 "  <p>${item.profitPercentage}</p>" +
+        return LitRenderer.<CryptoTransaction>of("<div class='transaction-profit-loss ${item.className}'>" +
+                                                 "  <p class='text-l'>${item.profit}</p>" +
+                                                 "  <p class='text-s'>${item.profitPercentage}</p>" +
                                                  "</div>")
                 .withProperty("className", transaction -> {
                     double currentPrice = instrumentsFacadeService.getAssetPrice(transaction.getAsset());
@@ -154,7 +154,6 @@ public class TransactionsGrid extends Div {
                     return NumberType.PERCENT.parse(percentage);
                 });
     }
-
 
     private NumberRenderer<CryptoTransaction> priceColumnRenderer(ValueProvider<CryptoTransaction, Number> priceProvider) {
         return new NumberRenderer<>(priceProvider, NumberFormat.getCurrencyInstance(Locale.US), "$0.00");

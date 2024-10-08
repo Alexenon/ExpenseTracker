@@ -15,6 +15,7 @@ import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.converter.StringToDoubleConverter;
+import com.vaadin.flow.data.renderer.LitRenderer;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
@@ -32,8 +33,8 @@ public class AddTransactionDialog extends Dialog {
 
     private final ComboBox<Asset> assetSymbolField = new ComboBox<>("Asset");
     private final Select<CryptoTransaction.TransactionType> typeField = new Select<>();
-    private final CurrencyField marketPriceField = new CurrencyField("Market Price");
-    private final CurrencyField totalPriceField = new CurrencyField("Order Total Price");
+    private final CurrencyField marketPriceField = new CurrencyField("Price");
+    private final CurrencyField totalPriceField = new CurrencyField("Total");
     private final TextArea notesField = new TextArea("Notes");
     private final DatePicker datePicker = new DatePicker("Date");
 
@@ -43,7 +44,6 @@ public class AddTransactionDialog extends Dialog {
     public AddTransactionDialog(InstrumentsFacadeService instrumentsFacadeService) {
         this(null, instrumentsFacadeService);
     }
-
 
     @Autowired
     public AddTransactionDialog(Asset asset, InstrumentsFacadeService instrumentsFacadeService) {
@@ -55,11 +55,11 @@ public class AddTransactionDialog extends Dialog {
     }
 
     private void buildForm() {
+        setHeaderTitle("Transaction");
         initializeBinder();
         initializeFields();
-        setHeaderTitle("Transaction");
 
-        Container formBody = Container.builder()
+        Container formBody = Container.builder("transaction-modal")
                 .addComponent(assetSymbolField)
                 .addComponent(typeField)
                 .addComponent(marketPriceField)
@@ -85,7 +85,8 @@ public class AddTransactionDialog extends Dialog {
 
     private void initializeFields() {
         assetSymbolField.setItems(instrumentsFacadeService.getAllAssets());
-        assetSymbolField.setItemLabelGenerator(Asset::getSymbol); // TODO: Icon + Name + Symbol
+        assetSymbolField.setItemLabelGenerator(instrumentsFacadeService::getAssetFullName);
+        assetSymbolField.setRenderer(assetSymbolRenderer());
         assetSymbolField.addValueChangeListener(l -> marketPriceField.setValue(getMarketPriceDefaultValue()));
 
         typeField.setLabel("Transaction Type");
@@ -97,6 +98,18 @@ public class AddTransactionDialog extends Dialog {
         totalPriceField.setValue(0);
         marketPriceField.setValue(getMarketPriceDefaultValue());
         datePicker.setValue(LocalDate.now());
+    }
+
+    private LitRenderer<Asset> assetSymbolRenderer() {
+        return LitRenderer.<Asset>of(
+                        "<div class='coin-overview-name-container'>" +
+                        "  <img class='rounded coin-overview-image' src='${item.imgUrl}' alt='${item.fullName}'/>" +
+                        "  <span>${item.symbol}</span>" +
+                        "  <p>${item.fullName}</p>" +
+                        "</div>")
+                .withProperty("imgUrl", instrumentsFacadeService::getAssetImgUrl)
+                .withProperty("symbol", Asset::getSymbol)
+                .withProperty("fullName", instrumentsFacadeService::getAssetFullName);
     }
 
     private void initializeBinder() {
@@ -113,13 +126,13 @@ public class AddTransactionDialog extends Dialog {
         binder.forField(marketPriceField)
                 .asRequired("Please fill this field")
                 .withConverter(new StringToDoubleConverter(0.0, "Couldn't convert to double"))
-                .withValidator(price -> price > 0, "Market price should be bigger than 0")
+                .withValidator(price -> price > 0, "Price should be bigger than 0")
                 .bind(CryptoTransaction::getMarketPrice, CryptoTransaction::setMarketPrice);
 
         binder.forField(totalPriceField)
                 .asRequired("Please fill this field")
                 .withConverter(new StringToDoubleConverter(0.0, "Couldn't convert to double"))
-                .withValidator(price -> price > 0, "Market price should be bigger than 0")
+                .withValidator(price -> price > 0, "Total price should be bigger than 0")
                 .bind(CryptoTransaction::getOrderTotalCost, CryptoTransaction::setOrderTotalCost);
 
         binder.forField(notesField)
@@ -136,7 +149,6 @@ public class AddTransactionDialog extends Dialog {
             return 0;
 
         return instrumentsFacadeService.getAssetPrice(selectedAsset);
-
     }
 
 
