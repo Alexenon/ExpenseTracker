@@ -3,7 +3,7 @@ package com.example.application.views.components.complex_components.dialogs.tran
 import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.CryptoTransaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
-import com.example.application.views.components.CurrencyField;
+import com.example.application.views.components.fields.CurrencyField;
 import com.example.application.views.components.native_components.Container;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;

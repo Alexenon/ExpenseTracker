@@ -54,11 +54,12 @@ public enum NumberType {
             if (value == 0.0)
                 return "$0";
 
-            if (value > 1.00){
+            if (value > 1.00) {
                 String formattedPrice = NumberFormat.getCurrencyInstance(Locale.US).format(value);
                 return StringUtils.stripTrailingZeroes(formattedPrice);
             }
 
+            // +3 digits after decimal point
             int decimalPlaces = (int) Math.abs(Math.floor(Math.log10(value))) + 3;
             String shortedPrice = String.format("%." + decimalPlaces + "f", value);
 

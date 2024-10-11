@@ -176,6 +176,14 @@ vaadin-grid {
 }
 
 vaadin-select::part(input-field),
+vaadin-combo-box::part(input-field),
+vaadin-text-field::part(input-field),
+vaadin-date-picker::part(input-field),
+vaadin-number-field::part(input-field) {
+    height: 2.5rem;
+}
+
+vaadin-select::part(input-field),
 vaadin-text-area::part(input-field),
 vaadin-combo-box::part(input-field),
 vaadin-text-field::part(input-field),

@@ -12,6 +12,20 @@ public class MathUtils {
     private static final double BILLION = 1_000_000_000.0;
     private static final double MILLION = 1_000_000.0;
 
+
+    /**
+     *  Method to count the decimal places in the string
+     * */
+    public static int numberOfDecimalPlaces(String value) {
+        int indexOfDecimal = value.indexOf('.');
+
+        if (indexOfDecimal < 0) {
+            return 0;
+        }
+
+        return value.length() - indexOfDecimal - 1;
+    }
+
     /**
      * Usage
      * <pre><code>

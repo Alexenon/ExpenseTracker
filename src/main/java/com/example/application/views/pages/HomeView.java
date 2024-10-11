@@ -1,8 +1,9 @@
 package com.example.application.views.pages;
 
+import com.example.application.services.crypto.InstrumentsFacadeService;
+import com.example.application.views.components.complex_components.dialogs.transactions.AddTransactionDialog;
 import com.example.application.views.layouts.MainLayout;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.contextmenu.SubMenu;
 import com.vaadin.flow.component.html.Main;
@@ -16,6 +17,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.theme.lumo.LumoIcon;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
@@ -24,10 +26,13 @@ import java.util.List;
 @Route(value = "", layout = MainLayout.class)
 public class HomeView extends Main {
 
+    @Autowired
+    private InstrumentsFacadeService service;
+
     public HomeView() {
         addClassName("page-content");
         Paragraph text = new Paragraph("Welcome to Home page!");
-        text.addClassNames(LumoUtility.FontSize.SMALL);
+        text.addClassNames(LumoUtility.FontSize.XLARGE);
         add(text);
 
         RadioButtonGroup<String> radioButtonGroup = new RadioButtonGroup<>();
@@ -42,30 +47,9 @@ public class HomeView extends Main {
         radioButtonGroup.setValue("foo");
         add(radioButtonGroup);
 
-
-        RadioButtonGroup<Button> buttonGroup = new RadioButtonGroup<>();
-        Button option1 = new Button("None", LumoIcon.CROSS.create());
-        Button option2 = new Button("Token", LumoIcon.CHECKMARK.create());
-        Button option3 = new Button("USD", LumoIcon.MINUS.create());
-        Button option4 = new Button("Percentage", LumoIcon.MINUS.create());
-        buttonGroup.setItems(option1, option2, option3, option4);
-        add(buttonGroup);
-
+        // Items
 
         List<String> optionTitles = List.of("Option 1", "Option 2", "Option 3", "Option 4");
-
-        MenuBar menuBar = new MenuBar();
-        SubMenu subItems = menuBar.addItem(VaadinIcon.SLIDERS.create()).getSubMenu();
-        optionTitles.forEach(t -> {
-            Checkbox checkbox = new Checkbox(t);
-            MenuItem menuItem = subItems.addItem(checkbox);
-            menuItem.addClickListener(e -> checkbox.setValue(!checkbox.getValue()));
-            menuItem.setKeepOpen(true);
-        });
-        add(menuBar);
-
-        // 2
-
         MenuBar menuBar2 = new MenuBar();
         SubMenu subItems2 = menuBar2.addItem(VaadinIcon.SLIDERS.create()).getSubMenu();
         optionTitles.forEach(t -> {
@@ -76,10 +60,10 @@ public class HomeView extends Main {
         });
         add(menuBar2);
 
-        // 3
 
-        Paragraph paragraph = new Paragraph("Welcome to Home page!");
-        add(paragraph);
+        Button btn = new Button("Add Transaction");
+        btn.addClickListener(e -> new AddTransactionDialog(service).open());
+        add(btn);
     }
 }
 

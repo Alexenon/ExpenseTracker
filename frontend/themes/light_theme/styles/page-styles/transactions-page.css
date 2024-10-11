@@ -89,10 +89,3 @@ vaadin-combo-box-item > .coin-overview-name-container > p {
     gap: 10px;
     width: 300px;
 }
-
-.transaction-modal > vaadin-select::part(input-field),
-.transaction-modal > vaadin-combo-box::part(input-field),
-.transaction-modal > vaadin-text-field::part(input-field),
-.transaction-modal > vaadin-date-picker::part(input-field) {
-    height: 2.5rem;
-}
