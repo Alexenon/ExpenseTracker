@@ -29,11 +29,21 @@ public enum NumberType {
     AMOUNT {
         @Override
         public String parse(double value) {
-            String valueWithDecimalPoints = value < 1
-                    ? String.format("%.6f", value)
-                    : String.format("%.2f", value);
+            NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.US);
+            numberFormat.setGroupingUsed(true);
+            numberFormat.setMinimumFractionDigits(0);
 
-            return StringUtils.stripTrailingZeroes(valueWithDecimalPoints);
+            if (value >= 1000) {
+                numberFormat.setMaximumFractionDigits(0);
+            } else if (value >= 1) {
+                numberFormat.setMaximumFractionDigits(4);
+            } else if (value >= 0.001) {
+                numberFormat.setMaximumFractionDigits(6);
+            } else {
+                numberFormat.setMaximumFractionDigits(8);
+            }
+
+            return StringUtils.stripTrailingZeroes(numberFormat.format(value));
         }
     },
     PERCENT {

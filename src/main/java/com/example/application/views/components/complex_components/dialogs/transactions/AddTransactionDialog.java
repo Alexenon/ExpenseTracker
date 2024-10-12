@@ -7,6 +7,7 @@ import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.views.components.fields.AmountField;
 import com.example.application.views.components.fields.CurrencyField;
 import com.example.application.views.components.native_components.Container;
+import com.example.application.views.components.utils.convertors.FlexibleAmountConvertor;
 import com.example.application.views.components.utils.convertors.FlexiblePriceConvertor;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
@@ -104,11 +105,12 @@ public class AddTransactionDialog extends Dialog {
 
             double amount = 0;
             if (marketPriceField.doubleValue() != 0) {
-                double totalPrice = Double.parseDouble(totalPriceField.getValue().replaceAll(",", ""));
+                String textPrice = totalPriceField.getValue().replaceAll(",", "");
+                double totalPrice = Double.parseDouble(textPrice.isEmpty() ? "0" : textPrice);
                 amount = totalPrice / marketPriceField.doubleValue();
             }
 
-            amountField.setValue(amount);
+            amountField.setFormatedValue(amount);
             binder.validate();
         });
 
@@ -167,11 +169,11 @@ public class AddTransactionDialog extends Dialog {
                 .asRequired("Please fill this field")
                 .bind(CryptoTransaction::getType, CryptoTransaction::setType);
 
-//        binder.forField(amountField)
-//                .asRequired("Please fill this field")
-//                .withConverter(new StringToDoubleConverter(0.0, "Couldn't convert to double"))
-//                .withValidator(amount -> amount > 0, "Price should be bigger than 0")
-//                .bind(CryptoTransaction::getOrderQuantity, CryptoTransaction::setOrderQuantity);
+        binder.forField(amountField)
+                .asRequired("Please fill this field")
+                .withConverter(new FlexibleAmountConvertor())
+                .withValidator(amount -> amount > 0, "Price should be bigger than 0")
+                .bind(CryptoTransaction::getOrderQuantity, CryptoTransaction::setOrderQuantity);
 //
         binder.forField(marketPriceField)
                 .asRequired("Please fill this field")

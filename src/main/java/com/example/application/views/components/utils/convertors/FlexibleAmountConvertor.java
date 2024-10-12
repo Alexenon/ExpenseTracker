@@ -5,24 +5,29 @@ import com.vaadin.flow.data.binder.Result;
 import com.vaadin.flow.data.binder.ValueContext;
 import com.vaadin.flow.data.converter.Converter;
 
+import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Locale;
 
-public class FlexiblePriceConvertor implements Converter<String, Double> {
+public class FlexibleAmountConvertor implements Converter<String, Double> {
+
+    private static final int MAXIMUM_FRACTION_DIGITS = 9;
 
     private final NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.US);
 
-    public FlexiblePriceConvertor() {
+    public FlexibleAmountConvertor() {
         numberFormat.setGroupingUsed(true); // Enable thousands separators
         numberFormat.setMinimumFractionDigits(0); // Allows the price to skip decimal points if not entered
+        numberFormat.setMaximumFractionDigits(MAXIMUM_FRACTION_DIGITS);
+        numberFormat.setRoundingMode(RoundingMode.UNNECESSARY);
     }
 
     @Override
     public Result<Double> convertToModel(String value, ValueContext context) {
         try {
             // Remove non-numeric characters except for decimal point and minus sign
-            String sanitizedValue = value.replaceAll("[^\\d.-]", "");
+            String sanitizedValue = value.replaceAll("[^\\d.]", "");
             double parsedValue = numberFormat.parse(sanitizedValue).doubleValue();
 
             if (parsedValue <= 0) {
@@ -34,9 +39,8 @@ public class FlexiblePriceConvertor implements Converter<String, Double> {
             }
 
             // Check if the number of decimal places exceeds the allowed threshold
-            int maxFractionDigits = getMaxAllowedFractionDigits(parsedValue);
-            if (MathUtils.numberOfDecimalPlaces(sanitizedValue) > maxFractionDigits) {
-                return Result.error("Too many decimal places. Allowed maximum: " + maxFractionDigits);
+            if (MathUtils.numberOfDecimalPlaces(sanitizedValue) > MAXIMUM_FRACTION_DIGITS) {
+                return Result.error("Too many decimal places. Allowed maximum: " + MAXIMUM_FRACTION_DIGITS);
             }
 
             return Result.ok(parsedValue);
@@ -51,33 +55,7 @@ public class FlexiblePriceConvertor implements Converter<String, Double> {
             return "";
         }
 
-        int maxFractionDigits = getMaxAllowedFractionDigits(value);
-        numberFormat.setMaximumFractionDigits(maxFractionDigits);
-
         return numberFormat.format(value);
-    }
-
-    /**
-     * Method to get maximum allowed fraction digits based on the value
-     */
-    private int getMaxAllowedFractionDigits(double value) {
-        if (value > 0.5 && value < 1) {
-            return 3;
-        } else if (value > 0.01 && value <= 0.5) {
-            return 4;
-        } else if (value > 0.001 && value <= 0.01) {
-            return 5;
-        } else if (value > 0.0001 && value <= 0.001) {
-            return 6;
-        } else if (value > 0.00001 && value <= 0.0001) {
-            return 7;
-        } else if (value > 0.000001 && value <= 0.00001) {
-            return 8;
-        } else if (value <= 0.000001) {
-            return 9;
-        }
-
-        return 2;
     }
 
 }
