@@ -11,11 +11,14 @@ import java.util.Locale;
 
 public class FlexiblePriceConvertor implements Converter<String, Double> {
 
+    private static final int MAXIMUM_INTEGER_DIGITS = 12;
+
     private final NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.US);
 
     public FlexiblePriceConvertor() {
         numberFormat.setGroupingUsed(true); // Enable thousands separators
         numberFormat.setMinimumFractionDigits(0); // Allows the price to skip decimal points if not entered
+        numberFormat.setMaximumIntegerDigits(MAXIMUM_INTEGER_DIGITS);
     }
 
     @Override
@@ -29,13 +32,18 @@ public class FlexiblePriceConvertor implements Converter<String, Double> {
                 return Result.error("Price must be greater than 0");
             }
 
-            if(sanitizedValue.endsWith(".")) {
+            if (sanitizedValue.endsWith(".")) {
                 return Result.error("Cannot be converted into a number");
+            }
+
+            // Check if the number of integer places exceeds the allowed threshold
+            if (MathUtils.integerPlacesInNumber(sanitizedValue) > MAXIMUM_INTEGER_DIGITS) {
+                return Result.error("Too many digits before comma. Allowed maximum: " + MAXIMUM_INTEGER_DIGITS);
             }
 
             // Check if the number of decimal places exceeds the allowed threshold
             int maxFractionDigits = getMaxAllowedFractionDigits(parsedValue);
-            if (MathUtils.numberOfDecimalPlaces(sanitizedValue) > maxFractionDigits) {
+            if (MathUtils.decimalPlacesInNumber(sanitizedValue) > maxFractionDigits) {
                 return Result.error("Too many decimal places. Allowed maximum: " + maxFractionDigits);
             }
 
@@ -53,6 +61,9 @@ public class FlexiblePriceConvertor implements Converter<String, Double> {
 
         int maxFractionDigits = getMaxAllowedFractionDigits(value);
         numberFormat.setMaximumFractionDigits(maxFractionDigits);
+
+
+        System.out.println("Converting " + value + " -> " + numberFormat.format(value));
 
         return numberFormat.format(value);
     }

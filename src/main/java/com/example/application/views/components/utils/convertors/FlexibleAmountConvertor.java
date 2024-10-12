@@ -5,14 +5,14 @@ import com.vaadin.flow.data.binder.Result;
 import com.vaadin.flow.data.binder.ValueContext;
 import com.vaadin.flow.data.converter.Converter;
 
-import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Locale;
 
 public class FlexibleAmountConvertor implements Converter<String, Double> {
 
-    private static final int MAXIMUM_FRACTION_DIGITS = 9;
+    private static final int MAXIMUM_FRACTION_DIGITS = 8;
+    private static final int MAXIMUM_INTEGER_DIGITS = 12;
 
     private final NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.US);
 
@@ -20,7 +20,7 @@ public class FlexibleAmountConvertor implements Converter<String, Double> {
         numberFormat.setGroupingUsed(true); // Enable thousands separators
         numberFormat.setMinimumFractionDigits(0); // Allows the price to skip decimal points if not entered
         numberFormat.setMaximumFractionDigits(MAXIMUM_FRACTION_DIGITS);
-        numberFormat.setRoundingMode(RoundingMode.UNNECESSARY);
+        numberFormat.setMaximumIntegerDigits(MAXIMUM_INTEGER_DIGITS);
     }
 
     @Override
@@ -31,7 +31,7 @@ public class FlexibleAmountConvertor implements Converter<String, Double> {
             double parsedValue = numberFormat.parse(sanitizedValue).doubleValue();
 
             if (parsedValue <= 0) {
-                return Result.error("Price must be greater than 0");
+                return Result.error("Amount must be greater than 0");
             }
 
             if(sanitizedValue.endsWith(".")) {
@@ -39,13 +39,13 @@ public class FlexibleAmountConvertor implements Converter<String, Double> {
             }
 
             // Check if the number of decimal places exceeds the allowed threshold
-            if (MathUtils.numberOfDecimalPlaces(sanitizedValue) > MAXIMUM_FRACTION_DIGITS) {
+            if (MathUtils.decimalPlacesInNumber(sanitizedValue) > MAXIMUM_FRACTION_DIGITS) {
                 return Result.error("Too many decimal places. Allowed maximum: " + MAXIMUM_FRACTION_DIGITS);
             }
 
             return Result.ok(parsedValue);
         } catch (ParseException | NumberFormatException e) {
-            return Result.error("Invalid price format");
+            return Result.error("Invalid amount format");
         }
     }
 

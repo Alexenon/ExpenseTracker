@@ -1,6 +1,5 @@
 package com.example.application.views.components.complex_components.dialogs.transactions;
 
-import com.example.application.data.models.NumberType;
 import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.CryptoTransaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
@@ -15,9 +14,9 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextArea;
-import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
@@ -40,7 +39,7 @@ public class AddTransactionDialog extends Dialog {
     private final Select<CryptoTransaction.TransactionType> typeField = new Select<>();
     private final AmountField amountField = new AmountField("Amount");
     private final CurrencyField marketPriceField = new CurrencyField("Price");
-    private final TextField totalPriceField = new TextField("Total");
+    private final CurrencyField totalPriceField = new CurrencyField("Total");
     private final DatePicker datePicker = new DatePicker("Date");
     private final TextArea notesField = new TextArea("Notes");
 
@@ -79,30 +78,27 @@ public class AddTransactionDialog extends Dialog {
         assetSymbolField.addValueChangeListener(l -> {
             binder.setValidatorsDisabled(false);
             marketPriceField.setValue(getMarketPriceBySelectedAsset());
+            // TODO: Can be improved by not creating a new span each time
+            amountField.setSuffixComponent(new Span(getSelectedAssetSymbol()));
         });
 
         amountField.setValueChangeMode(ValueChangeMode.EAGER);
         amountField.addKeyUpListener(e -> {
-            binder.setValidatorsDisabled(false);
             double totalPrice = amountField.doubleValue() * marketPriceField.doubleValue();
-            String formatedPrice = NumberType.PRICE.parse(totalPrice).substring(1);
-            totalPriceField.setValue(formatedPrice);
+            totalPriceField.setFormatedValue(totalPrice);
+            System.out.println("Validation");
             binder.validate();
         });
 
         marketPriceField.setValueChangeMode(ValueChangeMode.EAGER);
         marketPriceField.addKeyUpListener(e -> {
-            binder.setValidatorsDisabled(false);
             double totalPrice = amountField.doubleValue() * marketPriceField.doubleValue();
-            String formatedPrice = NumberType.PRICE.parse(totalPrice).substring(1);
-            totalPriceField.setValue(formatedPrice);
+            totalPriceField.setFormatedValue(totalPrice);
             binder.validate();
         });
 
         totalPriceField.setValueChangeMode(ValueChangeMode.EAGER);
         totalPriceField.addKeyUpListener(e -> {
-            binder.setValidatorsDisabled(false);
-
             double amount = 0;
             if (marketPriceField.doubleValue() != 0) {
                 String textPrice = totalPriceField.getValue().replaceAll(",", "");
@@ -135,13 +131,14 @@ public class AddTransactionDialog extends Dialog {
         assetSymbolField.addValueChangeListener(l -> marketPriceField.setValue(getMarketPriceBySelectedAsset()));
 
         typeField.setLabel("Transaction Type");
-        typeField.setValue(CryptoTransaction.TransactionType.BUY);
         typeField.setItems(CryptoTransaction.TransactionType.values());
 
+        // Initialize with values
         assetSymbolField.setValue(asset);
-        amountField.setValue(0.0);
+        typeField.setValue(CryptoTransaction.TransactionType.BUY);
+        amountField.setValue("");
         marketPriceField.setValue(getMarketPriceBySelectedAsset());
-        totalPriceField.setValue("");
+        totalPriceField.setValue(0);
         datePicker.setValue(LocalDate.now());
     }
 
@@ -159,7 +156,6 @@ public class AddTransactionDialog extends Dialog {
 
     private void initializeBinder() {
         binder.setBean(transaction);
-        binder.setValidatorsDisabled(true);
 
         binder.forField(assetSymbolField)
                 .asRequired("Please fill this field")
@@ -174,13 +170,13 @@ public class AddTransactionDialog extends Dialog {
                 .withConverter(new FlexibleAmountConvertor())
                 .withValidator(amount -> amount > 0, "Price should be bigger than 0")
                 .bind(CryptoTransaction::getOrderQuantity, CryptoTransaction::setOrderQuantity);
-//
+
         binder.forField(marketPriceField)
                 .asRequired("Please fill this field")
                 .withConverter(new FlexiblePriceConvertor())
                 .withValidator(price -> price > 0, "Price should be bigger than 0")
                 .bind(CryptoTransaction::getMarketPrice, CryptoTransaction::setMarketPrice);
-//
+
         binder.forField(totalPriceField)
                 .asRequired("Please fill this field")
                 .withConverter(new FlexiblePriceConvertor())
@@ -201,6 +197,15 @@ public class AddTransactionDialog extends Dialog {
             return 0;
 
         return instrumentsFacadeService.getAssetPrice(selectedAsset);
+    }
+
+    private String getSelectedAssetSymbol() {
+        Asset selectedAsset = assetSymbolField.getValue();
+
+        if (selectedAsset == null)
+            return "";
+
+        return selectedAsset.getSymbol();
     }
 
 

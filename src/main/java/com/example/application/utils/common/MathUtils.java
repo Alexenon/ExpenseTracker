@@ -12,18 +12,30 @@ public class MathUtils {
     private static final double BILLION = 1_000_000_000.0;
     private static final double MILLION = 1_000_000.0;
 
+    /**
+     * Method to count whole part in a decimal number
+     */
+    public static int integerPlacesInNumber(String number) {
+        int indexOfDecimal = number.indexOf('.');
+
+        if (indexOfDecimal < 0) {
+            return number.length();
+        }
+
+        return indexOfDecimal;
+    }
 
     /**
-     *  Method to count the decimal places in the string
-     * */
-    public static int numberOfDecimalPlaces(String value) {
-        int indexOfDecimal = value.indexOf('.');
+     * Method to count the decimal places in the string
+     */
+    public static int decimalPlacesInNumber(String number) {
+        int indexOfDecimal = number.indexOf('.');
 
         if (indexOfDecimal < 0) {
             return 0;
         }
 
-        return value.length() - indexOfDecimal - 1;
+        return number.length() - indexOfDecimal - 1;
     }
 
     /**
@@ -91,7 +103,7 @@ public class MathUtils {
         double minDiff = Double.MAX_VALUE;
 
         for (double buyPrice : prices) {
-            if(buyPrice == currentPrice)
+            if (buyPrice == currentPrice)
                 return currentPrice;
 
             double diff = Math.abs(currentPrice - buyPrice);

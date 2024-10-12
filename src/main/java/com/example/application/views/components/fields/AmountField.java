@@ -42,6 +42,22 @@ public class AmountField extends TextField {
         }
     }
 
+    public void setFormatter(NumeralFieldFormatter formatter) {
+        formatter.extend(this);
+    }
+
+    //
+    // TODO: THIS IS NOT USED....
+    //
+    public void setValue(double value) {
+        super.setValue(parse(value));
+    }
+
+    public void setFormatedValue(double value) {
+        String formatedValue = StringUtils.stripTrailingZeroes(parse(value));
+        super.setValue(formatedValue);
+    }
+
     private String parse(double value) {
         if (value >= 1000) {
             numberFormat.setMaximumFractionDigits(2);
@@ -54,20 +70,6 @@ public class AmountField extends TextField {
         }
 
         return numberFormat.format(value);
-    }
-
-    public void setValue(double value) {
-        System.out.println("SETTING AMOUNT " + value);
-        super.setValue(parse(value));
-    }
-
-    public void setFormatedValue(double value) {
-        String formatedValue = StringUtils.stripTrailingZeroes(parse(value));
-        super.setValue(formatedValue);
-    }
-
-    public void setFormatter(NumeralFieldFormatter formatter) {
-        formatter.extend(this);
     }
 
 }
