@@ -1,30 +1,20 @@
 package com.example.application.views.components.fields;
 
 import com.example.application.utils.common.StringUtils;
-import com.vaadin.flow.component.textfield.TextField;
-import org.vaadin.textfieldformatter.NumeralFieldFormatter;
 
-import java.text.NumberFormat;
-import java.util.Locale;
-
-public class AmountField extends TextField {
-
-    /**
-     * Pattern any number bigger than 0
-     */
-    private static final String PATTERN = "^(?!0+$)\\d*\\.?\\d+$";
-
-    private final NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.US);
+public class AmountField extends AbstractNumberTextField {
 
     public AmountField() {
         this(null);
     }
 
     public AmountField(String label) {
-        super(label);
-        setPattern(PATTERN);
+        this(label, true);
+    }
+
+    public AmountField(String label, boolean formatable) {
+        super(label, formatable);
         setAllowedCharPattern("[0-9.]");
-        numberFormat.setGroupingUsed(true);
         numberFormat.setMinimumFractionDigits(0);
     }
 
@@ -40,10 +30,6 @@ public class AmountField extends TextField {
             e.printStackTrace();
             return 0;
         }
-    }
-
-    public void setFormatter(NumeralFieldFormatter formatter) {
-        formatter.extend(this);
     }
 
     //

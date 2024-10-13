@@ -2,24 +2,27 @@ package com.example.application.views.components.fields;
 
 import com.example.application.utils.common.StringUtils;
 import com.vaadin.flow.component.html.Paragraph;
-import com.vaadin.flow.component.textfield.TextField;
-import org.vaadin.textfieldformatter.NumeralFieldFormatter;
 
-import java.text.NumberFormat;
-import java.util.Locale;
-
-public class CurrencyField extends TextField {
+public class CurrencyField extends AbstractNumberTextField {
 
     public CurrencyField() {
         this(null);
     }
 
     public CurrencyField(String label) {
-        super(label);
-        setAllowedCharPattern("[0-9.]");
-        setPrefixComponent(new Paragraph("$"));
+        this(label, true);
     }
 
+    public CurrencyField(String label, boolean formatable) {
+        super(label, formatable);
+        numberFormat.setMinimumFractionDigits(2);
+
+        setAllowedCharPattern("[0-9.]");
+        setPrefixComponent(new Paragraph("$"));
+        setFormatable(formatable);
+    }
+
+    @Override
     public double doubleValue() {
         try {
             String value = this.getValue();
@@ -34,14 +37,12 @@ public class CurrencyField extends TextField {
         }
     }
 
-    public void setFormatter(NumeralFieldFormatter formatter) {
-        formatter.extend(this);
-    }
-
+    @Override
     public void setValue(double value) {
         super.setValue(parse(value));
     }
 
+    @Override
     public void setFormatedValue(double value) {
         String formatedValue = StringUtils.stripTrailingZeroes(parse(value));
         super.setValue(formatedValue);
@@ -56,9 +57,6 @@ public class CurrencyField extends TextField {
         }
 
         int decimalPlaces = (int) Math.abs(Math.floor(Math.log10(value))) + 3;
-        NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.US);
-        numberFormat.setGroupingUsed(true);
-        numberFormat.setMinimumFractionDigits(2);
         numberFormat.setMaximumFractionDigits(decimalPlaces);
 
         return numberFormat.format(value);
