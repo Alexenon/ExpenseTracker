@@ -32,15 +32,10 @@ public class AmountField extends AbstractNumberTextField {
         }
     }
 
-    //
-    // TODO: THIS IS NOT USED....
-    //
+    @Override
     public void setValue(double value) {
-        super.setValue(parse(value));
-    }
-
-    public void setFormatedValue(double value) {
-        String formatedValue = StringUtils.stripTrailingZeroes(parse(value));
+        String parsedValue = parse(value);
+        String formatedValue = StringUtils.stripTrailingZeroes(parsedValue);
         super.setValue(formatedValue);
     }
 

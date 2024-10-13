@@ -53,6 +53,4 @@ public abstract class AbstractNumberTextField extends TextField {
 
     public abstract void setValue(double value);
 
-    public abstract void setFormatedValue(double value);
-
 }

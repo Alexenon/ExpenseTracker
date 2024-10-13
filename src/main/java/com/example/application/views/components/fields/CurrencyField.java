@@ -2,6 +2,8 @@ package com.example.application.views.components.fields;
 
 import com.example.application.utils.common.StringUtils;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.data.binder.Validator;
+import com.vaadin.flow.data.validator.AbstractValidator;
 
 public class CurrencyField extends AbstractNumberTextField {
 
@@ -39,27 +41,34 @@ public class CurrencyField extends AbstractNumberTextField {
 
     @Override
     public void setValue(double value) {
-        super.setValue(parse(value));
-    }
-
-    @Override
-    public void setFormatedValue(double value) {
-        String formatedValue = StringUtils.stripTrailingZeroes(parse(value));
+        String parsedValue = parse(value);
+        String formatedValue = StringUtils.stripTrailingZeroes(parsedValue);
+        System.out.println("SET VALUE -> " + parsedValue + " -> " + formatedValue);
         super.setValue(formatedValue);
     }
 
+    //
+    // TODO: Currently user doesn't know when the maximal fraction digit is
+    //  - Should
+    //
     private String parse(double value) {
         if (value == 0.0)
             return "0";
 
-        if (value > 1.00) {
-            return String.format("%.2f", value);
+        int maxDecimalPlaces = 2;
+        if (value < 1.00) {
+            maxDecimalPlaces = (int) Math.abs(Math.floor(Math.log10(value))) + 3;
         }
 
-        int decimalPlaces = (int) Math.abs(Math.floor(Math.log10(value))) + 3;
-        numberFormat.setMaximumFractionDigits(decimalPlaces);
+        numberFormat.setMaximumFractionDigits(maxDecimalPlaces);
 
         return numberFormat.format(value);
     }
 
+    @Override
+    public Validator<String> getDefaultValidator() {
+        // TODO: CREATE
+        AbstractValidator validator;
+        return super.getDefaultValidator();
+    }
 }

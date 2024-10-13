@@ -85,7 +85,7 @@ public class AddTransactionDialog extends Dialog {
         amountField.setValueChangeMode(ValueChangeMode.EAGER);
         amountField.addKeyUpListener(e -> {
             double totalPrice = amountField.doubleValue() * marketPriceField.doubleValue();
-            totalPriceField.setFormatedValue(totalPrice);
+            totalPriceField.setValue(totalPrice);
             System.out.println("Validation");
             binder.validate();
         });
@@ -93,7 +93,7 @@ public class AddTransactionDialog extends Dialog {
         marketPriceField.setValueChangeMode(ValueChangeMode.EAGER);
         marketPriceField.addKeyUpListener(e -> {
             double totalPrice = amountField.doubleValue() * marketPriceField.doubleValue();
-            totalPriceField.setFormatedValue(totalPrice);
+            totalPriceField.setValue(totalPrice);
             binder.validate();
         });
 
@@ -106,7 +106,7 @@ public class AddTransactionDialog extends Dialog {
                 amount = totalPrice / marketPriceField.doubleValue();
             }
 
-            amountField.setFormatedValue(amount);
+            amountField.setValue(amount);
             binder.validate();
         });
 
