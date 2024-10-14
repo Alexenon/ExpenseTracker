@@ -41,9 +41,15 @@ import java.util.function.ToDoubleFunction;
      - [?] grid.setMultiSort(true, MultiSortPriority.APPEND);
      - [!] Closest Buy ->  $34,000.00 ❗
             - URGENT -> vaadin:exclamation vaadin:warning
+     - [!] Columns per asset
+           - [+] TOTAL WORTH -> How much costs now
+           - [-] TOTAL COST  -> How much is invested now
+           - [-] AVG PROFIT  -> current_amount * (AVG BUY - AVG SELL)
+           - [-] TOTAL PROFIT  -> current_amount * (AVG BUY - AVG SELL)
+
     _______________________________________________________________________________________________________________________________________
-    | Name | Price  | 24h Changes | Amount | Avg buy | Avg sell | All-time low | All-time high | Total Worth | Total Invested | Realized  |
-    | BTC  | $64000 | 2%          | 0.0034 | $60000  |    -     | $10          | $73000        | $230        | $200           | $30 / 10% |
+    | Name | Price  | 24h Changes | Amount | Avg buy | Avg sell | All-time low | All-time high | Total Worth | Invested | Realized  |
+    | BTC  | $64000 | 2%          | 0.0034 | $60000  |    -     | $10          | $73000        | $230        | $200     | $30 / 10% |
     _______________________________________________________________________________________________________________________________________
 */
 public class AssetsGrid extends Div {
@@ -198,7 +204,6 @@ public class AssetsGrid extends Div {
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setAutoWidth(true)
                 .setTooltipGenerator(a -> "The closest %s sell price that was added in the watcher".formatted(a.getSymbol()));
-
 
 
         Icon menuButton = VaadinIcon.SLIDERS.create();

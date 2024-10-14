@@ -1,5 +1,7 @@
 package com.example.application.utils.common;
 
+import com.example.application.entities.crypto.CryptoTransaction;
+
 import java.math.BigInteger;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -9,6 +11,32 @@ public class MathUtils {
 
     private static final double BILLION = 1_000_000_000.0;
     private static final double MILLION = 1_000_000.0;
+
+    /**
+     * Method to count whole part in a decimal number
+     */
+    public static int integerPlacesInNumber(String number) {
+        int indexOfDecimal = number.indexOf('.');
+
+        if (indexOfDecimal < 0) {
+            return number.length();
+        }
+
+        return indexOfDecimal;
+    }
+
+    /**
+     * Method to count the decimal places in the string
+     */
+    public static int decimalPlacesInNumber(String number) {
+        int indexOfDecimal = number.indexOf('.');
+
+        if (indexOfDecimal < 0) {
+            return 0;
+        }
+
+        return number.length() - indexOfDecimal - 1;
+    }
 
     /**
      * Usage
@@ -39,10 +67,15 @@ public class MathUtils {
         return sellPrice * 100 / buyPrice;
     }
 
+    public static double profit(CryptoTransaction transaction, double currentPrice) {
+        return profit(transaction.getMarketPrice(), currentPrice, transaction.getOrderTotalCost());
+    }
+
     public static int percentageOf(BigInteger a, BigInteger b) {
         return a.multiply(BigInteger.valueOf(100)).divide(b).intValue();
     }
 
+    // TODO: Use FORMATTER -> CompactNumberFormat, MOVE TO NumberType
     public static String formatBigNumber(BigInteger number) {
         return formatBigNumber(number.doubleValue());
     }
@@ -65,12 +98,13 @@ public class MathUtils {
     // [34.000, 37.000, 40.000], 35.000  ->  34.000
     // [34.000, 37.000, 40.000], 36.000  ->  37.000
     // [34.000, 37.000, 40.000], 36.000  ->  37.000
+    @SuppressWarnings("unused")
     private double closestPrice(List<Double> prices, double currentPrice) {
         double closestPrice = 0;
         double minDiff = Double.MAX_VALUE;
 
         for (double buyPrice : prices) {
-            if(buyPrice == currentPrice)
+            if (buyPrice == currentPrice)
                 return currentPrice;
 
             double diff = Math.abs(currentPrice - buyPrice);

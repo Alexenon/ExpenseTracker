@@ -61,6 +61,8 @@ public class PortfolioPerformanceTracker {
         return instrumentsFacadeService.getAmountOfTokens(asset) * instrumentsFacadeService.getAssetPrice(asset);
     }
 
+    // TODO: Currently its calculating by all asset BUY transactions
+    //  should count the sold transactions as well
     public double getAssetTotalCost(Asset asset) {
         return calculateTotalCostForBuyTransactions(instrumentsFacadeService.getTransactionsByAsset(asset));
     }

@@ -256,7 +256,7 @@
 }
 
 .note-area {
-    min-height: 107px;
+    min-height: 110px;
     padding: 15px;
     color: #333333;
     overflow: hidden;
@@ -272,7 +272,9 @@
 
 .note-area::part(input-field) {
     background: white;
-    padding: 0px;
+    border-width: 0;
+    padding: 5px;
+    caret-color: black;
 }
 
 .note-wrapper > vaadin-text-area[focused] {

@@ -3,7 +3,7 @@ package com.example.application.views.components.complex_components.dialogs.tran
 import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.CryptoTransaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
-import com.example.application.views.components.CurrencyField;
+import com.example.application.views.components.fields.CurrencyField;
 import com.example.application.views.components.native_components.Container;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
@@ -19,6 +19,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.function.Consumer;
 
+/*
+    TODO: Maybe replace layout of view transsaction details with editing transaction details
+* */
 public class EditTransactionDialog extends Dialog {
 
     private final Asset asset;
@@ -48,9 +51,9 @@ public class EditTransactionDialog extends Dialog {
     }
 
     private void buildForm() {
+        setHeaderTitle("Transaction");
         initializeFields();
         initializeBinder();
-        setHeaderTitle("Transaction");
 
         Container formBody = Container.builder()
                 .addComponent(assetSymbolField)

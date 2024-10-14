@@ -1,4 +1,4 @@
-package com.example.application.views.components;
+package com.example.application.views.components.fields;
 
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.textfield.TextField;

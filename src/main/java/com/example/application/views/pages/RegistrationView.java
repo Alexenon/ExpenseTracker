@@ -98,7 +98,7 @@ public class RegistrationView extends Main implements HasNotifications {
                 .asRequired("Please fill this field")
                 .withValidator(s -> s.length() > 3, "Username must contain at least 4 characters")
                 .withValidator(s -> s.length() < 12, "Username must contain less than 12 characters")
-                .withValidator(s -> userService.checkIfUsernameExists(s), "Username already exists")
+                .withValidator(s -> !userService.checkIfUsernameExists(s), "Username already exists")
                 .bind(User::getUsername, User::setUsername);
 
         binder.forField(registerForm.getPassword())
@@ -116,7 +116,7 @@ public class RegistrationView extends Main implements HasNotifications {
         binder.forField(registerForm.getEmail())
                 .asRequired("Please fill this field")
                 .withValidator(new EmailValidator("Please enter a valid email address"))
-                .withValidator(s -> userService.checkIfEmailExists(s), "This email is already used")
+                .withValidator(s -> !userService.checkIfEmailExists(s), "This email is already used")
                 .bind(User::getEmail, User::setEmail);
     }
 

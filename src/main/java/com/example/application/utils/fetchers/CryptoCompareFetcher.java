@@ -1,8 +1,8 @@
 package com.example.application.utils.fetchers;
 
 import com.example.application.utils.fetchers.api_responses.ApiResponse;
-import com.example.application.utils.fetchers.api_responses.Coin;
 import com.example.application.utils.fetchers.api_responses.AssetMetaDataApiResp;
+import com.example.application.utils.fetchers.api_responses.Coin;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
@@ -34,6 +34,9 @@ public class CryptoCompareFetcher {
 
     public static void main(String[] args) {
 //        System.out.println(getCoinMetaData("BTC"));
+
+
+
         getCoinList().stream()
                 .sorted(Comparator.comparing(Coin::getCirculatingSupply))
                 .forEach(c -> System.out.println(c.getSymbol() + ","));

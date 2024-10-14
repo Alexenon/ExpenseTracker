@@ -4,6 +4,7 @@ import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.AssetWatcher;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.utils.common.StringUtils;
+import com.example.application.views.components.fields.CurrencyField;
 import com.example.application.views.components.native_components.Container;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;

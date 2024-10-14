@@ -39,6 +39,7 @@
     --o70Color: #4c4c4c;
     --o75Color: #404040;
     --o80Color: #333333;
+    --BlueLightColor: #3b82f6;
     --GreenLightColor: #34b349;
     --GreenDarkColor: #6ccf59;
     --RedLightColor: #f02934;
@@ -172,4 +173,33 @@ vaadin-button.modal-close-btn > vaadin-icon {
 
 vaadin-grid {
     overflow: hidden;
+}
+
+vaadin-select::part(input-field),
+vaadin-combo-box::part(input-field),
+vaadin-text-field::part(input-field),
+vaadin-date-picker::part(input-field),
+vaadin-number-field::part(input-field) {
+    height: 2.5rem;
+}
+
+vaadin-select::part(input-field),
+vaadin-text-area::part(input-field),
+vaadin-combo-box::part(input-field),
+vaadin-text-field::part(input-field),
+vaadin-date-picker::part(input-field),
+vaadin-number-field::part(input-field) {
+    width: 100%;
+    border-radius: .75rem;
+    border-width: 1px;
+    border-style: solid;
+    border-color: rgb(209 213 219);
+    background-color: rgb(255 255 255);
+    padding-left: .75rem;
+    padding-right: .75rem;
+    font-size: 1rem;
+    line-height: 1.5rem;
+    font-weight: 500;
+    color: rgb(17 24 39);
+    caret-color: var(--BlueLightColor);
 }

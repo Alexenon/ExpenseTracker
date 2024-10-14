@@ -3,6 +3,7 @@ package com.example.application.views.components;
 
 /*
     TODO:
+     - [!] Add Edit/Delete btn, directly in the grid, and in the display itself
      - [?] Add sync button functionality(don't forget about checkbox value)
     _______________________________________________________________________________________________________________________________________
     | Name | Price  | Total Cost  | Amount | Edit | Delete |
@@ -10,9 +11,11 @@ package com.example.application.views.components;
     _______________________________________________________________________________________________________________________________________
 */
 
+import com.example.application.data.models.NumberType;
 import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.CryptoTransaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
+import com.example.application.utils.common.MathUtils;
 import com.example.application.views.components.complex_components.dialogs.transactions.TransactionDetailsDialog;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
@@ -21,6 +24,7 @@ import com.vaadin.flow.component.grid.dataview.GridListDataView;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.renderer.NumberRenderer;
 import com.vaadin.flow.function.ValueProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,9 +59,13 @@ public class TransactionsGrid extends Div {
     }
 
     private void initializeGrid() {
-        grid.addColumn(t -> t.getAsset().getSymbol()).setKey("Name").setHeader("Name");
-        grid.addColumn(columnPriceRenderer(CryptoTransaction::getMarketPrice)).setKey("Price").setHeader("Price");
-        grid.addColumn(CryptoTransaction::getOrderQuantity).setKey("Amount").setHeader("Amount");
+        grid.addColumn(t -> t.getAsset().getSymbol()).setHeader("Name").setFrozen(true);
+        grid.addColumn(quantityColumnRenderer()).setHeader("Quantity");
+        grid.addColumn(priceColumnRenderer()).setHeader("Price");
+        grid.addColumn(priceColumnRenderer(CryptoTransaction::getOrderTotalCost)).setHeader("Total");
+        grid.addColumn(CryptoTransaction::getDate).setHeader("Date");
+        grid.addColumn(profitLossColumnRenderer()).setHeader("Profit/Loss").setFrozenToEnd(true);
+
 
         grid.setColumnReorderingAllowed(true);
         grid.getColumns().forEach(column -> {
@@ -66,8 +74,7 @@ public class TransactionsGrid extends Div {
         });
 
         grid.addItemClickListener(row -> {
-            TransactionDetailsDialog detailsDialog =
-                    new TransactionDetailsDialog(row.getItem(), instrumentsFacadeService);
+            TransactionDetailsDialog detailsDialog = new TransactionDetailsDialog(row.getItem(), instrumentsFacadeService);
             detailsDialog.open();
         });
     }
@@ -110,9 +117,46 @@ public class TransactionsGrid extends Div {
         });
     }
 
-    private NumberRenderer<CryptoTransaction> columnPriceRenderer(ValueProvider<CryptoTransaction, Number> priceProvider) {
-        NumberFormat nf = NumberFormat.getCurrencyInstance(Locale.US);
-        return new NumberRenderer<>(priceProvider, nf, "$0.00");
+    private LitRenderer<CryptoTransaction> priceColumnRenderer() {
+        return LitRenderer.<CryptoTransaction>of("<p class='asset-price'>${item.price}</p>")
+                .withProperty("price", t -> NumberType.PRICE.parse(t.getMarketPrice()));
+    }
+
+    private LitRenderer<CryptoTransaction> quantityColumnRenderer() {
+        return LitRenderer.<CryptoTransaction>of("<p class='${item.className}'>+${item.quantity} ${item.symbol}</p>")
+                .withProperty("className", t -> t.isBuyTransaction() ? "value-increase" : "value-decrease")
+                .withProperty("quantity", t -> NumberType.AMOUNT.parse(t.getOrderQuantity()))
+                .withProperty("symbol", t -> t.getAsset().getSymbol());
+    }
+
+    private LitRenderer<CryptoTransaction> profitLossColumnRenderer() {
+        return LitRenderer.<CryptoTransaction>of("<div class='transaction-profit-loss ${item.className}'>" +
+                                                 "  <p class='text-l'>${item.profit}</p>" +
+                                                 "  <p class='text-s'>${item.profitPercentage}</p>" +
+                                                 "</div>")
+                .withProperty("className", transaction -> {
+                    double currentPrice = instrumentsFacadeService.getAssetPrice(transaction.getAsset());
+                    double profit = MathUtils.profit(transaction, currentPrice);
+
+                    if (profit == 0)
+                        return "";
+
+                    return profit > 0 ? "value-increase" : "value-decrease";
+                })
+                .withProperty("profit", transaction -> {
+                    double currentPrice = instrumentsFacadeService.getAssetPrice(transaction.getAsset());
+                    double profit = MathUtils.profit(transaction, currentPrice);
+                    return NumberType.CURRENCY.parse(profit);
+                })
+                .withProperty("profitPercentage", transaction -> {
+                    double currentPrice = instrumentsFacadeService.getAssetPrice(transaction.getAsset());
+                    double percentage = MathUtils.profitPercentage(transaction.getMarketPrice(), currentPrice);
+                    return NumberType.PERCENT.parse(percentage);
+                });
+    }
+
+    private NumberRenderer<CryptoTransaction> priceColumnRenderer(ValueProvider<CryptoTransaction, Number> priceProvider) {
+        return new NumberRenderer<>(priceProvider, NumberFormat.getCurrencyInstance(Locale.US), "$0.00");
     }
 
     public void setItems(List<CryptoTransaction> transactions) {
