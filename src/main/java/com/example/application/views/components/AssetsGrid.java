@@ -11,8 +11,8 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.contextmenu.MenuItem;
+import com.vaadin.flow.component.contextmenu.SubMenu;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
@@ -21,6 +21,7 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LitRenderer;
@@ -41,12 +42,6 @@ import java.util.function.ToDoubleFunction;
      - [?] grid.setMultiSort(true, MultiSortPriority.APPEND);
      - [!] Closest Buy ->  $34,000.00 ❗
             - URGENT -> vaadin:exclamation vaadin:warning
-     - [!] Columns per asset
-           - [+] TOTAL WORTH -> How much costs now
-           - [-] TOTAL COST  -> How much is invested now
-           - [-] AVG PROFIT  -> current_amount * (AVG BUY - AVG SELL)
-           - [-] TOTAL PROFIT  -> current_amount * (AVG BUY - AVG SELL)
-
     _______________________________________________________________________________________________________________________________________
     | Name | Price  | 24h Changes | Amount | Avg buy | Avg sell | All-time low | All-time high | Total Worth | Invested | Realized  |
     | BTC  | $64000 | 2%          | 0.0034 | $60000  |    -     | $10          | $73000        | $230        | $200     | $30 / 10% |
@@ -199,16 +194,17 @@ public class AssetsGrid extends Div {
                 .setAutoWidth(true)
                 .setTooltipGenerator(a -> "The closest %s buy price that was added in the watcher".formatted(a.getSymbol()));
 
+
         grid.addColumn(columnPriceRenderer(AssetGridItem::getClosestSell))
                 .setHeader("Closest Sell")
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setAutoWidth(true)
                 .setTooltipGenerator(a -> "The closest %s sell price that was added in the watcher".formatted(a.getSymbol()));
 
-
-        Icon menuButton = VaadinIcon.SLIDERS.create();
+        // Creates the column selector menu based on column visibility
+        ColumnToggleMenu columnToggleMenu = new ColumnToggleMenu();
         grid.addColumn(new ComponentRenderer<>(this::threeDotsBtn))
-                .setHeader(menuButton)
+                .setHeader(columnToggleMenu)
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setFrozenToEnd(true);
 
@@ -217,9 +213,7 @@ public class AssetsGrid extends Div {
         // Display just the first columns, others should be selected to be displayed
         columnsWithData.stream().skip(8).forEach(c -> c.setVisible(false));
 
-        // Creates the column selector menu based on column visibility
-        ColumnToggleContextMenu columnToggleContextMenu = new ColumnToggleContextMenu(menuButton);
-        columnsWithData.forEach(col -> columnToggleContextMenu.addColumnToggleItem(col.getHeaderText(), col));
+        columnsWithData.forEach(col -> columnToggleMenu.addColumnToggleItem(col.getHeaderText(), col));
 
         updateColumnFooters();
     }
@@ -437,55 +431,18 @@ public class AssetsGrid extends Div {
         private double closestSell;
     }
 
-    private static class ColumnToggleContextMenu extends ContextMenu {
+    private static class ColumnToggleMenu extends MenuBar {
 
-        public ColumnToggleContextMenu(Component target) {
-            super(target);
-            setOpenOnClick(true);
-
-//            addOpenedChangeListener(event -> {
-//                if (!event.isOpened()) {
-//                    updateAllMenuItemCheckmarks();
-//                }
-//            });
-
-        }
+        private final SubMenu subItems = addItem(VaadinIcon.SLIDERS.create()).getSubMenu();
 
         void addColumnToggleItem(String label, Grid.Column<AssetGridItem> column) {
-            MenuItem menuItem = this.addItem(label);
+            MenuItem menuItem = subItems.addItem(label);
+            menuItem.setKeepOpen(true);
             menuItem.setCheckable(true);
             menuItem.setChecked(column.isVisible());
-
-            // Prevents from closing menu on inside menu item click, still closes on outside click
-            menuItem.getElement().setAttribute("onclick", "event.stopPropagation()");
-            menuItem.getElement().executeJs("this.click();");
-
-            menuItem.addClickListener(e -> {
-                boolean isChecked = !menuItem.isChecked();
-                column.setVisible(!menuItem.isChecked());
-                updateMenuItemCheckmark(menuItem, isChecked);
-            });
+            menuItem.addClickListener(e -> column.setVisible(!column.isVisible()));
         }
-
-        private void updateMenuItemCheckmark(MenuItem menuItem, boolean isChecked) {
-            if (isChecked) {
-                menuItem.getElement().setAttribute("menu-item-checked", "");
-            } else {
-                menuItem.getElement().removeAttribute("menu-item-checked");
-            }
-        }
-
-//        private void updateAllMenuItemCheckmarks() {
-//            this.getItems().forEach(item -> {
-//                if (item != null) {
-//                    boolean isVisible = item.getParent().orElse(null).isVisible();
-//                    item.setChecked(isVisible);
-//                    updateMenuItemCheckmark(item, isVisible);
-//                }
-//            });
-//        }
 
     }
-
 
 }

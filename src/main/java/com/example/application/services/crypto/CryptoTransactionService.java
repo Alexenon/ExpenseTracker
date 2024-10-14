@@ -36,16 +36,17 @@ public class CryptoTransactionService {
         return transactionRepository.findByWalletAndAssetAndType(wallet, asset, type);
     }
 
-
     public CryptoTransaction saveTransaction(CryptoTransaction transaction) {
-        transaction.setOrderQuantity(transaction.getOrderTotalCost() / transaction.getMarketPrice());
+        if(transaction.getOrderQuantity() == 0) {
+            transaction.setOrderQuantity(transaction.getOrderTotalCost() / transaction.getMarketPrice());
+        }
 
         CryptoTransaction savedTransaction = transactionRepository.save(transaction);
         System.out.printf("Saved Transaction -> %s\n", savedTransaction);
 
         // Find the WalletBalance for the asset in the wallet
-        WalletBalance walletBalance = walletBalanceRepository.findByWalletAndAsset(
-                        transaction.getWallet(), transaction.getAsset())
+        WalletBalance walletBalance = walletBalanceRepository
+                .findByWalletAndAsset(transaction.getWallet(), transaction.getAsset())
                 .orElseThrow(() -> new IllegalStateException("Wallet balance not found"));
 
         // Update the wallet balance amount
