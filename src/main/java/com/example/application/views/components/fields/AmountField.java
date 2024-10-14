@@ -18,24 +18,9 @@ public class AmountField extends AbstractNumberTextField {
         numberFormat.setMinimumFractionDigits(0);
     }
 
-    public double doubleValue() {
-        try {
-            String value = this.getValue();
-
-            if (value == null || value.isEmpty())
-                return 0;
-
-            return Double.parseDouble(value.replaceAll(",", ""));
-        } catch (NumberFormatException | NullPointerException e) {
-            e.printStackTrace();
-            return 0;
-        }
-    }
-
     @Override
     public void setValue(double value) {
-        String parsedValue = parse(value);
-        String formatedValue = StringUtils.stripTrailingZeroes(parsedValue);
+        String formatedValue = StringUtils.stripTrailingZeroes(parse(value));
         super.setValue(formatedValue);
     }
 

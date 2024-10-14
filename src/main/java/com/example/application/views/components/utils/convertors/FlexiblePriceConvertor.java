@@ -16,8 +16,8 @@ public class FlexiblePriceConvertor implements Converter<String, Double> {
     private final NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.US);
 
     public FlexiblePriceConvertor() {
-        numberFormat.setGroupingUsed(true); // Enable thousands separators
-        numberFormat.setMinimumFractionDigits(0); // Allows the price to skip decimal points if not entered
+        numberFormat.setGroupingUsed(true);
+        numberFormat.setMinimumFractionDigits(0);
         numberFormat.setMaximumIntegerDigits(MAXIMUM_INTEGER_DIGITS);
     }
 
@@ -26,9 +26,9 @@ public class FlexiblePriceConvertor implements Converter<String, Double> {
         try {
             // Remove non-numeric characters except for decimal point and minus sign
             String sanitizedValue = value.replaceAll("[^\\d.-]", "");
-            double parsedValue = numberFormat.parse(sanitizedValue).doubleValue();
+            double doubleValue = numberFormat.parse(sanitizedValue).doubleValue();
 
-            if (parsedValue <= 0) {
+            if (doubleValue <= 0) {
                 return Result.error("Price must be greater than 0");
             }
 
@@ -36,18 +36,22 @@ public class FlexiblePriceConvertor implements Converter<String, Double> {
                 return Result.error("Cannot be converted into a number");
             }
 
+            if (doubleValue < 0.000001) {
+                return Result.error("The price is too low to be processed");
+            }
+
             // Check if the number of integer places exceeds the allowed threshold
             if (MathUtils.integerPlacesInNumber(sanitizedValue) > MAXIMUM_INTEGER_DIGITS) {
-                return Result.error("Too many digits before comma. Allowed maximum: " + MAXIMUM_INTEGER_DIGITS);
+                return Result.error("The price is too big to be processed");
             }
 
             // Check if the number of decimal places exceeds the allowed threshold
-            int maxFractionDigits = getMaxAllowedFractionDigits(parsedValue);
+            int maxFractionDigits = getMaxAllowedFractionDigits(doubleValue);
             if (MathUtils.decimalPlacesInNumber(sanitizedValue) > maxFractionDigits) {
                 return Result.error("Too many decimal places. Allowed maximum: " + maxFractionDigits);
             }
 
-            return Result.ok(parsedValue);
+            return Result.ok(doubleValue);
         } catch (ParseException | NumberFormatException e) {
             return Result.error("Invalid price format");
         }
@@ -62,9 +66,6 @@ public class FlexiblePriceConvertor implements Converter<String, Double> {
         int maxFractionDigits = getMaxAllowedFractionDigits(value);
         numberFormat.setMaximumFractionDigits(maxFractionDigits);
 
-
-        System.out.println("Converting " + value + " -> " + numberFormat.format(value));
-
         return numberFormat.format(value);
     }
 
@@ -72,23 +73,20 @@ public class FlexiblePriceConvertor implements Converter<String, Double> {
      * Method to get maximum allowed fraction digits based on the value
      */
     private int getMaxAllowedFractionDigits(double value) {
-        if (value > 0.5 && value < 1) {
+        if (value >= 1) {
+            return 2;
+        } else if (value >= 0.1) {
             return 3;
-        } else if (value > 0.01 && value <= 0.5) {
+        } else if (value >= 0.01) {
             return 4;
-        } else if (value > 0.001 && value <= 0.01) {
+        } else if (value >= 0.001) {
             return 5;
-        } else if (value > 0.0001 && value <= 0.001) {
+        } else if (value >= 0.0001) {
             return 6;
-        } else if (value > 0.00001 && value <= 0.0001) {
+        } else if (value >= 0.00001) {
             return 7;
-        } else if (value > 0.000001 && value <= 0.00001) {
-            return 8;
-        } else if (value <= 0.000001) {
-            return 9;
         }
-
-        return 2;
+        return 8;
     }
 
 }

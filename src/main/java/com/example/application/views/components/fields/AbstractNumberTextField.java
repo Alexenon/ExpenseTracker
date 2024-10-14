@@ -5,6 +5,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import org.vaadin.textfieldformatter.NumeralFieldFormatter;
 
 import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.Locale;
 
 public abstract class AbstractNumberTextField extends TextField {
@@ -15,6 +16,9 @@ public abstract class AbstractNumberTextField extends TextField {
     public AbstractNumberTextField(String label, boolean formatable) {
         super(label);
         this.numberFormat.setGroupingUsed(true);
+        this.numberFormat.setParseIntegerOnly(false);
+        this.numberFormat.setMaximumIntegerDigits(12);
+
         this.formatter = new NumeralFieldFormatter.Builder()
                 .delimiter(",")
                 .decimalMark(".")
@@ -49,7 +53,18 @@ public abstract class AbstractNumberTextField extends TextField {
         this.numberFormat = numberFormat;
     }
 
-    public abstract double doubleValue();
+    public double doubleValue() {
+        try {
+            String value = this.getValue();
+
+            if (value == null || value.isEmpty())
+                return 0;
+
+            return numberFormat.parse(value).doubleValue();
+        } catch (ParseException e) {
+            return 0;
+        }
+    }
 
     public abstract void setValue(double value);
 

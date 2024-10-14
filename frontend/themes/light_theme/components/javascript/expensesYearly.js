@@ -1,4 +1,6 @@
 // https://echarts.apache.org/examples/en/editor.html?c=dataset-link
+// https://codepen.io/beng-starboard/pen/qBJrrbv
+// https://codepen.io/marcong95/pen/mdOqeLo
 
 const pieSeries = {
   type: 'pie',
@@ -80,3 +82,36 @@ setTimeout(function () {
   });
   myChart.setOption(option);
 });
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+option = {
+  xAxis: {
+    type: 'category',
+    data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+  },
+  yAxis: {
+    type: 'value'
+  },
+  tooltip: {trigger:'axis'},
+  series: [
+    {
+      data: [0, 0, 224, 218, 0, 147, 180],
+      type: 'line',
+      smooth: true
+    }
+  ]
+};
+
+myChart.on('highlight', (p) => {
+  myChart.setOption({
+    title: {text: 'dataIndex= ' +p.batch[0].dataIndex },
+  });
+});
+
+
+

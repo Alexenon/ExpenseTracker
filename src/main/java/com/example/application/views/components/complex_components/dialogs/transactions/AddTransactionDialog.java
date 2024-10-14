@@ -27,7 +27,6 @@ import java.time.LocalDate;
 // TODO:
 //  - boolean subtractFromGivenAsset
 //  - Add slider for percentage buy/transfer
-//  - private final CurrencyField quantityField = new CurrencyField("Order Quantity");
 public class AddTransactionDialog extends Dialog {
 
     private final Asset asset;
@@ -86,7 +85,6 @@ public class AddTransactionDialog extends Dialog {
         amountField.addKeyUpListener(e -> {
             double totalPrice = amountField.doubleValue() * marketPriceField.doubleValue();
             totalPriceField.setValue(totalPrice);
-            System.out.println("Validation");
             binder.validate();
         });
 

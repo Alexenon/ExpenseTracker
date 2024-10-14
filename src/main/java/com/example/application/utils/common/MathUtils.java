@@ -75,6 +75,7 @@ public class MathUtils {
         return a.multiply(BigInteger.valueOf(100)).divide(b).intValue();
     }
 
+    // TODO: Use FORMATTER -> CompactNumberFormat, MOVE TO NumberType
     public static String formatBigNumber(BigInteger number) {
         return formatBigNumber(number.doubleValue());
     }

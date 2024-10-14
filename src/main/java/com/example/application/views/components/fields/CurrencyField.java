@@ -2,8 +2,6 @@ package com.example.application.views.components.fields;
 
 import com.example.application.utils.common.StringUtils;
 import com.vaadin.flow.component.html.Paragraph;
-import com.vaadin.flow.data.binder.Validator;
-import com.vaadin.flow.data.validator.AbstractValidator;
 
 public class CurrencyField extends AbstractNumberTextField {
 
@@ -25,50 +23,37 @@ public class CurrencyField extends AbstractNumberTextField {
     }
 
     @Override
-    public double doubleValue() {
-        try {
-            String value = this.getValue();
-
-            if (value == null || value.isEmpty())
-                return 0;
-
-            return Double.parseDouble(value.replaceAll(",", ""));
-        } catch (NumberFormatException | NullPointerException e) {
-            e.printStackTrace();
-            return 0;
-        }
-    }
-
-    @Override
     public void setValue(double value) {
         String parsedValue = parse(value);
         String formatedValue = StringUtils.stripTrailingZeroes(parsedValue);
-        System.out.println("SET VALUE -> " + parsedValue + " -> " + formatedValue);
         super.setValue(formatedValue);
     }
 
-    //
-    // TODO: Currently user doesn't know when the maximal fraction digit is
-    //  - Should
-    //
     private String parse(double value) {
         if (value == 0.0)
             return "0";
 
-        int maxDecimalPlaces = 2;
-        if (value < 1.00) {
-            maxDecimalPlaces = (int) Math.abs(Math.floor(Math.log10(value))) + 3;
-        }
-
-        numberFormat.setMaximumFractionDigits(maxDecimalPlaces);
+        numberFormat.setMaximumFractionDigits(maxDecimalPlaces(value));
 
         return numberFormat.format(value);
     }
 
-    @Override
-    public Validator<String> getDefaultValidator() {
-        // TODO: CREATE
-        AbstractValidator validator;
-        return super.getDefaultValidator();
+    private int maxDecimalPlaces(double value) {
+        if (value >= 1) {
+            return 2;
+        } else if (value >= 0.1) {
+            return 3;
+        } else if (value >= 0.01) {
+            return 4;
+        } else if (value >= 0.001) {
+            return 5;
+        } else if (value >= 0.0001) {
+            return 6;
+        } else if (value >= 0.00001) {
+            return 7;
+        }
+        return 8;
     }
+
+
 }
