@@ -7,9 +7,11 @@ import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.views.components.AssetsGrid;
 import com.example.application.views.components.complex_components.AssetValueParagraph;
 import com.example.application.views.components.complex_components.PriceBadge;
+import com.example.application.views.components.complex_components.dialogs.transactions.AddTransactionDialog;
 import com.example.application.views.components.native_components.Container;
 import com.example.application.views.layouts.MainLayout;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -21,27 +23,36 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @PermitAll
-@PageTitle("Assets Dashboard")
-@Route(value = "assets-dashboard", layout = MainLayout.class)
-public class AssetsDashboardView extends Main {
+@PageTitle("Portfolio Tracker")
+@Route(value = "portfolio-tracker", layout = MainLayout.class)
+public class PortfolioTrackerView extends Main {
 
     private final InstrumentsFacadeService instrumentsFacadeService;
     private final PortfolioPerformanceTracker portfolioPerformanceTracker;
 
+    private final Button addNewTransactionBtn = new Button("Add Transaction");
+    private final AssetsGrid assetsGrid;
+
     @Autowired
-    public AssetsDashboardView(InstrumentsFacadeService instrumentsFacadeService,
-                               PortfolioPerformanceTracker portfolioPerformanceTracker) {
+    public PortfolioTrackerView(InstrumentsFacadeService instrumentsFacadeService,
+                                PortfolioPerformanceTracker portfolioPerformanceTracker) {
         this.instrumentsFacadeService = instrumentsFacadeService;
         this.portfolioPerformanceTracker = portfolioPerformanceTracker;
+        this.assetsGrid = new AssetsGrid(instrumentsFacadeService, portfolioPerformanceTracker);
 
-        AssetsGrid assetsGrid = new AssetsGrid(instrumentsFacadeService, portfolioPerformanceTracker);
+        addNewTransactionBtn.addClickListener(e -> {
+            AddTransactionDialog dialog = new AddTransactionDialog(instrumentsFacadeService);
+            dialog.open();
+        });
 
         initializeGrid();
-        add(performanceSection(), assetsGrid);
+        add(performanceSection(), addNewTransactionBtn, assetsGrid);
     }
 
     private void initializeGrid() {
         getStyle().set("margin", "100px 30px 30px 30px");
+        assetsGrid.setItems(instrumentsFacadeService.getAssetsWithNonZeroAmount());
+        assetsGrid.setGridFullSize(true);
     }
 
     private Section performanceSection() {
@@ -53,13 +64,17 @@ public class AssetsDashboardView extends Main {
                 .stream()
                 .collect(Collectors.toMap(asset -> asset, portfolioPerformanceTracker::getAssetProfit, (a, b) -> b));
 
-        // These assets are the ones that gave the most profit
+        // TODO: These assets are the ones that gave the most profit
+        //  - Add link to these assets
         Asset mostProfitableAsset = Collections.max(assetsProfits.entrySet(), Map.Entry.comparingByValue()).getKey();
         Asset leastProfitableAsset = Collections.min(assetsProfits.entrySet(), Map.Entry.comparingByValue()).getKey();
 
-        // Assets that grew the most from the avg buy rate
+        // TODO: Assets that grew the most from the avg buy rate
         Asset mostGrowingAsset;
         Asset leastGrowingAsset;
+
+        // TODO: How much amount of holding asset token to sell, to be in 0
+        //  How much remains, how much profit is it ?
 
         Div profitLossContainer = Container.builder()
                 .addClassName("price-profit-wrapper")

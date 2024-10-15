@@ -117,6 +117,11 @@ public class InstrumentsService {
         return walletBalanceRepository.findByWallet(wallet);
     }
 
+    // TODO: FIND A WAY TO EXTRACT THIS FROM DATABASE WITHOUT EXCEPTION
+    public List<WalletBalance> getWalletBalancesByWalletWithNonZeroAmount(Wallet wallet) {
+        return walletBalanceRepository.findByWalletWithNonZeroAmount(wallet.getId());
+    }
+
     /*
      * OTHERS
      * */

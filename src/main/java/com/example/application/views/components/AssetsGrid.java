@@ -1,7 +1,7 @@
 package com.example.application.views.components;
 
-import com.example.application.data.enums.Symbols;
 import com.example.application.data.models.NumberType;
+import com.example.application.entities.crypto.Asset;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.views.components.complex_components.PriceBadge;
@@ -32,6 +32,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.ToDoubleFunction;
@@ -42,6 +43,8 @@ import java.util.function.ToDoubleFunction;
      - [?] grid.setMultiSort(true, MultiSortPriority.APPEND);
      - [!] Closest Buy ->  $34,000.00 ❗
             - URGENT -> vaadin:exclamation vaadin:warning
+     - [?] Dont allow to remove the asset name from column toggle component
+            - cursor: not-allowed;
     _______________________________________________________________________________________________________________________________________
     | Name | Price  | 24h Changes | Amount | Avg buy | Avg sell | All-time low | All-time high | Total Worth | Invested | Realized  |
     | BTC  | $64000 | 2%          | 0.0034 | $60000  |    -     | $10          | $73000        | $230        | $200     | $30 / 10% |
@@ -59,6 +62,7 @@ public class AssetsGrid extends Div {
     private final Grid<AssetGridItem> grid = new Grid<>();
     private final Span hiddenRowsCounterField = new Span();
     private GridListDataView<AssetGridItem> dataView;
+    private List<AssetGridItem> gridItems = new ArrayList<>();
 
     private Grid.Column<AssetGridItem> changes24hCol;
     private Grid.Column<AssetGridItem> totalWorthCol;
@@ -71,7 +75,8 @@ public class AssetsGrid extends Div {
         this.instrumentsFacadeService = instrumentsFacadeService;
         this.portfolioPerformanceTracker = portfolioPerformanceTracker;
 
-        this.dataView = grid.setItems(getConvertedGridItems());
+        setItems(new ArrayList<>());
+
         initializeGrid();
         initializeFilteringBySearch();
         initializeFilteringNonZeroValues();
@@ -95,18 +100,15 @@ public class AssetsGrid extends Div {
 
     private void initializeGrid() {
         renderColumns();
-
+        grid.setAllRowsVisible(true);
         grid.setColumnReorderingAllowed(true);
-        // grid.getColumns().forEach(c -> c.setAutoWidth(true));
         grid.addItemClickListener(row -> {
             System.out.println(row.getItem());
             UI.getCurrent().navigate(AssetDetailsView.class, row.getItem().getSymbol().toUpperCase());
         });
 
-        grid.setAllRowsVisible(true);
-        grid.getElement().executeJs("this.shadowRoot.querySelector('table').style.overflow = 'hidden';");
-
         setHiddenRowCount(0);
+        grid.addAttachListener(e -> updateColumnFooters());
     }
 
     private void renderColumns() {
@@ -214,8 +216,6 @@ public class AssetsGrid extends Div {
         columnsWithData.stream().skip(8).forEach(c -> c.setVisible(false));
 
         columnsWithData.forEach(col -> columnToggleMenu.addColumnToggleItem(col.getHeaderText(), col));
-
-        updateColumnFooters();
     }
 
 
@@ -307,11 +307,12 @@ public class AssetsGrid extends Div {
         return new ComponentRenderer<>(a -> new PriceBadge(a.getPriceChangesPercentage24h(), NumberType.PERCENT));
     }
 
+    // TODO: FIXME: ITS NOT WORKING NOW
     private void initializeSyncButton() {
         syncButton.addClickListener(event -> {
             animateSyncButtonIcon();
             instrumentsFacadeService.updateAssetMetadata();
-            dataView = grid.setItems(getConvertedGridItems());
+            //dataView = grid.setItems(getConvertedGridItems());
             grid.removeAllColumns();
             renderColumns();
             resetFilterValues();
@@ -346,7 +347,7 @@ public class AssetsGrid extends Div {
     }
 
     private void updateHiddenRowsCounter() {
-        int numberOfHiddenRows = Symbols.getAll().size() - dataView.getItemCount();
+        int numberOfHiddenRows = gridItems.size() - dataView.getItemCount();
         setHiddenRowCount(numberOfHiddenRows);
     }
 
@@ -374,9 +375,19 @@ public class AssetsGrid extends Div {
         hideAssetsCheckbox.setValue(false);
     }
 
-    private List<AssetGridItem> getConvertedGridItems() {
-        return instrumentsFacadeService.getAllAssets()
-                .stream()
+    public void setItems(List<Asset> assets) {
+        gridItems = getConvertedGridItems(assets);
+        dataView = grid.setItems(gridItems);
+    }
+
+    public void setGridFullSize(boolean fullSize) {
+        if (fullSize) {
+            grid.getElement().executeJs("this.shadowRoot.querySelector('table').style.overflow = 'hidden';");
+        }
+    }
+
+    private List<AssetGridItem> getConvertedGridItems(List<Asset> assets) {
+        return assets.stream()
                 .map(asset -> AssetGridItem.builder()
                         .symbol(asset.getSymbol())
                         .name(instrumentsFacadeService.getAssetFullName(asset))

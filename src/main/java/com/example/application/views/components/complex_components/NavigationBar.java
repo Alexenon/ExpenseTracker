@@ -21,7 +21,7 @@ public class NavigationBar extends Nav {
     private final RouterLink expensesLink = new RouterLink("Expenses", ExpensesView.class);
     private final RouterLink dashboardLink = new RouterLink("Dashboard", DashboardView.class);
     private final RouterLink yearlyLink = new RouterLink("Yearly", YearyExpensesView.class);
-    private final RouterLink assetsLink = new RouterLink("Assets", AssetsDashboardView.class);
+    private final RouterLink assetsLink = new RouterLink("Assets", PortfolioTrackerView.class);
 
     public NavigationBar() {
         addClassName("navbar");

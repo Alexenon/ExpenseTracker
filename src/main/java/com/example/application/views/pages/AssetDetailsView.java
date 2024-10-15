@@ -40,7 +40,6 @@ import java.util.Objects;
 /*
  * TODO:
  *  [!] Make watchers to be sorted on ADDING a new one
- *  - cursor: not-allowed;    - style something
  * */
 
 @PermitAll

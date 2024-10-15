@@ -8,9 +8,9 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Data
-@Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity(name = "assets")
 public class Asset {
 
     @Id
