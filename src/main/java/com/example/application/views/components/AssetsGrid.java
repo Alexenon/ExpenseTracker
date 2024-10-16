@@ -62,7 +62,7 @@ public class AssetsGrid extends Div {
     private final Grid<AssetGridItem> grid = new Grid<>();
     private final Span hiddenRowsCounterField = new Span();
     private GridListDataView<AssetGridItem> dataView;
-    private List<AssetGridItem> gridItems = new ArrayList<>();
+    private List<Asset> gridAssets = new ArrayList<>();
 
     private Grid.Column<AssetGridItem> changes24hCol;
     private Grid.Column<AssetGridItem> totalWorthCol;
@@ -75,7 +75,7 @@ public class AssetsGrid extends Div {
         this.instrumentsFacadeService = instrumentsFacadeService;
         this.portfolioPerformanceTracker = portfolioPerformanceTracker;
 
-        setItems(new ArrayList<>());
+        setItems(gridAssets);
 
         initializeGrid();
         initializeFilteringBySearch();
@@ -307,12 +307,11 @@ public class AssetsGrid extends Div {
         return new ComponentRenderer<>(a -> new PriceBadge(a.getPriceChangesPercentage24h(), NumberType.PERCENT));
     }
 
-    // TODO: FIXME: ITS NOT WORKING NOW
     private void initializeSyncButton() {
         syncButton.addClickListener(event -> {
             animateSyncButtonIcon();
             instrumentsFacadeService.updateAssetMetadata();
-            //dataView = grid.setItems(getConvertedGridItems());
+            setItems(gridAssets);
             grid.removeAllColumns();
             renderColumns();
             resetFilterValues();
@@ -347,7 +346,7 @@ public class AssetsGrid extends Div {
     }
 
     private void updateHiddenRowsCounter() {
-        int numberOfHiddenRows = gridItems.size() - dataView.getItemCount();
+        int numberOfHiddenRows = gridAssets.size() - dataView.getItemCount();
         setHiddenRowCount(numberOfHiddenRows);
     }
 
@@ -376,8 +375,8 @@ public class AssetsGrid extends Div {
     }
 
     public void setItems(List<Asset> assets) {
-        gridItems = getConvertedGridItems(assets);
-        dataView = grid.setItems(gridItems);
+        gridAssets = assets;
+        dataView = grid.setItems(getConvertedGridItems());
     }
 
     public void setGridFullSize(boolean fullSize) {
@@ -386,8 +385,8 @@ public class AssetsGrid extends Div {
         }
     }
 
-    private List<AssetGridItem> getConvertedGridItems(List<Asset> assets) {
-        return assets.stream()
+    private List<AssetGridItem> getConvertedGridItems() {
+        return gridAssets.stream()
                 .map(asset -> AssetGridItem.builder()
                         .symbol(asset.getSymbol())
                         .name(instrumentsFacadeService.getAssetFullName(asset))

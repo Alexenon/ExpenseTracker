@@ -129,10 +129,6 @@ public class InstrumentsFacadeService {
         return instrumentsService.getWalletBalancesByWalletAndAsset(getAuthenticatedUserWallet(), asset);
     }
 
-    public List<WalletBalance> getWalletBalancesByWalletWithNonZeroAmount() {
-        return instrumentsService.getWalletBalancesByWalletWithNonZeroAmount(getAuthenticatedUserWallet());
-    }
-
     public double getAmountOfTokens(Asset asset) {
         return instrumentsService.getWalletBalancesByWalletAndAsset(getAuthenticatedUserWallet(), asset).getAmount();
     }

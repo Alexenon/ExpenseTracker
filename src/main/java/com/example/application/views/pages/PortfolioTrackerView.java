@@ -5,13 +5,12 @@ import com.example.application.entities.crypto.Asset;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.views.components.AssetsGrid;
+import com.example.application.views.components.TransactionsGrid;
 import com.example.application.views.components.complex_components.AssetValueParagraph;
 import com.example.application.views.components.complex_components.PriceBadge;
-import com.example.application.views.components.complex_components.dialogs.transactions.AddTransactionDialog;
 import com.example.application.views.components.native_components.Container;
 import com.example.application.views.layouts.MainLayout;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -30,8 +29,8 @@ public class PortfolioTrackerView extends Main {
     private final InstrumentsFacadeService instrumentsFacadeService;
     private final PortfolioPerformanceTracker portfolioPerformanceTracker;
 
-    private final Button addNewTransactionBtn = new Button("Add Transaction");
     private final AssetsGrid assetsGrid;
+    private final TransactionsGrid transactionsGrid;
 
     @Autowired
     public PortfolioTrackerView(InstrumentsFacadeService instrumentsFacadeService,
@@ -39,20 +38,38 @@ public class PortfolioTrackerView extends Main {
         this.instrumentsFacadeService = instrumentsFacadeService;
         this.portfolioPerformanceTracker = portfolioPerformanceTracker;
         this.assetsGrid = new AssetsGrid(instrumentsFacadeService, portfolioPerformanceTracker);
+        this.transactionsGrid = new TransactionsGrid(instrumentsFacadeService);
 
-        addNewTransactionBtn.addClickListener(e -> {
-            AddTransactionDialog dialog = new AddTransactionDialog(instrumentsFacadeService);
-            dialog.open();
-        });
-
-        initializeGrid();
-        add(performanceSection(), addNewTransactionBtn, assetsGrid);
+        initializePage();
+        add(
+                performanceSection(),
+                gridSection("Assets", assetsGrid),
+                gridSection("Transactions", transactionsGrid)
+        );
     }
 
-    private void initializeGrid() {
+    private void initializePage() {
         getStyle().set("margin", "100px 30px 30px 30px");
-        assetsGrid.setItems(instrumentsFacadeService.getAssetsWithNonZeroAmount());
         assetsGrid.setGridFullSize(true);
+        assetsGrid.setItems(instrumentsFacadeService.getAssetsWithNonZeroAmount());
+        transactionsGrid.setItems(instrumentsFacadeService.getAllTransactions());
+        transactionsGrid.setPageSize(10);
+    }
+
+    private Section headerSection() {
+        Section section = new Section();
+
+        return section;
+    }
+
+    private Section gridSection(String titleName, Component grid) {
+        Section section = new Section();
+        section.add();
+        H3 title = new H3(titleName);
+        title.setClassName("section-title");
+
+        section.add(title, grid);
+        return section;
     }
 
     private Section performanceSection() {
