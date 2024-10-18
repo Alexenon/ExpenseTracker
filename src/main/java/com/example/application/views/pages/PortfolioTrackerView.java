@@ -6,8 +6,9 @@ import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.views.components.AssetsGrid;
 import com.example.application.views.components.TransactionsGrid;
-import com.example.application.views.components.complex_components.AssetValueParagraph;
 import com.example.application.views.components.complex_components.PriceBadge;
+import com.example.application.views.components.complex_components.ProfitValueParagraph;
+import com.example.application.views.components.complex_components.fields.PricePercentageWrapper;
 import com.example.application.views.components.native_components.Container;
 import com.example.application.views.layouts.MainLayout;
 import com.vaadin.flow.component.Component;
@@ -42,6 +43,7 @@ public class PortfolioTrackerView extends Main {
 
         initializePage();
         add(
+                headerSection(),
                 performanceSection(),
                 gridSection("Assets", assetsGrid),
                 gridSection("Transactions", transactionsGrid)
@@ -58,7 +60,16 @@ public class PortfolioTrackerView extends Main {
 
     private Section headerSection() {
         Section section = new Section();
+        section.addClassName("asset-details-header");
 
+        ProfitValueParagraph worth = new ProfitValueParagraph(portfolioPerformanceTracker.getPortfolioWorth());
+        double percentage = portfolioPerformanceTracker.getPortfolioProfitPercentage();
+        double profit = portfolioPerformanceTracker.getPortfolioProfit();
+        PricePercentageWrapper profitWrapper = new PricePercentageWrapper(profit, percentage);
+
+        Container portfolioWorthWrapper = new Container("price-wrapper", worth, profitWrapper);
+
+        section.add(portfolioWorthWrapper);
         return section;
     }
 
@@ -72,6 +83,7 @@ public class PortfolioTrackerView extends Main {
         return section;
     }
 
+    @SuppressWarnings("unused")
     private Section performanceSection() {
         Section section = new Section();
         H3 title = new H3("Portfolio Statistics");
@@ -95,7 +107,7 @@ public class PortfolioTrackerView extends Main {
 
         Div profitLossContainer = Container.builder()
                 .addClassName("price-profit-wrapper")
-                .addComponent(new AssetValueParagraph(portfolioPerformanceTracker.getPortfolioProfit(), NumberType.CURRENCY))
+                .addComponent(new ProfitValueParagraph(portfolioPerformanceTracker.getPortfolioProfit(), NumberType.CURRENCY))
                 .addComponent(() -> {
                     double percentage = portfolioPerformanceTracker.getPortfolioProfitPercentage();
                     PriceBadge priceBadge = new PriceBadge(percentage, NumberType.PERCENT);
