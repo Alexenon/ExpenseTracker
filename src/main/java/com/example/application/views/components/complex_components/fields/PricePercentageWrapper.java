@@ -1,7 +1,7 @@
 package com.example.application.views.components.complex_components.fields;
 
 import com.example.application.data.models.NumberType;
-import com.example.application.views.components.complex_components.PriceBadge;
+import com.example.application.views.components.complex_components.PercentageBadge;
 import com.example.application.views.components.complex_components.ProfitValueParagraph;
 import com.vaadin.flow.component.html.Div;
 
@@ -11,24 +11,20 @@ import com.vaadin.flow.component.html.Div;
 public class PricePercentageWrapper extends Div {
 
     private final ProfitValueParagraph price;
-    private final PriceBadge percentage;
+    private final PercentageBadge percentage;
 
     public PricePercentageWrapper(double priceValue, double percentageValue) {
         price = new ProfitValueParagraph(priceValue, NumberType.CURRENCY, true);
-        percentage = new PriceBadge(percentageValue, NumberType.PERCENT);
+        percentage = new PercentageBadge(percentageValue);
         add(price, percentage);
     }
 
     public void setPriceColor(boolean shouldBeColored) {
-        price.setApplyColor(shouldBeColored);
+        price.setHasColor(shouldBeColored);
     }
 
     public void setPercentageBadgeBackgroundColor(boolean shouldBeColored) {
-        if (shouldBeColored) {
-            percentage.setBackgroundColor();
-        } else {
-            percentage.setBackgroundColor(PriceBadge.Color.DEFAULT_BACKGROUND_COLOR);
-        }
+        percentage.setHasBackground(shouldBeColored);
     }
 
 

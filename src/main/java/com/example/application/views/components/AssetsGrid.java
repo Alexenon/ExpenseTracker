@@ -4,7 +4,7 @@ import com.example.application.data.models.NumberType;
 import com.example.application.entities.crypto.Asset;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
-import com.example.application.views.components.complex_components.PriceBadge;
+import com.example.application.views.components.complex_components.PercentageBadge;
 import com.example.application.views.components.native_components.Container;
 import com.example.application.views.pages.AssetDetailsView;
 import com.vaadin.flow.component.Component;
@@ -304,7 +304,7 @@ public class AssetsGrid extends Div {
     }
 
     private ComponentRenderer<Component, AssetGridItem> columnChanges24hRenderer() {
-        return new ComponentRenderer<>(a -> new PriceBadge(a.getPriceChangesPercentage24h(), NumberType.PERCENT));
+        return new ComponentRenderer<>(a -> new PercentageBadge(a.getPriceChangesPercentage24h(), true, false));
     }
 
     private void initializeSyncButton() {

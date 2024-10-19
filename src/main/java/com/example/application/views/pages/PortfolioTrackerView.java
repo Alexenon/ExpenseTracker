@@ -6,7 +6,7 @@ import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.views.components.AssetsGrid;
 import com.example.application.views.components.TransactionsGrid;
-import com.example.application.views.components.complex_components.PriceBadge;
+import com.example.application.views.components.complex_components.PercentageBadge;
 import com.example.application.views.components.complex_components.ProfitValueParagraph;
 import com.example.application.views.components.complex_components.fields.PricePercentageWrapper;
 import com.example.application.views.components.native_components.Container;
@@ -110,9 +110,9 @@ public class PortfolioTrackerView extends Main {
                 .addComponent(new ProfitValueParagraph(portfolioPerformanceTracker.getPortfolioProfit(), NumberType.CURRENCY))
                 .addComponent(() -> {
                     double percentage = portfolioPerformanceTracker.getPortfolioProfitPercentage();
-                    PriceBadge priceBadge = new PriceBadge(percentage, NumberType.PERCENT);
-                    priceBadge.setBackgroundColor(PriceBadge.Color.DEFAULT_BACKGROUND_COLOR);
-                    return priceBadge;
+                    PercentageBadge percentageBadge = new PercentageBadge(percentage);
+                    percentageBadge.setHasBackground(false);
+                    return percentageBadge;
                 })
                 .build();
 

@@ -5,7 +5,7 @@ import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.CryptoTransaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.utils.common.MathUtils;
-import com.example.application.views.components.complex_components.PriceBadge;
+import com.example.application.views.components.complex_components.PercentageBadge;
 import com.example.application.views.components.complex_components.ProfitValueParagraph;
 import com.example.application.views.components.native_components.Container;
 import com.vaadin.flow.component.Key;
@@ -125,7 +125,7 @@ public class TransactionDetailsDialog extends Dialog {
                 .addComponent(() -> Container.builder()
                         .addClassName("price-profit-wrapper")
                         .addComponent(new ProfitValueParagraph(usdProfit, NumberType.CURRENCY))
-                        .addComponent(new PriceBadge(percentageProfit, NumberType.PERCENT))
+                        .addComponent(new PercentageBadge(percentageProfit))
                         .build())
                 .build();
 

@@ -10,7 +10,7 @@ import com.example.application.utils.common.StringUtils;
 import com.example.application.views.components.PriceMonitorContainer;
 import com.example.application.views.components.PriceWatchlistComponent;
 import com.example.application.views.components.TransactionsGrid;
-import com.example.application.views.components.complex_components.PriceBadge;
+import com.example.application.views.components.complex_components.PercentageBadge;
 import com.example.application.views.components.complex_components.ProfitValueParagraph;
 import com.example.application.views.components.complex_components.dialogs.transactions.AddTransactionDialog;
 import com.example.application.views.components.complex_components.fields.PricePercentageWrapper;
@@ -250,7 +250,7 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         Div profitLossContainer = Container.builder()
                 .addClassName("price-profit-wrapper")
                 .addComponent(new ProfitValueParagraph(assetProfitLoss, NumberType.CURRENCY))
-                .addComponent(new PriceBadge(profitLossPercentage, NumberType.PERCENT, true, true, false))
+                .addComponent(new PercentageBadge(profitLossPercentage, true, false))
                 .build();
 
         Container diversityContainer = Container.builder("portfolio-diversity")

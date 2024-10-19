@@ -8,7 +8,11 @@ import com.vaadin.flow.component.html.Paragraph;
 public class ProfitValueParagraph extends Paragraph {
 
     private double value;
-    private boolean withColor;
+    private boolean hasColor;
+
+    public ProfitValueParagraph() {
+        this(0.0, NumberType.CURRENCY);
+    }
 
     public ProfitValueParagraph(double value) {
         this(value, NumberType.CURRENCY);
@@ -18,9 +22,9 @@ public class ProfitValueParagraph extends Paragraph {
         this(value, numberType, false);
     }
 
-    public ProfitValueParagraph(double value, NumberType numberType, boolean withColor) {
+    public ProfitValueParagraph(double value, NumberType numberType, boolean hasColor) {
         this.value = value;
-        this.withColor = withColor;
+        this.hasColor = hasColor;
         this.setText(numberType.parse(value));
         setClassNameByColor();
     }
@@ -30,21 +34,22 @@ public class ProfitValueParagraph extends Paragraph {
         setClassNameByColor();
     }
 
-    public void setApplyColor(boolean withColor) {
-        this.withColor = withColor;
+    public void setHasColor(boolean withColor) {
+        this.hasColor = withColor;
         setClassNameByColor();
     }
 
     private void setClassNameByColor() {
         removeClassNames("value-increase", "value-decrease");
-        if (withColor) {
-            addClassName(getClassNameByValue());
+        String className = getClassNameByValue();
+        if (hasColor && !className.isEmpty()) {
+            addClassName(className);
         }
     }
 
     private String getClassNameByValue() {
         if (value == 0)
-            return null;
+            return "";
 
         return (value > 0) ? "value-increase" : "value-decrease";
     }
