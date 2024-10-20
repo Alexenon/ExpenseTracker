@@ -117,3 +117,47 @@ div.assets-grid-footer {
     background: var(--o5Color);
 }
 
+
+/*
+    Portfolio Performance Section
+*/
+.performance-asset-image {
+    margin: 0px;
+    align-self: center;
+}
+
+.performance-item {
+    display: flex;
+    cursor: pointer;
+    padding: .75rem;
+    border-radius: .75rem;
+    background-color: rgb(241 245 249);
+}
+
+.performance-details {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    align-content: space-around;
+    justify-content: space-between;
+}
+
+.performace-label {
+    font-weight: 500;
+    font-size: .875rem;
+    line-height: 1.25rem;
+    color: rgb(156 163 175);
+}
+
+.performance-symbol {
+    font-weight: 600;
+    font-size: 1.10rem;
+    line-height: 1.25rem;
+}
+
+.performance-values {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}

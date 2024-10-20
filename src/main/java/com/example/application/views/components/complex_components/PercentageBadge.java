@@ -1,5 +1,6 @@
 package com.example.application.views.components.complex_components;
 
+import com.example.application.data.models.NumberType;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
@@ -8,7 +9,7 @@ import com.vaadin.flow.theme.lumo.LumoIcon;
 @Tag(Tag.DIV)
 public class PercentageBadge extends Div {
 
-    private final ProfitValueParagraph textField = new ProfitValueParagraph();
+    private final ProfitValueParagraph textField = new ProfitValueParagraph(0.0, NumberType.PERCENT);
 
     private double value;
     private boolean hasColor;
