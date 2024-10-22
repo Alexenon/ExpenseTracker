@@ -7,6 +7,8 @@ import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoField;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class FastUtils {
 
@@ -14,7 +16,7 @@ public class FastUtils {
         List<String> optionSeries = List.of(
                 "AAPL 16 AUG 24 100",
                 "AAPL 16 SEP 24 100",
-                "AAPL 20 OCT 24 100",
+                "AAPL 21 OCT 24 100",
                 "AAPL 16 NOV 24 100",
                 "AAPL 16 DEC 24 100",
                 "AAPL 16 JAN 24 100",
@@ -31,19 +33,23 @@ public class FastUtils {
     }
 
     /**
-     * @param option extracts and parses the expiration date from an option name.
-     *               Must be in the format {@code "SYMBOL dd MMM yy STRIKE"}, such as {@code "AAPL 16 AUG 24 100"}.
+     * @param option must be in the format {@code "SYMBOL dd MMM yy STRIKE"}, such as {@code "AAPL 16 AUG 24 100"}.
      *
      * @return expiration date extracted from the option name.
      * @throws IllegalArgumentException if the input does not follow the expected format.
-     * @throws DateTimeParseException  if the extracted date cannot be parsed.
+     * @throws DateTimeParseException   if the extracted date cannot be parsed.
      */
     private static LocalDate extractExpireDate(String option) {
-        String[] parts = option.split("\\s");
+        Pattern pattern = Pattern.compile("\\w+ (\\d+) ([A-Z]{3}) (\\d+) \\d+");
+        Matcher matcher = pattern.matcher(option);
 
-        String dateStr = String.format("%s %s %s", parts[1], parts[2], parts[3]);
+        if (!matcher.matches()) {
+            throw new IllegalArgumentException("Option doesn't match the expected format: \"SYMBOL dd MMM yy STRIKE\"");
+        }
 
-        // Formatter able to handle 2 digits year -> "18 AUG 24"
+        String dateStr = String.format("%s %s %s", matcher.group(1), matcher.group(2), matcher.group(3));
+
+        // Formatter able to handle 2 digits year dates -> "18 AUG 24"
         DateTimeFormatter formatter = new DateTimeFormatterBuilder()
                 .parseCaseInsensitive()
                 .appendPattern("dd MMM ")
@@ -52,7 +58,6 @@ public class FastUtils {
 
         return LocalDate.parse(dateStr, formatter);
     }
-
 
 
 }

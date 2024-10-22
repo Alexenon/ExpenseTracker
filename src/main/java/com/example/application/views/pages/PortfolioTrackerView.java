@@ -13,24 +13,33 @@ import com.example.application.views.components.native_components.Container;
 import com.example.application.views.layouts.MainLayout;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.dependency.JavaScript;
+import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import elemental.json.Json;
+import elemental.json.JsonArray;
+import elemental.json.JsonObject;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @PermitAll
 @PageTitle("Portfolio Tracker")
 @Route(value = "portfolio-tracker", layout = MainLayout.class)
+@JsModule("./themes/light_theme/components/javascript/fillPieChart.js")
+@JavaScript("https://fastly.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js")
 public class PortfolioTrackerView extends Main {
 
     private final InstrumentsFacadeService instrumentsFacadeService;
     private final PortfolioPerformanceTracker portfolioPerformanceTracker;
 
+    private final Div chartPie = new Div();
     private final AssetsGrid assetsGrid;
     private final TransactionsGrid transactionsGrid;
 
@@ -45,6 +54,7 @@ public class PortfolioTrackerView extends Main {
         initializePage();
         add(
                 headerSection(),
+                chartPie,
                 performanceSection(),
                 statictionSection(),
                 gridSection("Assets", assetsGrid),
@@ -54,6 +64,7 @@ public class PortfolioTrackerView extends Main {
 
     private void initializePage() {
         getStyle().set("margin", "100px 30px 30px 30px");
+        initializeChart();
         assetsGrid.setGridFullSize(true);
         assetsGrid.setItems(instrumentsFacadeService.getAssetsWithNonZeroAmount());
         transactionsGrid.setItems(instrumentsFacadeService.getAllTransactions());
@@ -73,6 +84,29 @@ public class PortfolioTrackerView extends Main {
 
         section.add(portfolioWorthWrapper);
         return section;
+    }
+
+    private void initializeChart() {
+        chartPie.setId("chart-pie");
+
+        Map<String, Double> assetsDiversity = instrumentsFacadeService.getAssetsWithNonZeroAmount()
+                .stream()
+                .collect(Collectors.toMap(Asset::getSymbol, portfolioPerformanceTracker::getAssetTotalCost, (a, b) -> b));
+
+        JsonArray jsonOptionData = Json.createArray();
+        AtomicInteger index = new AtomicInteger(0);
+        assetsDiversity.forEach((assetName, diversityPercentage) -> {
+            JsonObject jsonObject = Json.createObject();
+            jsonObject.put("name", assetName);
+            jsonObject.put("value", diversityPercentage);
+            jsonOptionData.set(index.get(), jsonObject);
+
+            System.out.println(jsonObject);
+
+            index.addAndGet(1);
+        });
+
+        UI.getCurrent().getPage().executeJs("fillAssetsDiversityChart($0);", jsonOptionData.toJson());
     }
 
     private Section gridSection(String titleName, Component grid) {

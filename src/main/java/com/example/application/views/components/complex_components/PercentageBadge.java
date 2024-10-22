@@ -9,7 +9,7 @@ import com.vaadin.flow.theme.lumo.LumoIcon;
 @Tag(Tag.DIV)
 public class PercentageBadge extends Div {
 
-    private final ProfitValueParagraph textField = new ProfitValueParagraph(0.0, NumberType.PERCENT);
+    private final ProfitValueParagraph textField;
 
     private double value;
     private boolean hasColor;
@@ -25,6 +25,7 @@ public class PercentageBadge extends Div {
         this.value = value;
         this.hasColor = hasColor;
         this.hasBackground = hasBackground;
+        this.textField = new ProfitValueParagraph(value, NumberType.PERCENT);
 
         addClassName("price-change-badge");
         add(textField);
