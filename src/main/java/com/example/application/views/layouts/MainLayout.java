@@ -48,7 +48,7 @@ public class MainLayout extends AppLayout {
             navigationBar.add(loginIcon);
         }
 
-        navigationBar.getTextLinks().forEach(c -> c.setVisible(isLoggedIn));
+        navigationBar.getRoutes().forEach(c -> c.setVisible(isLoggedIn));
     }
 
     private void initialize() {

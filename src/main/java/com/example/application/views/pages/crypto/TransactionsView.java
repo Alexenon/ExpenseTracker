@@ -1,4 +1,4 @@
-package com.example.application.views.pages;
+package com.example.application.views.pages.crypto;
 
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.views.components.TransactionsGrid;

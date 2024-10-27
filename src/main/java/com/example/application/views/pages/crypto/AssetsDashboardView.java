@@ -1,4 +1,4 @@
-package com.example.application.views.pages;
+package com.example.application.views.pages.crypto;
 
 import com.example.application.data.models.NumberType;
 import com.example.application.entities.crypto.Asset;
