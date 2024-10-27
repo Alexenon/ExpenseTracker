@@ -117,6 +117,19 @@ div.assets-grid-footer {
     background: var(--o5Color);
 }
 
+/*
+    Portfolio Statistics Section
+*/
+.statistics-section-wrapper {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+}
+
+#assets-diverstity-chart {
+    width: 700px;
+    height: 500px;
+}
 
 /*
     Portfolio Performance Section

@@ -29,6 +29,13 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+/*
+
+TODO: Analitics
+     - How much amount of holding asset token to sell, to be in 0, How much remains, how much profit is it ?
+
+* */
+
 @PermitAll
 @PageTitle("Portfolio Tracker")
 @Route(value = "portfolio-tracker", layout = MainLayout.class)
@@ -39,9 +46,9 @@ public class PortfolioTrackerView extends Main {
     private final InstrumentsFacadeService instrumentsFacadeService;
     private final PortfolioPerformanceTracker portfolioPerformanceTracker;
 
-    private final Div chartPie = new Div();
     private final AssetsGrid assetsGrid;
     private final TransactionsGrid transactionsGrid;
+    private final Div assetsDiversityChart = new Div();
 
     @Autowired
     public PortfolioTrackerView(InstrumentsFacadeService instrumentsFacadeService,
@@ -54,17 +61,16 @@ public class PortfolioTrackerView extends Main {
         initializePage();
         add(
                 headerSection(),
-                chartPie,
+                statisticsSection(),
                 performanceSection(),
-                statictionSection(),
                 gridSection("Assets", assetsGrid),
                 gridSection("Transactions", transactionsGrid)
         );
+        initializeChart();
     }
 
     private void initializePage() {
         getStyle().set("margin", "100px 30px 30px 30px");
-        initializeChart();
         assetsGrid.setGridFullSize(true);
         assetsGrid.setItems(instrumentsFacadeService.getAssetsWithNonZeroAmount());
         transactionsGrid.setItems(instrumentsFacadeService.getAllTransactions());
@@ -87,7 +93,7 @@ public class PortfolioTrackerView extends Main {
     }
 
     private void initializeChart() {
-        chartPie.setId("chart-pie");
+        assetsDiversityChart.setId("assets-diverstity-chart");
 
         Map<String, Double> assetsDiversity = instrumentsFacadeService.getAssetsWithNonZeroAmount()
                 .stream()
@@ -119,13 +125,13 @@ public class PortfolioTrackerView extends Main {
         return section;
     }
 
-    private Section statictionSection() {
-        Section section = new Section();
+    private Div statisticsSection() {
+        Div sectionWrapper = new Div();
+        sectionWrapper.setClassName("statistics-section-wrapper");
+
+        Section statisticSectionDetails = new Section();
         H3 title = new H3("Portfolio Statistics");
         title.setClassName("section-title");
-
-        // TODO: Analitics
-        //  - How much amount of holding asset token to sell, to be in 0, How much remains, how much profit is it ?
 
         Div profitLossContainer = Container.builder()
                 .addClassName("price-profit-wrapper")
@@ -146,8 +152,10 @@ public class PortfolioTrackerView extends Main {
         Div body = new Div();
         body.addClassNames("section-card-wrapper");
         body.add(totalWorth, totalCost, profitStats);
-        section.add(title, body);
-        return section;
+        statisticSectionDetails.add(title, body);
+
+        sectionWrapper.add(statisticSectionDetails, assetsDiversityChart);
+        return sectionWrapper;
     }
 
     private Section performanceSection() {
