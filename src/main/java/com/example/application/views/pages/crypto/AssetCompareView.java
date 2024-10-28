@@ -29,6 +29,8 @@ public class AssetCompareView extends Main {
     }
 
     private void buildPage() {
+        //addClassName("page-content");
+        getStyle().set("margin", "100 30");
         add(assetForm1, assetForm2, compareBtn);
     }
 

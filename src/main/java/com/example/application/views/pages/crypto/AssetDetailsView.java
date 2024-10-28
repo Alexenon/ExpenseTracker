@@ -10,9 +10,10 @@ import com.example.application.utils.common.StringUtils;
 import com.example.application.views.components.PriceMonitorContainer;
 import com.example.application.views.components.PriceWatchlistComponent;
 import com.example.application.views.components.TransactionsGrid;
-import com.example.application.views.components.complex_components.AssetValueParagraph;
-import com.example.application.views.components.complex_components.PriceBadge;
+import com.example.application.views.components.complex_components.PercentageBadge;
+import com.example.application.views.components.complex_components.ProfitValueParagraph;
 import com.example.application.views.components.complex_components.dialogs.transactions.AddTransactionDialog;
+import com.example.application.views.components.complex_components.fields.PricePercentageWrapper;
 import com.example.application.views.components.fields.CurrencyField;
 import com.example.application.views.components.fields.PercentageField;
 import com.example.application.views.components.native_components.Container;
@@ -40,7 +41,6 @@ import java.util.Objects;
 /*
  * TODO:
  *  [!] Make watchers to be sorted on ADDING a new one
- *  - cursor: not-allowed;    - style something
  * */
 
 @PermitAll
@@ -102,17 +102,10 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
                 .addComponent(new Span(asset.getSymbol()))
                 .build();
 
-        Container priceWrapper = Container.builder()
-                .addClassName("price-wrapper")
-                .addComponent(() -> {
-                    String assetPrice = NumberType.CURRENCY.parse(instrumentsFacadeService.getAssetPrice(asset));
-                    return new Paragraph(assetPrice);
-                })
-                .addComponent(() -> {
-                    double percentageChangeLast24H = instrumentsFacadeService.getAsset24HourChangePercentage(asset);
-                    return new PriceBadge(percentageChangeLast24H, NumberType.PERCENT);
-                })
-                .build();
+        double price = instrumentsFacadeService.getAssetPrice(asset);
+        double percentage = instrumentsFacadeService.getAsset24HourChangePercentage(asset);
+        PricePercentageWrapper priceWrapper = new PricePercentageWrapper(price, percentage);
+        priceWrapper.addClassName("price-wrapper");
 
         Div coinInfoContainer = new Div(rank, coinNameContainer, priceWrapper);
 
@@ -252,18 +245,18 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         double profitLossPercentage = portfolioPerformanceTracker.getAssetProfitPercentage(asset);
         int assetDiversityPercentage = portfolioPerformanceTracker.getAssetDiversityPercentage(asset);
 
-        AssetValueParagraph costValue = new AssetValueParagraph(assetCost, NumberType.CURRENCY);
-        AssetValueParagraph worthValue = new AssetValueParagraph(assetWorth, NumberType.CURRENCY);
+        ProfitValueParagraph costValue = new ProfitValueParagraph(assetCost, NumberType.CURRENCY);
+        ProfitValueParagraph worthValue = new ProfitValueParagraph(assetWorth, NumberType.CURRENCY);
         Div profitLossContainer = Container.builder()
                 .addClassName("price-profit-wrapper")
-                .addComponent(new AssetValueParagraph(assetProfitLoss, NumberType.CURRENCY))
-                .addComponent(new PriceBadge(profitLossPercentage, NumberType.PERCENT, true, true, false))
+                .addComponent(new ProfitValueParagraph(assetProfitLoss, NumberType.CURRENCY))
+                .addComponent(new PercentageBadge(profitLossPercentage, true, false))
                 .build();
 
         Container diversityContainer = Container.builder("portfolio-diversity")
                 .addComponent(() -> {
-                    AssetValueParagraph valueParagraph = new AssetValueParagraph(assetDiversityPercentage, NumberType.PERCENT);
-                    valueParagraph.setColor("blue");
+                    ProfitValueParagraph valueParagraph = new ProfitValueParagraph(assetDiversityPercentage, NumberType.PERCENT);
+                    valueParagraph.getStyle().setColor("blue");
                     return valueParagraph;
                 })
                 .addComponent(new ProgressBar(0, 100, assetDiversityPercentage))

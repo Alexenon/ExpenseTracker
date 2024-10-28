@@ -115,13 +115,12 @@ public class ExpenseService {
         return repository.findExpensesPerYear(year);
     }
 
-
     /**
      * @param date is converted if it's:
      *             <ul>
      *                  <li>CURRENT MONTH -> remains same
-     *                  <li>PREVIOUS MONTH ->  into another date with its last day of month
-     *                  <li>NEXT MONTH ->  into another date with its first day of month
+     *                  <li>PREVIOUS MONTH -> into another date with its last day of month
+     *                  <li>NEXT MONTH -> into another date with its first day of month
      *              </ul>
      */
     @Transactional

@@ -10,6 +10,7 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -28,16 +29,28 @@ public class AssetPriceAmountForm extends Div {
     @Autowired
     public AssetPriceAmountForm(InstrumentsFacadeService instrumentsFacadeService) {
         this.instrumentsFacadeService = instrumentsFacadeService;
-        buildPage();
+        buildForm();
     }
 
-    private void buildPage() {
-        initializeFields();
+    private void buildForm() {
         initializeBinder();
+        initializeFieldsValues();
+        initializeFieldsListeners();
         add(assetSymbolField, amountField, marketPriceField, totalPriceField);
     }
 
-    private void initializeFields() {
+    private void initializeFieldsValues() {
+        assetSymbolField.setItems(instrumentsFacadeService.getAllAssets());
+        assetSymbolField.setItemLabelGenerator(instrumentsFacadeService::getAssetFullName);
+        assetSymbolField.setRenderer(assetSymbolRenderer());
+        assetSymbolField.addValueChangeListener(l -> marketPriceField.setValue(getMarketPriceBySelectedAsset()));
+
+        amountField.setValue("");
+        marketPriceField.setValue(getMarketPriceBySelectedAsset());
+        totalPriceField.setValue(0);
+    }
+
+    private void initializeFieldsListeners() {
         assetSymbolField.addValueChangeListener(l -> {
             binder.setValidatorsDisabled(false);
             marketPriceField.setValue(getMarketPriceBySelectedAsset());
@@ -70,7 +83,6 @@ public class AssetPriceAmountForm extends Div {
             amountField.setValue(amount);
             binder.validate();
         });
-
     }
 
     private void initializeBinder() {
@@ -92,6 +104,18 @@ public class AssetPriceAmountForm extends Div {
                 .withConverter(new FlexiblePriceConvertor())
                 .withValidator(price -> price >= 1, "Total price should be at least one dollar");
 
+    }
+
+    private LitRenderer<Asset> assetSymbolRenderer() {
+        return LitRenderer.<Asset>of(
+                        "<div class='coin-overview-name-container'>" +
+                        "  <img class='rounded coin-overview-image' src='${item.imgUrl}' alt='${item.fullName}'/>" +
+                        "  <span>${item.symbol}</span>" +
+                        "  <p>${item.fullName}</p>" +
+                        "</div>")
+                .withProperty("imgUrl", instrumentsFacadeService::getAssetImgUrl)
+                .withProperty("symbol", Asset::getSymbol)
+                .withProperty("fullName", instrumentsFacadeService::getAssetFullName);
     }
 
     private double getMarketPriceBySelectedAsset() {

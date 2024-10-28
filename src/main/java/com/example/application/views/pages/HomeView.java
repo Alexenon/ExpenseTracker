@@ -50,15 +50,15 @@ public class HomeView extends Main {
         // Items
 
         List<String> optionTitles = List.of("Option 1", "Option 2", "Option 3", "Option 4");
-        MenuBar menuBar2 = new MenuBar();
-        SubMenu subItems2 = menuBar2.addItem(VaadinIcon.SLIDERS.create()).getSubMenu();
+        MenuBar menuBar = new MenuBar();
+        SubMenu subItems2 = menuBar.addItem(VaadinIcon.SLIDERS.create()).getSubMenu();
         optionTitles.forEach(t -> {
             MenuItem menuItem = subItems2.addItem(t);
             menuItem.setCheckable(true);
             menuItem.setChecked(false);
             menuItem.setKeepOpen(true);
         });
-        add(menuBar2);
+        add(menuBar);
 
 
         Button btn = new Button("Add Transaction");

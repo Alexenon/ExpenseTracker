@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigInteger;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /*
     TODO: Rename
@@ -43,6 +44,14 @@ public class InstrumentsFacadeService {
     //<editor-fold desc="ASSET">
     public List<Asset> getAllAssets() {
         return instrumentsService.getAllAssets();
+    }
+
+    public List<Asset> getAssetsWithNonZeroAmount() {
+        return getWalletBalances()
+                .stream()
+                .filter(wb -> wb.getAmount() > 0)
+                .map(WalletBalance::getAsset)
+                .collect(Collectors.toList());
     }
 
     public Asset getAssetBySymbol(String symbolName) {

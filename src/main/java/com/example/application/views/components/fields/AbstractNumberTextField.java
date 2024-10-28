@@ -1,6 +1,5 @@
 package com.example.application.views.components.fields;
 
-import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.textfield.TextField;
 import org.vaadin.textfieldformatter.NumeralFieldFormatter;
 
@@ -28,7 +27,6 @@ public abstract class AbstractNumberTextField extends TextField {
                 .build();
 
         setAllowedCharPattern("[0-9.]");
-        setPrefixComponent(new Paragraph("$"));
         setFormatable(formatable);
     }
 

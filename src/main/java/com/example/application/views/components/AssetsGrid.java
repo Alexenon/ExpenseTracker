@@ -1,18 +1,18 @@
 package com.example.application.views.components;
 
-import com.example.application.data.enums.Symbols;
 import com.example.application.data.models.NumberType;
+import com.example.application.entities.crypto.Asset;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
-import com.example.application.views.components.complex_components.PriceBadge;
+import com.example.application.views.components.complex_components.PercentageBadge;
 import com.example.application.views.components.native_components.Container;
 import com.example.application.views.pages.crypto.AssetDetailsView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.contextmenu.ContextMenu;
 import com.vaadin.flow.component.contextmenu.MenuItem;
+import com.vaadin.flow.component.contextmenu.SubMenu;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
@@ -21,6 +21,7 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LitRenderer;
@@ -31,6 +32,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.ToDoubleFunction;
@@ -41,12 +43,8 @@ import java.util.function.ToDoubleFunction;
      - [?] grid.setMultiSort(true, MultiSortPriority.APPEND);
      - [!] Closest Buy ->  $34,000.00 ❗
             - URGENT -> vaadin:exclamation vaadin:warning
-     - [!] Columns per asset
-           - [+] TOTAL WORTH -> How much costs now
-           - [-] TOTAL COST  -> How much is invested now
-           - [-] AVG PROFIT  -> current_amount * (AVG BUY - AVG SELL)
-           - [-] TOTAL PROFIT  -> current_amount * (AVG BUY - AVG SELL)
-
+     - [?] Dont allow to remove the asset name from column toggle component
+            - cursor: not-allowed;
     _______________________________________________________________________________________________________________________________________
     | Name | Price  | 24h Changes | Amount | Avg buy | Avg sell | All-time low | All-time high | Total Worth | Invested | Realized  |
     | BTC  | $64000 | 2%          | 0.0034 | $60000  |    -     | $10          | $73000        | $230        | $200     | $30 / 10% |
@@ -64,6 +62,7 @@ public class AssetsGrid extends Div {
     private final Grid<AssetGridItem> grid = new Grid<>();
     private final Span hiddenRowsCounterField = new Span();
     private GridListDataView<AssetGridItem> dataView;
+    private List<Asset> gridAssets = new ArrayList<>();
 
     private Grid.Column<AssetGridItem> changes24hCol;
     private Grid.Column<AssetGridItem> totalWorthCol;
@@ -76,7 +75,8 @@ public class AssetsGrid extends Div {
         this.instrumentsFacadeService = instrumentsFacadeService;
         this.portfolioPerformanceTracker = portfolioPerformanceTracker;
 
-        this.dataView = grid.setItems(getConvertedGridItems());
+        setItems(gridAssets);
+
         initializeGrid();
         initializeFilteringBySearch();
         initializeFilteringNonZeroValues();
@@ -100,18 +100,15 @@ public class AssetsGrid extends Div {
 
     private void initializeGrid() {
         renderColumns();
-
+        grid.setAllRowsVisible(true);
         grid.setColumnReorderingAllowed(true);
-        // grid.getColumns().forEach(c -> c.setAutoWidth(true));
         grid.addItemClickListener(row -> {
             System.out.println(row.getItem());
             UI.getCurrent().navigate(AssetDetailsView.class, row.getItem().getSymbol().toUpperCase());
         });
 
-        grid.setAllRowsVisible(true);
-        grid.getElement().executeJs("this.shadowRoot.querySelector('table').style.overflow = 'hidden';");
-
         setHiddenRowCount(0);
+        grid.addAttachListener(e -> updateColumnFooters());
     }
 
     private void renderColumns() {
@@ -199,16 +196,17 @@ public class AssetsGrid extends Div {
                 .setAutoWidth(true)
                 .setTooltipGenerator(a -> "The closest %s buy price that was added in the watcher".formatted(a.getSymbol()));
 
+
         grid.addColumn(columnPriceRenderer(AssetGridItem::getClosestSell))
                 .setHeader("Closest Sell")
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setAutoWidth(true)
                 .setTooltipGenerator(a -> "The closest %s sell price that was added in the watcher".formatted(a.getSymbol()));
 
-
-        Icon menuButton = VaadinIcon.SLIDERS.create();
+        // Creates the column selector menu based on column visibility
+        ColumnToggleMenu columnToggleMenu = new ColumnToggleMenu();
         grid.addColumn(new ComponentRenderer<>(this::threeDotsBtn))
-                .setHeader(menuButton)
+                .setHeader(columnToggleMenu)
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setFrozenToEnd(true);
 
@@ -217,11 +215,7 @@ public class AssetsGrid extends Div {
         // Display just the first columns, others should be selected to be displayed
         columnsWithData.stream().skip(8).forEach(c -> c.setVisible(false));
 
-        // Creates the column selector menu based on column visibility
-        ColumnToggleContextMenu columnToggleContextMenu = new ColumnToggleContextMenu(menuButton);
-        columnsWithData.forEach(col -> columnToggleContextMenu.addColumnToggleItem(col.getHeaderText(), col));
-
-        updateColumnFooters();
+        columnsWithData.forEach(col -> columnToggleMenu.addColumnToggleItem(col.getHeaderText(), col));
     }
 
 
@@ -310,14 +304,14 @@ public class AssetsGrid extends Div {
     }
 
     private ComponentRenderer<Component, AssetGridItem> columnChanges24hRenderer() {
-        return new ComponentRenderer<>(a -> new PriceBadge(a.getPriceChangesPercentage24h(), NumberType.PERCENT));
+        return new ComponentRenderer<>(a -> new PercentageBadge(a.getPriceChangesPercentage24h(), true, false));
     }
 
     private void initializeSyncButton() {
         syncButton.addClickListener(event -> {
             animateSyncButtonIcon();
             instrumentsFacadeService.updateAssetMetadata();
-            dataView = grid.setItems(getConvertedGridItems());
+            setItems(gridAssets);
             grid.removeAllColumns();
             renderColumns();
             resetFilterValues();
@@ -352,7 +346,7 @@ public class AssetsGrid extends Div {
     }
 
     private void updateHiddenRowsCounter() {
-        int numberOfHiddenRows = Symbols.getAll().size() - dataView.getItemCount();
+        int numberOfHiddenRows = gridAssets.size() - dataView.getItemCount();
         setHiddenRowCount(numberOfHiddenRows);
     }
 
@@ -380,9 +374,19 @@ public class AssetsGrid extends Div {
         hideAssetsCheckbox.setValue(false);
     }
 
+    public void setItems(List<Asset> assets) {
+        gridAssets = assets;
+        dataView = grid.setItems(getConvertedGridItems());
+    }
+
+    public void setGridFullSize(boolean fullSize) {
+        if (fullSize) {
+            grid.getElement().executeJs("this.shadowRoot.querySelector('table').style.overflow = 'hidden';");
+        }
+    }
+
     private List<AssetGridItem> getConvertedGridItems() {
-        return instrumentsFacadeService.getAllAssets()
-                .stream()
+        return gridAssets.stream()
                 .map(asset -> AssetGridItem.builder()
                         .symbol(asset.getSymbol())
                         .name(instrumentsFacadeService.getAssetFullName(asset))
@@ -437,55 +441,18 @@ public class AssetsGrid extends Div {
         private double closestSell;
     }
 
-    private static class ColumnToggleContextMenu extends ContextMenu {
+    private static class ColumnToggleMenu extends MenuBar {
 
-        public ColumnToggleContextMenu(Component target) {
-            super(target);
-            setOpenOnClick(true);
-
-//            addOpenedChangeListener(event -> {
-//                if (!event.isOpened()) {
-//                    updateAllMenuItemCheckmarks();
-//                }
-//            });
-
-        }
+        private final SubMenu subItems = addItem(VaadinIcon.SLIDERS.create()).getSubMenu();
 
         void addColumnToggleItem(String label, Grid.Column<AssetGridItem> column) {
-            MenuItem menuItem = this.addItem(label);
+            MenuItem menuItem = subItems.addItem(label);
+            menuItem.setKeepOpen(true);
             menuItem.setCheckable(true);
             menuItem.setChecked(column.isVisible());
-
-            // Prevents from closing menu on inside menu item click, still closes on outside click
-            menuItem.getElement().setAttribute("onclick", "event.stopPropagation()");
-            menuItem.getElement().executeJs("this.click();");
-
-            menuItem.addClickListener(e -> {
-                boolean isChecked = !menuItem.isChecked();
-                column.setVisible(!menuItem.isChecked());
-                updateMenuItemCheckmark(menuItem, isChecked);
-            });
+            menuItem.addClickListener(e -> column.setVisible(!column.isVisible()));
         }
-
-        private void updateMenuItemCheckmark(MenuItem menuItem, boolean isChecked) {
-            if (isChecked) {
-                menuItem.getElement().setAttribute("menu-item-checked", "");
-            } else {
-                menuItem.getElement().removeAttribute("menu-item-checked");
-            }
-        }
-
-//        private void updateAllMenuItemCheckmarks() {
-//            this.getItems().forEach(item -> {
-//                if (item != null) {
-//                    boolean isVisible = item.getParent().orElse(null).isVisible();
-//                    item.setChecked(isVisible);
-//                    updateMenuItemCheckmark(item, isVisible);
-//                }
-//            });
-//        }
 
     }
-
 
 }
