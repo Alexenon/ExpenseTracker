@@ -8,6 +8,7 @@
 
 @import 'styles/page-styles/assets-page.css';
 @import 'styles/page-styles/asset-details-page.css';
+@import 'styles/page-styles/asset-compare-page.css';
 @import 'styles/page-styles/transactions-page.css';
 
 :root {

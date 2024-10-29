@@ -33,7 +33,7 @@ public class AssetPriceAmountForm extends Div {
     }
 
     private void buildForm() {
-        initializeBinder();
+        //initializeBinder();
         initializeFieldsValues();
         initializeFieldsListeners();
         add(assetSymbolField, amountField, marketPriceField, totalPriceField);
@@ -124,25 +124,21 @@ public class AssetPriceAmountForm extends Div {
 
     }
 
-    private String getSelectedAssetSymbol() {
+    public String getSelectedAssetSymbol() {
         Asset selectedAsset = assetSymbolField.getValue();
         return selectedAsset == null ? "" : selectedAsset.getSymbol();
     }
 
-    public ComboBox<Asset> getAssetSymbolField() {
-        return assetSymbolField;
+    public double getAmount() {
+        return amountField.doubleValue();
     }
 
-    public AmountField getAmountField() {
-        return amountField;
+    public double getPrice() {
+        return marketPriceField.doubleValue();
     }
 
-    public CurrencyField getMarketPriceField() {
-        return marketPriceField;
-    }
-
-    public CurrencyField getTotalPriceField() {
-        return totalPriceField;
+    public double getTotalPrice() {
+        return totalPriceField.doubleValue();
     }
 
     public Binder<?> getBinder() {
