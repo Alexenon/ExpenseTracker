@@ -1,11 +1,13 @@
-package com.example.application.views.pages.crypto;
+package com.example.application.views.pages.crypto.comparator;
 
 import com.example.application.data.models.NumberType;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.utils.common.MathUtils;
+import com.example.application.utils.investment.EarnCalculator;
 import com.example.application.views.components.native_components.Container;
 import com.example.application.views.layouts.MainLayout;
-import com.example.application.views.pages.crypto.comparator.ProfitAssetForm;
+import com.example.application.views.pages.crypto.comparator.form.ProfitAssetForm;
+import com.example.application.views.pages.crypto.comparator.form.ProfitStakingForm;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
@@ -41,10 +43,11 @@ public class AssetCompareView extends Main {
     }
 
     private void buildPage() {
-        getStyle().set("margin", "150px 50px");
+        getStyle().set("margin", "100px 0 50px 0");
 
         TabSheet tabSheet = new TabSheet();
         tabSheet.add("Profit Calculator", getProfitCalculatorTab());
+        tabSheet.add("Staking Calculator", getStakingCalculatorTab());
         tabSheet.add("Compare Assets", getComparationTab());
         tabSheet.addThemeVariants(TabSheetVariant.LUMO_TABS_CENTERED);
 
@@ -55,7 +58,7 @@ public class AssetCompareView extends Main {
         Tab tab = new Tab();
         tab.addClassName("compare-tab-content");
 
-        H3 title = new H3("Profit Calculator");
+        H3 title = new H3("Profit calculator");
         ProfitAssetForm assetForm = new ProfitAssetForm(instrumentsFacadeService);
         Button calculateBtn = new Button("Calculate");
         Pre output = new Pre();
@@ -89,7 +92,7 @@ public class AssetCompareView extends Main {
         Tab tab = new Tab();
         tab.addClassName("compare-tab-content");
 
-        H3 title = new H3("Assets Profit Comparator");
+        H3 title = new H3("Compare assets");
         ProfitAssetForm assetForm1 = new ProfitAssetForm(instrumentsFacadeService);
         ProfitAssetForm assetForm2 = new ProfitAssetForm(instrumentsFacadeService);
         Container comparationBody = new Container("comparation-body", assetForm1, assetForm2);
@@ -100,6 +103,42 @@ public class AssetCompareView extends Main {
         assetForm2.addClassName("asset-compare-form");
 
         tab.add(title, comparationBody, compareBtn, output);
+        return tab;
+    }
+
+    private Tab getStakingCalculatorTab() {
+        Tab tab = new Tab();
+        tab.addClassName("compare-tab-content");
+
+        H3 title = new H3("Staking calculator");
+        ProfitStakingForm profitStakingForm = new ProfitStakingForm(instrumentsFacadeService);
+        Container comparationBody = new Container("comparation-body", profitStakingForm);
+        Button calculateBtn = new Button("Calculate");
+        Pre output = new Pre();
+
+        calculateBtn.addClickListener(e -> {
+            double apr = profitStakingForm.getApr();
+            double stakingAmount = profitStakingForm.getStakingWorth();
+
+            String text = """
+                    | Stacking amount - $%.2f, APR - %.2f%%
+                    |-------------------------------------------|
+                    | Daily - $%.2f
+                    | Weekly - $%.2f
+                    | Monthly - $%.2f
+                    | Yearly - $%.2f
+                    |-------------------------------------------|
+                    """.formatted(stakingAmount, apr,
+                    EarnCalculator.earnDaily(stakingAmount, apr),
+                    EarnCalculator.earnWeekly(stakingAmount, apr),
+                    EarnCalculator.earnMonthly(stakingAmount, apr),
+                    EarnCalculator.earnYearly(stakingAmount, apr));
+            output.setText(text);
+        });
+
+        profitStakingForm.addClassName("asset-compare-form");
+
+        tab.add(title, comparationBody, calculateBtn, output);
         return tab;
     }
 

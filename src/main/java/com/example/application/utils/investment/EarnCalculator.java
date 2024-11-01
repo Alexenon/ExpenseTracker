@@ -25,7 +25,7 @@ public class EarnCalculator {
                         """,
                 details, stakingAmount, apr,
                 earnDaily(stakingAmount, apr),
-                earnDaily(stakingAmount, apr) * 7,
+                earnWeekly(stakingAmount, apr),
                 earnMonthly(stakingAmount, apr),
                 earnYearly(stakingAmount, apr)
         );
@@ -33,6 +33,10 @@ public class EarnCalculator {
 
     public static double earnDaily(double stackingAmount, double annualPercentageRate) {
         return earnYearly(stackingAmount, annualPercentageRate) / DAYS_IN_YEAR;
+    }
+
+    public static double earnWeekly(double stackingAmount, double annualPercentageRate) {
+        return earnDaily(stackingAmount, annualPercentageRate) * 7;
     }
 
     public static double earnMonthly(double stackingAmount, double annualPercentageRate) {

@@ -1,7 +1,8 @@
-package com.example.application.views.pages.crypto.comparator;
+package com.example.application.views.pages.crypto.comparator.form;
 
 import com.example.application.entities.crypto.Asset;
 import com.example.application.services.crypto.InstrumentsFacadeService;
+import com.example.application.utils.common.MathUtils;
 import com.example.application.views.components.fields.AmountField;
 import com.example.application.views.components.fields.CurrencyField;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -32,7 +33,6 @@ public class ProfitAssetForm extends Div {
     }
 
     private void buildForm() {
-        //initializeBinder();
         initializeFieldsValues();
         initializeFieldsListeners();
         add(assetSymbolField, amountField, buyPriceField, totalPriceField, sellPriceField);
@@ -73,14 +73,8 @@ public class ProfitAssetForm extends Div {
 
         totalPriceField.setValueChangeMode(ValueChangeMode.EAGER);
         totalPriceField.addKeyUpListener(e -> {
-            double amount = 0;
-            if (buyPriceField.doubleValue() != 0) {
-                String textPrice = totalPriceField.getValue().replaceAll(",", "");
-                double totalPrice = Double.parseDouble(textPrice.isEmpty() ? "0" : textPrice);
-                amount = totalPrice / buyPriceField.doubleValue();
-            }
-
-            amountField.setValue(amount);
+            double amountValue = MathUtils.safeZeroDivision(totalPriceField.doubleValue(), buyPriceField.doubleValue());
+            amountField.setValue(amountValue);
             binder.validate();
         });
     }
@@ -123,7 +117,7 @@ public class ProfitAssetForm extends Div {
     public double getSellPrice() {
         return sellPriceField.doubleValue();
     }
-    
+
     public Binder<?> getBinder() {
         return binder;
     }

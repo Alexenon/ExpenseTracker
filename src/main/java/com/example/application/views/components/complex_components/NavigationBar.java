@@ -1,7 +1,7 @@
 package com.example.application.views.components.complex_components;
 
 import com.example.application.views.pages.*;
-import com.example.application.views.pages.crypto.AssetCompareView;
+import com.example.application.views.pages.crypto.comparator.AssetCompareView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.html.Div;

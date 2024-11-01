@@ -38,6 +38,14 @@ public class MathUtils {
         return number.length() - indexOfDecimal - 1;
     }
 
+    public static double safeZeroDivision(double dividend, double divisor) {
+        if (Double.compare(divisor, 0.0) == 0) {
+            return 0;
+        }
+
+        return dividend / divisor;
+    }
+
     /**
      * Usage
      * <pre><code>
