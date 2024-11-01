@@ -1,13 +1,16 @@
 package com.example.application.views.pages.crypto;
 
+import com.example.application.data.models.NumberType;
 import com.example.application.services.crypto.InstrumentsFacadeService;
+import com.example.application.utils.common.MathUtils;
 import com.example.application.views.components.native_components.Container;
 import com.example.application.views.layouts.MainLayout;
-import com.example.application.views.pages.crypto.comparator.AssetPriceAmountForm;
+import com.example.application.views.pages.crypto.comparator.ProfitAssetForm;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Main;
+import com.vaadin.flow.component.html.Pre;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.TabSheet;
 import com.vaadin.flow.component.tabs.TabSheetVariant;
@@ -15,10 +18,6 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
-import java.util.List;
 
 /*
 
@@ -41,12 +40,6 @@ public class AssetCompareView extends Main {
         buildPage();
     }
 
-    public static void main(String[] args) {
-        LocalDate currentDate = LocalDate.now();
-        LocalDate maxAllowedDate = currentDate.plus(1, ChronoUnit.MONTHS);
-        System.out.println(maxAllowedDate);
-    }
-
     private void buildPage() {
         getStyle().set("margin", "150px 50px");
 
@@ -63,9 +56,28 @@ public class AssetCompareView extends Main {
         tab.addClassName("compare-tab-content");
 
         H3 title = new H3("Profit Calculator");
-        AssetPriceAmountForm assetForm = new AssetPriceAmountForm(instrumentsFacadeService);
+        ProfitAssetForm assetForm = new ProfitAssetForm(instrumentsFacadeService);
         Button calculateBtn = new Button("Calculate");
-        Div output = new Div();
+        Pre output = new Pre();
+
+        calculateBtn.addClickListener(e -> {
+            double profit = MathUtils.profit(assetForm.getBuyPrice(), assetForm.getSellPrice(), assetForm.getTotalPrice());
+            double profitPercentage = MathUtils.profitPercentage(assetForm.getBuyPrice(), assetForm.getSellPrice());
+
+            String text = """
+                    Invested in %s $%.0f
+                    Buy Price: %s
+                    Sell Price: %s
+                    Profit: %s ~ %.1f%%
+                    """.formatted(assetForm.getSelectedAssetSymbol(), assetForm.getTotalPrice(),
+                    NumberType.PRICE.parse(assetForm.getBuyPrice()),
+                    NumberType.PRICE.parse(assetForm.getSellPrice()),
+                    NumberType.PRICE.parse(profit), profitPercentage
+            );
+
+            output.setText(text);
+        });
+
 
         assetForm.addClassName("asset-compare-form");
 
@@ -78,8 +90,8 @@ public class AssetCompareView extends Main {
         tab.addClassName("compare-tab-content");
 
         H3 title = new H3("Assets Profit Comparator");
-        AssetPriceAmountForm assetForm1 = new AssetPriceAmountForm(instrumentsFacadeService);
-        AssetPriceAmountForm assetForm2 = new AssetPriceAmountForm(instrumentsFacadeService);
+        ProfitAssetForm assetForm1 = new ProfitAssetForm(instrumentsFacadeService);
+        ProfitAssetForm assetForm2 = new ProfitAssetForm(instrumentsFacadeService);
         Container comparationBody = new Container("comparation-body", assetForm1, assetForm2);
         Button compareBtn = new Button("Compare");
         Div output = new Div();
@@ -89,18 +101,6 @@ public class AssetCompareView extends Main {
 
         tab.add(title, comparationBody, compareBtn, output);
         return tab;
-    }
-
-    private void test() {
-        List<Integer> r = List.of(1, 2, 3).stream()
-                .filter(o -> {
-                    LocalDate expireDate = LocalDate.now();
-                    LocalDate currentDate = LocalDate.now();
-                    LocalDate maxAllowedDate = currentDate.plus(1, ChronoUnit.MONTHS);
-
-                    return expireDate.isAfter(currentDate) && expireDate.isBefore(maxAllowedDate);
-                })
-                .toList();
     }
 
 }

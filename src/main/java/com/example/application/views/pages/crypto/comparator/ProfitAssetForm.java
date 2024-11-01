@@ -4,8 +4,6 @@ import com.example.application.entities.crypto.Asset;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.views.components.fields.AmountField;
 import com.example.application.views.components.fields.CurrencyField;
-import com.example.application.views.components.utils.convertors.FlexibleAmountConvertor;
-import com.example.application.views.components.utils.convertors.FlexiblePriceConvertor;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
@@ -16,18 +14,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AssetPriceAmountForm extends Div {
+public class ProfitAssetForm extends Div {
 
     private final InstrumentsFacadeService instrumentsFacadeService;
 
     private final ComboBox<Asset> assetSymbolField = new ComboBox<>("Asset");
     private final AmountField amountField = new AmountField("Amount");
-    private final CurrencyField marketPriceField = new CurrencyField("Price");
+    private final CurrencyField buyPriceField = new CurrencyField("Buy Price");
     private final CurrencyField totalPriceField = new CurrencyField("Total");
+    private final CurrencyField sellPriceField = new CurrencyField("Sell Price");
     private final Binder<?> binder = new Binder<>();
 
     @Autowired
-    public AssetPriceAmountForm(InstrumentsFacadeService instrumentsFacadeService) {
+    public ProfitAssetForm(InstrumentsFacadeService instrumentsFacadeService) {
         this.instrumentsFacadeService = instrumentsFacadeService;
         buildForm();
     }
@@ -36,37 +35,38 @@ public class AssetPriceAmountForm extends Div {
         //initializeBinder();
         initializeFieldsValues();
         initializeFieldsListeners();
-        add(assetSymbolField, amountField, marketPriceField, totalPriceField);
+        add(assetSymbolField, amountField, buyPriceField, totalPriceField, sellPriceField);
     }
 
     private void initializeFieldsValues() {
         assetSymbolField.setItems(instrumentsFacadeService.getAllAssets());
         assetSymbolField.setItemLabelGenerator(instrumentsFacadeService::getAssetFullName);
         assetSymbolField.setRenderer(assetSymbolRenderer());
-        assetSymbolField.addValueChangeListener(l -> marketPriceField.setValue(getMarketPriceBySelectedAsset()));
+        assetSymbolField.addValueChangeListener(l -> buyPriceField.setValue(getMarketPriceBySelectedAsset()));
 
         amountField.setValue("");
-        marketPriceField.setValue(getMarketPriceBySelectedAsset());
+        buyPriceField.setValue(getMarketPriceBySelectedAsset());
         totalPriceField.setValue(0);
+        sellPriceField.setValue("");
     }
 
     private void initializeFieldsListeners() {
         assetSymbolField.addValueChangeListener(l -> {
             binder.setValidatorsDisabled(false);
-            marketPriceField.setValue(getMarketPriceBySelectedAsset());
+            buyPriceField.setValue(getMarketPriceBySelectedAsset());
             amountField.setSuffixComponent(new Span(getSelectedAssetSymbol()));
         });
 
         amountField.setValueChangeMode(ValueChangeMode.EAGER);
         amountField.addKeyUpListener(e -> {
-            double totalPrice = amountField.doubleValue() * marketPriceField.doubleValue();
+            double totalPrice = amountField.doubleValue() * buyPriceField.doubleValue();
             totalPriceField.setValue(totalPrice);
             binder.validate();
         });
 
-        marketPriceField.setValueChangeMode(ValueChangeMode.EAGER);
-        marketPriceField.addKeyUpListener(e -> {
-            double totalPrice = amountField.doubleValue() * marketPriceField.doubleValue();
+        buyPriceField.setValueChangeMode(ValueChangeMode.EAGER);
+        buyPriceField.addKeyUpListener(e -> {
+            double totalPrice = amountField.doubleValue() * buyPriceField.doubleValue();
             totalPriceField.setValue(totalPrice);
             binder.validate();
         });
@@ -74,36 +74,15 @@ public class AssetPriceAmountForm extends Div {
         totalPriceField.setValueChangeMode(ValueChangeMode.EAGER);
         totalPriceField.addKeyUpListener(e -> {
             double amount = 0;
-            if (marketPriceField.doubleValue() != 0) {
+            if (buyPriceField.doubleValue() != 0) {
                 String textPrice = totalPriceField.getValue().replaceAll(",", "");
                 double totalPrice = Double.parseDouble(textPrice.isEmpty() ? "0" : textPrice);
-                amount = totalPrice / marketPriceField.doubleValue();
+                amount = totalPrice / buyPriceField.doubleValue();
             }
 
             amountField.setValue(amount);
             binder.validate();
         });
-    }
-
-    private void initializeBinder() {
-        binder.forField(assetSymbolField)
-                .asRequired("Please fill this field");
-
-        binder.forField(amountField)
-                .asRequired("Please fill this field")
-                .withConverter(new FlexibleAmountConvertor())
-                .withValidator(amount -> amount > 0, "Price should be bigger than 0");
-
-        binder.forField(marketPriceField)
-                .asRequired("Please fill this field")
-                .withConverter(new FlexiblePriceConvertor())
-                .withValidator(price -> price > 0, "Price should be bigger than 0");
-
-        binder.forField(totalPriceField)
-                .asRequired("Please fill this field")
-                .withConverter(new FlexiblePriceConvertor())
-                .withValidator(price -> price >= 1, "Total price should be at least one dollar");
-
     }
 
     private LitRenderer<Asset> assetSymbolRenderer() {
@@ -133,14 +112,18 @@ public class AssetPriceAmountForm extends Div {
         return amountField.doubleValue();
     }
 
-    public double getPrice() {
-        return marketPriceField.doubleValue();
+    public double getBuyPrice() {
+        return buyPriceField.doubleValue();
     }
 
     public double getTotalPrice() {
         return totalPriceField.doubleValue();
     }
 
+    public double getSellPrice() {
+        return sellPriceField.doubleValue();
+    }
+    
     public Binder<?> getBinder() {
         return binder;
     }
