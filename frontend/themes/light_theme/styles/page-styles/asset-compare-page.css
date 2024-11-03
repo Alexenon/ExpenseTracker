@@ -22,3 +22,26 @@
 vaadin-tabs::part(tabs) {
     justify-content: space-evenly;
 }
+
+/*
+    RESULTS SECTION
+*/
+
+.results {
+    width: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.result-items {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.result-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
