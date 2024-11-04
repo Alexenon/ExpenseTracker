@@ -9,7 +9,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Component;
 /*
     TODO:
         [!] Add result component to display beauty profit + profit percentage
-        [?] Remove binder / Add binder
 
     FIX:
         - Incorrect profit percetage value, check this
@@ -31,7 +29,6 @@ public class SellProfitTab extends BaseCalculatorTab {
     private final CurrencyField buyPriceField = new CurrencyField("Buy Price");
     private final CurrencyField totalPriceField = new CurrencyField("Total");
     private final CurrencyField sellPriceField = new CurrencyField("Sell Price");
-    private final Binder<?> binder = new Binder<>();
 
     @Autowired
     public SellProfitTab(InstrumentsFacadeService instrumentsFacadeService) {
@@ -58,7 +55,6 @@ public class SellProfitTab extends BaseCalculatorTab {
 
     private void initializeFieldsListeners() {
         assetSymbolField.addValueChangeListener(l -> {
-            binder.setValidatorsDisabled(false);
             amountField.setValue(getAmountOfTokens(assetSymbolField.getValue()));
             amountField.setSuffixComponent(new Span(getSelectedAssetSymbol(assetSymbolField)));
             buyPriceField.setValue(getAssetMarketPrice(assetSymbolField));
@@ -69,21 +65,18 @@ public class SellProfitTab extends BaseCalculatorTab {
         amountField.addKeyUpListener(e -> {
             double totalPrice = amountField.doubleValue() * buyPriceField.doubleValue();
             totalPriceField.setValue(totalPrice);
-            binder.validate();
         });
 
         buyPriceField.setValueChangeMode(ValueChangeMode.EAGER);
         buyPriceField.addKeyUpListener(e -> {
             double totalPrice = amountField.doubleValue() * buyPriceField.doubleValue();
             totalPriceField.setValue(totalPrice);
-            binder.validate();
         });
 
         totalPriceField.setValueChangeMode(ValueChangeMode.EAGER);
         totalPriceField.addKeyUpListener(e -> {
             double amountValue = MathUtils.safeZeroDivision(totalPriceField.doubleValue(), buyPriceField.doubleValue());
             amountField.setValue(amountValue);
-            binder.validate();
         });
     }
 
@@ -112,5 +105,19 @@ public class SellProfitTab extends BaseCalculatorTab {
 
         return calculateBtn;
     }
+
+//    private ResponseBodyExtractionOptions delete(String json, RequestSpecification requestSpec) {
+//        return given()
+//                .spec(requestSpec)
+//                .content(ContentType.JSON)
+//                .body(json)
+//                .accept(ContentType.JSON)
+//                .when()
+//                .delete()
+//                .then()
+//                .statusCode(200)
+//                .extract();
+//    }
+
 
 }

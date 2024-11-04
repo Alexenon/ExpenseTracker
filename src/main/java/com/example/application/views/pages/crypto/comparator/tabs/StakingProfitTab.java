@@ -1,9 +1,9 @@
 package com.example.application.views.pages.crypto.comparator.tabs;
 
+import com.example.application.data.models.NumberType;
 import com.example.application.entities.crypto.Asset;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.utils.common.MathUtils;
-import com.example.application.utils.investment.EarnCalculator;
 import com.example.application.views.components.fields.AmountField;
 import com.example.application.views.components.fields.CurrencyField;
 import com.vaadin.flow.component.button.Button;
@@ -13,10 +13,11 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import static com.example.application.utils.investment.EarnCalculator.*;
+
 /*
     TODO:
         - Add wanted custom sell price
-        - Display the amount of token will be staked daily..., not just the dollar amount
 * */
 public final class StakingProfitTab extends BaseCalculatorTab {
 
@@ -76,19 +77,34 @@ public final class StakingProfitTab extends BaseCalculatorTab {
         Button calculateBtn = new Button("Calculate");
 
         calculateBtn.addClickListener(e -> {
+            String symbol = getSelectedAssetSymbol(assetSymbolField);
             double apr = aprField.doubleValue();
-            double amount = worthField.doubleValue();
+            double worth = worthField.doubleValue();
+            double amount = amountField.doubleValue();
+
+            String daily = stakedAmount(earnDaily(amount, apr), earnDaily(worth, apr));
+            String weekly = stakedAmount(earnWeekly(amount, apr), earnWeekly(worth, apr));
+            String monthly = stakedAmount(earnMonthly(amount, apr), earnMonthly(worth, apr));
+            String yearly = stakedAmount(earnYearly(amount, apr), earnYearly(worth, apr));
 
             resultsContainer.removeAll();
             resultsContainer.add(
-                    createResultItem("Daily", EarnCalculator.earnDaily(amount, apr)),
-                    createResultItem("Weekly", EarnCalculator.earnWeekly(amount, apr)),
-                    createResultItem("Monthly", EarnCalculator.earnMonthly(amount, apr)),
-                    createResultItem("Yearly", EarnCalculator.earnYearly(amount, apr))
+                    createResultItem("Daily", daily),
+                    createResultItem("Weekly", weekly),
+                    createResultItem("Monthly", monthly),
+                    createResultItem("Yearly", yearly)
             );
         });
 
         return calculateBtn;
+    }
+
+    private String stakedAmount(double amountTokens, double worthEquivalent) {
+        return "+ %s %s ≈ %s".formatted(
+                NumberType.AMOUNT.parse(amountTokens),
+                getSelectedAssetSymbol(assetSymbolField),
+                NumberType.PRICE.parse(worthEquivalent)
+        );
     }
 
 }

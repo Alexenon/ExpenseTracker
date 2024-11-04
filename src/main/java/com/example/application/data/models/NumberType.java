@@ -71,7 +71,8 @@ public enum NumberType {
 
             // +3 digits after decimal point
             int decimalPlaces = (int) Math.abs(Math.floor(Math.log10(value))) + 3;
-            String shortedPrice = String.format("%." + decimalPlaces + "f", value);
+            String format = "%." + decimalPlaces + "f";
+            String shortedPrice = String.format(format, value);
 
             return "$" + new BigDecimal(shortedPrice)
                     .stripTrailingZeros()
