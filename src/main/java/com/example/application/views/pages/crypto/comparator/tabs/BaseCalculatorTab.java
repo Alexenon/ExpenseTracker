@@ -12,30 +12,30 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.data.renderer.LitRenderer;
 
-public abstract class BaseCompareTab extends Tab {
+public abstract class BaseCalculatorTab extends Tab {
 
     protected final InstrumentsFacadeService instrumentsFacadeService;
 
     protected Div inputFieldsContainer;
     protected Button displayResultsBtn;
-    protected final Container resultsContainer = new Container("result-items");
+    protected Div resultsContainer = new Container("result-items");
 
-    protected double assetMarketPrice;
-
-    public BaseCompareTab(String label, InstrumentsFacadeService instrumentsFacadeService) {
+    public BaseCalculatorTab(String label, InstrumentsFacadeService instrumentsFacadeService) {
         this.instrumentsFacadeService = instrumentsFacadeService;
 
         addClassName("compare-tab-content");
-        add(
-                new H3(label),
-                new Container("results", new H3("Results"), resultsContainer)
-        );
 
         addAttachListener(e -> {
-            this.displayResultsBtn = createDisplayResultsBtn();
             this.inputFieldsContainer = createInputFieldsContainer();
-            addComponentAtIndex(1, inputFieldsContainer);
-            addComponentAtIndex(2, displayResultsBtn);
+            this.displayResultsBtn = createDisplayResultsBtn();
+            add(
+                    new H3(label),
+                    inputFieldsContainer,
+                    displayResultsBtn,
+                    new Container("results", new H3("Results"), resultsContainer)
+            );
+
+            inputFieldsContainer.addClassName("comparation-body");
         });
     }
 
@@ -43,12 +43,11 @@ public abstract class BaseCompareTab extends Tab {
 
     protected abstract Button createDisplayResultsBtn();
 
-
-    protected Div createOutputItem(String labelText, double value) {
-        return createOutputItem(labelText, String.format("$%.2f", value));
+    protected Div createResultItem(String labelText, double value) {
+        return createResultItem(labelText, String.format("$%.2f", value));
     }
 
-    protected Div createOutputItem(String labelText, String valueText) {
+    protected Div createResultItem(String labelText, String valueText) {
         Div itemContainer = new Div();
         itemContainer.addClassName("result-item");
         itemContainer.add(new Paragraph(labelText), new Span(valueText));
@@ -72,12 +71,20 @@ public abstract class BaseCompareTab extends Tab {
         return selectedAsset == null ? "" : selectedAsset.getSymbol();
     }
 
-    protected void updateAssetMarketPrice(ComboBox<Asset> assetSymbolField) {
+    protected double getAssetMarketPrice(ComboBox<Asset> assetSymbolField) {
         Asset selectedAsset = assetSymbolField.getValue();
         if (selectedAsset == null) {
-            assetMarketPrice = 0;
+            return 0;
         } else {
-            assetMarketPrice = instrumentsFacadeService.getAssetPrice(selectedAsset);
+            return instrumentsFacadeService.getAssetPrice(selectedAsset);
+        }
+    }
+
+    protected double getAmountOfTokens(Asset selectedAsset) {
+        if (selectedAsset == null) {
+            return 0.0;
+        } else {
+            return instrumentsFacadeService.getAmountOfTokens(selectedAsset);
         }
     }
 

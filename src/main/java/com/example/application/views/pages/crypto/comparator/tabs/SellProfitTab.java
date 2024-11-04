@@ -1,6 +1,5 @@
 package com.example.application.views.pages.crypto.comparator.tabs;
 
-import com.example.application.data.models.NumberType;
 import com.example.application.entities.crypto.Asset;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.utils.common.MathUtils;
@@ -15,8 +14,17 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+/*
+    TODO:
+        [!] Add result component to display beauty profit + profit percentage
+        [?] Remove binder / Add binder
+
+    FIX:
+        - Incorrect profit percetage value, check this
+* */
+
 @Component
-public class SellProfitTab extends BaseCompareTab {
+public class SellProfitTab extends BaseCalculatorTab {
 
     private final ComboBox<Asset> assetSymbolField = new ComboBox<>("Asset");
     private final AmountField amountField = new AmountField("Amount");
@@ -40,10 +48,10 @@ public class SellProfitTab extends BaseCompareTab {
         assetSymbolField.setItems(instrumentsFacadeService.getAllAssets());
         assetSymbolField.setItemLabelGenerator(instrumentsFacadeService::getAssetFullName);
         assetSymbolField.setRenderer(assetSymbolRenderer());
-        assetSymbolField.addValueChangeListener(l -> buyPriceField.setValue(assetMarketPrice));
+        assetSymbolField.addValueChangeListener(l -> buyPriceField.setValue(getAssetMarketPrice(assetSymbolField)));
 
         amountField.setValue("");
-        buyPriceField.setValue(assetMarketPrice);
+        buyPriceField.setValue(getAssetMarketPrice(assetSymbolField));
         totalPriceField.setValue(0);
         sellPriceField.setValue("");
     }
@@ -51,8 +59,10 @@ public class SellProfitTab extends BaseCompareTab {
     private void initializeFieldsListeners() {
         assetSymbolField.addValueChangeListener(l -> {
             binder.setValidatorsDisabled(false);
-            buyPriceField.setValue(assetMarketPrice);
+            amountField.setValue(getAmountOfTokens(assetSymbolField.getValue()));
             amountField.setSuffixComponent(new Span(getSelectedAssetSymbol(assetSymbolField)));
+            buyPriceField.setValue(getAssetMarketPrice(assetSymbolField));
+            totalPriceField.setValue(amountField.doubleValue() * buyPriceField.doubleValue());
         });
 
         amountField.setValueChangeMode(ValueChangeMode.EAGER);
@@ -89,15 +99,13 @@ public class SellProfitTab extends BaseCompareTab {
             double profit = MathUtils.profit(buyPriceField.doubleValue(), sellPriceField.doubleValue(), totalPriceField.doubleValue());
             double profitPercentage = MathUtils.profitPercentage(buyPriceField.doubleValue(), sellPriceField.doubleValue());
 
-            String text = """
-                    Invested in %s $%.0f
-                    Buy Price: %s
-                    Sell Price: %s
-                    Profit: %s ~ %.1f%%
-                    """.formatted(getSelectedAssetSymbol(assetSymbolField), totalPriceField.doubleValue(),
-                    NumberType.PRICE.parse(buyPriceField.doubleValue()),
-                    NumberType.PRICE.parse(sellPriceField.doubleValue()),
-                    NumberType.PRICE.parse(profit), profitPercentage
+            resultsContainer.removeAll();
+            resultsContainer.add(
+                    createResultItem("Invested", totalPriceField.doubleValue()),
+                    createResultItem("Buy Price", buyPriceField.doubleValue()),
+                    createResultItem("Sell Price", sellPriceField.doubleValue()),
+                    createResultItem("Profit USD", profit),
+                    createResultItem("Profit %", profitPercentage)
             );
 
         });
