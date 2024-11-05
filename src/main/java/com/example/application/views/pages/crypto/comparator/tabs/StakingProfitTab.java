@@ -15,15 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import static com.example.application.utils.investment.EarnCalculator.*;
 
-/*
-    TODO:
-        - Add wanted custom sell price
-* */
 public final class StakingProfitTab extends BaseCalculatorTab {
 
     private final ComboBox<Asset> assetSymbolField = new ComboBox<>("Asset");
     private final AmountField amountField = new AmountField("Amount of tokens");
-    private final CurrencyField worthField = new CurrencyField("Total worth of asset");
+    private final CurrencyField worthField = new CurrencyField("Current total worth");
     private final AmountField aprField = new AmountField("APR");
 
     @Autowired

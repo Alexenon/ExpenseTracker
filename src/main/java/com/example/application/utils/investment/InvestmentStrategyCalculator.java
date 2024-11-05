@@ -193,7 +193,6 @@ public class InvestmentStrategyCalculator {
         return null;
     }
 
-    // TODO: Think more about this
     private static List<Double> stepStrategy(double sumToInvest, double start, double end, Step step, StrategyType strategyType) {
         List<Double> pricesWhenToBuy = new LinkedList<>();
 

@@ -44,6 +44,7 @@ public class AddTransactionDialog extends Dialog {
 
     private final Button saveButton = new Button("Save");
     private final Button cancelButton = new Button("Cancel");
+    private final Span symbolSuffix = new Span();
 
     public AddTransactionDialog(InstrumentsFacadeService instrumentsFacadeService) {
         this(null, instrumentsFacadeService);
@@ -77,10 +78,10 @@ public class AddTransactionDialog extends Dialog {
         assetSymbolField.addValueChangeListener(l -> {
             binder.setValidatorsDisabled(false);
             marketPriceField.setValue(getMarketPriceBySelectedAsset());
-            // TODO: Can be improved by not creating a new span each time
-            amountField.setSuffixComponent(new Span(getSelectedAssetSymbol()));
+            symbolSuffix.setText(getSelectedAssetSymbol());
         });
 
+        amountField.setSuffixComponent(symbolSuffix);
         amountField.setValueChangeMode(ValueChangeMode.EAGER);
         amountField.addKeyUpListener(e -> {
             double totalPrice = amountField.doubleValue() * marketPriceField.doubleValue();

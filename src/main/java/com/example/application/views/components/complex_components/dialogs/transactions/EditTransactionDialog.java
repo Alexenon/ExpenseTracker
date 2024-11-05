@@ -44,6 +44,7 @@ public class EditTransactionDialog extends Dialog {
 
     private final Button saveButton = new Button("Save");
     private final Button cancelButton = new Button("Cancel");
+    private final Span symbolSuffix = new Span();
 
     @Autowired
     public EditTransactionDialog(Asset asset, CryptoTransaction transaction,
@@ -74,10 +75,10 @@ public class EditTransactionDialog extends Dialog {
         assetSymbolField.addValueChangeListener(l -> {
             binder.setValidatorsDisabled(false);
             marketPriceField.setValue(getMarketPriceBySelectedAsset());
-            // TODO: Can be improved by not creating a new span each time
-            amountField.setSuffixComponent(new Span(getSelectedAssetSymbol()));
+            symbolSuffix.setText(getSelectedAssetSymbol());
         });
 
+        amountField.setSuffixComponent(symbolSuffix);
         amountField.setValueChangeMode(ValueChangeMode.EAGER);
         amountField.addKeyUpListener(e -> {
             double totalPrice = amountField.doubleValue() * marketPriceField.doubleValue();
@@ -140,10 +141,10 @@ public class EditTransactionDialog extends Dialog {
     private LitRenderer<Asset> assetSymbolRenderer() {
         return LitRenderer.<Asset>of(
                         "<div class='coin-overview-name-container'>" +
-                        "  <img class='rounded coin-overview-image' src='${item.imgUrl}' alt='${item.fullName}'/>" +
-                        "  <span>${item.symbol}</span>" +
-                        "  <p>${item.fullName}</p>" +
-                        "</div>")
+                                "  <img class='rounded coin-overview-image' src='${item.imgUrl}' alt='${item.fullName}'/>" +
+                                "  <span>${item.symbol}</span>" +
+                                "  <p>${item.fullName}</p>" +
+                                "</div>")
                 .withProperty("imgUrl", instrumentsFacadeService::getAssetImgUrl)
                 .withProperty("symbol", Asset::getSymbol)
                 .withProperty("fullName", instrumentsFacadeService::getAssetFullName);
