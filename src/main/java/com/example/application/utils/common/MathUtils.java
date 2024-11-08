@@ -72,7 +72,7 @@ public class MathUtils {
     }
 
     public static double profitPercentage(double buyPrice, double sellPrice) {
-        return sellPrice * 100 / buyPrice;
+        return (sellPrice - buyPrice) /  buyPrice * 100;
     }
 
     public static double profit(CryptoTransaction transaction, double currentPrice) {

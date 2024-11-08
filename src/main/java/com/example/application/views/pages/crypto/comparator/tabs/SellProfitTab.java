@@ -3,6 +3,7 @@ package com.example.application.views.pages.crypto.comparator.tabs;
 import com.example.application.entities.crypto.Asset;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.utils.common.MathUtils;
+import com.example.application.views.components.complex_components.ProfitValueParagraph;
 import com.example.application.views.components.complex_components.fields.PricePercentageWrapper;
 import com.example.application.views.components.fields.AmountField;
 import com.example.application.views.components.fields.CurrencyField;
@@ -13,11 +14,6 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-/*
-    FIX:
-        - Incorrect profit percetage value, check this
-* */
 
 @Component
 public class SellProfitTab extends BaseCalculatorTab {
@@ -90,19 +86,19 @@ public class SellProfitTab extends BaseCalculatorTab {
             double invested = totalPriceField.doubleValue();
             double buyPrice = buyPriceField.doubleValue();
             double sellPrice = sellPriceField.doubleValue();
-            double totalProfit = MathUtils.profit(buyPrice, sellPrice, invested);
-            double totalProfitPercentage = MathUtils.profitPercentage(buyPrice, sellPrice);
-            double netProfit = totalProfit - invested;
-            double netProfitPercentage = totalProfitPercentage - 100;
-            PricePercentageWrapper worthWrapper = new PricePercentageWrapper(totalProfit, totalProfitPercentage);
-            PricePercentageWrapper netProfitWrapper = new PricePercentageWrapper(netProfit, netProfitPercentage);
+            double profit = MathUtils.profit(buyPrice, sellPrice, invested);
+            double profitPercentage = MathUtils.profitPercentage(buyPrice, sellPrice);
+            double totalWorth = profit + invested;
+
+            ProfitValueParagraph worthParagraph = new ProfitValueParagraph(totalWorth);
+            PricePercentageWrapper netProfitWrapper = new PricePercentageWrapper(profit, profitPercentage);
 
             resultsContainer.removeAll();
             resultsContainer.add(
                     createResultItem("Invested", invested),
                     createResultItem("Buy Price", buyPrice),
                     createResultItem("Sell Price", sellPrice),
-                    createResultItem("Total Worth", worthWrapper),
+                    createResultItem("Total Worth", worthParagraph),
                     createResultItem("Net Profit", netProfitWrapper)
             );
 
