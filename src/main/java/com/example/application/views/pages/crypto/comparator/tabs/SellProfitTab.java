@@ -3,6 +3,7 @@ package com.example.application.views.pages.crypto.comparator.tabs;
 import com.example.application.entities.crypto.Asset;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.utils.common.MathUtils;
+import com.example.application.views.components.complex_components.fields.PricePercentageWrapper;
 import com.example.application.views.components.fields.AmountField;
 import com.example.application.views.components.fields.CurrencyField;
 import com.vaadin.flow.component.button.Button;
@@ -14,9 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /*
-    TODO:
-        [!] Add result component to display beauty profit + profit percentage
-
     FIX:
         - Incorrect profit percetage value, check this
 * */
@@ -89,35 +87,29 @@ public class SellProfitTab extends BaseCalculatorTab {
     protected Button createDisplayResultsBtn() {
         Button calculateBtn = new Button("Calculate");
         calculateBtn.addClickListener(e -> {
-            double profit = MathUtils.profit(buyPriceField.doubleValue(), sellPriceField.doubleValue(), totalPriceField.doubleValue());
-            double profitPercentage = MathUtils.profitPercentage(buyPriceField.doubleValue(), sellPriceField.doubleValue());
+            double invested = totalPriceField.doubleValue();
+            double buyPrice = buyPriceField.doubleValue();
+            double sellPrice = sellPriceField.doubleValue();
+            double totalProfit = MathUtils.profit(buyPrice, sellPrice, invested);
+            double totalProfitPercentage = MathUtils.profitPercentage(buyPrice, sellPrice);
+            double netProfit = totalProfit - invested;
+            double netProfitPercentage = totalProfitPercentage - 100;
+            PricePercentageWrapper worthWrapper = new PricePercentageWrapper(totalProfit, totalProfitPercentage);
+            PricePercentageWrapper netProfitWrapper = new PricePercentageWrapper(netProfit, netProfitPercentage);
 
             resultsContainer.removeAll();
             resultsContainer.add(
-                    createResultItem("Invested", totalPriceField.doubleValue()),
-                    createResultItem("Buy Price", buyPriceField.doubleValue()),
-                    createResultItem("Sell Price", sellPriceField.doubleValue()),
-                    createResultItem("Profit USD", profit),
-                    createResultItem("Profit %", profitPercentage)
+                    createResultItem("Invested", invested),
+                    createResultItem("Buy Price", buyPrice),
+                    createResultItem("Sell Price", sellPrice),
+                    createResultItem("Total Worth", worthWrapper),
+                    createResultItem("Net Profit", netProfitWrapper)
             );
 
         });
 
         return calculateBtn;
     }
-
-//    private ResponseBodyExtractionOptions delete(String json, RequestSpecification requestSpec) {
-//        return given()
-//                .spec(requestSpec)
-//                .content(ContentType.JSON)
-//                .body(json)
-//                .accept(ContentType.JSON)
-//                .when()
-//                .delete()
-//                .then()
-//                .statusCode(200)
-//                .extract();
-//    }
 
 
 }

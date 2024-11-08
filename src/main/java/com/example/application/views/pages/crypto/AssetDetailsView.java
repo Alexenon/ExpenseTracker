@@ -10,7 +10,6 @@ import com.example.application.utils.common.StringUtils;
 import com.example.application.views.components.PriceMonitorContainer;
 import com.example.application.views.components.PriceWatchlistComponent;
 import com.example.application.views.components.TransactionsGrid;
-import com.example.application.views.components.complex_components.PercentageBadge;
 import com.example.application.views.components.complex_components.ProfitValueParagraph;
 import com.example.application.views.components.complex_components.dialogs.transactions.AddTransactionDialog;
 import com.example.application.views.components.complex_components.fields.PricePercentageWrapper;
@@ -202,20 +201,16 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
                 .addComponent(outputContainer)
                 .build();
 
-        // FIXME: Deleting all from input looks strange
-        // TODO: setValue() should be same formatter as default
         tokenAmountField.setValueChangeMode(ValueChangeMode.EAGER);
         tokenAmountField.addKeyUpListener(e -> {
             double calculatedPrice = tokenAmountField.doubleValue() * instrumentsFacadeService.getAssetPrice(asset);
             usdAmountField.setValue(calculatedPrice);
-            System.out.println("usdAmountField = " + calculatedPrice);
         });
 
         usdAmountField.setValueChangeMode(ValueChangeMode.EAGER);
         usdAmountField.addKeyUpListener(e -> {
             double calculatedPrice = usdAmountField.doubleValue() / instrumentsFacadeService.getAssetPrice(asset);
             tokenAmountField.setValue(calculatedPrice);
-            System.out.println("tokenAmountField = " + calculatedPrice);
         });
 
         Section section = new Section(title, sectionBody);
@@ -247,11 +242,8 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
 
         ProfitValueParagraph costValue = new ProfitValueParagraph(assetCost, NumberType.CURRENCY);
         ProfitValueParagraph worthValue = new ProfitValueParagraph(assetWorth, NumberType.CURRENCY);
-        Div profitLossContainer = Container.builder()
-                .addClassName("price-profit-wrapper")
-                .addComponent(new ProfitValueParagraph(assetProfitLoss, NumberType.CURRENCY))
-                .addComponent(new PercentageBadge(profitLossPercentage, true, false))
-                .build();
+        PricePercentageWrapper profitLossContainer = new PricePercentageWrapper(assetProfitLoss, profitLossPercentage);
+        profitLossContainer.setPercentageBadgeBackground(false);
 
         Container diversityContainer = Container.builder("portfolio-diversity")
                 .addComponent(() -> {

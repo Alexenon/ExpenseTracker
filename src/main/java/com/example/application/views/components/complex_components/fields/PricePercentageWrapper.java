@@ -17,15 +17,15 @@ public class PricePercentageWrapper extends Div {
         price = new ProfitValueParagraph(priceValue, NumberType.CURRENCY, true);
         percentage = new PercentageBadge(percentageValue);
         add(price, percentage);
+        addClassName("price-profit-wrapper");
     }
 
     public void setPriceColor(boolean shouldBeColored) {
         price.setHasColor(shouldBeColored);
     }
 
-    public void setPercentageBadgeBackgroundColor(boolean shouldBeColored) {
+    public void setPercentageBadgeBackground(boolean shouldBeColored) {
         percentage.setHasBackground(shouldBeColored);
     }
-
 
 }

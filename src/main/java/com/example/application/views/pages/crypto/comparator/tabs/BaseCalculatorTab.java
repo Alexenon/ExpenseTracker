@@ -3,6 +3,7 @@ package com.example.application.views.pages.crypto.comparator.tabs;
 import com.example.application.entities.crypto.Asset;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.views.components.native_components.Container;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
@@ -48,11 +49,16 @@ public abstract class BaseCalculatorTab extends Tab {
     }
 
     protected Div createResultItem(String labelText, String valueText) {
+        return createResultItem(labelText, new Span(valueText));
+    }
+
+    protected Div createResultItem(String labelText, Component content) {
         Div itemContainer = new Div();
         itemContainer.addClassName("result-item");
-        itemContainer.add(new Paragraph(labelText), new Span(valueText));
+        itemContainer.add(new Paragraph(labelText), content);
         return itemContainer;
     }
+
 
     protected LitRenderer<Asset> assetSymbolRenderer() {
         return LitRenderer.<Asset>of(

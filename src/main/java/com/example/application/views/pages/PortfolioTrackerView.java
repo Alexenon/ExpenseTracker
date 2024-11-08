@@ -6,7 +6,6 @@ import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.views.components.AssetsGrid;
 import com.example.application.views.components.TransactionsGrid;
-import com.example.application.views.components.complex_components.PercentageBadge;
 import com.example.application.views.components.complex_components.ProfitValueParagraph;
 import com.example.application.views.components.complex_components.fields.PricePercentageWrapper;
 import com.example.application.views.components.native_components.Container;
@@ -134,16 +133,10 @@ public class PortfolioTrackerView extends Main {
         H3 title = new H3("Portfolio Statistics");
         title.setClassName("section-title");
 
-        Div profitLossContainer = Container.builder()
-                .addClassName("price-profit-wrapper")
-                .addComponent(new ProfitValueParagraph(portfolioPerformanceTracker.getPortfolioProfit(), NumberType.CURRENCY))
-                .addComponent(() -> {
-                    double percentage = portfolioPerformanceTracker.getPortfolioProfitPercentage();
-                    PercentageBadge percentageBadge = new PercentageBadge(percentage);
-                    percentageBadge.setHasBackground(false);
-                    return percentageBadge;
-                })
-                .build();
+        double profit = portfolioPerformanceTracker.getPortfolioProfit();
+        double percentage = portfolioPerformanceTracker.getPortfolioProfitPercentage();
+        PricePercentageWrapper profitLossContainer = new PricePercentageWrapper(profit, percentage);
+        profitLossContainer.setPercentageBadgeBackground(false);
 
         // TODO: Add hints for help
         Div totalWorth = createStatsItem("Total Worth", NumberType.CURRENCY.parse(portfolioPerformanceTracker.getPortfolioWorth()));
