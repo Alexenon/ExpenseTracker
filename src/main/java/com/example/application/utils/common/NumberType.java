@@ -1,10 +1,14 @@
-package com.example.application.data.models;
-
-import com.example.application.utils.common.StringUtils;
+package com.example.application.utils.common;
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.Locale;
+
+/*
+    TODO: Make this class to return only NumberFormat
+        - Explain difference between price and currency !!!
+        - Check spring NumberStyleFormatter
+* */
 
 /**
  * Class to identify type of number, and how it should be parsed as String
@@ -43,7 +47,18 @@ public enum NumberType {
     PERCENT {
         @Override
         public String parse(double value) {
-            return String.format("%.2f%%", Math.abs(value));
+            NumberFormat numberFormat = NumberFormat.getPercentInstance();
+            numberFormat.setMaximumFractionDigits(2);
+            double formattedValue = Math.abs(value / 100);
+            return numberFormat.format(formattedValue);
+        }
+    },
+    CLEAR_PERCENT {
+        @Override
+        public String parse(double value) {
+            NumberFormat numberFormat = NumberFormat.getPercentInstance();
+            double formattedValue = Math.abs(value / 100);
+            return numberFormat.format(formattedValue);
         }
     },
     CURRENCY {
@@ -71,6 +86,13 @@ public enum NumberType {
             return "$" + new BigDecimal(shortedPrice)
                     .stripTrailingZeros()
                     .toPlainString();
+        }
+    },
+    SHORT {
+        @Override
+        public String parse(double value) {
+            NumberFormat numberFormat = NumberFormat.getCompactNumberInstance();
+            return numberFormat.format(value);
         }
     };
 

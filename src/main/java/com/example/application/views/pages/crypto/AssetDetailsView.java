@@ -1,11 +1,11 @@
 package com.example.application.views.pages.crypto;
 
-import com.example.application.data.models.NumberType;
 import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.AssetWatcher;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.utils.common.MathUtils;
+import com.example.application.utils.common.NumberType;
 import com.example.application.utils.common.StringUtils;
 import com.example.application.views.components.PriceMonitorContainer;
 import com.example.application.views.components.PriceWatchlistComponent;
@@ -271,17 +271,18 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         H3 title = new H3("Market Stats");
         title.setClassName("section-title");
 
-        Div marketCap = createStatsItem("Market Cap",
-                MathUtils.formatBigNumber(instrumentsFacadeService.getAssetTotalMarketCap(asset)));
+        double assetTotalMarketCap = instrumentsFacadeService.getAssetTotalMarketCap(asset);
+        Div marketCap = createStatsItem("Market Cap", NumberType.SHORT.parse(assetTotalMarketCap));
 
-        BigInteger totalSupplyValue = instrumentsFacadeService.getAssetSupplyTotal(asset);
+        BigInteger assetTotalSupply = instrumentsFacadeService.getAssetSupplyTotal(asset);
+        double asset24HourVolume = instrumentsFacadeService.getAsset24HourVolume(asset);
         BigInteger circulationSupplyValue = instrumentsFacadeService.getAssetSupplyCirculating(asset);
-        int percentageUseOfCirculationSupply = MathUtils.percentageOf(circulationSupplyValue, totalSupplyValue);
+        int percentageUseOfCirculationSupply = MathUtils.percentageOf(circulationSupplyValue, assetTotalSupply);
         ProgressBar bar = new ProgressBar(0, 100, percentageUseOfCirculationSupply);
 
         Container circulationSupplyContainer = Container.builder("portfolio-diversity")
                 .addComponent(() -> {
-                    Paragraph circulationText = new Paragraph(MathUtils.formatBigNumber(circulationSupplyValue));
+                    Paragraph circulationText = new Paragraph(NumberType.SHORT.parse(circulationSupplyValue.doubleValue()));
                     Paragraph percentageText = new Paragraph(String.format("(%d%%)", percentageUseOfCirculationSupply));
                     percentageText.getStyle().set("color", "blue");
                     return new HorizontalLayout(circulationText, percentageText);
@@ -291,10 +292,8 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
 
         Div circulationSupply = createStatsItem("Circulation Supply", circulationSupplyContainer);
 
-        Div totalSupply = createStatsItem("Total Supply",
-                MathUtils.formatBigNumber(instrumentsFacadeService.getAssetSupplyTotal(asset)));
-        Div volume24Hour = createStatsItem("Volume 24h",
-                MathUtils.formatBigNumber(instrumentsFacadeService.getAsset24HourVolume(asset)));
+        Div totalSupply = createStatsItem("Total Supply", NumberType.SHORT.parse(assetTotalSupply.doubleValue()));
+        Div volume24Hour = createStatsItem("Volume 24h", NumberType.SHORT.parse(asset24HourVolume));
 
         Div body = new Div(marketCap, circulationSupply, totalSupply, volume24Hour);
         body.addClassNames("section-card-wrapper", "market-stats-section");

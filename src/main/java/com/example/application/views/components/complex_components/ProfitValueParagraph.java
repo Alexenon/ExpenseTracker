@@ -1,6 +1,6 @@
 package com.example.application.views.components.complex_components;
 
-import com.example.application.data.models.NumberType;
+import com.example.application.utils.common.NumberType;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.html.Paragraph;
 
@@ -9,6 +9,7 @@ public class ProfitValueParagraph extends Paragraph {
 
     private double value;
     private boolean hasColor;
+    private NumberType numberType;
 
     public ProfitValueParagraph() {
         this(0.0, NumberType.CURRENCY);
@@ -18,6 +19,10 @@ public class ProfitValueParagraph extends Paragraph {
         this(value, NumberType.CURRENCY);
     }
 
+    public ProfitValueParagraph(double value, boolean hasColor) {
+        this(value, NumberType.CURRENCY, hasColor);
+    }
+
     public ProfitValueParagraph(double value, NumberType numberType) {
         this(value, numberType, false);
     }
@@ -25,6 +30,7 @@ public class ProfitValueParagraph extends Paragraph {
     public ProfitValueParagraph(double value, NumberType numberType, boolean hasColor) {
         this.value = value;
         this.hasColor = hasColor;
+        this.numberType = numberType;
         this.setText(numberType.parse(value));
         setClassNameByColor();
     }
@@ -53,5 +59,11 @@ public class ProfitValueParagraph extends Paragraph {
 
         return (value > 0) ? "value-increase" : "value-decrease";
     }
+
+    public void setFormatter(NumberType numberType) {
+        this.numberType = numberType;
+        setText(numberType.parse(value));
+    }
+
 }
 

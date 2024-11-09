@@ -9,9 +9,6 @@ import java.util.stream.IntStream;
 
 public class MathUtils {
 
-    private static final double BILLION = 1_000_000_000.0;
-    private static final double MILLION = 1_000_000.0;
-
     /**
      * Method to count whole part in a decimal number
      */
@@ -83,21 +80,8 @@ public class MathUtils {
         return a.multiply(BigInteger.valueOf(100)).divide(b).intValue();
     }
 
-    // TODO: Use FORMATTER -> CompactNumberFormat, MOVE TO NumberType
-    public static String formatBigNumber(BigInteger number) {
-        return formatBigNumber(number.doubleValue());
-    }
-
-    public static String formatBigNumber(double number) {
-        if (number >= BILLION) {
-            return String.format("%.2f B", number / BILLION);
-        }
-
-        if (number >= MILLION) {
-            return String.format("%.2f M", number / MILLION);
-        }
-
-        return String.format("%.2f", number);
+    public static double roi(double netProfit, double investedCost) {
+        return netProfit / investedCost * 100;
     }
 
     // [34.000, 35.000, 36.000], 40.000  ->  36.000

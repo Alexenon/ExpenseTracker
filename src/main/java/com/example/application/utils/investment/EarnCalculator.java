@@ -1,15 +1,41 @@
 package com.example.application.utils.investment;
 
+
+import com.example.application.utils.common.number.CurrencyFormatter;
+import com.example.application.utils.common.number.DecimalFormatter;
+import com.example.application.utils.common.number.PercentageFormatter;
+
+import java.util.List;
+
 public class EarnCalculator {
 
     private static final int DAYS_IN_YEAR = 365;
     private static final int DAYS_IN_MONTH = 30;
 
     public static void main(String[] args) {
-        System.out.println("|" + "-".repeat(43) + "|");
-        printResults("Flexible Earning USDT", 500, 7.0);
-        printResults("Flexible Earning USDE", 500, 18.0);
-        printResults("Wealth Management USDT", 2000, 2.5);
+
+        List<Double> numbers = List.of(
+                0.0001000,
+                0.00095,
+                0.12345,
+                0.34567,
+                0.90000,
+                123.0,
+                123.456,
+                -123.456789
+        );
+
+        List<DecimalFormatter> formatters = List.of(
+                new DecimalFormatter(),
+                new CurrencyFormatter(),
+                new PercentageFormatter()
+        );
+
+        formatters.forEach(f -> {
+            numbers.forEach(n -> System.out.println(n + " -> " + f.format(n)));
+            System.out.println();
+        });
+
     }
 
     private static void printResults(String details, double stakingAmount, double apr) {

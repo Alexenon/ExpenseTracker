@@ -1,9 +1,9 @@
 package com.example.application.views.pages;
 
-import com.example.application.data.models.NumberType;
 import com.example.application.entities.crypto.Asset;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
+import com.example.application.utils.common.NumberType;
 import com.example.application.views.components.AssetsGrid;
 import com.example.application.views.components.TransactionsGrid;
 import com.example.application.views.components.complex_components.ProfitValueParagraph;

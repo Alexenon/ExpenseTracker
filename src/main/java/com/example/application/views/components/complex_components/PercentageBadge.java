@@ -1,10 +1,14 @@
 package com.example.application.views.components.complex_components;
 
-import com.example.application.data.models.NumberType;
+import com.example.application.utils.common.NumberType;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.theme.lumo.LumoIcon;
+
+/*
+* TODO: Add Builder for easier creation
+* */
 
 @Tag(Tag.DIV)
 public class PercentageBadge extends Div {
@@ -17,15 +21,22 @@ public class PercentageBadge extends Div {
     private Icon icon;
 
     public PercentageBadge(double value) {
-        this(value, true, true);
+        this(value, true, true, NumberType.PERCENT);
     }
 
-    // Builder
+    public PercentageBadge(double value, NumberType numberType) {
+        this(value, true, true, numberType);
+    }
+
     public PercentageBadge(double value, boolean hasColor, boolean hasBackground) {
+        this(value, true, true, NumberType.PERCENT);
+    }
+
+    public PercentageBadge(double value, boolean hasColor, boolean hasBackground, NumberType numberType) {
         this.value = value;
         this.hasColor = hasColor;
         this.hasBackground = hasBackground;
-        this.textField = new ProfitValueParagraph(value, NumberType.PERCENT);
+        this.textField = new ProfitValueParagraph(value, numberType);
 
         addClassName("price-change-badge");
         add(textField);
@@ -96,5 +107,13 @@ public class PercentageBadge extends Div {
     public void setHasBackground(boolean hasBackground) {
         this.hasBackground = hasBackground;
         setBackgroundClassName();
+    }
+
+    public ProfitValueParagraph getTextField() {
+        return textField;
+    }
+
+    public void setFormatter(NumberType numberType) {
+        textField.setFormatter(numberType);
     }
 }

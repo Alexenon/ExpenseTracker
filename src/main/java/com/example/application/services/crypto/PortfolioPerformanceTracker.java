@@ -12,6 +12,8 @@ import java.util.stream.Collectors;
     TODO: LONG TERM -> Implement next methods
        - % in Market, how much tokens had been sold and how much are still holding
        - Total Time Holding + Asset Avg Time Holding
+       - ROI
+       - Cumulative Profit Loss
 * */
 
 @Component

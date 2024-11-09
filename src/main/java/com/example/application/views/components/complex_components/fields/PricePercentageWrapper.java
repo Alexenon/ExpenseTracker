@@ -1,6 +1,6 @@
 package com.example.application.views.components.complex_components.fields;
 
-import com.example.application.data.models.NumberType;
+import com.example.application.utils.common.NumberType;
 import com.example.application.views.components.complex_components.PercentageBadge;
 import com.example.application.views.components.complex_components.ProfitValueParagraph;
 import com.vaadin.flow.component.html.Div;
@@ -26,6 +26,14 @@ public class PricePercentageWrapper extends Div {
 
     public void setPercentageBadgeBackground(boolean shouldBeColored) {
         percentage.setHasBackground(shouldBeColored);
+    }
+
+    public void setPriceFormatter(NumberType numberType) {
+        price.setFormatter(numberType);
+    }
+
+    public void setPercentageFormatter(NumberType numberType) {
+        percentage.setFormatter(numberType);
     }
 
 }

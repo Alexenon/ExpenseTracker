@@ -1,9 +1,9 @@
 package com.example.application.views.pages.crypto.comparator.tabs;
 
-import com.example.application.data.models.NumberType;
 import com.example.application.entities.crypto.Asset;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.utils.common.MathUtils;
+import com.example.application.utils.common.NumberType;
 import com.example.application.views.components.fields.AmountField;
 import com.example.application.views.components.fields.CurrencyField;
 import com.vaadin.flow.component.button.Button;

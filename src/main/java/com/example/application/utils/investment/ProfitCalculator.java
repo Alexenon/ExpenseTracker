@@ -1,7 +1,7 @@
 package com.example.application.utils.investment;
 
-import com.example.application.data.models.NumberType;
 import com.example.application.utils.common.MathUtils;
+import com.example.application.utils.common.NumberType;
 
 public class ProfitCalculator {
 
