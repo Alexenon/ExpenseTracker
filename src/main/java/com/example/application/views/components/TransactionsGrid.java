@@ -15,7 +15,9 @@ import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.CryptoTransaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.utils.common.MathUtils;
-import com.example.application.utils.common.NumberType;
+import com.example.application.utils.common.number.AmountFormatter;
+import com.example.application.utils.common.number.CurrencyFormatter;
+import com.example.application.utils.common.number.PercentageFormatter;
 import com.example.application.views.components.complex_components.dialogs.transactions.TransactionDetailsDialog;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
@@ -124,18 +126,22 @@ public class TransactionsGrid extends Div {
     }
 
     private LitRenderer<CryptoTransaction> priceColumnRenderer() {
+        CurrencyFormatter currencyFormatter = new CurrencyFormatter();
         return LitRenderer.<CryptoTransaction>of("<p class='asset-price'>${item.price}</p>")
-                .withProperty("price", t -> NumberType.PRICE.parse(t.getMarketPrice()));
+                .withProperty("price", t -> currencyFormatter.format(t.getMarketPrice()));
     }
 
     private LitRenderer<CryptoTransaction> quantityColumnRenderer() {
+        AmountFormatter amountFormatter = new AmountFormatter();
         return LitRenderer.<CryptoTransaction>of("<p class='${item.className}'>+ ${item.quantity} ${item.symbol}</p>")
                 .withProperty("className", t -> t.isBuyTransaction() ? "value-increase" : "value-decrease")
-                .withProperty("quantity", t -> NumberType.AMOUNT.parse(t.getOrderQuantity()))
+                .withProperty("quantity", t -> amountFormatter.format(t.getOrderQuantity()))
                 .withProperty("symbol", t -> t.getAsset().getSymbol());
     }
 
     private LitRenderer<CryptoTransaction> profitLossColumnRenderer() {
+        CurrencyFormatter currencyFormatter = new CurrencyFormatter();
+        PercentageFormatter percentageFormatter = new PercentageFormatter();
         return LitRenderer.<CryptoTransaction>of("<div class='transaction-profit-loss ${item.className}'>" +
                                                  "  <p class='text-l'>${item.profit}</p>" +
                                                  "  <p class='text-s'>${item.profitPercentage}</p>" +
@@ -144,12 +150,12 @@ public class TransactionsGrid extends Div {
                 .withProperty("profit", transaction -> {
                     double currentPrice = instrumentsFacadeService.getAssetPrice(transaction.getAsset());
                     double profit = MathUtils.profit(transaction, currentPrice);
-                    return NumberType.CURRENCY.parse(profit);
+                    return currencyFormatter.format(profit);
                 })
                 .withProperty("profitPercentage", transaction -> {
                     double currentPrice = instrumentsFacadeService.getAssetPrice(transaction.getAsset());
                     double percentage = MathUtils.profitPercentage(transaction.getMarketPrice(), currentPrice);
-                    return NumberType.PERCENT.parse(percentage);
+                    return percentageFormatter.format(percentage);
                 });
     }
 

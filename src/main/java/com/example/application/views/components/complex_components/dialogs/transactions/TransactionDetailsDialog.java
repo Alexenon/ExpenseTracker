@@ -4,7 +4,8 @@ import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.CryptoTransaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.utils.common.MathUtils;
-import com.example.application.utils.common.NumberType;
+import com.example.application.utils.common.number.AmountFormatter;
+import com.example.application.utils.common.number.CurrencyFormatter;
 import com.example.application.views.components.complex_components.fields.PricePercentageWrapper;
 import com.example.application.views.components.native_components.Container;
 import com.vaadin.flow.component.Key;
@@ -29,6 +30,10 @@ public class TransactionDetailsDialog extends Dialog {
     private final Asset asset;
     private final CryptoTransaction transaction;
     private final InstrumentsFacadeService instrumentsFacadeService;
+
+
+    CurrencyFormatter currencyFormatter = new CurrencyFormatter();
+    AmountFormatter amountFormatter = new AmountFormatter();
 
     private final Paragraph editBtn = new Paragraph("Edit");
     private final Button closeBtn = new Button(LumoIcon.CROSS.create(), e -> this.close());
@@ -78,11 +83,11 @@ public class TransactionDetailsDialog extends Dialog {
     }
 
     private Div detailsTransaction() {
-        String formattedPrice = NumberType.CURRENCY.parse(transaction.getMarketPrice());
-        String formattedAmount = NumberType.AMOUNT.parse(transaction.getOrderQuantity())
-                                 + " " + transaction.getAsset().getSymbol();
+        String formattedPrice = currencyFormatter.format(transaction.getMarketPrice());
+        String formattedAmount = amountFormatter.format(transaction.getOrderQuantity())
+                + " " + transaction.getAsset().getSymbol();
         Paragraph pricePerTokenField = new Paragraph(String.format("(1 %s = %s)", asset.getSymbol(), formattedPrice));
-        Paragraph totalPriceField = new Paragraph(NumberType.CURRENCY.parse(transaction.getOrderTotalCost()));
+        Paragraph totalPriceField = new Paragraph(currencyFormatter.format(transaction.getOrderTotalCost()));
 
         Div priceDetails = Container.builder()
                 .addComponent(new H4(formattedAmount))
@@ -130,7 +135,7 @@ public class TransactionDetailsDialog extends Dialog {
                 .addComponent(() -> Container.builder()
                         .addClassName("transaction-profit-loss-badge-item")
                         .addComponent(new Paragraph("Current Value"))
-                        .addComponent(new Paragraph(NumberType.CURRENCY.parse(instrumentsFacadeService.getAssetPrice(asset))))
+                        .addComponent(new Paragraph(currencyFormatter.format(instrumentsFacadeService.getAssetPrice(asset))))
                         .build())
                 .build();
     }

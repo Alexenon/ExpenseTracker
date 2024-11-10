@@ -1,6 +1,7 @@
 package com.example.application.views.components.complex_components;
 
-import com.example.application.utils.common.NumberType;
+import com.example.application.utils.common.number.DecimalFormatter;
+import com.example.application.utils.common.number.PercentageFormatter;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
@@ -21,22 +22,22 @@ public class PercentageBadge extends Div {
     private Icon icon;
 
     public PercentageBadge(double value) {
-        this(value, true, true, NumberType.PERCENT);
+        this(value, true, true, new PercentageFormatter());
     }
 
-    public PercentageBadge(double value, NumberType numberType) {
-        this(value, true, true, numberType);
+    public PercentageBadge(double value, DecimalFormatter formatter) {
+        this(value, true, true, formatter);
     }
 
     public PercentageBadge(double value, boolean hasColor, boolean hasBackground) {
-        this(value, true, true, NumberType.PERCENT);
+        this(value, true, true, new PercentageFormatter());
     }
 
-    public PercentageBadge(double value, boolean hasColor, boolean hasBackground, NumberType numberType) {
+    public PercentageBadge(double value, boolean hasColor, boolean hasBackground, DecimalFormatter formatter) {
         this.value = value;
         this.hasColor = hasColor;
         this.hasBackground = hasBackground;
-        this.textField = new ProfitValueParagraph(value, numberType);
+        this.textField = new ProfitValueParagraph(value, formatter);
 
         addClassName("price-change-badge");
         add(textField);
@@ -113,7 +114,7 @@ public class PercentageBadge extends Div {
         return textField;
     }
 
-    public void setFormatter(NumberType numberType) {
-        textField.setFormatter(numberType);
+    public void setFormatter(DecimalFormatter formatter) {
+        textField.setFormatter(formatter);
     }
 }

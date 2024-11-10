@@ -3,7 +3,8 @@ package com.example.application.views.pages.crypto.comparator.tabs;
 import com.example.application.entities.crypto.Asset;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.utils.common.MathUtils;
-import com.example.application.utils.common.NumberType;
+import com.example.application.utils.common.number.AmountFormatter;
+import com.example.application.utils.common.number.CurrencyFormatter;
 import com.example.application.views.components.fields.AmountField;
 import com.example.application.views.components.fields.CurrencyField;
 import com.vaadin.flow.component.button.Button;
@@ -21,6 +22,9 @@ public final class StakingProfitTab extends BaseCalculatorTab {
     private final AmountField amountField = new AmountField("Amount of tokens");
     private final CurrencyField worthField = new CurrencyField("Current total worth");
     private final AmountField aprField = new AmountField("APR");
+
+    AmountFormatter amountFormatter = new AmountFormatter();
+    CurrencyFormatter currencyFormatter = new CurrencyFormatter();
 
     @Autowired
     public StakingProfitTab(InstrumentsFacadeService instrumentsFacadeService) {
@@ -97,9 +101,9 @@ public final class StakingProfitTab extends BaseCalculatorTab {
 
     private String stakedAmount(double amountTokens, double worthEquivalent) {
         return "+ %s %s ≈ %s".formatted(
-                NumberType.AMOUNT.parse(amountTokens),
+                amountFormatter.format(amountTokens),
                 getSelectedAssetSymbol(assetSymbolField),
-                NumberType.PRICE.parse(worthEquivalent)
+                currencyFormatter.format(worthEquivalent)
         );
     }
 

@@ -1,38 +1,43 @@
 package com.example.application.views.components.complex_components;
 
-import com.example.application.utils.common.NumberType;
+import com.example.application.utils.common.number.DecimalFormatter;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.html.Paragraph;
 
 @Tag(Tag.P)
 public class ProfitValueParagraph extends Paragraph {
 
+    // TODO: Rename this to
+    //  -> NumberDisplayParagraph
+    //  -> NumericDisplayParagraph
+    //  -> NumericValueDisplay
+
     private double value;
     private boolean hasColor;
-    private NumberType numberType;
+    private DecimalFormatter formatter;
 
     public ProfitValueParagraph() {
-        this(0.0, NumberType.CURRENCY);
+        this(0.0, new DecimalFormatter());
     }
 
     public ProfitValueParagraph(double value) {
-        this(value, NumberType.CURRENCY);
+        this(value, new DecimalFormatter());
     }
 
     public ProfitValueParagraph(double value, boolean hasColor) {
-        this(value, NumberType.CURRENCY, hasColor);
+        this(value, new DecimalFormatter(), hasColor);
     }
 
-    public ProfitValueParagraph(double value, NumberType numberType) {
-        this(value, numberType, false);
+    public ProfitValueParagraph(double value, DecimalFormatter formatter) {
+        this(value, formatter, false);
     }
 
-    public ProfitValueParagraph(double value, NumberType numberType, boolean hasColor) {
+    public ProfitValueParagraph(double value, DecimalFormatter formatter, boolean hasColor) {
         this.value = value;
         this.hasColor = hasColor;
-        this.numberType = numberType;
-        this.setText(numberType.parse(value));
+        this.formatter = formatter;
         setClassNameByColor();
+        setText(formatter.format(value));
     }
 
     public void setValue(double value) {
@@ -60,9 +65,9 @@ public class ProfitValueParagraph extends Paragraph {
         return (value > 0) ? "value-increase" : "value-decrease";
     }
 
-    public void setFormatter(NumberType numberType) {
-        this.numberType = numberType;
-        setText(numberType.parse(value));
+    public void setFormatter(DecimalFormatter formatter) {
+        this.formatter = formatter;
+        setText(this.formatter.format(value));
     }
 
 }

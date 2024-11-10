@@ -3,7 +3,8 @@ package com.example.application.views.components;
 import com.example.application.entities.crypto.Asset;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
-import com.example.application.utils.common.NumberType;
+import com.example.application.utils.common.number.CurrencyFormatter;
+import com.example.application.utils.common.number.PercentageFormatter;
 import com.example.application.views.components.complex_components.PercentageBadge;
 import com.example.application.views.components.native_components.Container;
 import com.example.application.views.pages.crypto.AssetDetailsView;
@@ -272,8 +273,9 @@ public class AssetsGrid extends Div {
     }
 
     private LitRenderer<AssetGridItem> columnPriceRenderer() {
+        CurrencyFormatter currencyFormatter = new CurrencyFormatter();
         return LitRenderer.<AssetGridItem>of("<p class='asset-price'>${item.price}</p>")
-                .withProperty("price", asset -> NumberType.PRICE.parse(asset.getPrice()));
+                .withProperty("price", asset -> currencyFormatter.format(asset.getPrice()));
     }
 
     private LitRenderer<AssetGridItem> columnPriceRenderer(ValueProvider<AssetGridItem, Number> priceProvider) {
@@ -298,9 +300,10 @@ public class AssetsGrid extends Div {
     }
 
     private LitRenderer<AssetGridItem> columnPercentageRenderer(ValueProvider<AssetGridItem, Number> percentageProvider) {
+        PercentageFormatter percentageFormatter = new PercentageFormatter();
         return LitRenderer.<AssetGridItem>of("<p>${item.percentage}</p>")
                 .withProperty("percentage", asset ->
-                        NumberType.PERCENT.parse(percentageProvider.apply(asset).doubleValue()));
+                        percentageFormatter.format(percentageProvider.apply(asset).doubleValue()));
     }
 
     private ComponentRenderer<Component, AssetGridItem> columnChanges24hRenderer() {

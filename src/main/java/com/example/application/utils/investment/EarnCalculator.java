@@ -1,9 +1,7 @@
 package com.example.application.utils.investment;
 
 
-import com.example.application.utils.common.number.CurrencyFormatter;
-import com.example.application.utils.common.number.DecimalFormatter;
-import com.example.application.utils.common.number.PercentageFormatter;
+import com.example.application.utils.common.number.*;
 
 import java.util.List;
 
@@ -15,17 +13,21 @@ public class EarnCalculator {
     public static void main(String[] args) {
 
         List<Double> numbers = List.of(
-                0.0001000,
-                0.00095,
-                0.12345,
-                0.34567,
-                0.90000,
-                123.0,
-                123.456,
-                -123.456789
+                0.000001,
+                0.000012,
+                0.000123,
+                0.001234,
+                0.012345,
+                0.123456,
+                0.123456,
+                1.234567,
+                23.45678
         );
 
         List<DecimalFormatter> formatters = List.of(
+                new AmountFormatter(),
+                new CompactFormatter(),
+                new IntegerFormatter(),
                 new DecimalFormatter(),
                 new CurrencyFormatter(),
                 new PercentageFormatter()

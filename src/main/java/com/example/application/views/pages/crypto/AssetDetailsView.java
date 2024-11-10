@@ -5,8 +5,10 @@ import com.example.application.entities.crypto.AssetWatcher;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.utils.common.MathUtils;
-import com.example.application.utils.common.NumberType;
 import com.example.application.utils.common.StringUtils;
+import com.example.application.utils.common.number.CompactFormatter;
+import com.example.application.utils.common.number.CurrencyFormatter;
+import com.example.application.utils.common.number.PercentageFormatter;
 import com.example.application.views.components.PriceMonitorContainer;
 import com.example.application.views.components.PriceWatchlistComponent;
 import com.example.application.views.components.TransactionsGrid;
@@ -55,6 +57,9 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
 
     @Autowired
     private PortfolioPerformanceTracker portfolioPerformanceTracker;
+
+    private static final CurrencyFormatter currencyFormatter = CurrencyFormatter.withDefaults();
+    private static final PercentageFormatter percentageFormatter = PercentageFormatter.withDefaults();
 
     @Override
     public void setParameter(BeforeEvent beforeEvent, String symbol) {
@@ -240,14 +245,14 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         double profitLossPercentage = portfolioPerformanceTracker.getAssetProfitPercentage(asset);
         int assetDiversityPercentage = portfolioPerformanceTracker.getAssetDiversityPercentage(asset);
 
-        ProfitValueParagraph costValue = new ProfitValueParagraph(assetCost, NumberType.CURRENCY);
-        ProfitValueParagraph worthValue = new ProfitValueParagraph(assetWorth, NumberType.CURRENCY);
+        ProfitValueParagraph costValue = new ProfitValueParagraph(assetCost, currencyFormatter);
+        ProfitValueParagraph worthValue = new ProfitValueParagraph(assetWorth, currencyFormatter);
         PricePercentageWrapper profitLossContainer = new PricePercentageWrapper(assetProfitLoss, profitLossPercentage);
         profitLossContainer.setPercentageBadgeBackground(false);
 
         Container diversityContainer = Container.builder("portfolio-diversity")
                 .addComponent(() -> {
-                    ProfitValueParagraph valueParagraph = new ProfitValueParagraph(assetDiversityPercentage, NumberType.PERCENT);
+                    ProfitValueParagraph valueParagraph = new ProfitValueParagraph(assetDiversityPercentage, percentageFormatter);
                     valueParagraph.getStyle().setColor("blue");
                     return valueParagraph;
                 })
@@ -270,9 +275,10 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         Section section = new Section();
         H3 title = new H3("Market Stats");
         title.setClassName("section-title");
+        CompactFormatter compactFormatter = new CompactFormatter();
 
         double assetTotalMarketCap = instrumentsFacadeService.getAssetTotalMarketCap(asset);
-        Div marketCap = createStatsItem("Market Cap", NumberType.SHORT.parse(assetTotalMarketCap));
+        Div marketCap = createStatsItem("Market Cap", compactFormatter.format(assetTotalMarketCap));
 
         BigInteger assetTotalSupply = instrumentsFacadeService.getAssetSupplyTotal(asset);
         double asset24HourVolume = instrumentsFacadeService.getAsset24HourVolume(asset);
@@ -282,7 +288,7 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
 
         Container circulationSupplyContainer = Container.builder("portfolio-diversity")
                 .addComponent(() -> {
-                    Paragraph circulationText = new Paragraph(NumberType.SHORT.parse(circulationSupplyValue.doubleValue()));
+                    Paragraph circulationText = new Paragraph(compactFormatter.format(circulationSupplyValue.doubleValue()));
                     Paragraph percentageText = new Paragraph(String.format("(%d%%)", percentageUseOfCirculationSupply));
                     percentageText.getStyle().set("color", "blue");
                     return new HorizontalLayout(circulationText, percentageText);
@@ -292,8 +298,8 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
 
         Div circulationSupply = createStatsItem("Circulation Supply", circulationSupplyContainer);
 
-        Div totalSupply = createStatsItem("Total Supply", NumberType.SHORT.parse(assetTotalSupply.doubleValue()));
-        Div volume24Hour = createStatsItem("Volume 24h", NumberType.SHORT.parse(asset24HourVolume));
+        Div totalSupply = createStatsItem("Total Supply", compactFormatter.format(assetTotalSupply.doubleValue()));
+        Div volume24Hour = createStatsItem("Volume 24h", compactFormatter.format(asset24HourVolume));
 
         Div body = new Div(marketCap, circulationSupply, totalSupply, volume24Hour);
         body.addClassNames("section-card-wrapper", "market-stats-section");

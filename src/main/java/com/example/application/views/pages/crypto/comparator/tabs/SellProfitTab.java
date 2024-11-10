@@ -3,7 +3,7 @@ package com.example.application.views.pages.crypto.comparator.tabs;
 import com.example.application.entities.crypto.Asset;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.utils.common.MathUtils;
-import com.example.application.utils.common.NumberType;
+import com.example.application.utils.common.number.PercentageFormatter;
 import com.example.application.views.components.complex_components.ProfitValueParagraph;
 import com.example.application.views.components.complex_components.fields.PricePercentageWrapper;
 import com.example.application.views.components.fields.AmountField;
@@ -93,7 +93,10 @@ public class SellProfitTab extends BaseCalculatorTab {
 
             ProfitValueParagraph worthParagraph = new ProfitValueParagraph(totalWorth);
             PricePercentageWrapper netProfitWrapper = new PricePercentageWrapper(profit, profitPercentage);
-            netProfitWrapper.setPercentageFormatter(NumberType.CLEAR_PERCENT);
+
+            PercentageFormatter percentageFormatter = new PercentageFormatter();
+            percentageFormatter.setMaximumFractionDigits(0);
+            netProfitWrapper.setPercentageFormatter(percentageFormatter);
 
             resultsContainer.removeAll();
             resultsContainer.add(

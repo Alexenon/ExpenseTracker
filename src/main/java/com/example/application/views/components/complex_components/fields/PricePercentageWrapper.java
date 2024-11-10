@@ -1,6 +1,7 @@
 package com.example.application.views.components.complex_components.fields;
 
-import com.example.application.utils.common.NumberType;
+import com.example.application.utils.common.number.CurrencyFormatter;
+import com.example.application.utils.common.number.DecimalFormatter;
 import com.example.application.views.components.complex_components.PercentageBadge;
 import com.example.application.views.components.complex_components.ProfitValueParagraph;
 import com.vaadin.flow.component.html.Div;
@@ -13,8 +14,10 @@ public class PricePercentageWrapper extends Div {
     private final ProfitValueParagraph price;
     private final PercentageBadge percentage;
 
+    CurrencyFormatter currencyFormatter = new CurrencyFormatter();
+
     public PricePercentageWrapper(double priceValue, double percentageValue) {
-        price = new ProfitValueParagraph(priceValue, NumberType.CURRENCY, true);
+        price = new ProfitValueParagraph(priceValue, currencyFormatter, true);
         percentage = new PercentageBadge(percentageValue);
         add(price, percentage);
         addClassName("price-profit-wrapper");
@@ -28,12 +31,12 @@ public class PricePercentageWrapper extends Div {
         percentage.setHasBackground(shouldBeColored);
     }
 
-    public void setPriceFormatter(NumberType numberType) {
-        price.setFormatter(numberType);
+    public void setPriceFormatter(DecimalFormatter formatter) {
+        price.setFormatter(formatter);
     }
 
-    public void setPercentageFormatter(NumberType numberType) {
-        percentage.setFormatter(numberType);
+    public void setPercentageFormatter(DecimalFormatter formatter) {
+        percentage.setFormatter(formatter);
     }
 
 }

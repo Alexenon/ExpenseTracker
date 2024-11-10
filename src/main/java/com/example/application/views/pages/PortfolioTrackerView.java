@@ -3,7 +3,7 @@ package com.example.application.views.pages;
 import com.example.application.entities.crypto.Asset;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
-import com.example.application.utils.common.NumberType;
+import com.example.application.utils.common.number.CurrencyFormatter;
 import com.example.application.views.components.AssetsGrid;
 import com.example.application.views.components.TransactionsGrid;
 import com.example.application.views.components.complex_components.ProfitValueParagraph;
@@ -139,8 +139,9 @@ public class PortfolioTrackerView extends Main {
         profitLossContainer.setPercentageBadgeBackground(false);
 
         // TODO: Add hints for help
-        Div totalWorth = createStatsItem("Total Worth", NumberType.CURRENCY.parse(portfolioPerformanceTracker.getPortfolioWorth()));
-        Div totalCost = createStatsItem("Total Cost", NumberType.CURRENCY.parse(portfolioPerformanceTracker.getPortfolioCost()));
+        CurrencyFormatter currencyFormatter = new CurrencyFormatter();
+        Div totalWorth = createStatsItem("Total Worth", currencyFormatter.format(portfolioPerformanceTracker.getPortfolioWorth()));
+        Div totalCost = createStatsItem("Total Cost", currencyFormatter.format(portfolioPerformanceTracker.getPortfolioCost()));
         Div profitStats = createStatsItem("Profit", profitLossContainer);
 
         Div body = new Div();
