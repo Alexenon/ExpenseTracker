@@ -233,8 +233,8 @@ public class AssetsGrid extends Div {
                 String lowercaseFullName = assetProvided.getName().toLowerCase();
 
                 return lowercaseSearchTerm.isEmpty()
-                       || lowercaseSymbol.contains(lowercaseSearchTerm)
-                       || lowercaseFullName.contains(lowercaseSearchTerm);
+                        || lowercaseSymbol.contains(lowercaseSearchTerm)
+                        || lowercaseFullName.contains(lowercaseSearchTerm);
             });
 
             updateColumnFooters();
@@ -262,20 +262,19 @@ public class AssetsGrid extends Div {
     private LitRenderer<AssetGridItem> columnNameRenderer() {
         return LitRenderer.<AssetGridItem>of(
                         "<div class='coin-overview-name-container'>" +
-                        "  <img class='rounded coin-overview-image' src='${item.imgUrl}' alt='${item.fullName}'/>" +
-                        "  <p>${item.fullName}</p>" +
-                        "  <span class='dot'>•</span>" +
-                        "  <span>${item.symbol}</span>" +
-                        "</div>")
+                                "  <img class='rounded coin-overview-image' src='${item.imgUrl}' alt='${item.fullName}'/>" +
+                                "  <p>${item.fullName}</p>" +
+                                "  <span class='dot'>•</span>" +
+                                "  <span>${item.symbol}</span>" +
+                                "</div>")
                 .withProperty("imgUrl", AssetGridItem::getImageUrl)
                 .withProperty("fullName", AssetGridItem::getName)
                 .withProperty("symbol", AssetGridItem::getSymbol);
     }
 
     private LitRenderer<AssetGridItem> columnPriceRenderer() {
-        CurrencyFormatter currencyFormatter = new CurrencyFormatter();
         return LitRenderer.<AssetGridItem>of("<p class='asset-price'>${item.price}</p>")
-                .withProperty("price", asset -> currencyFormatter.format(asset.getPrice()));
+                .withProperty("price", asset -> CurrencyFormatter.withDefaults().format(asset.getPrice()));
     }
 
     private LitRenderer<AssetGridItem> columnPriceRenderer(ValueProvider<AssetGridItem, Number> priceProvider) {
@@ -300,10 +299,11 @@ public class AssetsGrid extends Div {
     }
 
     private LitRenderer<AssetGridItem> columnPercentageRenderer(ValueProvider<AssetGridItem, Number> percentageProvider) {
-        PercentageFormatter percentageFormatter = new PercentageFormatter();
         return LitRenderer.<AssetGridItem>of("<p>${item.percentage}</p>")
-                .withProperty("percentage", asset ->
-                        percentageFormatter.format(percentageProvider.apply(asset).doubleValue()));
+                .withProperty("percentage", asset -> {
+                    double percentage = percentageProvider.apply(asset).doubleValue();
+                    return PercentageFormatter.withDefaults().format(percentage);
+                });
     }
 
     private ComponentRenderer<Component, AssetGridItem> columnChanges24hRenderer() {

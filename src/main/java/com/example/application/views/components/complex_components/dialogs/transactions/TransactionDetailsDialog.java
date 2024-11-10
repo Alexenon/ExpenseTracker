@@ -27,13 +27,12 @@ import java.time.temporal.ChronoField;
 //  - [!] ICONS: vaadin:trending-down | vaadin:trending-up
 public class TransactionDetailsDialog extends Dialog {
 
+    private static final AmountFormatter amountFormatter = AmountFormatter.withDefaults();
+    private static final CurrencyFormatter currencyFormatter = CurrencyFormatter.withDefaults();
+
     private final Asset asset;
     private final CryptoTransaction transaction;
     private final InstrumentsFacadeService instrumentsFacadeService;
-
-
-    CurrencyFormatter currencyFormatter = new CurrencyFormatter();
-    AmountFormatter amountFormatter = new AmountFormatter();
 
     private final Paragraph editBtn = new Paragraph("Edit");
     private final Button closeBtn = new Button(LumoIcon.CROSS.create(), e -> this.close());

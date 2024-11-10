@@ -12,7 +12,7 @@ import com.example.application.utils.common.number.PercentageFormatter;
 import com.example.application.views.components.PriceMonitorContainer;
 import com.example.application.views.components.PriceWatchlistComponent;
 import com.example.application.views.components.TransactionsGrid;
-import com.example.application.views.components.complex_components.ProfitValueParagraph;
+import com.example.application.views.components.complex_components.NumericValueParagraph;
 import com.example.application.views.components.complex_components.dialogs.transactions.AddTransactionDialog;
 import com.example.application.views.components.complex_components.fields.PricePercentageWrapper;
 import com.example.application.views.components.fields.CurrencyField;
@@ -245,14 +245,14 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         double profitLossPercentage = portfolioPerformanceTracker.getAssetProfitPercentage(asset);
         int assetDiversityPercentage = portfolioPerformanceTracker.getAssetDiversityPercentage(asset);
 
-        ProfitValueParagraph costValue = new ProfitValueParagraph(assetCost, currencyFormatter);
-        ProfitValueParagraph worthValue = new ProfitValueParagraph(assetWorth, currencyFormatter);
+        NumericValueParagraph costValue = new NumericValueParagraph(assetCost, currencyFormatter);
+        NumericValueParagraph worthValue = new NumericValueParagraph(assetWorth, currencyFormatter);
         PricePercentageWrapper profitLossContainer = new PricePercentageWrapper(assetProfitLoss, profitLossPercentage);
         profitLossContainer.setPercentageBadgeBackground(false);
 
         Container diversityContainer = Container.builder("portfolio-diversity")
                 .addComponent(() -> {
-                    ProfitValueParagraph valueParagraph = new ProfitValueParagraph(assetDiversityPercentage, percentageFormatter);
+                    NumericValueParagraph valueParagraph = new NumericValueParagraph(assetDiversityPercentage, percentageFormatter);
                     valueParagraph.getStyle().setColor("blue");
                     return valueParagraph;
                 })

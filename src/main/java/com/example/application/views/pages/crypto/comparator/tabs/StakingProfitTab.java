@@ -18,13 +18,13 @@ import static com.example.application.utils.investment.EarnCalculator.*;
 
 public final class StakingProfitTab extends BaseCalculatorTab {
 
+    private static final AmountFormatter amountFormatter = AmountFormatter.withDefaults();
+    private static final CurrencyFormatter currencyFormatter = CurrencyFormatter.withDefaults();
+
     private final ComboBox<Asset> assetSymbolField = new ComboBox<>("Asset");
     private final AmountField amountField = new AmountField("Amount of tokens");
     private final CurrencyField worthField = new CurrencyField("Current total worth");
     private final AmountField aprField = new AmountField("APR");
-
-    AmountFormatter amountFormatter = new AmountFormatter();
-    CurrencyFormatter currencyFormatter = new CurrencyFormatter();
 
     @Autowired
     public StakingProfitTab(InstrumentsFacadeService instrumentsFacadeService) {

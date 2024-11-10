@@ -4,7 +4,7 @@ import com.example.application.entities.crypto.Asset;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.utils.common.MathUtils;
 import com.example.application.utils.common.number.PercentageFormatter;
-import com.example.application.views.components.complex_components.ProfitValueParagraph;
+import com.example.application.views.components.complex_components.NumericValueParagraph;
 import com.example.application.views.components.complex_components.fields.PricePercentageWrapper;
 import com.example.application.views.components.fields.AmountField;
 import com.example.application.views.components.fields.CurrencyField;
@@ -91,7 +91,7 @@ public class SellProfitTab extends BaseCalculatorTab {
             double profitPercentage = MathUtils.profitPercentage(buyPrice, sellPrice);
             double totalWorth = profit + invested;
 
-            ProfitValueParagraph worthParagraph = new ProfitValueParagraph(totalWorth);
+            NumericValueParagraph worthParagraph = new NumericValueParagraph(totalWorth);
             PricePercentageWrapper netProfitWrapper = new PricePercentageWrapper(profit, profitPercentage);
 
             PercentageFormatter percentageFormatter = new PercentageFormatter();

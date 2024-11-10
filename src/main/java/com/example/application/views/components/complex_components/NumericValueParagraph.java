@@ -5,34 +5,29 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.html.Paragraph;
 
 @Tag(Tag.P)
-public class ProfitValueParagraph extends Paragraph {
-
-    // TODO: Rename this to
-    //  -> NumberDisplayParagraph
-    //  -> NumericDisplayParagraph
-    //  -> NumericValueDisplay
+public class NumericValueParagraph extends Paragraph {
 
     private double value;
     private boolean hasColor;
     private DecimalFormatter formatter;
 
-    public ProfitValueParagraph() {
+    public NumericValueParagraph() {
         this(0.0, new DecimalFormatter());
     }
 
-    public ProfitValueParagraph(double value) {
+    public NumericValueParagraph(double value) {
         this(value, new DecimalFormatter());
     }
 
-    public ProfitValueParagraph(double value, boolean hasColor) {
+    public NumericValueParagraph(double value, boolean hasColor) {
         this(value, new DecimalFormatter(), hasColor);
     }
 
-    public ProfitValueParagraph(double value, DecimalFormatter formatter) {
+    public NumericValueParagraph(double value, DecimalFormatter formatter) {
         this(value, formatter, false);
     }
 
-    public ProfitValueParagraph(double value, DecimalFormatter formatter, boolean hasColor) {
+    public NumericValueParagraph(double value, DecimalFormatter formatter, boolean hasColor) {
         this.value = value;
         this.hasColor = hasColor;
         this.formatter = formatter;

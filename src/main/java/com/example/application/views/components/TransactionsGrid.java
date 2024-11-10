@@ -126,9 +126,8 @@ public class TransactionsGrid extends Div {
     }
 
     private LitRenderer<CryptoTransaction> priceColumnRenderer() {
-        CurrencyFormatter currencyFormatter = new CurrencyFormatter();
         return LitRenderer.<CryptoTransaction>of("<p class='asset-price'>${item.price}</p>")
-                .withProperty("price", t -> currencyFormatter.format(t.getMarketPrice()));
+                .withProperty("price", t -> CurrencyFormatter.withDefaults().format(t.getMarketPrice()));
     }
 
     private LitRenderer<CryptoTransaction> quantityColumnRenderer() {
@@ -140,8 +139,6 @@ public class TransactionsGrid extends Div {
     }
 
     private LitRenderer<CryptoTransaction> profitLossColumnRenderer() {
-        CurrencyFormatter currencyFormatter = new CurrencyFormatter();
-        PercentageFormatter percentageFormatter = new PercentageFormatter();
         return LitRenderer.<CryptoTransaction>of("<div class='transaction-profit-loss ${item.className}'>" +
                                                  "  <p class='text-l'>${item.profit}</p>" +
                                                  "  <p class='text-s'>${item.profitPercentage}</p>" +
@@ -150,12 +147,12 @@ public class TransactionsGrid extends Div {
                 .withProperty("profit", transaction -> {
                     double currentPrice = instrumentsFacadeService.getAssetPrice(transaction.getAsset());
                     double profit = MathUtils.profit(transaction, currentPrice);
-                    return currencyFormatter.format(profit);
+                    return CurrencyFormatter.withDefaults().format(profit);
                 })
                 .withProperty("profitPercentage", transaction -> {
                     double currentPrice = instrumentsFacadeService.getAssetPrice(transaction.getAsset());
                     double percentage = MathUtils.profitPercentage(transaction.getMarketPrice(), currentPrice);
-                    return percentageFormatter.format(percentage);
+                    return PercentageFormatter.withDefaults().format(percentage);
                 });
     }
 

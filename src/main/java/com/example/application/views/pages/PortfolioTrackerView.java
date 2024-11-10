@@ -6,7 +6,7 @@ import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.utils.common.number.CurrencyFormatter;
 import com.example.application.views.components.AssetsGrid;
 import com.example.application.views.components.TransactionsGrid;
-import com.example.application.views.components.complex_components.ProfitValueParagraph;
+import com.example.application.views.components.complex_components.NumericValueParagraph;
 import com.example.application.views.components.complex_components.fields.PricePercentageWrapper;
 import com.example.application.views.components.native_components.Container;
 import com.example.application.views.layouts.MainLayout;
@@ -81,7 +81,7 @@ public class PortfolioTrackerView extends Main {
         Section section = new Section();
         section.addClassName("asset-details-header");
 
-        ProfitValueParagraph worth = new ProfitValueParagraph(portfolioPerformanceTracker.getPortfolioWorth());
+        NumericValueParagraph worth = new NumericValueParagraph(portfolioPerformanceTracker.getPortfolioWorth());
         double percentage = portfolioPerformanceTracker.getPortfolioProfitPercentage();
         double profit = portfolioPerformanceTracker.getPortfolioProfit();
         PricePercentageWrapper profitWrapper = new PricePercentageWrapper(profit, percentage);

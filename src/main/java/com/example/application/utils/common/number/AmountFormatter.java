@@ -7,6 +7,10 @@ import java.util.Locale;
 
 public class AmountFormatter extends DecimalFormatter {
 
+    public static AmountFormatter withDefaults() {
+        return new AmountFormatter();
+    }
+
     public AmountFormatter() {
         NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.US);
         numberFormat.setGroupingUsed(true);
