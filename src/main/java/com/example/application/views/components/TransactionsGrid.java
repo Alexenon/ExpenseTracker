@@ -108,10 +108,10 @@ public class TransactionsGrid extends Div {
 
         dataView.setFilter(transaction -> {
             boolean nameFilter = selectedAsset == null
-                                 || transaction.getAsset().equals(selectedAsset);
+                    || transaction.getAsset().equals(selectedAsset);
 
             boolean typeFilter = selectedTypes.isEmpty()
-                                 || selectedTypes.contains(transaction.getType());
+                    || selectedTypes.contains(transaction.getType());
 
             return nameFilter && typeFilter;
         });
@@ -132,17 +132,21 @@ public class TransactionsGrid extends Div {
 
     private LitRenderer<CryptoTransaction> quantityColumnRenderer() {
         AmountFormatter amountFormatter = new AmountFormatter();
-        return LitRenderer.<CryptoTransaction>of("<p class='${item.className}'>+ ${item.quantity} ${item.symbol}</p>")
+        return LitRenderer.<CryptoTransaction>of("<p class='${item.className}'> ${item.quantity} ${item.symbol}</p>")
                 .withProperty("className", t -> t.isBuyTransaction() ? "value-increase" : "value-decrease")
-                .withProperty("quantity", t -> amountFormatter.format(t.getOrderQuantity()))
+                .withProperty("quantity", t -> {
+                    double quantity = t.getOrderQuantity();
+                    String sign = t.isBuyTransaction() ? "+" : "-";
+                    return String.format("%s %s", sign, amountFormatter.format(quantity));
+                })
                 .withProperty("symbol", t -> t.getAsset().getSymbol());
     }
 
     private LitRenderer<CryptoTransaction> profitLossColumnRenderer() {
         return LitRenderer.<CryptoTransaction>of("<div class='transaction-profit-loss ${item.className}'>" +
-                                                 "  <p class='text-l'>${item.profit}</p>" +
-                                                 "  <p class='text-s'>${item.profitPercentage}</p>" +
-                                                 "</div>")
+                        "  <p class='text-l'>${item.profit}</p>" +
+                        "  <p class='text-s'>${item.profitPercentage}</p>" +
+                        "</div>")
                 .withProperty("className", this::getProfitLossClassName)
                 .withProperty("profit", transaction -> {
                     double currentPrice = instrumentsFacadeService.getAssetPrice(transaction.getAsset());

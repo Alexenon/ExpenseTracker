@@ -16,6 +16,18 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+/*
+    TODO:
+        - Add ROI (SAME AS PROFIT/LOSS)
+        - To gain a $50,000 profit from $50,000, BTC needs to hit 50,000 + 50,000 = 100,000 (n %)
+        - Add tooltips
+        - Add additional information
+        - Net Profit per Unit:
+        - Example: If inflation is 3%, the inflation-adjusted profit would be  20,000 / (1+0.03) = 19,417.47.
+        - Example: Reinvesting $20,000 at a 15% annual return for 5 years yields 20,000 * ( 1 + 0.15 ) 5 = 40,228.86
+
+* */
+
 @Component
 public class SellProfitTab extends BaseCalculatorTab {
 
@@ -43,8 +55,10 @@ public class SellProfitTab extends BaseCalculatorTab {
         assetSymbolField.addValueChangeListener(l -> buyPriceField.setValue(getAssetMarketPrice(assetSymbolField)));
 
         amountField.setValue("");
+        // TODO: Add average buy price here
         buyPriceField.setValue(getAssetMarketPrice(assetSymbolField));
         totalPriceField.setValue(0);
+        // TODO: Add current asset price
         sellPriceField.setValue("");
     }
 
@@ -87,9 +101,13 @@ public class SellProfitTab extends BaseCalculatorTab {
             double invested = totalPriceField.doubleValue();
             double buyPrice = buyPriceField.doubleValue();
             double sellPrice = sellPriceField.doubleValue();
+            double amountTokens = amountField.doubleValue();
             double profit = MathUtils.profit(buyPrice, sellPrice, invested);
             double profitPercentage = MathUtils.profitPercentage(buyPrice, sellPrice);
             double totalWorth = profit + invested;
+            double buyPricePerUnit = MathUtils.buyPricePerUnit(buyPrice, amountTokens);
+            double sellPricePerUnit = MathUtils.sellPricePerUnit(sellPrice, amountTokens);
+            double profitPerUnit = buyPricePerUnit - sellPricePerUnit;
 
             NumericValueParagraph worthParagraph = new NumericValueParagraph(totalWorth);
             PricePercentageWrapper netProfitWrapper = new PricePercentageWrapper(profit, profitPercentage);
@@ -103,6 +121,9 @@ public class SellProfitTab extends BaseCalculatorTab {
                     createResultItem("Invested", invested),
                     createResultItem("Buy Price", buyPrice),
                     createResultItem("Sell Price", sellPrice),
+                    createResultItem("Buy price per unit", buyPricePerUnit),
+                    createResultItem("Sell price per unit", sellPricePerUnit),
+                    createResultItem("Net Profit per unit", profitPerUnit),
                     createResultItem("Total Worth", worthParagraph),
                     createResultItem("Net Profit", netProfitWrapper)
             );

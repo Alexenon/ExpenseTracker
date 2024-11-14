@@ -63,7 +63,6 @@
     display: flex;
     margin-top: 13px;
     align-items: center;
-    flex-direction: column;
 }
 
 .price-wrapper > p:first-child {

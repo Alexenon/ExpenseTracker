@@ -154,6 +154,7 @@ div.assets-grid-footer {
     flex-direction: row;
     align-content: space-around;
     justify-content: space-between;
+    gap: 10px;
 }
 
 .performace-label {

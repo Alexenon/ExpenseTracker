@@ -58,8 +58,8 @@ public class EditTransactionDialog extends Dialog {
 
     private void buildForm() {
         setHeaderTitle("Transaction");
-        initializeBinder();
         initializeFields();
+        initializeBinder();
 
         Container formBody = Container.builder("transaction-modal")
                 .addComponent(assetSymbolField)

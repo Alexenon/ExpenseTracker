@@ -69,11 +69,23 @@ public class MathUtils {
     }
 
     public static double profitPercentage(double buyPrice, double sellPrice) {
-        return (sellPrice - buyPrice) /  buyPrice * 100;
+        return (sellPrice - buyPrice) / buyPrice * 100;
     }
 
     public static double profit(CryptoTransaction transaction, double currentPrice) {
         return profit(transaction.getMarketPrice(), currentPrice, transaction.getOrderTotalCost());
+    }
+
+    public static double buyPricePerUnit(double totalBuyPrice, double amountTokens) {
+        return totalBuyPrice / amountTokens;
+    }
+
+    public static double sellPricePerUnit(double totalSellPrice, double amountTokens) {
+        return totalSellPrice / amountTokens;
+    }
+
+    public static double profitPerUnit(double buyPrice, double sellPrice, int amohntTokens) {
+        return buyPricePerUnit(buyPrice, amohntTokens) - sellPricePerUnit(sellPrice, amohntTokens);
     }
 
     public static int percentageOf(BigInteger a, BigInteger b) {
