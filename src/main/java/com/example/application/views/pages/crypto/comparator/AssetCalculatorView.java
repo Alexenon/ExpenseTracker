@@ -1,8 +1,10 @@
 package com.example.application.views.pages.crypto.comparator;
 
 import com.example.application.services.crypto.InstrumentsFacadeService;
+import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.views.components.native_components.Container;
 import com.example.application.views.layouts.MainLayout;
+import com.example.application.views.pages.crypto.comparator.tabs.SellEmulatorTab;
 import com.example.application.views.pages.crypto.comparator.tabs.SellProfitTab;
 import com.example.application.views.pages.crypto.comparator.tabs.StakingProfitTab;
 import com.vaadin.flow.component.button.Button;
@@ -17,23 +19,26 @@ import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @PermitAll
-@PageTitle("Asset Details")
+@PageTitle("Calculator")
 @Route(value = "details", layout = MainLayout.class)
-public class AssetCompareView extends Main {
+public class AssetCalculatorView extends Main {
 
     private final InstrumentsFacadeService instrumentsFacadeService;
+    private final PortfolioPerformanceTracker portfolioPerformanceTracker;
 
     @Autowired
-    public AssetCompareView(InstrumentsFacadeService instrumentsFacadeService) {
+    public AssetCalculatorView(InstrumentsFacadeService instrumentsFacadeService, PortfolioPerformanceTracker portfolioPerformanceTracker) {
         this.instrumentsFacadeService = instrumentsFacadeService;
+        this.portfolioPerformanceTracker = portfolioPerformanceTracker;
         buildPage();
     }
 
     private void buildPage() {
         getStyle().set("margin", "100px 0 50px 0");
 
-        Tab sellProfitTab = new SellProfitTab(instrumentsFacadeService);
+        Tab sellProfitTab = new SellProfitTab(instrumentsFacadeService, portfolioPerformanceTracker);
         Tab stakingProfitTab = new StakingProfitTab(instrumentsFacadeService);
+        Tab profitEmulatorTab = new SellEmulatorTab(instrumentsFacadeService);
 
         TabSheet tabSheet = new TabSheet();
         tabSheet.setId("comparator-tabs");
@@ -41,6 +46,7 @@ public class AssetCompareView extends Main {
         tabSheet.add("Profit Calculator", sellProfitTab);
         tabSheet.add("Staking Calculator", stakingProfitTab);
         tabSheet.add("Compare Assets", getComparationTab());
+        tabSheet.add("Profit Emulator", profitEmulatorTab);
 
         add(tabSheet);
     }
@@ -50,8 +56,8 @@ public class AssetCompareView extends Main {
         tab.addClassName("compare-tab-content");
 
         H3 title = new H3("Compare assets");
-        SellProfitTab assetForm1 = new SellProfitTab(instrumentsFacadeService);
-        SellProfitTab assetForm2 = new SellProfitTab(instrumentsFacadeService);
+        SellProfitTab assetForm1 = new SellProfitTab(instrumentsFacadeService, portfolioPerformanceTracker);
+        SellProfitTab assetForm2 = new SellProfitTab(instrumentsFacadeService, portfolioPerformanceTracker);
         Container comparationBody = new Container("comparation-body", assetForm1, assetForm2);
         Button compareBtn = new Button("Compare");
         Div output = new Div();

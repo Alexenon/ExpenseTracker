@@ -62,10 +62,14 @@ public class PriceWatchlistComponent extends Div {
         priceLayoutContainer.add(new WatchlistLayout());
     }
 
-    /*
+    /**
      * PriceLayout used for tracking wanted sell/buy prices
      * */
     private class WatchlistLayout extends Div {
+
+        // TODO:
+        //  - Add "unsaved" / "draft" status
+        //  - Binder validation should be triggered after save, and not on changing
 
         private final AssetWatcher assetWatcher;
         private final Binder<AssetWatcher> binder = new Binder<>(AssetWatcher.class);
@@ -73,16 +77,16 @@ public class PriceWatchlistComponent extends Div {
         private final Paragraph status = new Paragraph();
         private final CurrencyField target = new CurrencyField("Price");
         private final CurrencyField targetAmount = new CurrencyField("Amount in USD");
-        private final Checkbox markAsBought = new Checkbox("Mark as bought");
-        private final Button editBtn = new Button(LumoIcon.EDIT.create());
+        private final Checkbox markAsCompleted = new Checkbox("Mark as completed");
         private final Button saveBtn = new Button("Save");
         private final Button deleteBtn = new Button("Delete");
+        private final Button editBtn = new Button(LumoIcon.EDIT.create());
 
         private boolean isEditMode;
 
         /**
          * Default constructor, that is used when creating a watchlistLayout without any data
-         * to be retrieved from the database, and the component fields should be filled and saved.
+         * to be retrieved from the database, with the input fields should be filled and saved.
          */
         public WatchlistLayout() {
             this.isEditMode = true;
@@ -118,18 +122,11 @@ public class PriceWatchlistComponent extends Div {
             target.setClassName("asset-amount-field");
             targetAmount.setClassName("asset-amount-field");
             status.setClassName("watchlist-status");
-
             saveBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
             deleteBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_ERROR);
 
-            editBtn.addClickListener(event -> {
-                setEditMode(!isEditMode);
-                revertChanges();
-            });
-
-            markAsBought.addClickListener(e -> updateStatus());
-
             saveBtn.addClickListener(event -> {
+                binder.validate();
                 if (binder.writeBeanIfValid(assetWatcher)) {
                     System.out.println("Saving " + assetWatcher);
                     instrumentsFacadeService.saveAssetWatcher(assetWatcher);
@@ -139,7 +136,13 @@ public class PriceWatchlistComponent extends Div {
                 }
             });
 
+            markAsCompleted.addClickListener(e -> updateStatus());
             deleteBtn.addClickListener(event -> this.removeFromParent());
+
+            editBtn.addClickListener(event -> {
+                setEditMode(!isEditMode);
+                revertChanges();
+            });
 
             initBinder();
             setEditMode(isEditMode);
@@ -151,7 +154,7 @@ public class PriceWatchlistComponent extends Div {
                     .addClassName("card-wrapper-body")
                     .addComponent(target)
                     .addComponent(targetAmount)
-                    .addComponent(markAsBought)
+                    .addComponent(markAsCompleted)
                     .build();
         }
 
@@ -168,14 +171,13 @@ public class PriceWatchlistComponent extends Div {
             target.setReadOnly(!isEditMode);
             targetAmount.setReadOnly(!isEditMode);
             status.setVisible(!isEditMode);
-            markAsBought.setVisible(isEditMode);
+            markAsCompleted.setVisible(isEditMode);
             saveBtn.setVisible(isEditMode);
             deleteBtn.setVisible(isEditMode);
             editBtn.setIcon(isEditMode ? LumoIcon.UNDO.create() : LumoIcon.EDIT.create());
         }
 
-        // This is for price
-        // TODO: Make same for percentage
+        // TODO: Make same for percentage, this is for price
         private void initBinder() {
             binder.forField(target)
                     .asRequired("Please fill this field")
@@ -189,9 +191,10 @@ public class PriceWatchlistComponent extends Div {
                     .withValidator(amount -> amount > 0, "Amount should be bigger than 0")
                     .bind(AssetWatcher::getTargetAmount, AssetWatcher::setTargetAmount);
 
-            binder.forField(markAsBought)
+            binder.forField(markAsCompleted)
                     .bind(AssetWatcher::isCompleted, AssetWatcher::setCompleted);
 
+            binder.setValidatorsDisabled(true);
             // Initially load the bean into the form
             binder.readBean(assetWatcher);
         }
@@ -205,9 +208,9 @@ public class PriceWatchlistComponent extends Div {
         }
 
         private void updateStatus() {
-            status.setText(markAsBought.getValue() ? "Ended" : "Ongoing");
+            status.setText(markAsCompleted.getValue() ? "Ended" : "Ongoing");
             status.removeClassNames("completed", "ongoing");
-            status.addClassName(markAsBought.getValue() ? "completed" : "ongoing");
+            status.addClassName(markAsCompleted.getValue() ? "completed" : "ongoing");
         }
 
     }

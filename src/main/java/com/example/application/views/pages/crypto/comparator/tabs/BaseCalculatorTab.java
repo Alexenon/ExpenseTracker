@@ -2,6 +2,7 @@ package com.example.application.views.pages.crypto.comparator.tabs;
 
 import com.example.application.entities.crypto.Asset;
 import com.example.application.services.crypto.InstrumentsFacadeService;
+import com.example.application.utils.common.number.AmountFormatter;
 import com.example.application.views.components.native_components.Container;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
@@ -16,6 +17,8 @@ import com.vaadin.flow.data.renderer.LitRenderer;
 public abstract class BaseCalculatorTab extends Tab {
 
     protected final InstrumentsFacadeService instrumentsFacadeService;
+
+    protected AmountFormatter amountFormatter = AmountFormatter.withDefaults();
 
     protected Div inputFieldsContainer;
     protected Button displayResultsBtn;
@@ -58,7 +61,6 @@ public abstract class BaseCalculatorTab extends Tab {
         itemContainer.add(new Paragraph(labelText), content);
         return itemContainer;
     }
-
 
     protected LitRenderer<Asset> assetSymbolRenderer() {
         return LitRenderer.<Asset>of(

@@ -33,6 +33,9 @@ import java.util.stream.Collectors;
 
 TODO: Analitics
      - How much amount of holding asset token to sell, to be in 0, How much remains, how much profit is it ?
+     - mostTradedAsset, leastTradedAsset
+     - largestSellTransaction, largestBuyTransaction
+     - mostHeldAsset, leastHeldAsset
 
 * */
 
@@ -42,6 +45,8 @@ TODO: Analitics
 @JsModule("./themes/light_theme/components/javascript/fillPieChart.js")
 @JavaScript("https://fastly.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js")
 public class PortfolioTrackerView extends Main {
+
+    private final static CurrencyFormatter currencyFormatter = CurrencyFormatter.withDefaults();
 
     private final InstrumentsFacadeService instrumentsFacadeService;
     private final PortfolioPerformanceTracker portfolioPerformanceTracker;
@@ -87,7 +92,7 @@ public class PortfolioTrackerView extends Main {
         PricePercentageWrapper profitWrapper = new PricePercentageWrapper(profit, percentage);
 
         Container portfolioWorthWrapper = new Container("price-wrapper", worth, profitWrapper);
-
+        portfolioWorthWrapper.getStyle().set("flex-direction", "column");
         section.add(portfolioWorthWrapper);
         return section;
     }
@@ -134,19 +139,29 @@ public class PortfolioTrackerView extends Main {
         title.setClassName("section-title");
 
         double profit = portfolioPerformanceTracker.getPortfolioProfit();
-        double percentage = portfolioPerformanceTracker.getPortfolioProfitPercentage();
-        PricePercentageWrapper profitLossContainer = new PricePercentageWrapper(profit, percentage);
-        profitLossContainer.setPercentageBadgeBackground(false);
+        String nrOfAssets = String.valueOf(instrumentsFacadeService.getAssetsWithNonZeroAmount().size());
+        String realized = currencyFormatter.format(portfolioPerformanceTracker.getPortfolioRealizedProfit());
+        String unrealized = currencyFormatter.format(portfolioPerformanceTracker.getPortfolioUnrealizedProfit());
+        String avgTimeHolding = String.format("%.1f days", portfolioPerformanceTracker.getPortfolioAverageHoldingDays());
 
         // TODO: Add hints for help
-        CurrencyFormatter currencyFormatter = new CurrencyFormatter();
         Div totalWorth = createStatsItem("Total Worth", currencyFormatter.format(portfolioPerformanceTracker.getPortfolioWorth()));
         Div totalCost = createStatsItem("Total Cost", currencyFormatter.format(portfolioPerformanceTracker.getPortfolioCost()));
-        Div profitStats = createStatsItem("Profit", profitLossContainer);
+        Div numberOfAssets = createStatsItem("No. of Assets", nrOfAssets);
+        Div profitStats = createStatsItem("Profit", new NumericValueParagraph(profit));
+        Div realizedProfit = createStatsItem("Realized Profit", realized);
+        Div unrealizedProfit = createStatsItem("Unrealized Profit", unrealized);
+        // TOOLTIP: 69:31 (69% of transactions are buys, 31% are sells.)
+        Div buySellRatio = createStatsItem("Buy/Sell Ratio", portfolioPerformanceTracker.getPortfolioBuySellRatio());
+        Div avgHoldingTime = createStatsItem("Average Holding Time", avgTimeHolding);
 
         Div body = new Div();
         body.addClassNames("section-card-wrapper");
-        body.add(totalWorth, totalCost, profitStats);
+        body.add(
+                totalWorth, totalCost, numberOfAssets,
+                profitStats, realizedProfit, unrealizedProfit,
+                buySellRatio, avgHoldingTime
+        );
         statisticSectionDetails.add(title, body);
 
         sectionWrapper.add(statisticSectionDetails, assetsDiversityChart);
@@ -213,7 +228,7 @@ public class PortfolioTrackerView extends Main {
         label.addClassName("stats-title");
         Div div = new Div(label, valueComponent);
         valueComponent.addClassName("stats-item");
-        div.addClassName("stats-details-wrapper");
+        div.addClassName("portfolio-stats-details");
         return div;
     }
 

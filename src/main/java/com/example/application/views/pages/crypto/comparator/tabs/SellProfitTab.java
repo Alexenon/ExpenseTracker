@@ -2,6 +2,7 @@ package com.example.application.views.pages.crypto.comparator.tabs;
 
 import com.example.application.entities.crypto.Asset;
 import com.example.application.services.crypto.InstrumentsFacadeService;
+import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.utils.common.MathUtils;
 import com.example.application.utils.common.number.PercentageFormatter;
 import com.example.application.views.components.complex_components.NumericValueParagraph;
@@ -11,6 +12,8 @@ import com.example.application.views.components.fields.CurrencyField;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Hr;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,18 +21,17 @@ import org.springframework.stereotype.Component;
 
 /*
     TODO:
-        - Add ROI (SAME AS PROFIT/LOSS)
         - To gain a $50,000 profit from $50,000, BTC needs to hit 50,000 + 50,000 = 100,000 (n %)
         - Add tooltips
-        - Add additional information
-        - Net Profit per Unit:
         - Example: If inflation is 3%, the inflation-adjusted profit would be  20,000 / (1+0.03) = 19,417.47.
         - Example: Reinvesting $20,000 at a 15% annual return for 5 years yields 20,000 * ( 1 + 0.15 ) 5 = 40,228.86
-
+        - What market cap will be at that sell price -> which top will enter
 * */
 
 @Component
 public class SellProfitTab extends BaseCalculatorTab {
+
+    private final PortfolioPerformanceTracker portfolioPerformanceTracker;
 
     private final ComboBox<Asset> assetSymbolField = new ComboBox<>("Asset");
     private final AmountField amountField = new AmountField("Amount");
@@ -38,8 +40,9 @@ public class SellProfitTab extends BaseCalculatorTab {
     private final CurrencyField sellPriceField = new CurrencyField("Sell Price");
 
     @Autowired
-    public SellProfitTab(InstrumentsFacadeService instrumentsFacadeService) {
+    public SellProfitTab(InstrumentsFacadeService instrumentsFacadeService, PortfolioPerformanceTracker portfolioPerformanceTracker) {
         super("Sell profit calculator", instrumentsFacadeService);
+        this.portfolioPerformanceTracker = portfolioPerformanceTracker;
         buildForm();
     }
 
@@ -52,22 +55,24 @@ public class SellProfitTab extends BaseCalculatorTab {
         assetSymbolField.setItems(instrumentsFacadeService.getAllAssets());
         assetSymbolField.setItemLabelGenerator(instrumentsFacadeService::getAssetFullName);
         assetSymbolField.setRenderer(assetSymbolRenderer());
-        assetSymbolField.addValueChangeListener(l -> buyPriceField.setValue(getAssetMarketPrice(assetSymbolField)));
 
-        amountField.setValue("");
-        // TODO: Add average buy price here
-        buyPriceField.setValue(getAssetMarketPrice(assetSymbolField));
-        totalPriceField.setValue(0);
-        // TODO: Add current asset price
-        sellPriceField.setValue("");
+        updateFieldsValues();
+    }
+
+    private void updateFieldsValues() {
+        Asset selectedAsset = assetSymbolField.getValue();
+        double amountOfTokens = getAmountOfTokens(selectedAsset);
+        double currentPrice = getAssetMarketPrice(assetSymbolField);
+        amountField.setValue(amountOfTokens);
+        buyPriceField.setValue(portfolioPerformanceTracker.getAverageBuyPrice(selectedAsset));
+        sellPriceField.setValue(amountOfTokens * currentPrice);
+        totalPriceField.setValue(amountOfTokens * buyPriceField.doubleValue());
     }
 
     private void initializeFieldsListeners() {
         assetSymbolField.addValueChangeListener(l -> {
-            amountField.setValue(getAmountOfTokens(assetSymbolField.getValue()));
+            updateFieldsValues();
             amountField.setSuffixComponent(new Span(getSelectedAssetSymbol(assetSymbolField)));
-            buyPriceField.setValue(getAssetMarketPrice(assetSymbolField));
-            totalPriceField.setValue(amountField.doubleValue() * buyPriceField.doubleValue());
         });
 
         amountField.setValueChangeMode(ValueChangeMode.EAGER);
@@ -98,6 +103,7 @@ public class SellProfitTab extends BaseCalculatorTab {
     protected Button createDisplayResultsBtn() {
         Button calculateBtn = new Button("Calculate");
         calculateBtn.addClickListener(e -> {
+            String symbol = assetSymbolField.getValue().getSymbol();
             double invested = totalPriceField.doubleValue();
             double buyPrice = buyPriceField.doubleValue();
             double sellPrice = sellPriceField.doubleValue();
@@ -108,6 +114,9 @@ public class SellProfitTab extends BaseCalculatorTab {
             double buyPricePerUnit = MathUtils.buyPricePerUnit(buyPrice, amountTokens);
             double sellPricePerUnit = MathUtils.sellPricePerUnit(sellPrice, amountTokens);
             double profitPerUnit = buyPricePerUnit - sellPricePerUnit;
+            double tokensToSellToBeInZero = MathUtils.safeZeroDivision(invested, sellPrice);
+            double profitTokens = amountTokens - tokensToSellToBeInZero;
+            double profitTokensValue = profitTokens * buyPrice;
 
             NumericValueParagraph worthParagraph = new NumericValueParagraph(totalWorth);
             PricePercentageWrapper netProfitWrapper = new PricePercentageWrapper(profit, profitPercentage);
@@ -116,6 +125,10 @@ public class SellProfitTab extends BaseCalculatorTab {
             percentageFormatter.setMaximumFractionDigits(0);
             netProfitWrapper.setPercentageFormatter(percentageFormatter);
 
+            String text = String.format("%s %s ≈ $%.2f", amountFormatter.format(profitTokens),
+                    getSelectedAssetSymbol(assetSymbolField), profitTokensValue);
+            Paragraph tokensProfitWrapper = new Paragraph(text);
+
             resultsContainer.removeAll();
             resultsContainer.add(
                     createResultItem("Invested", invested),
@@ -123,15 +136,18 @@ public class SellProfitTab extends BaseCalculatorTab {
                     createResultItem("Sell Price", sellPrice),
                     createResultItem("Buy price per unit", buyPricePerUnit),
                     createResultItem("Sell price per unit", sellPricePerUnit),
+                    new Hr(),
                     createResultItem("Net Profit per unit", profitPerUnit),
                     createResultItem("Total Worth", worthParagraph),
-                    createResultItem("Net Profit", netProfitWrapper)
+                    createResultItem("Net Profit", netProfitWrapper),
+                    new Hr(),
+                    createResultItem("Sell Quantity for Zero Profit", amountFormatter.format(tokensToSellToBeInZero)),
+                    createResultItem("Remaining tokens profit", tokensProfitWrapper)
             );
 
         });
 
         return calculateBtn;
     }
-
 
 }

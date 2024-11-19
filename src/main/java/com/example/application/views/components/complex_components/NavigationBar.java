@@ -1,7 +1,7 @@
 package com.example.application.views.components.complex_components;
 
 import com.example.application.views.pages.*;
-import com.example.application.views.pages.crypto.comparator.AssetCompareView;
+import com.example.application.views.pages.crypto.comparator.AssetCalculatorView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.html.Div;
@@ -22,7 +22,7 @@ public class NavigationBar extends Nav {
     private final RouterLink expensesLink = new RouterLink("Expenses", ExpensesView.class);
     private final RouterLink dashboardLink = new RouterLink("Dashboard", DashboardView.class);
     private final RouterLink yearlyLink = new RouterLink("Yearly", YearyExpensesView.class);
-    private final RouterLink comparatorLink = new RouterLink("Comparator", AssetCompareView.class);
+    private final RouterLink comparatorLink = new RouterLink("Comparator", AssetCalculatorView.class);
     private final RouterLink assetsLink = new RouterLink("Portfolio", PortfolioTrackerView.class);
 
     public NavigationBar() {

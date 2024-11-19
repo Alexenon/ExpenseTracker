@@ -9,14 +9,12 @@ import com.example.application.utils.common.StringUtils;
 import com.example.application.utils.common.number.CompactFormatter;
 import com.example.application.utils.common.number.CurrencyFormatter;
 import com.example.application.utils.common.number.PercentageFormatter;
-import com.example.application.views.components.PriceMonitorContainer;
 import com.example.application.views.components.PriceWatchlistComponent;
 import com.example.application.views.components.TransactionsGrid;
 import com.example.application.views.components.complex_components.NumericValueParagraph;
 import com.example.application.views.components.complex_components.dialogs.transactions.AddTransactionDialog;
 import com.example.application.views.components.complex_components.fields.PricePercentageWrapper;
 import com.example.application.views.components.fields.CurrencyField;
-import com.example.application.views.components.fields.PercentageField;
 import com.example.application.views.components.native_components.Container;
 import com.example.application.views.layouts.MainLayout;
 import com.vaadin.flow.component.Component;
@@ -67,7 +65,8 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         this.addTransactionDialog = new AddTransactionDialog(asset, instrumentsFacadeService);
 
         buildPage();
-        getElement().executeJs("window.scrollTo(0,0)"); // Scroll to top of the page, on initialization
+        // Scroll to top of the page, on initialization
+        getElement().executeJs("window.scrollTo(0,0)");
     }
 
     private void buildPage() {
@@ -79,7 +78,6 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
                 notesAndConvertorSection(),
                 createWatchlistSection(AssetWatcher.ActionType.BUY),
                 createWatchlistSection(AssetWatcher.ActionType.SELL),
-                priceMonitorSection(),
                 marketStatsSection(),
                 aboutSection(),
                 transactionHistorySection()
@@ -124,21 +122,6 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         section.addClassName("asset-details-header");
         section.add(coinInfoContainer, markAsFavorite);
 
-        return section;
-    }
-
-    private Section priceMonitorSection() {
-        Section section = new Section();
-        section.addClassName("section-card-wrapper");
-        section.add(new PriceMonitorContainer());
-
-        HorizontalLayout layout = new HorizontalLayout();
-        PercentageField percentageField = new PercentageField("Percentage");
-        Span estimatedSign = new Span("~");
-        Paragraph estimatedMoneyAmount = new Paragraph("$300");
-        layout.add(percentageField, estimatedSign, estimatedMoneyAmount);
-
-        section.add(layout);
         return section;
     }
 
@@ -326,7 +309,7 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         label.addClassName("stats-title");
 
         Div div = new Div(label, paragraph);
-        div.addClassName("stats-details-wrapper");
+        div.addClassName("asset-stats-details");
         return div;
     }
 
@@ -335,7 +318,7 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         label.addClassName("stats-title");
         Div div = new Div(label, valueComponent);
         valueComponent.addClassName("stats-item");
-        div.addClassName("stats-details-wrapper");
+        div.addClassName("asset-stats-details");
         return div;
     }
 

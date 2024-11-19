@@ -195,7 +195,7 @@
     Market Stats Section
 */
 
-.stats-details-wrapper {
+.asset-stats-details {
     max-width: 236px;
     flex: 0 0 auto;
     width: 100%;
@@ -204,12 +204,12 @@
     align-items: center;
 }
 
-.stats-details-wrapper > .stats-title {
+.asset-stats-details > .stats-title {
     font-size: 20px;
     font-weight: 600;
 }
 
-.stats-details-wrapper > .stats-item {
+.asset-stats-details > .stats-item {
     display: flex;
     align-items: center;
     gap: 5px;

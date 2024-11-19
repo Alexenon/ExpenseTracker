@@ -1,7 +1,8 @@
 /*
     Header
-*/
 
+    TODO: RENAME THIS FILE
+*/
 
 
 /*
@@ -126,14 +127,40 @@ div.assets-grid-footer {
     gap: 30px;
 }
 
+/*
+    Portfolio Performance Section
+*/
+
+.portfolio-stats-details {
+    max-width: 236px;
+    flex: 0 0 auto;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.portfolio-stats-details > .stats-title {
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.portfolio-stats-details > .stats-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 18px;
+}
+
 #assets-diverstity-chart {
     width: 700px;
     height: 500px;
 }
 
 /*
-    Portfolio Performance Section
+    Asset Performance Section
 */
+
 .performance-asset-image {
     margin: 0px;
     align-self: center;
