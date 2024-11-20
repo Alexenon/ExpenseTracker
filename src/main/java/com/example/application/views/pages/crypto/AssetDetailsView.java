@@ -14,6 +14,8 @@ import com.example.application.views.components.TransactionsGrid;
 import com.example.application.views.components.complex_components.NumericValueParagraph;
 import com.example.application.views.components.complex_components.dialogs.transactions.AddTransactionDialog;
 import com.example.application.views.components.complex_components.fields.PricePercentageWrapper;
+import com.example.application.views.components.complex_components.icons.MonoIcon;
+import com.example.application.views.components.complex_components.icons.PictogramIcon;
 import com.example.application.views.components.fields.CurrencyField;
 import com.example.application.views.components.native_components.Container;
 import com.example.application.views.layouts.MainLayout;
@@ -24,6 +26,7 @@ import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
+import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.BeforeEvent;
@@ -246,10 +249,17 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         Div totalWorth = createStatsItem("Total Worth", worthValue);
         Div profitLoss = createStatsItem("Profit Loss", profitLossContainer);
         Div diversity = createStatsItem("Portfolio Diversity", diversityContainer);
+        String ratio = portfolioPerformanceTracker.getAssetBuySellRatio(asset);
+        String[] ratioParts = ratio.split(":");
+        Div buySellRatio = createStatsItem("Buy/Sell Ratio", ratio,
+                String.format("%s%% of transactions are buys, %s%% are sells, in dollar equivalent", ratioParts[0], ratioParts[1]));
+        String avgTimeHolding = String.format("%.1f days", portfolioPerformanceTracker.getAssetAverageHoldingDays(asset));
+        Div avgHoldingTime = createStatsItem("Avg Holding Time", avgTimeHolding,
+                "Average holding time from the first buy");
 
         Div body = new Div();
         body.addClassName("section-card-wrapper");
-        body.add(totalWorth, profitLoss, totalCost, diversity);
+        body.add(totalWorth, profitLoss, totalCost, diversity, buySellRatio, avgHoldingTime);
 
         return new Section(header, body);
     }
@@ -320,6 +330,26 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         valueComponent.addClassName("stats-item");
         div.addClassName("asset-stats-details");
         return div;
+    }
+
+    private Div createStatsItem(String labelText, String valueText, String tooltipText) {
+        return createStatsItem(labelText, new Paragraph(valueText), tooltipText);
+    }
+
+    private Div createStatsItem(String labelText, Component valueComponent, String tooltipText) {
+        Paragraph label = new Paragraph(labelText);
+        label.addClassName("stats-title");
+        valueComponent.addClassName("stats-item");
+
+        if (tooltipText != null && !tooltipText.isEmpty()) {
+            MonoIcon infoIcon = PictogramIcon.INFORMATION_OUTLINE.create();
+            Tooltip tooltip = Tooltip.forComponent(infoIcon);
+            tooltip.setPosition(Tooltip.TooltipPosition.TOP);
+            tooltip.setText(tooltipText);
+            label.add(infoIcon);
+        }
+
+        return new Container("asset-stats-details", label, valueComponent);
     }
 
     private Icon getStarIcon(boolean isMarkedAsFavorite) {

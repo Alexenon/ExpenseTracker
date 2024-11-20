@@ -5,7 +5,9 @@ import com.example.application.entities.crypto.CryptoTransaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,7 +31,7 @@ public class PortfolioPerformanceTracker {
     }
 
     public double getAverageBuyPrice(Asset asset) {
-        if(asset == null)
+        if (asset == null)
             return 0;
 
         List<CryptoTransaction> transactions = instrumentsFacadeService.getTransactionsByAsset(asset);
@@ -40,7 +42,7 @@ public class PortfolioPerformanceTracker {
     }
 
     public double getAverageSellPrice(Asset asset) {
-        if(asset == null)
+        if (asset == null)
             return 0;
 
         List<CryptoTransaction> transactions = instrumentsFacadeService.getTransactionsByAsset(asset);
@@ -51,7 +53,7 @@ public class PortfolioPerformanceTracker {
     }
 
     public double getAveragePriceForRemainingTokens(Asset asset) {
-        if(asset == null)
+        if (asset == null)
             return 0;
 
         double totalCost = 0;
@@ -86,41 +88,65 @@ public class PortfolioPerformanceTracker {
         return getAssetTotalWorth(asset) / getAssetTotalCost(asset);
     }
 
-    public double getAssetAverageHoldingDays(Asset asset) {
-        long totalHoldingTime = 0;
-        int countSellTransactions = 0;
-
+    public String getAssetBuySellRatio(Asset asset) {
         List<CryptoTransaction> transactions = instrumentsFacadeService.getTransactionsByAsset(asset);
+        double buyCost = calculateTotalCostForBuyTransactions(transactions);
+        double sellCost = calculateTotalCostForSellTransactions(transactions);
+        double totalCost = buyCost + sellCost;
 
-        List<CryptoTransaction> buyTransactions = transactions.stream()
-                .filter(t -> t.isBuyTransaction() && t.getAsset().equals(asset))
+        double buyRatio = buyCost / totalCost * 100;
+        double sellRatio = sellCost / totalCost * 100;
+
+        return String.format("%d : %d", Math.round(buyRatio), Math.round(sellRatio));
+    }
+
+    public double getAssetAverageHoldingDays(Asset asset) {
+        List<CryptoTransaction> sortedAssetTransactions = instrumentsFacadeService.getTransactionsByAsset(asset)
+                .stream()
                 .sorted(Comparator.comparing(CryptoTransaction::getDate))
                 .toList();
 
-        // Iterate through buy transactions and match them with sell transactions
-        for (int i = 0; i < buyTransactions.size(); i++) {
-            CryptoTransaction buyTransaction = buyTransactions.get(i);
+        List<CryptoTransaction> buyTransactionsTillSale = new ArrayList<>();
+        double totalWeightedHoldingTime = 0;
+        double totalSoldQuantity = 0;
 
-            for (int j = i; j < transactions.size(); j++) {
-                CryptoTransaction sellTransaction = transactions.get(j);
-
-                if (sellTransaction.isSellTransaction() && sellTransaction.getAsset().equals(buyTransaction.getAsset())) {
-                    long holdingTime = getHoldingTimeInDays(buyTransaction, sellTransaction);
-                    totalHoldingTime += holdingTime;
-                    countSellTransactions++;
-                    break; // Move to the next buy transaction
-                }
+        for (CryptoTransaction transaction : sortedAssetTransactions) {
+            if (transaction.isBuyTransaction()) {
+                buyTransactionsTillSale.add(transaction);
+                continue;
             }
+
+            // Process sell transactions
+            double quantityToSell = transaction.getOrderQuantity();
+            long weightedHoldingTime = 0;
+
+            for (CryptoTransaction buyTransaction : buyTransactionsTillSale) {
+                if (quantityToSell <= 0) break;
+
+                double buyQuantity = buyTransaction.getOrderQuantity();
+                double soldQuantityFromThisBuy = Math.min(buyQuantity, quantityToSell);
+                weightedHoldingTime += (long) (getHoldingTimeInDays(buyTransaction, transaction) * soldQuantityFromThisBuy);
+                quantityToSell -= soldQuantityFromThisBuy;
+            }
+
+            totalWeightedHoldingTime += weightedHoldingTime;
+            totalSoldQuantity += transaction.getOrderQuantity();
         }
 
-        return countSellTransactions == 0 ? totalHoldingTime : (double) totalHoldingTime / countSellTransactions;
+        if (totalSoldQuantity == 0) {
+            LocalDate firstBoughtDate = buyTransactionsTillSale.getFirst().getDate();
+            return getHoldingTimeInDays(firstBoughtDate, LocalDate.now());
+        }
+
+        return totalWeightedHoldingTime / totalSoldQuantity;
     }
 
-    public long getHoldingTimeInDays(CryptoTransaction buyTransaction, CryptoTransaction sellTransaction) {
-        if (sellTransaction.isBuyTransaction() && sellTransaction.isSellTransaction()) {
-            return ChronoUnit.DAYS.between(buyTransaction.getDate(), sellTransaction.getDate());
-        }
-        return 0;
+    private long getHoldingTimeInDays(CryptoTransaction buyTransaction, CryptoTransaction sellTransaction) {
+        return getHoldingTimeInDays(buyTransaction.getDate(), sellTransaction.getDate());
+    }
+
+    private long getHoldingTimeInDays(LocalDate buyDate, LocalDate sellDate) {
+        return ChronoUnit.DAYS.between(buyDate, sellDate);
     }
 
 

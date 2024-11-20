@@ -8,6 +8,8 @@ import com.example.application.views.components.AssetsGrid;
 import com.example.application.views.components.TransactionsGrid;
 import com.example.application.views.components.complex_components.NumericValueParagraph;
 import com.example.application.views.components.complex_components.fields.PricePercentageWrapper;
+import com.example.application.views.components.complex_components.icons.MonoIcon;
+import com.example.application.views.components.complex_components.icons.PictogramIcon;
 import com.example.application.views.components.native_components.Container;
 import com.example.application.views.layouts.MainLayout;
 import com.example.application.views.pages.crypto.AssetDetailsView;
@@ -16,6 +18,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.*;
+import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import elemental.json.Json;
@@ -144,16 +147,24 @@ public class PortfolioTrackerView extends Main {
         String unrealized = currencyFormatter.format(portfolioPerformanceTracker.getPortfolioUnrealizedProfit());
         String avgTimeHolding = String.format("%.1f days", portfolioPerformanceTracker.getPortfolioAverageHoldingDays());
 
-        // TODO: Add hints for help
-        Div totalWorth = createStatsItem("Total Worth", currencyFormatter.format(portfolioPerformanceTracker.getPortfolioWorth()));
-        Div totalCost = createStatsItem("Total Cost", currencyFormatter.format(portfolioPerformanceTracker.getPortfolioCost()));
-        Div numberOfAssets = createStatsItem("No. of Assets", nrOfAssets);
-        Div profitStats = createStatsItem("Profit", new NumericValueParagraph(profit));
-        Div realizedProfit = createStatsItem("Realized Profit", realized);
-        Div unrealizedProfit = createStatsItem("Unrealized Profit", unrealized);
-        // TOOLTIP: 69:31 (69% of transactions are buys, 31% are sells.)
-        Div buySellRatio = createStatsItem("Buy/Sell Ratio", portfolioPerformanceTracker.getPortfolioBuySellRatio());
-        Div avgHoldingTime = createStatsItem("Average Holding Time", avgTimeHolding);
+        Div totalWorth = createStatsItem("Total Worth", currencyFormatter.format(portfolioPerformanceTracker.getPortfolioWorth()),
+                "Total value of all your holdings based on the latest price");
+        Div totalCost = createStatsItem("Total Cost", currencyFormatter.format(portfolioPerformanceTracker.getPortfolioCost()),
+                "Total amount of dollars invested to buy all the assets");
+        Div numberOfAssets = createStatsItem("No. of Assets", nrOfAssets,
+                "Current number of assets that are in your portfolio");
+        Div profitStats = createStatsItem("Profit", new NumericValueParagraph(profit),
+                "Total profit if you were to sell all assets now");
+        Div realizedProfit = createStatsItem("Realized Profit", realized,
+                "Profit or loss from your sold %s holdings");
+        Div unrealizedProfit = createStatsItem("Unrealized Profit", unrealized,
+                "Potential profit or loss if you were to sell all assets now");
+        String ratio = portfolioPerformanceTracker.getPortfolioBuySellRatio();
+        String[] ratioParts = ratio.split(":");
+        Div buySellRatio = createStatsItem("Buy/Sell Ratio", ratio,
+                String.format("%s%% of transactions are buys, %s%% are sells, in dollar equivalent", ratioParts[0], ratioParts[1]));
+        Div avgHoldingTime = createStatsItem("Avg Holding Time", avgTimeHolding,
+                "Average holding time for all assets, from the first bought");
 
         Div body = new Div();
         body.addClassNames("section-card-wrapper");
@@ -219,17 +230,24 @@ public class PortfolioTrackerView extends Main {
         return container;
     }
 
-    private Div createStatsItem(String labelText, String valueText) {
-        return createStatsItem(labelText, new Paragraph(valueText));
+    private Div createStatsItem(String labelText, String valueText, String tooltipText) {
+        return createStatsItem(labelText, new Paragraph(valueText), tooltipText);
     }
 
-    private Div createStatsItem(String labelText, Component valueComponent) {
+    private Div createStatsItem(String labelText, Component valueComponent, String tooltipText) {
         Paragraph label = new Paragraph(labelText);
         label.addClassName("stats-title");
-        Div div = new Div(label, valueComponent);
         valueComponent.addClassName("stats-item");
-        div.addClassName("portfolio-stats-details");
-        return div;
+
+        if (tooltipText != null && !tooltipText.isEmpty()) {
+            MonoIcon infoIcon = PictogramIcon.INFORMATION_OUTLINE.create();
+            Tooltip tooltip = Tooltip.forComponent(infoIcon);
+            tooltip.setPosition(Tooltip.TooltipPosition.TOP);
+            tooltip.setText(tooltipText);
+            label.add(infoIcon);
+        }
+
+        return new Container("portfolio-stats-details", label, valueComponent);
     }
 
 }

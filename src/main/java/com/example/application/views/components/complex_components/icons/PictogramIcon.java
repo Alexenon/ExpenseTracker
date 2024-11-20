@@ -9,7 +9,8 @@ package com.example.application.views.components.complex_components.icons;
 public enum PictogramIcon {
     LOGIN,
     LOGOUT,
-    ACCOUNT;
+    ACCOUNT,
+    INFORMATION_OUTLINE;
 
     public MonoIcon create() {
         return new MonoIcon(this);

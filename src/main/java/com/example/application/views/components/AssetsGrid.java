@@ -165,7 +165,7 @@ public class AssetsGrid extends Div {
                 .setAutoWidth(true)
                 .setSortable(true)
                 .setComparator(AssetGridItem::getTotalCost)
-                .setTooltipGenerator(a -> "Total cost of your %s holdings based on the latest price.".formatted(a.getSymbol()));
+                .setTooltipGenerator(a -> "Total cost of your %s holdings(How much you have invested)".formatted(a.getSymbol()));
 
         grid.addColumn(columnPercentageRenderer(AssetGridItem::getDiversityPercentage))
                 .setHeader("Diversity")
@@ -218,7 +218,6 @@ public class AssetsGrid extends Div {
 
         columnsWithData.forEach(col -> columnToggleMenu.addColumnToggleItem(col.getHeaderText(), col));
     }
-
 
     private void initializeFilteringBySearch() {
         searchField.addClassName("asset-search-field");
