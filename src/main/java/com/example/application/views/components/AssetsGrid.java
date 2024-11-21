@@ -401,7 +401,7 @@ public class AssetsGrid extends Div {
                         // TODO: Add volume column
                         .avgBuy(portfolioPerformanceTracker.getAverageBuyPrice(asset))
                         .avgSell(portfolioPerformanceTracker.getAverageSellPrice(asset))
-                        .realizedProfit(portfolioPerformanceTracker.getAssetProfit(asset))
+                        .realizedProfit(portfolioPerformanceTracker.getAssetTotalProfit(asset))
                         .unrealizedProfit(0) // TODO: Is Unrealized profit the same as TotalWorth ???
                         .totalCost(portfolioPerformanceTracker.getAssetTotalCost(asset))
                         .totalWorth(portfolioPerformanceTracker.getAssetTotalWorth(asset))

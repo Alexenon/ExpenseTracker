@@ -219,6 +219,7 @@
     font-size: 18px;
 }
 
+.tooltip-info-icon,
 .asset-stats-details > .stats-title > mono-icon,
 .portfolio-stats-details > .stats-title > mono-icon {
     font-size: 24px;
@@ -226,6 +227,7 @@
     color: gray;
     margin-left: 3px;
 }
+
 
 /*
     Notes Widget

@@ -227,7 +227,7 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
 
         double assetCost = portfolioPerformanceTracker.getAssetTotalCost(asset);
         double assetWorth = portfolioPerformanceTracker.getAssetTotalWorth(asset);
-        double assetProfitLoss = portfolioPerformanceTracker.getAssetProfit(asset);
+        double assetProfitLoss = portfolioPerformanceTracker.getAssetTotalProfit(asset);
         double profitLossPercentage = portfolioPerformanceTracker.getAssetProfitPercentage(asset);
         int assetDiversityPercentage = portfolioPerformanceTracker.getAssetDiversityPercentage(asset);
 
@@ -309,6 +309,8 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         return new Section(title, body);
     }
 
+    // TODO: Create own component for this
+    //  - Finish adding tooltips for stats above
     private Div createStatsItem(String labelText, String valueText) {
         Paragraph paragraph = new Paragraph(valueText);
         paragraph.setId(labelText);

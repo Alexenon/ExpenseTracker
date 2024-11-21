@@ -46,6 +46,14 @@ public class InstrumentsFacadeService {
         return instrumentsService.getAllAssets();
     }
 
+    public Asset getAssetBySymbol(String symbolName) {
+        return instrumentsService.getAssetBySymbol(symbolName);
+    }
+
+    public Asset getAssetBySymbol(Symbols symbol) {
+        return instrumentsService.getAssetBySymbol(symbol.name());
+    }
+
     public List<Asset> getAssetsWithNonZeroAmount() {
         return getWalletBalances()
                 .stream()
@@ -54,13 +62,15 @@ public class InstrumentsFacadeService {
                 .collect(Collectors.toList());
     }
 
-    public Asset getAssetBySymbol(String symbolName) {
-        return instrumentsService.getAssetBySymbol(symbolName);
+    public List<Asset> getAllAssetsEverBought() {
+        return getAllTransactions()
+                .stream()
+                .filter(CryptoTransaction::isBuyTransaction)
+                .map(CryptoTransaction::getAsset)
+                .distinct()
+                .toList();
     }
 
-    public Asset getAssetBySymbol(Symbols symbol) {
-        return instrumentsService.getAssetBySymbol(symbol.name());
-    }
     //</editor-fold>
 
     //<editor-fold desc="TRANSACTIONS">

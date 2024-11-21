@@ -2,6 +2,7 @@ package com.example.application.services.crypto;
 
 import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.CryptoTransaction;
+import com.example.application.utils.common.MathUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -76,12 +77,29 @@ public class PortfolioPerformanceTracker {
     }
 
     public double getAssetTotalCost(Asset asset) {
-        List<CryptoTransaction> transactions = instrumentsFacadeService.getTransactionsByAsset(asset);
-        return calculateTotalCostForBuyTransactions(transactions) - calculateTotalCostForSellTransactions(transactions);
+        return calculateTotalCostForBuyTransactions(instrumentsFacadeService.getTransactionsByAsset(asset));
     }
 
-    public double getAssetProfit(Asset asset) {
-        return getAssetTotalWorth(asset) - getAssetTotalCost(asset);
+    public double getAssetTotalProfit(Asset asset) {
+        return getAssetRealizedProfit(asset) + getAssetUnrealizedProfit(asset);
+    }
+
+    public double getAssetTotalNetProfit(Asset asset) {
+        return getAssetTotalProfit(asset) - getAssetTotalCost(asset);
+    }
+
+    public double getAssetRealizedProfit(Asset asset) {
+        double quantitySold = instrumentsFacadeService.getTransactionsByAsset(asset)
+                .stream()
+                .filter(CryptoTransaction::isSellTransaction)
+                .mapToDouble(CryptoTransaction::getOrderQuantity)
+                .sum();
+
+        return (getAverageSellPrice(asset) - getAverageBuyPrice(asset)) * quantitySold;
+    }
+
+    public double getAssetUnrealizedProfit(Asset asset) {
+        return getAssetTotalWorth(asset);
     }
 
     public double getAssetProfitPercentage(Asset asset) {
@@ -149,7 +167,6 @@ public class PortfolioPerformanceTracker {
         return ChronoUnit.DAYS.between(buyDate, sellDate);
     }
 
-
     public double getPortfolioWorth() {
         return instrumentsFacadeService.getWalletBalances().stream()
                 .mapToDouble(balance -> balance.getAmount() * instrumentsFacadeService.getAssetPrice(balance.getAsset()))
@@ -168,7 +185,10 @@ public class PortfolioPerformanceTracker {
     }
 
     public double getPortfolioRealizedProfit() {
-        return getPortfolioWorth() - getPortfolioCost();
+        return instrumentsFacadeService.getAllAssetsEverBought()
+                .stream()
+                .mapToDouble(this::getAssetTotalProfit)
+                .sum();
     }
 
     public double getPortfolioUnrealizedProfit() {
@@ -176,11 +196,8 @@ public class PortfolioPerformanceTracker {
     }
 
     public double getPortfolioAverageHoldingDays() {
-        return instrumentsFacadeService.getAllTransactions()
+        return instrumentsFacadeService.getAllAssetsEverBought()
                 .stream()
-                .filter(CryptoTransaction::isBuyTransaction)
-                .map(CryptoTransaction::getAsset)
-                .distinct()
                 .mapToDouble(this::getAssetAverageHoldingDays)
                 .average()
                 .orElse(0);
@@ -242,10 +259,7 @@ public class PortfolioPerformanceTracker {
     }
 
     private double calculateAveragePrice(double totalCost, double totalQuantity) {
-        if (totalQuantity == 0)
-            return 0;
-
-        return totalCost / totalQuantity;
+        return MathUtils.safeZeroDivision(totalCost, totalQuantity);
     }
 
     private double adjustCostForSale(CryptoTransaction transaction, double totalCost, double totalQuantity) {

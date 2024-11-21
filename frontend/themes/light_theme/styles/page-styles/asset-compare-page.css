@@ -29,7 +29,7 @@ vaadin-tabs::part(tabs) {
 */
 
 .results {
-    width: 300px;
+    width: 400px;
     display: flex;
     flex-direction: column;
     gap: 2rem;

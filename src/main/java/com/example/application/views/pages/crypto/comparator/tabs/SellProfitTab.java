@@ -113,12 +113,12 @@ public class SellProfitTab extends BaseCalculatorTab {
             double totalWorth = profit + invested;
             double buyPricePerUnit = MathUtils.buyPricePerUnit(buyPrice, amountTokens);
             double sellPricePerUnit = MathUtils.sellPricePerUnit(sellPrice, amountTokens);
-            double profitPerUnit = buyPricePerUnit - sellPricePerUnit;
             double tokensToSellToBeInZero = MathUtils.safeZeroDivision(invested, sellPrice);
             double profitTokens = amountTokens - tokensToSellToBeInZero;
             double profitTokensValue = profitTokens * buyPrice;
 
-            NumericValueParagraph worthParagraph = new NumericValueParagraph(totalWorth);
+            double netProfitPerUnit = MathUtils.safeZeroDivision(profit, amountTokens);
+            NumericValueParagraph worthParagraph = new NumericValueParagraph(totalWorth, currencyFormatter, true);
             PricePercentageWrapper netProfitWrapper = new PricePercentageWrapper(profit, profitPercentage);
 
             PercentageFormatter percentageFormatter = new PercentageFormatter();
@@ -137,12 +137,14 @@ public class SellProfitTab extends BaseCalculatorTab {
                     createResultItem("Buy price per unit", buyPricePerUnit),
                     createResultItem("Sell price per unit", sellPricePerUnit),
                     new Hr(),
-                    createResultItem("Net Profit per unit", profitPerUnit),
                     createResultItem("Total Worth", worthParagraph),
                     createResultItem("Net Profit", netProfitWrapper),
+                    createResultItem("Net Profit per unit", netProfitPerUnit),
                     new Hr(),
-                    createResultItem("Sell Quantity for Zero Profit", amountFormatter.format(tokensToSellToBeInZero)),
-                    createResultItem("Remaining tokens profit", tokensProfitWrapper)
+                    createResultItem("Sell quantity for zero profit", amountFormatter.format(tokensToSellToBeInZero),
+                            "How many tokens can you sell to safely exit from holding without loses"),
+                    createResultItem("Remaining tokens profit", tokensProfitWrapper,
+                            "The amount of tokens remained after safe holding exit")
             );
 
         });

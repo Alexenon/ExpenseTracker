@@ -3,6 +3,8 @@ package com.example.application.views.pages.crypto.comparator.tabs;
 import com.example.application.entities.crypto.Asset;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.utils.common.number.AmountFormatter;
+import com.example.application.views.components.complex_components.icons.MonoIcon;
+import com.example.application.views.components.complex_components.icons.PictogramIcon;
 import com.example.application.views.components.native_components.Container;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
@@ -11,6 +13,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.data.renderer.LitRenderer;
 
@@ -19,6 +22,7 @@ public abstract class BaseCalculatorTab extends Tab {
     protected final InstrumentsFacadeService instrumentsFacadeService;
 
     protected AmountFormatter amountFormatter = AmountFormatter.withDefaults();
+    protected AmountFormatter currencyFormatter = AmountFormatter.withDefaults();
 
     protected Div inputFieldsContainer;
     protected Button displayResultsBtn;
@@ -51,14 +55,40 @@ public abstract class BaseCalculatorTab extends Tab {
         return createResultItem(labelText, String.format("$%.2f", value));
     }
 
+    protected Div createResultItem(String labelText, double value, String tooltipText) {
+        return createResultItem(labelText, String.format("$%.2f", value), tooltipText);
+    }
+
     protected Div createResultItem(String labelText, String valueText) {
-        return createResultItem(labelText, new Span(valueText));
+        return createResultItem(labelText, new Span(valueText), null);
+    }
+
+    protected Div createResultItem(String labelText, String valueText, String tooltipText) {
+        return createResultItem(labelText, new Span(valueText), tooltipText);
     }
 
     protected Div createResultItem(String labelText, Component content) {
         Div itemContainer = new Div();
         itemContainer.addClassName("result-item");
         itemContainer.add(new Paragraph(labelText), content);
+        return itemContainer;
+    }
+
+    protected Div createResultItem(String labelText, Component content, String tooltipText) {
+        Div itemContainer = new Div();
+        Paragraph label = new Paragraph(labelText);
+        itemContainer.addClassName("result-item");
+        itemContainer.add(label, content);
+
+        if (tooltipText != null && !tooltipText.isEmpty()) {
+            MonoIcon infoIcon = PictogramIcon.INFORMATION_OUTLINE.create();
+            infoIcon.addClassName("tooltip-info-icon");
+            Tooltip tooltip = Tooltip.forComponent(infoIcon);
+            tooltip.setPosition(Tooltip.TooltipPosition.TOP);
+            tooltip.setText(tooltipText);
+            label.add(infoIcon);
+        }
+
         return itemContainer;
     }
 

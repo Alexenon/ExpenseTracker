@@ -1,6 +1,7 @@
 package com.example.application.views.pages;
 
 import com.example.application.entities.crypto.Asset;
+import com.example.application.entities.crypto.CryptoTransaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.utils.common.number.CurrencyFormatter;
@@ -36,10 +37,6 @@ import java.util.stream.Collectors;
 
 TODO: Analitics
      - How much amount of holding asset token to sell, to be in 0, How much remains, how much profit is it ?
-     - mostTradedAsset, leastTradedAsset
-     - largestSellTransaction, largestBuyTransaction
-     - mostHeldAsset, leastHeldAsset
-
 * */
 
 @PermitAll
@@ -184,19 +181,31 @@ public class PortfolioTrackerView extends Main {
         H3 title = new H3("Performance");
         title.setClassName("section-title");
 
+        // The Assets that are the most profitable, by TOTAL profit
         Map<Asset, Double> assetsProfits = instrumentsFacadeService.getAssetsWithNonZeroAmount()
                 .stream()
-                .collect(Collectors.toMap(asset -> asset, portfolioPerformanceTracker::getAssetProfit, (a, b) -> b));
+                .collect(Collectors.toMap(asset -> asset, portfolioPerformanceTracker::getAssetTotalProfit, (a, b) -> b));
 
-        // Assets are the most profitable, the profit is realized
         Asset mostProfitableAsset = Collections.max(assetsProfits.entrySet(), Map.Entry.comparingByValue()).getKey();
         Asset leastProfitableAsset = Collections.min(assetsProfits.entrySet(), Map.Entry.comparingByValue()).getKey();
+
+        // The Assets that are most traded, by NUMBER of trades
+        Map<Asset, Long> assetsNrTransactions = instrumentsFacadeService.getAllTransactions()
+                .stream()
+                .collect(Collectors.groupingBy(CryptoTransaction::getAsset, Collectors.counting()));
+
+        Asset mostTradedAsset = Collections.max(assetsNrTransactions.entrySet(), Map.Entry.comparingByValue()).getKey();
+        Asset leastTradedAsset = Collections.min(assetsNrTransactions.entrySet(), Map.Entry.comparingByValue()).getKey();
+
+
 
         Div body = new Div();
         body.addClassNames("section-card-wrapper");
         body.add(
                 createPerformanceItem("Top Gainer", mostProfitableAsset),
-                createPerformanceItem("Top Loser", leastProfitableAsset)
+                createPerformanceItem("Top Loser", leastProfitableAsset),
+                createPerformanceItem("Most Traded", mostTradedAsset),
+                createPerformanceItem("Least Traded", leastTradedAsset)
         );
 
         section.add(title, body);
@@ -215,7 +224,7 @@ public class PortfolioTrackerView extends Main {
         Image assetImage = new Image(instrumentsFacadeService.getAssetImgUrl(asset), asset.getSymbol());
         assetImage.addClassNames("coin-overview-image", "performance-asset-image");
 
-        double profit = portfolioPerformanceTracker.getAssetProfit(asset);
+        double profit = portfolioPerformanceTracker.getAssetTotalProfit(asset);
         double percentageProfit = portfolioPerformanceTracker.getAssetProfitPercentage(asset);
         PricePercentageWrapper pricePercentageWrapper = new PricePercentageWrapper(profit, percentageProfit);
         pricePercentageWrapper.addClassName("performance-values");
