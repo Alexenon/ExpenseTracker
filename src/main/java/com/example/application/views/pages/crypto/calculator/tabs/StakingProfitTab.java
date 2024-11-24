@@ -1,4 +1,4 @@
-package com.example.application.views.pages.crypto.comparator.tabs;
+package com.example.application.views.pages.crypto.calculator.tabs;
 
 import com.example.application.entities.crypto.Asset;
 import com.example.application.services.crypto.InstrumentsFacadeService;

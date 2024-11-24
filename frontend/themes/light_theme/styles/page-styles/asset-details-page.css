@@ -25,7 +25,7 @@
 }
 
 .section-header > vaadin-button {
-    border: 1px solid #e5e5e5;
+    border: 1px solid var(--o10Color);
     padding: 6px 16px 6px 12px;
     border-radius: 12px;
     background-color: white;
@@ -47,7 +47,7 @@
 }
 
 .rounded-button {
-    border: 1px solid #e5e5e5;
+    border: 1px solid var(--o10Color);
     background-color: var(--white-color);
     display: flex;
     align-items: center;
@@ -264,7 +264,7 @@
 .note-wrapper {
     min-height: 172px;
     padding: 25px;
-    border: 1px solid #e5e5e5;
+    border: 1px solid var(--o10Color);
     border-radius: 16px;
     box-shadow: rgba(0, 0, 0, 0.02) 0px 8px 12px 0px;
 }
@@ -279,7 +279,7 @@
     letter-spacing: 0px;
     white-space: nowrap;
     text-overflow: ellipsis;
-    border: 1px solid #e5e5e5;
+    border: 1px solid var(--o10Color);
     border-radius: 16px;
     width: 100%;
 }
@@ -319,7 +319,7 @@
     gap: 40px;
     justify-content: space-around;
     box-shadow: rgba(0, 0, 0, 0.02) 0px 8px 12px;
-    border: 1px solid #e5e5e5;
+    border: 1px solid var(--o10Color);
     border-radius: 16px;
     padding: 30px;
 }

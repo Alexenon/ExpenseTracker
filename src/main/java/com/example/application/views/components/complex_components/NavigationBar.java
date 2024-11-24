@@ -1,7 +1,10 @@
 package com.example.application.views.components.complex_components;
 
-import com.example.application.views.pages.*;
-import com.example.application.views.pages.crypto.comparator.AssetCalculatorView;
+import com.example.application.views.pages.DashboardView;
+import com.example.application.views.pages.ExpensesView;
+import com.example.application.views.pages.HomeView;
+import com.example.application.views.pages.PortfolioTrackerView;
+import com.example.application.views.pages.crypto.calculator.AssetCalculatorView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.html.Div;
@@ -21,8 +24,8 @@ public class NavigationBar extends Nav {
     private final Image logoImage = new Image("/images/logos/logo-white-background.png", "Logo image");
     private final RouterLink expensesLink = new RouterLink("Expenses", ExpensesView.class);
     private final RouterLink dashboardLink = new RouterLink("Dashboard", DashboardView.class);
-    private final RouterLink yearlyLink = new RouterLink("Yearly", YearyExpensesView.class);
-    private final RouterLink comparatorLink = new RouterLink("Comparator", AssetCalculatorView.class);
+//    private final RouterLink yearlyLink = new RouterLink("Yearly", YearyExpensesView.class);
+    private final RouterLink calculatorLink = new RouterLink("Calculator", AssetCalculatorView.class);
     private final RouterLink assetsLink = new RouterLink("Portfolio", PortfolioTrackerView.class);
 
     public NavigationBar() {
@@ -44,7 +47,7 @@ public class NavigationBar extends Nav {
     }
 
     public List<Component> getRoutes() {
-        return List.of(expensesLink, dashboardLink, yearlyLink, assetsLink, comparatorLink);
+        return List.of(expensesLink, dashboardLink, assetsLink, calculatorLink);
     }
 
     public Image getLogo() {

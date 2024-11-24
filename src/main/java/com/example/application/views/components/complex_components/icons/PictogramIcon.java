@@ -10,7 +10,9 @@ public enum PictogramIcon {
     LOGIN,
     LOGOUT,
     ACCOUNT,
-    INFORMATION_OUTLINE;
+    INFORMATION_OUTLINE,
+    TRASH_CAN_OUTLINE;
+
 
     public MonoIcon create() {
         return new MonoIcon(this);

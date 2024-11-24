@@ -8,6 +8,7 @@ import com.example.application.utils.common.number.CurrencyFormatter;
 import com.example.application.views.components.AssetsGrid;
 import com.example.application.views.components.TransactionsGrid;
 import com.example.application.views.components.complex_components.NumericValueParagraph;
+import com.example.application.views.components.complex_components.dialogs.transactions.AddTransactionDialog;
 import com.example.application.views.components.complex_components.fields.PricePercentageWrapper;
 import com.example.application.views.components.complex_components.icons.MonoIcon;
 import com.example.application.views.components.complex_components.icons.PictogramIcon;
@@ -16,12 +17,14 @@ import com.example.application.views.layouts.MainLayout;
 import com.example.application.views.pages.crypto.AssetDetailsView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.theme.lumo.LumoIcon;
 import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
@@ -94,6 +97,12 @@ public class PortfolioTrackerView extends Main {
         Container portfolioWorthWrapper = new Container("price-wrapper", worth, profitWrapper);
         portfolioWorthWrapper.getStyle().set("flex-direction", "column");
         section.add(portfolioWorthWrapper);
+
+        Button addTransactionBtn = new Button("Add Transaction", LumoIcon.PLUS.create());
+        addTransactionBtn.setIconAfterText(false);
+        addTransactionBtn.addClickListener(e -> new AddTransactionDialog(instrumentsFacadeService).open());
+        section.add(addTransactionBtn);
+
         return section;
     }
 
@@ -185,6 +194,10 @@ public class PortfolioTrackerView extends Main {
         Map<Asset, Double> assetsProfits = instrumentsFacadeService.getAssetsWithNonZeroAmount()
                 .stream()
                 .collect(Collectors.toMap(asset -> asset, portfolioPerformanceTracker::getAssetTotalProfit, (a, b) -> b));
+
+        if(assetsProfits.isEmpty()) {
+            return new Section();
+        }
 
         Asset mostProfitableAsset = Collections.max(assetsProfits.entrySet(), Map.Entry.comparingByValue()).getKey();
         Asset leastProfitableAsset = Collections.min(assetsProfits.entrySet(), Map.Entry.comparingByValue()).getKey();

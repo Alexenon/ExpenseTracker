@@ -1,12 +1,12 @@
-package com.example.application.views.pages.crypto.comparator;
+package com.example.application.views.pages.crypto.calculator;
 
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.views.components.native_components.Container;
 import com.example.application.views.layouts.MainLayout;
-import com.example.application.views.pages.crypto.comparator.tabs.SellEmulatorTab;
-import com.example.application.views.pages.crypto.comparator.tabs.SellProfitTab;
-import com.example.application.views.pages.crypto.comparator.tabs.StakingProfitTab;
+import com.example.application.views.pages.crypto.calculator.tabs.ProfitEmulatorTab;
+import com.example.application.views.pages.crypto.calculator.tabs.SellProfitTab;
+import com.example.application.views.pages.crypto.calculator.tabs.StakingProfitTab;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
@@ -38,7 +38,7 @@ public class AssetCalculatorView extends Main {
 
         Tab sellProfitTab = new SellProfitTab(instrumentsFacadeService, portfolioPerformanceTracker);
         Tab stakingProfitTab = new StakingProfitTab(instrumentsFacadeService);
-        Tab profitEmulatorTab = new SellEmulatorTab(instrumentsFacadeService);
+        Tab profitEmulatorTab = new ProfitEmulatorTab(instrumentsFacadeService, portfolioPerformanceTracker);
 
         TabSheet tabSheet = new TabSheet();
         tabSheet.setId("comparator-tabs");

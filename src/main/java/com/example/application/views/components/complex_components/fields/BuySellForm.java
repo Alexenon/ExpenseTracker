@@ -3,7 +3,7 @@ package com.example.application.views.components.complex_components.fields;
 import com.example.application.utils.common.MathUtils;
 import com.example.application.views.components.fields.AmountField;
 import com.example.application.views.components.fields.CurrencyField;
-import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import org.springframework.stereotype.Component;
 
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
  * Component to gather the buy price, sell price, invested amount, and amount of tokens placed using input fields
  * */
 @Component
-public class BuySellForm extends FormLayout {
+public class BuySellForm extends Div {
 
     private final AmountField amountField = new AmountField("Amount");
     private final CurrencyField buyPriceField = new CurrencyField("Buy Price");

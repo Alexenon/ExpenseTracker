@@ -204,3 +204,18 @@ vaadin-number-field::part(input-field) {
     color: rgb(17 24 39);
     caret-color: var(--BlueLightColor);
 }
+
+
+
+/*
+    COMMON COMPONENTS
+*/
+
+.add-entity-btn {
+    border: 1px solid var(--o20Color);
+    padding: 6px 16px 6px 12px;
+    border-radius: 12px;
+    background-color: white;
+    font-size: 16px;
+    color: black;
+}

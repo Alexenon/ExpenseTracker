@@ -4,7 +4,7 @@ import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.CryptoTransaction;
 import com.example.application.utils.common.MathUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
        - Cumulative Profit Loss
 * */
 
-@Component
+@Service
 public class PortfolioPerformanceTracker {
 
     private final InstrumentsFacadeService instrumentsFacadeService;
