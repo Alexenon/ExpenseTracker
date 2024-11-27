@@ -1,11 +1,11 @@
 package com.example.application.utils.common;
 
-import com.example.application.entities.crypto.CryptoTransaction;
-
 import java.math.BigInteger;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
+
+import static com.example.application.utils.investment.ProfitUtils.ONE_HUNDRED_PERCENT;
 
 public class MathUtils {
 
@@ -63,37 +63,15 @@ public class MathUtils {
         return IntStream.range(0, n).map(i -> (int) Math.pow(2, i)).sum();
     }
 
-    public static double profit(double buyPrice, double sellPrice, double investedAmount) {
-        double coinsBought = investedAmount / buyPrice;
-        return (sellPrice - buyPrice) * coinsBought;
+    public static int percentageOf(BigInteger from, BigInteger to) {
+        return from.multiply(BigInteger.valueOf(ONE_HUNDRED_PERCENT)).divide(to).intValue();
     }
 
-    public static double profitPercentage(double buyPrice, double sellPrice) {
-        return (sellPrice - buyPrice) / buyPrice * 100;
-    }
+    public static int percentageOf(double from, double to) {
+        return to == 0
+                ? ONE_HUNDRED_PERCENT
+                : (int) (from * ONE_HUNDRED_PERCENT / to);
 
-    public static double profit(CryptoTransaction transaction, double currentPrice) {
-        return profit(transaction.getMarketPrice(), currentPrice, transaction.getOrderTotalCost());
-    }
-
-    public static double buyPricePerUnit(double totalBuyPrice, double amountTokens) {
-        return totalBuyPrice / amountTokens;
-    }
-
-    public static double sellPricePerUnit(double totalSellPrice, double amountTokens) {
-        return totalSellPrice / amountTokens;
-    }
-
-    public static double profitPerUnit(double buyPrice, double sellPrice, int amohntTokens) {
-        return buyPricePerUnit(buyPrice, amohntTokens) - sellPricePerUnit(sellPrice, amohntTokens);
-    }
-
-    public static int percentageOf(BigInteger a, BigInteger b) {
-        return a.multiply(BigInteger.valueOf(100)).divide(b).intValue();
-    }
-
-    public static double roi(double netProfit, double investedCost) {
-        return netProfit / investedCost * 100;
     }
 
     // [34.000, 35.000, 36.000], 40.000  ->  36.000

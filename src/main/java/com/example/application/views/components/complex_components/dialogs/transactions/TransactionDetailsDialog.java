@@ -3,9 +3,9 @@ package com.example.application.views.components.complex_components.dialogs.tran
 import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.CryptoTransaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
-import com.example.application.utils.common.MathUtils;
 import com.example.application.utils.common.number.AmountFormatter;
 import com.example.application.utils.common.number.CurrencyFormatter;
+import com.example.application.utils.investment.ProfitUtils;
 import com.example.application.views.components.complex_components.fields.PricePercentageWrapper;
 import com.example.application.views.components.native_components.Container;
 import com.vaadin.flow.component.Key;
@@ -115,8 +115,8 @@ public class TransactionDetailsDialog extends Dialog {
         double sellPrice = instrumentsFacadeService.getAssetPrice(transaction.getAsset());
         double totalCost = transaction.getOrderTotalCost();
 
-        double usdProfit = MathUtils.profit(buyPrice, sellPrice, totalCost);
-        double percentageProfit = MathUtils.profitPercentage(buyPrice, sellPrice) - 100;
+        double usdProfit = ProfitUtils.netProfit(buyPrice, sellPrice, totalCost);
+        double percentageProfit = ProfitUtils.netProfitPercentage(buyPrice, sellPrice) - 100;
 
         Div profitLossContainer = Container.builder()
                 .addComponent(() -> {

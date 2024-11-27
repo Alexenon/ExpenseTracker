@@ -70,8 +70,8 @@ public class InvestmentStrategyCalculator {
             double buyPrice = pricesToBuy.get(i);
             double investedAmount = amountToBuy.get(i);
             double investPercentage = investedAmount * 100 / totalInvestAmount;
-            double profitPercentage = MathUtils.profitPercentage(buyPrice, sellPrice);
-            double profit = MathUtils.profit(buyPrice, sellPrice, investedAmount);
+            double profitPercentage = ProfitUtils.netProfitPercentage(buyPrice, sellPrice);
+            double profit = ProfitUtils.netProfit(buyPrice, sellPrice, investedAmount);
             totalProfit.updateAndGet(v -> v + profit);
             System.out.printf("At $%.2f -> invest: $%.2f investRate: %.2f%% -> profitRate: %.2f%% profit: $%.2f\n",
                     buyPrice, investedAmount, investPercentage, profitPercentage, profit);
@@ -104,7 +104,7 @@ public class InvestmentStrategyCalculator {
         double distribution = sumToInvest / pricesToBuy.size();
 
         return pricesToBuy.stream()
-                .map(i -> i = distribution)
+                .map(i -> distribution)
                 .collect(Collectors.toCollection(LinkedList::new));
     }
 
@@ -168,7 +168,7 @@ public class InvestmentStrategyCalculator {
         List<Integer> fibonacciList = MathUtils.generateFibonacciSequence()
                 .limit(pricesToBuy.size())
                 .boxed()
-                .collect(Collectors.toList());
+                .toList();
 
         int fibonacciSum = fibonacciList.stream().mapToInt(Integer::intValue).sum();
         double distribution = sumToInvest / fibonacciSum;

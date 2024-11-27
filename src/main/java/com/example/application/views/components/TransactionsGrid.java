@@ -14,10 +14,10 @@ package com.example.application.views.components;
 import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.CryptoTransaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
-import com.example.application.utils.common.MathUtils;
 import com.example.application.utils.common.number.AmountFormatter;
 import com.example.application.utils.common.number.CurrencyFormatter;
 import com.example.application.utils.common.number.PercentageFormatter;
+import com.example.application.utils.investment.ProfitUtils;
 import com.example.application.views.components.complex_components.dialogs.transactions.TransactionDetailsDialog;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
@@ -150,12 +150,12 @@ public class TransactionsGrid extends Div {
                 .withProperty("className", this::getProfitLossClassName)
                 .withProperty("profit", transaction -> {
                     double currentPrice = instrumentsFacadeService.getAssetPrice(transaction.getAsset());
-                    double profit = MathUtils.profit(transaction, currentPrice);
+                    double profit = ProfitUtils.netProfit(transaction, currentPrice);
                     return CurrencyFormatter.withDefaults().format(profit);
                 })
                 .withProperty("profitPercentage", transaction -> {
                     double currentPrice = instrumentsFacadeService.getAssetPrice(transaction.getAsset());
-                    double percentage = MathUtils.profitPercentage(transaction.getMarketPrice(), currentPrice);
+                    double percentage = ProfitUtils.netProfitPercentage(transaction.getMarketPrice(), currentPrice);
                     return PercentageFormatter.withDefaults().format(percentage);
                 });
     }
@@ -166,7 +166,7 @@ public class TransactionsGrid extends Div {
 
     private String getProfitLossClassName(CryptoTransaction transaction) {
         double currentPrice = instrumentsFacadeService.getAssetPrice(transaction.getAsset());
-        double profit = MathUtils.profit(transaction, currentPrice);
+        double profit = ProfitUtils.netProfit(transaction, currentPrice);
 
         if (profit == 0)
             return "";
