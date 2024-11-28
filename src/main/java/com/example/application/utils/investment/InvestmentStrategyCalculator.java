@@ -70,7 +70,7 @@ public class InvestmentStrategyCalculator {
             double buyPrice = pricesToBuy.get(i);
             double investedAmount = amountToBuy.get(i);
             double investPercentage = investedAmount * 100 / totalInvestAmount;
-            double profitPercentage = ProfitUtils.netProfitPercentage(buyPrice, sellPrice);
+            double profitPercentage = ProfitUtils.growthPercentage(buyPrice, sellPrice);
             double profit = ProfitUtils.netProfit(buyPrice, sellPrice, investedAmount);
             totalProfit.updateAndGet(v -> v + profit);
             System.out.printf("At $%.2f -> invest: $%.2f investRate: %.2f%% -> profitRate: %.2f%% profit: $%.2f\n",

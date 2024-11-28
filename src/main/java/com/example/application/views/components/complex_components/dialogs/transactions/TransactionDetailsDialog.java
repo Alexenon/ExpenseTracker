@@ -116,7 +116,7 @@ public class TransactionDetailsDialog extends Dialog {
         double totalCost = transaction.getOrderTotalCost();
 
         double usdProfit = ProfitUtils.netProfit(buyPrice, sellPrice, totalCost);
-        double percentageProfit = ProfitUtils.netProfitPercentage(buyPrice, sellPrice) - 100;
+        double percentageProfit = ProfitUtils.growthPercentage(buyPrice, sellPrice) - 100;
 
         Div profitLossContainer = Container.builder()
                 .addComponent(() -> {

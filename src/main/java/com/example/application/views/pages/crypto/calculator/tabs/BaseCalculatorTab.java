@@ -3,6 +3,7 @@ package com.example.application.views.pages.crypto.calculator.tabs;
 import com.example.application.entities.crypto.Asset;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.utils.common.number.AmountFormatter;
+import com.example.application.utils.common.number.CompactFormatter;
 import com.example.application.utils.common.number.CurrencyFormatter;
 import com.example.application.views.components.complex_components.icons.MonoIcon;
 import com.example.application.views.components.complex_components.icons.PictogramIcon;
@@ -23,6 +24,7 @@ public abstract class BaseCalculatorTab extends Tab {
     protected final InstrumentsFacadeService instrumentsFacadeService;
 
     protected AmountFormatter amountFormatter = AmountFormatter.withDefaults();
+    protected CompactFormatter compactFormatter = CompactFormatter.withDefaults();
     protected CurrencyFormatter currencyFormatter = CurrencyFormatter.withDefaults();
 
     protected Div inputFieldsContainer;

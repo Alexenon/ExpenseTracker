@@ -155,7 +155,7 @@ public class TransactionsGrid extends Div {
                 })
                 .withProperty("profitPercentage", transaction -> {
                     double currentPrice = instrumentsFacadeService.getAssetPrice(transaction.getAsset());
-                    double percentage = ProfitUtils.netProfitPercentage(transaction.getMarketPrice(), currentPrice);
+                    double percentage = ProfitUtils.growthPercentage(transaction.getMarketPrice(), currentPrice);
                     return PercentageFormatter.withDefaults().format(percentage);
                 });
     }

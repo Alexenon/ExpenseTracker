@@ -8,8 +8,11 @@ import com.example.application.utils.common.number.PercentageFormatter;
 import com.example.application.utils.investment.ProfitUtils;
 import com.example.application.views.components.complex_components.NumericValueParagraph;
 import com.example.application.views.components.complex_components.fields.PricePercentageWrapper;
+import com.example.application.views.components.complex_components.icons.MonoIcon;
+import com.example.application.views.components.complex_components.icons.PictogramIcon;
 import com.example.application.views.components.fields.AmountField;
 import com.example.application.views.components.fields.CurrencyField;
+import com.example.application.views.components.native_components.Container;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
@@ -19,6 +22,8 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.math.BigInteger;
 
 /*
     TODO:
@@ -47,31 +52,31 @@ public class SellProfitTab extends BaseCalculatorTab {
     }
 
     private void buildForm() {
+        initializeFields();
         initializeFieldsValues();
         initializeFieldsListeners();
     }
 
-    private void initializeFieldsValues() {
+    private void initializeFields() {
         assetSymbolField.setItems(instrumentsFacadeService.getAllAssets());
         assetSymbolField.setItemLabelGenerator(instrumentsFacadeService::getAssetFullName);
         assetSymbolField.setRenderer(assetSymbolRenderer());
-
-        updateFieldsValues();
     }
 
-    private void updateFieldsValues() {
+    private void initializeFieldsValues() {
         Asset selectedAsset = assetSymbolField.getValue();
         double amountOfTokens = getAmountOfTokens(selectedAsset);
         double currentPrice = getAssetMarketPrice(assetSymbolField);
+        double averageBuyPrice = portfolioPerformanceTracker.getAverageBuyPrice(selectedAsset);
         amountField.setValue(amountOfTokens);
-        buyPriceField.setValue(portfolioPerformanceTracker.getAverageBuyPrice(selectedAsset));
-        sellPriceField.setValue(amountOfTokens * currentPrice);
-        totalPriceField.setValue(amountOfTokens * buyPriceField.doubleValue());
+        buyPriceField.setValue(averageBuyPrice);
+        sellPriceField.setValue(currentPrice);
+        totalPriceField.setValue(amountOfTokens * averageBuyPrice);
     }
 
     private void initializeFieldsListeners() {
         assetSymbolField.addValueChangeListener(l -> {
-            updateFieldsValues();
+            initializeFieldsValues();
             amountField.setSuffixComponent(new Span(getSelectedAssetSymbol(assetSymbolField)));
         });
 
@@ -109,51 +114,74 @@ public class SellProfitTab extends BaseCalculatorTab {
             double sellPrice = sellPriceField.doubleValue();
             double amountTokens = amountField.doubleValue();
             double profit = ProfitUtils.netProfit(buyPrice, sellPrice, invested);
-            double profitPercentage = ProfitUtils.netProfitPercentage(buyPrice, sellPrice);
+            double profitPercentage = ProfitUtils.profitPercentage(buyPrice, sellPrice, invested);
             double totalWorth = profit + invested;
-            double buyPricePerUnit = ProfitUtils.buyPricePerUnit(buyPrice, amountTokens);
-            double sellPricePerUnit = ProfitUtils.sellPricePerUnit(sellPrice, amountTokens);
-            double tokensToSellToBeInZero = MathUtils.safeZeroDivision(invested, sellPrice);
-            double profitTokens = amountTokens - tokensToSellToBeInZero;
-            double profitTokensValue = profitTokens * buyPrice;
+
+            PercentageFormatter percentageFormatter = new PercentageFormatter();
+            percentageFormatter.setMaximumFractionDigits(0);
 
             double netProfitPerUnit = MathUtils.safeZeroDivision(profit, amountTokens);
             NumericValueParagraph worthParagraph = new NumericValueParagraph(totalWorth, currencyFormatter, true);
             PricePercentageWrapper netProfitWrapper = new PricePercentageWrapper(profit, profitPercentage);
-
-            PercentageFormatter percentageFormatter = new PercentageFormatter();
-            percentageFormatter.setMaximumFractionDigits(0);
             netProfitWrapper.setPercentageFormatter(percentageFormatter);
-
-            String text = String.format("%s %s ≈ $%.2f", amountFormatter.format(profitTokens), symbol, profitTokensValue);
-            Paragraph tokensProfitWrapper = new Paragraph(text);
-
-            String zeroProfitSellQuantity = "%s %s".formatted(amountFormatter.format(tokensToSellToBeInZero), symbol);
 
             resultsContainer.removeAll();
             resultsContainer.add(
                     createResultItem("Invested", invested),
                     createResultItem("Buy Price", buyPrice),
                     createResultItem("Sell Price", sellPrice),
-                    createResultItem("Buy price per unit", buyPricePerUnit),
-                    createResultItem("Sell price per unit", sellPricePerUnit),
-                    // TODO: new Hr() with
-                    //  - How many % the token price raised, or dropped
-                    //  - What market cap was, and what cap gained
+                    new Hr(),
+                    createResultItem("Growth Rate", percentageFormatter.format(ProfitUtils.growthPercentage(buyPrice, sellPrice))),
+                    createResultItem("Market Cap", marketCapStatsWrapper(assetSymbolField.getValue(), buyPrice, sellPrice)),
+                    createResultItem("FDV", fdvStatsWrapper(assetSymbolField.getValue(), buyPrice, sellPrice)),
                     new Hr(),
                     createResultItem("Total Worth", worthParagraph),
                     createResultItem("Net Profit", netProfitWrapper),
                     createResultItem("Net Profit per unit", netProfitPerUnit),
                     new Hr(),
-                    createResultItem("Sell quantity for zero profit", zeroProfitSellQuantity,
+                    createResultItem("Sell quantity for zero profit", zeroQuantitySellProfit(invested, sellPrice, symbol),
                             "How many tokens can you sell to safely exit from holding without loses"),
-                    createResultItem("Remaining tokens profit", tokensProfitWrapper,
+                    createResultItem("Remaining tokens profit", getTokensProfitWrapper(symbol),
                             "The amount of tokens remained after safe holding exit")
             );
-
         });
 
         return calculateBtn;
+    }
+
+    private String zeroQuantitySellProfit(double invested, double sellPrice, String symbol) {
+        return "%s %s".formatted(amountFormatter.format(MathUtils.safeZeroDivision(invested, sellPrice)), symbol);
+    }
+
+    private Paragraph getTokensProfitWrapper(String symbol) {
+        double tokensToSellToBeInZero = MathUtils.safeZeroDivision(totalPriceField.doubleValue(), sellPriceField.doubleValue());
+        double profitTokens = amountField.doubleValue() - tokensToSellToBeInZero;
+        double profitTokensValue = profitTokens * buyPriceField.doubleValue();
+        return new Paragraph(String.format("%s %s ≈ $%.2f", amountFormatter.format(profitTokens), symbol, profitTokensValue));
+    }
+
+    private Div marketCapStatsWrapper(Asset asset, double buyPrice, double sellPrice) {
+        BigInteger circulationSupply = instrumentsFacadeService.getAssetSupplyCirculating(asset);
+        double prevMarketCap = ProfitUtils.marketCap(circulationSupply, buyPrice);
+        double newMarketCap = ProfitUtils.marketCap(circulationSupply, sellPrice);
+
+        MonoIcon arrowIcon = PictogramIcon.ARROW_RIGHT_THIN.create();
+        Paragraph previousMarketCap = new Paragraph(compactFormatter.format(prevMarketCap));
+        Paragraph followingMarketCap = new Paragraph(compactFormatter.format(newMarketCap));
+
+        return new Container("centered-row", previousMarketCap, arrowIcon, followingMarketCap);
+    }
+
+    private Div fdvStatsWrapper(Asset asset, double buyPrice, double sellPrice) {
+        BigInteger totalMarketSupply = instrumentsFacadeService.getAssetSupplyTotal(asset);
+        double currentValueFDV = ProfitUtils.fdv(totalMarketSupply, buyPrice);
+        double followingValueFDV = ProfitUtils.fdv(totalMarketSupply, sellPrice);
+
+        MonoIcon arrowIcon = PictogramIcon.ARROW_RIGHT_THIN.create();
+        Paragraph previousFDV = new Paragraph(compactFormatter.format(currentValueFDV));
+        Paragraph followingFDV = new Paragraph(compactFormatter.format(followingValueFDV));
+
+        return new Container("centered-row", previousFDV, arrowIcon, followingFDV);
     }
 
 }

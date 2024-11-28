@@ -3,6 +3,9 @@ package com.example.application.utils.investment;
 import com.example.application.entities.crypto.CryptoTransaction;
 import com.example.application.utils.common.MathUtils;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
 public class ProfitUtils {
 
     public static final int ONE_HUNDRED_PERCENT = 100;
@@ -23,20 +26,18 @@ public class ProfitUtils {
         return netProfit(transaction.getMarketPrice(), currentPrice, transaction.getOrderTotalCost());
     }
 
-    // TODO: FIXME
-    public static double totalProfitPercentage(double buyPrice, double sellPrice) {
-        return (sellPrice - buyPrice) / buyPrice * ONE_HUNDRED_PERCENT;
-    }
-    public static double netProfitPercentage(double buyPrice, double sellPrice) {
-        return (sellPrice - buyPrice) / buyPrice * ONE_HUNDRED_PERCENT;
-    }
-
-    public static double roi(double buyPrice, double sellPrice, double investedAmount) {
-        return (worth(buyPrice, investedAmount) - investedAmount) / investedAmount * ONE_HUNDRED_PERCENT;
+    /**
+     * @return percentage profit relative to the investment amount (monetary perspective)
+     */
+    public static double profitPercentage(double buyPrice, double sellPrice, double investedAmount) {
+        return MathUtils.safeZeroDivision(netProfit(buyPrice, sellPrice, investedAmount), investedAmount) * ONE_HUNDRED_PERCENT;
     }
 
-    public static double roi(double netProfit, double investedCost) {
-        return netProfit / investedCost * 100;
+    /**
+     * @return percentage increase or decrease in the price of the asset (token price perspective)
+     */
+    public static double growthPercentage(double buyPrice, double sellPrice) {
+        return MathUtils.safeZeroDivision(sellPrice - buyPrice, buyPrice) * ONE_HUNDRED_PERCENT;
     }
 
     public static double buyPricePerUnit(double totalBuyPrice, double amountTokens) {
@@ -47,8 +48,34 @@ public class ProfitUtils {
         return totalSellPrice / amountTokens;
     }
 
-    public static double profitPerUnit(double buyPrice, double sellPrice, int amohntTokens) {
-        return buyPricePerUnit(buyPrice, amohntTokens) - sellPricePerUnit(sellPrice, amohntTokens);
+    public static double profitPerUnit(double buyPrice, double sellPrice, int amountTokens) {
+        return buyPricePerUnit(buyPrice, amountTokens) - sellPricePerUnit(sellPrice, amountTokens);
+    }
+
+    public static double marketCap(BigInteger circulationSupply, double tokenPrice) {
+        return new BigDecimal(circulationSupply)
+                .multiply(BigDecimal.valueOf(tokenPrice))
+                .doubleValue();
+    }
+
+    public static double fdv(BigInteger totalSupply, double tokenPrice) {
+        return new BigDecimal(totalSupply)
+                .multiply(BigDecimal.valueOf(tokenPrice))
+                .doubleValue();
+    }
+
+    /**
+     * Calculates how much the price has recovered after a drop.
+     */
+    public static double recoveryPercentage(double currentPrice, double lowestPrice) {
+        return MathUtils.safeZeroDivision(currentPrice - lowestPrice, lowestPrice) * ONE_HUNDRED_PERCENT;
+    }
+
+    /**
+     * Indicates how much % the price needs to increase to recover the initial investment (if at a loss).
+     */
+    public static double breakEvenPercentage(double buyPrice, double currentPrice) {
+        return MathUtils.safeZeroDivision(buyPrice - currentPrice, buyPrice) * ONE_HUNDRED_PERCENT;
     }
 
 }
