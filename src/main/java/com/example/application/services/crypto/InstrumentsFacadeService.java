@@ -140,17 +140,13 @@ public class InstrumentsFacadeService {
     }
 
     public double getAmountOfTokens(Asset asset) {
-        return instrumentsService.getWalletBalancesByWalletAndAsset(getAuthenticatedUserWallet(), asset).getAmount();
+        return asset == null ? 0 : getWalletBalanceByAsset(asset).getAmount();
     }
     //</editor-fold>
 
     //<editor-fold desc="METADATA">
     public AssetMetadata getAssetMetadata(Asset asset) {
         return instrumentsProvider.getMetadata().get(asset);
-    }
-
-    public String getAssetFullName(Asset asset) {
-        return instrumentsProvider.getMetadata().get(asset).getName();
     }
 
     public double getAssetPrice(Asset asset) {

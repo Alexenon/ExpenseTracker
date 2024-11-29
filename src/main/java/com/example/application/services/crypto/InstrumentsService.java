@@ -8,6 +8,7 @@ import com.example.application.repositories.crypto.WalletBalanceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -127,9 +128,9 @@ public class InstrumentsService {
      * */
 
     public void updateDatabase() {
-        Symbols.getAll().forEach(symbol -> {
-            if (assetRepository.findBySymbol(symbol) == null) {
-                assetRepository.save(new Asset(symbol));
+        Arrays.stream(Symbols.values()).forEach(asset -> {
+            if (assetRepository.findBySymbol(asset.name()) == null) {
+                assetRepository.save(new Asset(asset.name(), asset.getFullName()));
             }
         });
 

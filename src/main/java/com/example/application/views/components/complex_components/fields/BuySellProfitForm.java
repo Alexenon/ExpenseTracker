@@ -4,6 +4,7 @@
 //import com.example.application.services.crypto.InstrumentsFacadeService;
 //import com.example.application.utils.common.MathUtils;
 //import com.example.application.views.components.fields.AmountField;
+//import com.example.application.views.components.fields.AssetComboBox;
 //import com.example.application.views.components.fields.CurrencyField;
 //import com.vaadin.flow.component.combobox.ComboBox;
 //import com.vaadin.flow.component.formlayout.FormLayout;
@@ -17,14 +18,14 @@
 //
 ///**
 // * Component to gather the buy price, sell price, invested amount, and amount of tokens placed using input fields
-// * */
+// */
 //@Component
 //public class BuySellProfitForm extends FormLayout implements BeforeEnterObserver {
 //
 //    @Autowired
 //    private InstrumentsFacadeService instrumentsFacadeService;
 //
-//    private final ComboBox<Asset> assetSymbolField = new ComboBox<>("Asset");
+//    private AssetComboBox assetSymbolField;
 //    private final AmountField amountField = new AmountField("Amount");
 //    private final CurrencyField buyPriceField = new CurrencyField("Buy Price");
 //    private final CurrencyField totalPriceField = new CurrencyField("Total");
@@ -32,6 +33,7 @@
 //
 //    @Override
 //    public void beforeEnter(BeforeEnterEvent event) {
+//        assetSymbolField = new AssetComboBox(instrumentsFacadeService);
 //        buildForm();
 //    }
 //
@@ -41,9 +43,7 @@
 //    }
 //
 //    private void initializeFieldsValues() {
-//        assetSymbolField.setItems(instrumentsFacadeService.getAllAssets());
-//        assetSymbolField.setItemLabelGenerator(instrumentsFacadeService::getAssetFullName);
-//        assetSymbolField.setRenderer(assetSymbolRenderer());
+//
 //        assetSymbolField.addValueChangeListener(l -> buyPriceField.setValue(getAssetMarketPrice(assetSymbolField)));
 //
 //        amountField.setValue("");
@@ -83,6 +83,15 @@
 //
 //    protected Div createInputFieldsContainer() {
 //        return new Div(assetSymbolField, amountField, buyPriceField, totalPriceField, sellPriceField);
+//    }
+//
+//    protected double getAssetMarketPrice(ComboBox<Asset> assetSymbolField) {
+//        Asset selectedAsset = assetSymbolField.getValue();
+//        if (selectedAsset == null) {
+//            return 0;
+//        } else {
+//            return instrumentsFacadeService.getAssetPrice(selectedAsset);
+//        }
 //    }
 //
 //}

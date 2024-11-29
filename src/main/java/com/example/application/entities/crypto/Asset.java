@@ -20,6 +20,9 @@ public class Asset {
     @Column(nullable = false)
     private String symbol;
 
+    @Column(nullable = false)
+    private String fullName;
+
     @Column(name = "comment")
     private String comment;
 
@@ -29,9 +32,20 @@ public class Asset {
     @Column(nullable = false)
     private LocalDateTime lastTimeUpdated = LocalDateTime.now();
 
-    public Asset(String symbol) {
-        this(0, symbol, "", false, LocalDateTime.now());
+    public Asset(String symbol, String fullName) {
+        this(0, symbol, fullName, "", false, LocalDateTime.now());
     }
 
+    @Override
+    public String toString() {
+        return "Asset{" +
+                "id=" + id +
+                ", symbol='" + symbol + '\'' +
+                ", fullName='" + fullName + '\'' +
+                ", comment='" + comment + '\'' +
+                ", markedAsFavorite=" + markedAsFavorite +
+                ", lastTimeUpdated=" + lastTimeUpdated +
+                '}';
+    }
 }
 

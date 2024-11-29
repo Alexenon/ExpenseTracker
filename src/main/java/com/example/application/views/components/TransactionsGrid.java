@@ -88,13 +88,13 @@ public class TransactionsGrid extends Div {
         ComboBox.ItemFilter<Asset> nameSearchFilter = (asset, filterString) -> {
             String lowercaseInput = filterString.toLowerCase();
             String lowercaseSymbol = asset.getSymbol().toLowerCase();
-            String lowercaseName = instrumentsFacadeService.getAssetFullName(asset).toLowerCase();
+            String lowercaseName = asset.getFullName().toLowerCase();
 
             return lowercaseSymbol.startsWith(lowercaseInput) || lowercaseName.startsWith(lowercaseInput);
         };
 
         nameSearchField.setItems(nameSearchFilter, instrumentsFacadeService.getAllAssets());
-        nameSearchField.setItemLabelGenerator(instrumentsFacadeService::getAssetFullName); // TODO: Icon + Full Name
+        nameSearchField.setItemLabelGenerator(Asset::getFullName); // TODO: Icon + Full Name
         nameSearchField.addValueChangeListener(e -> applyFilter());
 
         typeSearchField.setItems(CryptoTransaction.TransactionType.values());
@@ -107,11 +107,8 @@ public class TransactionsGrid extends Div {
         Set<CryptoTransaction.TransactionType> selectedTypes = typeSearchField.getSelectedItems();
 
         dataView.setFilter(transaction -> {
-            boolean nameFilter = selectedAsset == null
-                    || transaction.getAsset().equals(selectedAsset);
-
-            boolean typeFilter = selectedTypes.isEmpty()
-                    || selectedTypes.contains(transaction.getType());
+            boolean nameFilter = selectedAsset == null || transaction.getAsset().equals(selectedAsset);
+            boolean typeFilter = selectedTypes.isEmpty() || selectedTypes.contains(transaction.getType());
 
             return nameFilter && typeFilter;
         });
@@ -171,6 +168,7 @@ public class TransactionsGrid extends Div {
         if (profit == 0)
             return "";
 
+        // TODO: EMMM??? -> REFACTOR
         return profit > 0 ? "value-increase" : "value-decrease";
     }
 

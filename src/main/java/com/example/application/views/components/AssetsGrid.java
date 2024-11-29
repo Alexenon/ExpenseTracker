@@ -391,7 +391,7 @@ public class AssetsGrid extends Div {
         return gridAssets.stream()
                 .map(asset -> AssetGridItem.builder()
                         .symbol(asset.getSymbol())
-                        .name(instrumentsFacadeService.getAssetFullName(asset))
+                        .name(asset.getFullName())
                         .imageUrl(instrumentsFacadeService.getAssetImgUrl(asset))
                         .price(instrumentsFacadeService.getAssetPrice(asset))
                         .tokenAmount(instrumentsFacadeService.getAmountOfTokens(asset))

@@ -6,8 +6,8 @@ import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.views.components.complex_components.fields.BuySellForm;
 import com.example.application.views.components.complex_components.icons.MonoIcon;
 import com.example.application.views.components.complex_components.icons.PictogramIcon;
+import com.example.application.views.components.fields.AssetComboBox;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.theme.lumo.LumoIcon;
@@ -28,26 +28,24 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
 
     private final PortfolioPerformanceTracker portfolioPerformanceTracker;
 
+    private final AssetComboBox assetSymbolField;
     private final List<BuySellForm> buySellForms = new ArrayList<>();
-    private final ComboBox<Asset> assetSymbolField = new ComboBox<>("Asset");
 
     public ProfitEmulatorTab(InstrumentsFacadeService instrumentsFacadeService,
                              PortfolioPerformanceTracker portfolioPerformanceTracker) {
         super("Profit Buy/Sell Emulator", instrumentsFacadeService);
         this.portfolioPerformanceTracker = portfolioPerformanceTracker;
+        this.assetSymbolField = new AssetComboBox(instrumentsFacadeService);
         buildTab();
     }
 
     private void buildTab() {
-        assetSymbolField.setItems(instrumentsFacadeService.getAllAssets());
-        assetSymbolField.setItemLabelGenerator(instrumentsFacadeService::getAssetFullName);
-        assetSymbolField.setRenderer(assetSymbolRenderer());
-        assetSymbolField.addValueChangeListener(l -> {
-            if (l.getHasValue().isEmpty()) {
+        assetSymbolField.addValueChangeListener(field -> {
+            if (field.getHasValue().isEmpty()) {
                 return;
             }
 
-            Asset selectedAsset = l.getValue();
+            Asset selectedAsset = field.getValue();
             buySellForms.forEach(form -> {
                 double buyPrice = portfolioPerformanceTracker.getAverageBuyPrice(selectedAsset);
                 double amountOfTokens = instrumentsFacadeService.getAmountOfTokens(selectedAsset);

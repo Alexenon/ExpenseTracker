@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
@@ -60,7 +61,7 @@ public class InstrumentsProvider {
     }
 
     public Map<Asset, AssetMetadata> getMetadata() {
-        return metadataPerAsset;
+        return Objects.requireNonNull(metadataPerAsset, "The metadata for all assets is empty");
     }
 
     public Map<Asset, AssetMetadata> getUpdatedMetadata() {

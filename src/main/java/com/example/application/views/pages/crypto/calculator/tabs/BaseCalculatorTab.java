@@ -1,6 +1,5 @@
 package com.example.application.views.pages.crypto.calculator.tabs;
 
-import com.example.application.entities.crypto.Asset;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.utils.common.number.AmountFormatter;
 import com.example.application.utils.common.number.CompactFormatter;
@@ -10,14 +9,12 @@ import com.example.application.views.components.complex_components.icons.Pictogr
 import com.example.application.views.components.native_components.Container;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.component.tabs.Tab;
-import com.vaadin.flow.data.renderer.LitRenderer;
 
 public abstract class BaseCalculatorTab extends Tab {
 
@@ -93,40 +90,6 @@ public abstract class BaseCalculatorTab extends Tab {
         }
 
         return itemContainer;
-    }
-
-    protected LitRenderer<Asset> assetSymbolRenderer() {
-        return LitRenderer.<Asset>of(
-                        "<div class='coin-overview-name-container'>" +
-                                "  <img class='rounded coin-overview-image' src='${item.imgUrl}' alt='${item.fullName}'/>" +
-                                "  <span>${item.symbol}</span>" +
-                                "  <p>${item.fullName}</p>" +
-                                "</div>")
-                .withProperty("imgUrl", instrumentsFacadeService::getAssetImgUrl)
-                .withProperty("symbol", Asset::getSymbol)
-                .withProperty("fullName", instrumentsFacadeService::getAssetFullName);
-    }
-
-    public String getSelectedAssetSymbol(ComboBox<Asset> assetSymbolField) {
-        Asset selectedAsset = assetSymbolField.getValue();
-        return selectedAsset == null ? "" : selectedAsset.getSymbol();
-    }
-
-    protected double getAssetMarketPrice(ComboBox<Asset> assetSymbolField) {
-        Asset selectedAsset = assetSymbolField.getValue();
-        if (selectedAsset == null) {
-            return 0;
-        } else {
-            return instrumentsFacadeService.getAssetPrice(selectedAsset);
-        }
-    }
-
-    protected double getAmountOfTokens(Asset selectedAsset) {
-        if (selectedAsset == null) {
-            return 0.0;
-        } else {
-            return instrumentsFacadeService.getAmountOfTokens(selectedAsset);
-        }
     }
 
 }

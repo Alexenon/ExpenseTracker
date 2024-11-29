@@ -122,7 +122,7 @@ public class EditTransactionDialog extends Dialog {
 
     private void initializeFields() {
         assetSymbolField.setItems(instrumentsFacadeService.getAllAssets());
-        assetSymbolField.setItemLabelGenerator(instrumentsFacadeService::getAssetFullName);
+        assetSymbolField.setItemLabelGenerator(Asset::getFullName);
         assetSymbolField.setRenderer(assetSymbolRenderer());
         assetSymbolField.addValueChangeListener(l -> marketPriceField.setValue(getMarketPriceBySelectedAsset()));
 
@@ -147,7 +147,7 @@ public class EditTransactionDialog extends Dialog {
                                 "</div>")
                 .withProperty("imgUrl", instrumentsFacadeService::getAssetImgUrl)
                 .withProperty("symbol", Asset::getSymbol)
-                .withProperty("fullName", instrumentsFacadeService::getAssetFullName);
+                .withProperty("fullName", Asset::getFullName);
     }
 
     private void initializeBinder() {

@@ -98,7 +98,7 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
                     image.setClassName("coin-overview-image");
                     return image;
                 })
-                .addComponent(new H1(instrumentsFacadeService.getAssetFullName(asset)))
+                .addComponent(new H1(asset.getFullName()))
                 .addComponent(() -> {
                     Span dot = new Span("•");
                     dot.setClassName("dot");
@@ -302,7 +302,7 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
     }
 
     private Section aboutSection() {
-        H3 title = new H3("About " + instrumentsFacadeService.getAssetFullName(asset));
+        H3 title = new H3("About " + asset.getFullName());
         title.setClassName("section-title");
         Paragraph description = new Paragraph(instrumentsFacadeService.getAssetDescriptionSummary(asset));
         Container body = new Container("section-card-wrapper", description);
