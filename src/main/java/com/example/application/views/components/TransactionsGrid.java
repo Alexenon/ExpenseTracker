@@ -18,8 +18,8 @@ import com.example.application.utils.common.number.AmountFormatter;
 import com.example.application.utils.common.number.CurrencyFormatter;
 import com.example.application.utils.common.number.PercentageFormatter;
 import com.example.application.utils.investment.ProfitUtils;
-import com.example.application.views.components.complex_components.dialogs.transactions.TransactionDetailsDialog;
-import com.vaadin.flow.component.combobox.ComboBox;
+import com.example.application.views.components.custom.dialogs.transactions.TransactionDetailsDialog;
+import com.example.application.views.components.custom.fields.AssetComboBox;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
@@ -40,13 +40,14 @@ public class TransactionsGrid extends Div {
 
     private final InstrumentsFacadeService instrumentsFacadeService;
 
-    private final ComboBox<Asset> nameSearchField = new ComboBox<>();
+    private final AssetComboBox nameSearchField;
     private final MultiSelectComboBox<CryptoTransaction.TransactionType> typeSearchField = new MultiSelectComboBox<>("Transaction Type");
     private final Grid<CryptoTransaction> grid = new Grid<>();
-    private final GridListDataView<CryptoTransaction> dataView = grid.setItems();
+    private final GridListDataView<CryptoTransaction> gridDataView = grid.setItems();
 
     public TransactionsGrid(InstrumentsFacadeService instrumentsFacadeService) {
         this.instrumentsFacadeService = instrumentsFacadeService;
+        this.nameSearchField = new AssetComboBox(instrumentsFacadeService);
         initializeGrid();
         initializeFilteringBySearch();
         add(gridHeader(), grid);
@@ -66,7 +67,6 @@ public class TransactionsGrid extends Div {
         grid.addColumn(CryptoTransaction::getDate).setHeader("Date");
         grid.addColumn(profitLossColumnRenderer()).setHeader("Profit/Loss").setFrozenToEnd(true);
 
-
         grid.setColumnReorderingAllowed(true);
         grid.getColumns().forEach(column -> {
             column.setSortable(true);
@@ -84,17 +84,6 @@ public class TransactionsGrid extends Div {
         nameSearchField.setPlaceholder("Search");
         nameSearchField.setPrefixComponent(new Icon(VaadinIcon.SEARCH));
         nameSearchField.setAllowCustomValue(false);
-
-        ComboBox.ItemFilter<Asset> nameSearchFilter = (asset, filterString) -> {
-            String lowercaseInput = filterString.toLowerCase();
-            String lowercaseSymbol = asset.getSymbol().toLowerCase();
-            String lowercaseName = asset.getFullName().toLowerCase();
-
-            return lowercaseSymbol.startsWith(lowercaseInput) || lowercaseName.startsWith(lowercaseInput);
-        };
-
-        nameSearchField.setItems(nameSearchFilter, instrumentsFacadeService.getAllAssets());
-        nameSearchField.setItemLabelGenerator(Asset::getFullName); // TODO: Icon + Full Name
         nameSearchField.addValueChangeListener(e -> applyFilter());
 
         typeSearchField.setItems(CryptoTransaction.TransactionType.values());
@@ -106,7 +95,7 @@ public class TransactionsGrid extends Div {
         Asset selectedAsset = nameSearchField.getValue();
         Set<CryptoTransaction.TransactionType> selectedTypes = typeSearchField.getSelectedItems();
 
-        dataView.setFilter(transaction -> {
+        gridDataView.setFilter(transaction -> {
             boolean nameFilter = selectedAsset == null || transaction.getAsset().equals(selectedAsset);
             boolean typeFilter = selectedTypes.isEmpty() || selectedTypes.contains(transaction.getType());
 
@@ -168,7 +157,7 @@ public class TransactionsGrid extends Div {
         if (profit == 0)
             return "";
 
-        // TODO: EMMM??? -> REFACTOR
+        // FIXME: EMMM??? -> REFACTOR
         return profit > 0 ? "value-increase" : "value-decrease";
     }
 

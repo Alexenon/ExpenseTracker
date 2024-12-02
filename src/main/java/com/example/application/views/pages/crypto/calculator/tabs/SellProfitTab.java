@@ -6,14 +6,14 @@ import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.utils.common.MathUtils;
 import com.example.application.utils.common.number.PercentageFormatter;
 import com.example.application.utils.investment.ProfitUtils;
-import com.example.application.views.components.complex_components.NumericValueParagraph;
-import com.example.application.views.components.complex_components.fields.PricePercentageWrapper;
-import com.example.application.views.components.complex_components.icons.MonoIcon;
-import com.example.application.views.components.complex_components.icons.PictogramIcon;
-import com.example.application.views.components.fields.AmountField;
-import com.example.application.views.components.fields.AssetComboBox;
-import com.example.application.views.components.fields.CurrencyField;
-import com.example.application.views.components.native_components.Container;
+import com.example.application.views.components.core.Container;
+import com.example.application.views.components.custom.NumericValueParagraph;
+import com.example.application.views.components.custom.fields.AmountField;
+import com.example.application.views.components.custom.fields.AssetComboBox;
+import com.example.application.views.components.custom.fields.CurrencyField;
+import com.example.application.views.components.custom.fields.PricePercentageWrapper;
+import com.example.application.views.components.custom.icons.MonoIcon;
+import com.example.application.views.components.custom.icons.PictogramIcon;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Hr;
@@ -141,6 +141,10 @@ public class SellProfitTab extends BaseCalculatorTab {
                     createResultItem("Remaining tokens profit", getTokensProfitWrapper(),
                             "The amount of tokens remained after safe holding exit")
             );
+
+            // FIXME: THIS DOESN'T WORK
+            // Scroll smothly to the bottom of the tab
+            this.getElement().executeJs("this.scrollTo({ top: this.scrollHeight, behavior: 'smooth' });");
         });
 
         return calculateBtn;

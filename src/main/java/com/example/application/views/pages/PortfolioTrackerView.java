@@ -7,12 +7,12 @@ import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.utils.common.number.CurrencyFormatter;
 import com.example.application.views.components.AssetsGrid;
 import com.example.application.views.components.TransactionsGrid;
-import com.example.application.views.components.complex_components.NumericValueParagraph;
-import com.example.application.views.components.complex_components.dialogs.transactions.AddTransactionDialog;
-import com.example.application.views.components.complex_components.fields.PricePercentageWrapper;
-import com.example.application.views.components.complex_components.icons.MonoIcon;
-import com.example.application.views.components.complex_components.icons.PictogramIcon;
-import com.example.application.views.components.native_components.Container;
+import com.example.application.views.components.core.Container;
+import com.example.application.views.components.custom.NumericValueParagraph;
+import com.example.application.views.components.custom.dialogs.transactions.AddTransactionDialog;
+import com.example.application.views.components.custom.fields.PricePercentageWrapper;
+import com.example.application.views.components.custom.icons.MonoIcon;
+import com.example.application.views.components.custom.icons.PictogramIcon;
 import com.example.application.views.layouts.MainLayout;
 import com.example.application.views.pages.crypto.AssetDetailsView;
 import com.vaadin.flow.component.Component;
@@ -35,12 +35,6 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-
-/*
-
-TODO: Analitics
-     - How much amount of holding asset token to sell, to be in 0, How much remains, how much profit is it ?
-* */
 
 @PermitAll
 @PageTitle("Portfolio Tracker")
@@ -159,7 +153,7 @@ public class PortfolioTrackerView extends Main {
                 "Total amount of dollars invested to buy all the assets");
         Div numberOfAssets = createStatsItem("No. of Assets", nrOfAssets,
                 "Current number of assets that are in your portfolio");
-        Div profitStats = createStatsItem("Profit", new NumericValueParagraph(profit),
+        Div profitStats = createStatsItem("Profit", new NumericValueParagraph(profit, currencyFormatter, true),
                 "Total profit if you were to sell all assets now");
         Div realizedProfit = createStatsItem("Realized Profit", realized,
                 "Profit or loss from your sold %s holdings");
@@ -168,7 +162,7 @@ public class PortfolioTrackerView extends Main {
         String ratio = portfolioPerformanceTracker.getPortfolioBuySellRatio();
         String[] ratioParts = ratio.split(":");
         Div buySellRatio = createStatsItem("Buy/Sell Ratio", ratio,
-                String.format("%s%% of transactions are buys, %s%% are sells, in dollar equivalent", ratioParts[0], ratioParts[1]));
+                String.format("%s%% of transactions are buys, %s%% are sells, in dollar equivalent", ratioParts[0].trim(), ratioParts[1]));
         Div avgHoldingTime = createStatsItem("Avg Holding Time", avgTimeHolding,
                 "Average holding time for all assets, from the first bought");
 

@@ -5,8 +5,8 @@ import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.utils.common.number.CurrencyFormatter;
 import com.example.application.utils.common.number.PercentageFormatter;
-import com.example.application.views.components.complex_components.PercentageBadge;
-import com.example.application.views.components.native_components.Container;
+import com.example.application.views.components.core.Container;
+import com.example.application.views.components.custom.PercentageBadge;
 import com.example.application.views.pages.crypto.AssetDetailsView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
@@ -401,8 +401,8 @@ public class AssetsGrid extends Div {
                         // TODO: Add volume column
                         .avgBuy(portfolioPerformanceTracker.getAverageBuyPrice(asset))
                         .avgSell(portfolioPerformanceTracker.getAverageSellPrice(asset))
-                        .realizedProfit(portfolioPerformanceTracker.getAssetTotalProfit(asset))
-                        .unrealizedProfit(0) // TODO: Is Unrealized profit the same as TotalWorth ???
+                        .realizedProfit(portfolioPerformanceTracker.getAssetRealizedProfit(asset))
+                        .unrealizedProfit(portfolioPerformanceTracker.getAssetUnrealizedProfit(asset))
                         .totalCost(portfolioPerformanceTracker.getAssetTotalCost(asset))
                         .totalWorth(portfolioPerformanceTracker.getAssetTotalWorth(asset))
                         .diversityPercentage(portfolioPerformanceTracker.getAssetDiversityPercentage(asset))

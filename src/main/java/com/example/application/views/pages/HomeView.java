@@ -1,7 +1,7 @@
 package com.example.application.views.pages;
 
 import com.example.application.services.crypto.InstrumentsFacadeService;
-import com.example.application.views.components.complex_components.dialogs.transactions.AddTransactionDialog;
+import com.example.application.views.components.custom.dialogs.transactions.AddTransactionDialog;
 import com.example.application.views.layouts.MainLayout;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.contextmenu.MenuItem;

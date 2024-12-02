@@ -2,7 +2,7 @@ package com.example.application.views.pages;
 
 import com.example.application.entities.User;
 import com.example.application.services.UserService;
-import com.example.application.views.components.complex_components.forms.RegisterForm;
+import com.example.application.views.components.custom.forms.RegisterForm;
 import com.example.application.views.components.utils.HasNotifications;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;

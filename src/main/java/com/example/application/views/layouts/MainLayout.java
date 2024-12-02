@@ -1,9 +1,9 @@
 package com.example.application.views.layouts;
 
 import com.example.application.services.SecurityService;
-import com.example.application.views.components.complex_components.NavigationBar;
-import com.example.application.views.components.complex_components.icons.MonoIcon;
-import com.example.application.views.components.complex_components.icons.PictogramIcon;
+import com.example.application.views.components.custom.NavigationBar;
+import com.example.application.views.components.custom.icons.MonoIcon;
+import com.example.application.views.components.custom.icons.PictogramIcon;
 import com.example.application.views.pages.LoginView;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;

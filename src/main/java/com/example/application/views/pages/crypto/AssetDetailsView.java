@@ -11,13 +11,13 @@ import com.example.application.utils.common.number.CurrencyFormatter;
 import com.example.application.utils.common.number.PercentageFormatter;
 import com.example.application.views.components.PriceWatchlistComponent;
 import com.example.application.views.components.TransactionsGrid;
-import com.example.application.views.components.complex_components.NumericValueParagraph;
-import com.example.application.views.components.complex_components.dialogs.transactions.AddTransactionDialog;
-import com.example.application.views.components.complex_components.fields.PricePercentageWrapper;
-import com.example.application.views.components.complex_components.icons.MonoIcon;
-import com.example.application.views.components.complex_components.icons.PictogramIcon;
-import com.example.application.views.components.fields.CurrencyField;
-import com.example.application.views.components.native_components.Container;
+import com.example.application.views.components.core.Container;
+import com.example.application.views.components.custom.NumericValueParagraph;
+import com.example.application.views.components.custom.dialogs.transactions.AddTransactionDialog;
+import com.example.application.views.components.custom.fields.CurrencyField;
+import com.example.application.views.components.custom.fields.PricePercentageWrapper;
+import com.example.application.views.components.custom.icons.MonoIcon;
+import com.example.application.views.components.custom.icons.PictogramIcon;
 import com.example.application.views.layouts.MainLayout;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
@@ -39,11 +39,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigInteger;
 import java.util.Objects;
-
-/*
- * TODO:
- *  [!] Make watchers to be sorted on ADDING a new one
- * */
 
 @PermitAll
 @PageTitle("Asset Details")
@@ -252,7 +247,7 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         String ratio = portfolioPerformanceTracker.getAssetBuySellRatio(asset);
         String[] ratioParts = ratio.split(":");
         Div buySellRatio = createStatsItem("Buy/Sell Ratio", ratio,
-                String.format("%s%% of transactions are buys, %s%% are sells, in dollar equivalent", ratioParts[0], ratioParts[1]));
+                String.format("%s%% of transactions are buys, %s%% are sells, in dollar equivalent", ratioParts[0].trim(), ratioParts[1]));
         String avgTimeHolding = String.format("%.1f days", portfolioPerformanceTracker.getAssetAverageHoldingDays(asset));
         Div avgHoldingTime = createStatsItem("Avg Holding Time", avgTimeHolding,
                 "Average holding time from the first buy");

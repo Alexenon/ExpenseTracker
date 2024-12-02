@@ -4,8 +4,8 @@ import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.AssetWatcher;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.utils.common.StringUtils;
-import com.example.application.views.components.fields.CurrencyField;
-import com.example.application.views.components.native_components.Container;
+import com.example.application.views.components.core.Container;
+import com.example.application.views.components.custom.fields.CurrencyField;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -20,7 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 
 /*
- * TODO:
+ * TODO: LONG TERM:
  *  - Add percentage alternative
  *  - Add style for 'Save' and 'Delete' buttons
  * */
