@@ -86,11 +86,11 @@ public class TransactionDetailsDialog extends Dialog {
         String formattedAmount = amountFormatter.format(transaction.getOrderQuantity())
                 + " " + transaction.getAsset().getSymbol();
         Paragraph pricePerTokenField = new Paragraph(String.format("(1 %s = %s)", asset.getSymbol(), formattedPrice));
-        Paragraph totalPriceField = new Paragraph(currencyFormatter.format(transaction.getOrderTotalCost()));
+        Paragraph totalCostField = new Paragraph(currencyFormatter.format(transaction.getOrderTotalCost()));
 
         Div priceDetails = Container.builder()
                 .addComponent(new H4(formattedAmount))
-                .addComponent(new HorizontalLayout(totalPriceField, pricePerTokenField))
+                .addComponent(new HorizontalLayout(totalCostField, pricePerTokenField))
                 .build();
 
         Image symbolImage = new Image(instrumentsFacadeService.getAssetImgUrl(asset), asset.getSymbol());
@@ -112,7 +112,7 @@ public class TransactionDetailsDialog extends Dialog {
 
     private Div detailsProfitLoss() {
         double buyPrice = transaction.getMarketPrice();
-        double sellPrice = instrumentsFacadeService.getAssetPrice(transaction.getAsset());
+        double sellPrice = instrumentsFacadeService.getAssetMarketPrice(transaction.getAsset());
         double totalCost = transaction.getOrderTotalCost();
 
         double usdProfit = ProfitUtils.netProfit(buyPrice, sellPrice, totalCost);
@@ -134,7 +134,7 @@ public class TransactionDetailsDialog extends Dialog {
                 .addComponent(() -> Container.builder()
                         .addClassName("transaction-profit-loss-badge-item")
                         .addComponent(new Paragraph("Current Value"))
-                        .addComponent(new Paragraph(currencyFormatter.format(instrumentsFacadeService.getAssetPrice(asset))))
+                        .addComponent(new Paragraph(currencyFormatter.format(instrumentsFacadeService.getAssetMarketPrice(asset))))
                         .build())
                 .build();
     }

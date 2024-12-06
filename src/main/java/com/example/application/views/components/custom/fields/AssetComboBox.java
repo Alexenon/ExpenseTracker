@@ -61,7 +61,7 @@ public class AssetComboBox extends ComboBox<Asset> {
     }
 
     public double getMarketPrice() {
-        return extract(instrumentsFacadeService::getAssetPrice, 0.0);
+        return extract(instrumentsFacadeService::getAssetMarketPrice, 0.0);
     }
 
     public double getAmountTokens() {

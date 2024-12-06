@@ -149,7 +149,7 @@ public class InstrumentsFacadeService {
         return instrumentsProvider.getMetadata().get(asset);
     }
 
-    public double getAssetPrice(Asset asset) {
+    public double getAssetMarketPrice(Asset asset) {
         return asset == null ? 0 : instrumentsProvider.getMetadata().get(asset).getPriceUsd();
     }
 

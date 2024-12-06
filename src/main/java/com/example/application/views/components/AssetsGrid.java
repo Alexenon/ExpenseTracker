@@ -393,7 +393,7 @@ public class AssetsGrid extends Div {
                         .symbol(asset.getSymbol())
                         .name(asset.getFullName())
                         .imageUrl(instrumentsFacadeService.getAssetImgUrl(asset))
-                        .price(instrumentsFacadeService.getAssetPrice(asset))
+                        .price(instrumentsFacadeService.getAssetMarketPrice(asset))
                         .tokenAmount(instrumentsFacadeService.getAmountOfTokens(asset))
                         .priceChangesPercentage24h(instrumentsFacadeService.getAsset24HourChangePercentage(asset))
                         .closestBuy(instrumentsFacadeService.getClosestBuyWatcherPrice(asset))

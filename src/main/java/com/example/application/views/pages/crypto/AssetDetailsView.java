@@ -16,17 +16,14 @@ import com.example.application.views.components.custom.NumericValueParagraph;
 import com.example.application.views.components.custom.dialogs.transactions.AddTransactionDialog;
 import com.example.application.views.components.custom.fields.CurrencyField;
 import com.example.application.views.components.custom.fields.PricePercentageWrapper;
-import com.example.application.views.components.custom.icons.MonoIcon;
-import com.example.application.views.components.custom.icons.PictogramIcon;
+import com.example.application.views.components.custom.fields.stats.PortfolioStatsDisplay;
 import com.example.application.views.layouts.MainLayout;
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
-import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.BeforeEvent;
@@ -45,8 +42,8 @@ import java.util.Objects;
 @Route(value = "details", layout = MainLayout.class)
 public class AssetDetailsView extends Main implements HasUrlParameter<String> {
 
-    private Asset asset;
-    private AddTransactionDialog addTransactionDialog;
+    private static final CurrencyFormatter currencyFormatter = CurrencyFormatter.withDefaults();
+    private static final PercentageFormatter percentageFormatter = PercentageFormatter.withDefaults();
 
     @Autowired
     private InstrumentsFacadeService instrumentsFacadeService;
@@ -54,8 +51,8 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
     @Autowired
     private PortfolioPerformanceTracker portfolioPerformanceTracker;
 
-    private static final CurrencyFormatter currencyFormatter = CurrencyFormatter.withDefaults();
-    private static final PercentageFormatter percentageFormatter = PercentageFormatter.withDefaults();
+    private Asset asset;
+    private AddTransactionDialog addTransactionDialog;
 
     @Override
     public void setParameter(BeforeEvent beforeEvent, String symbol) {
@@ -102,7 +99,7 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
                 .addComponent(new Span(asset.getSymbol()))
                 .build();
 
-        double price = instrumentsFacadeService.getAssetPrice(asset);
+        double price = instrumentsFacadeService.getAssetMarketPrice(asset);
         double percentage = instrumentsFacadeService.getAsset24HourChangePercentage(asset);
         PricePercentageWrapper priceWrapper = new PricePercentageWrapper(price, percentage);
         priceWrapper.addClassName("price-wrapper");
@@ -161,7 +158,7 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         tokenAmountField.setValue(1);
 
         CurrencyField usdAmountField = new CurrencyField();
-        usdAmountField.setValue(instrumentsFacadeService.getAssetPrice(asset));
+        usdAmountField.setValue(instrumentsFacadeService.getAssetMarketPrice(asset));
 
         Container inputContainer = Container.builder()
                 .addComponent(inputImage)
@@ -189,13 +186,13 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
 
         tokenAmountField.setValueChangeMode(ValueChangeMode.EAGER);
         tokenAmountField.addKeyUpListener(e -> {
-            double calculatedPrice = tokenAmountField.doubleValue() * instrumentsFacadeService.getAssetPrice(asset);
+            double calculatedPrice = tokenAmountField.doubleValue() * instrumentsFacadeService.getAssetMarketPrice(asset);
             usdAmountField.setValue(calculatedPrice);
         });
 
         usdAmountField.setValueChangeMode(ValueChangeMode.EAGER);
         usdAmountField.addKeyUpListener(e -> {
-            double calculatedPrice = usdAmountField.doubleValue() / instrumentsFacadeService.getAssetPrice(asset);
+            double calculatedPrice = usdAmountField.doubleValue() / instrumentsFacadeService.getAssetMarketPrice(asset);
             tokenAmountField.setValue(calculatedPrice);
         });
 
@@ -240,16 +237,16 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
                 .addComponent(new ProgressBar(0, 100, assetDiversityPercentage))
                 .build();
 
-        Div totalCost = createStatsItem("Total Cost", costValue);
-        Div totalWorth = createStatsItem("Total Worth", worthValue);
-        Div profitLoss = createStatsItem("Profit Loss", profitLossContainer);
-        Div diversity = createStatsItem("Portfolio Diversity", diversityContainer);
+        Div totalCost = new PortfolioStatsDisplay("Total Cost", costValue);
+        Div totalWorth = new PortfolioStatsDisplay("Total Worth", worthValue);
+        Div profitLoss = new PortfolioStatsDisplay("Profit Loss", profitLossContainer);
+        Div diversity = new PortfolioStatsDisplay("Portfolio Diversity", diversityContainer);
         String ratio = portfolioPerformanceTracker.getAssetBuySellRatio(asset);
         String[] ratioParts = ratio.split(":");
-        Div buySellRatio = createStatsItem("Buy/Sell Ratio", ratio,
+        Div buySellRatio = new PortfolioStatsDisplay("Buy/Sell Ratio", ratio,
                 String.format("%s%% of transactions are buys, %s%% are sells, in dollar equivalent", ratioParts[0].trim(), ratioParts[1]));
         String avgTimeHolding = String.format("%.1f days", portfolioPerformanceTracker.getAssetAverageHoldingDays(asset));
-        Div avgHoldingTime = createStatsItem("Avg Holding Time", avgTimeHolding,
+        Div avgHoldingTime = new PortfolioStatsDisplay("Avg Holding Time", avgTimeHolding,
                 "Average holding time from the first buy");
 
         Div body = new Div();
@@ -266,7 +263,7 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         CompactFormatter compactFormatter = new CompactFormatter();
 
         double assetTotalMarketCap = instrumentsFacadeService.getAssetTotalMarketCap(asset);
-        Div marketCap = createStatsItem("Market Cap", compactFormatter.format(assetTotalMarketCap));
+        Div marketCap = new PortfolioStatsDisplay("Market Cap", compactFormatter.format(assetTotalMarketCap));
 
         BigInteger assetTotalSupply = instrumentsFacadeService.getAssetSupplyTotal(asset);
         double asset24HourVolume = instrumentsFacadeService.getAsset24HourVolume(asset);
@@ -284,10 +281,10 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
                 .addComponent(bar)
                 .build();
 
-        Div circulationSupply = createStatsItem("Circulation Supply", circulationSupplyContainer);
+        Div circulationSupply = new PortfolioStatsDisplay("Circulation Supply", circulationSupplyContainer);
 
-        Div totalSupply = createStatsItem("Total Supply", compactFormatter.format(assetTotalSupply.doubleValue()));
-        Div volume24Hour = createStatsItem("Volume 24h", compactFormatter.format(asset24HourVolume));
+        Div totalSupply = new PortfolioStatsDisplay("Total Supply", compactFormatter.format(assetTotalSupply.doubleValue()));
+        Div volume24Hour = new PortfolioStatsDisplay("Volume 24h", compactFormatter.format(asset24HourVolume));
 
         Div body = new Div(marketCap, circulationSupply, totalSupply, volume24Hour);
         body.addClassNames("section-card-wrapper", "market-stats-section");
@@ -302,51 +299,6 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         Paragraph description = new Paragraph(instrumentsFacadeService.getAssetDescriptionSummary(asset));
         Container body = new Container("section-card-wrapper", description);
         return new Section(title, body);
-    }
-
-    // TODO: Create own component for this
-    //  - Finish adding tooltips for stats above
-    private Div createStatsItem(String labelText, String valueText) {
-        Paragraph paragraph = new Paragraph(valueText);
-        paragraph.setId(labelText);
-        paragraph.addClassName("stats-item");
-
-        NativeLabel label = new NativeLabel(labelText);
-        label.setFor(paragraph);
-        label.addClassName("stats-title");
-
-        Div div = new Div(label, paragraph);
-        div.addClassName("asset-stats-details");
-        return div;
-    }
-
-    private Div createStatsItem(String labelText, Component valueComponent) {
-        Paragraph label = new Paragraph(labelText);
-        label.addClassName("stats-title");
-        Div div = new Div(label, valueComponent);
-        valueComponent.addClassName("stats-item");
-        div.addClassName("asset-stats-details");
-        return div;
-    }
-
-    private Div createStatsItem(String labelText, String valueText, String tooltipText) {
-        return createStatsItem(labelText, new Paragraph(valueText), tooltipText);
-    }
-
-    private Div createStatsItem(String labelText, Component valueComponent, String tooltipText) {
-        Paragraph label = new Paragraph(labelText);
-        label.addClassName("stats-title");
-        valueComponent.addClassName("stats-item");
-
-        if (tooltipText != null && !tooltipText.isEmpty()) {
-            MonoIcon infoIcon = PictogramIcon.INFORMATION_OUTLINE.create();
-            Tooltip tooltip = Tooltip.forComponent(infoIcon);
-            tooltip.setPosition(Tooltip.TooltipPosition.TOP);
-            tooltip.setText(tooltipText);
-            label.add(infoIcon);
-        }
-
-        return new Container("asset-stats-details", label, valueComponent);
     }
 
     private Icon getStarIcon(boolean isMarkedAsFavorite) {
@@ -407,4 +359,3 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
     }
 
 }
-

@@ -73,7 +73,7 @@ public class PortfolioPerformanceTracker {
     }
 
     public double getAssetTotalWorth(Asset asset) {
-        return instrumentsFacadeService.getAmountOfTokens(asset) * instrumentsFacadeService.getAssetPrice(asset);
+        return instrumentsFacadeService.getAmountOfTokens(asset) * instrumentsFacadeService.getAssetMarketPrice(asset);
     }
 
     public double getAssetTotalCost(Asset asset) {
@@ -169,7 +169,7 @@ public class PortfolioPerformanceTracker {
 
     public double getPortfolioWorth() {
         return instrumentsFacadeService.getWalletBalances().stream()
-                .mapToDouble(balance -> balance.getAmount() * instrumentsFacadeService.getAssetPrice(balance.getAsset()))
+                .mapToDouble(balance -> balance.getAmount() * instrumentsFacadeService.getAssetMarketPrice(balance.getAsset()))
                 .sum();
     }
 

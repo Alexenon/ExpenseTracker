@@ -11,8 +11,7 @@ import com.example.application.views.components.core.Container;
 import com.example.application.views.components.custom.NumericValueParagraph;
 import com.example.application.views.components.custom.dialogs.transactions.AddTransactionDialog;
 import com.example.application.views.components.custom.fields.PricePercentageWrapper;
-import com.example.application.views.components.custom.icons.MonoIcon;
-import com.example.application.views.components.custom.icons.PictogramIcon;
+import com.example.application.views.components.custom.fields.stats.PortfolioStatsDisplay;
 import com.example.application.views.layouts.MainLayout;
 import com.example.application.views.pages.crypto.AssetDetailsView;
 import com.vaadin.flow.component.Component;
@@ -21,7 +20,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.*;
-import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoIcon;
@@ -147,23 +145,23 @@ public class PortfolioTrackerView extends Main {
         String unrealized = currencyFormatter.format(portfolioPerformanceTracker.getPortfolioUnrealizedProfit());
         String avgTimeHolding = String.format("%.1f days", portfolioPerformanceTracker.getPortfolioAverageHoldingDays());
 
-        Div totalWorth = createStatsItem("Total Worth", currencyFormatter.format(portfolioPerformanceTracker.getPortfolioWorth()),
+        Div totalWorth = new PortfolioStatsDisplay("Total Worth", currencyFormatter.format(portfolioPerformanceTracker.getPortfolioWorth()),
                 "Total value of all your holdings based on the latest price");
-        Div totalCost = createStatsItem("Total Cost", currencyFormatter.format(portfolioPerformanceTracker.getPortfolioCost()),
+        Div totalCost = new PortfolioStatsDisplay("Total Cost", currencyFormatter.format(portfolioPerformanceTracker.getPortfolioCost()),
                 "Total amount of dollars invested to buy all the assets");
-        Div numberOfAssets = createStatsItem("No. of Assets", nrOfAssets,
+        Div numberOfAssets = new PortfolioStatsDisplay("No. of Assets", nrOfAssets,
                 "Current number of assets that are in your portfolio");
-        Div profitStats = createStatsItem("Profit", new NumericValueParagraph(profit, currencyFormatter, true),
+        Div profitStats = new PortfolioStatsDisplay("Profit", new NumericValueParagraph(profit, currencyFormatter, true),
                 "Total profit if you were to sell all assets now");
-        Div realizedProfit = createStatsItem("Realized Profit", realized,
+        Div realizedProfit = new PortfolioStatsDisplay("Realized Profit", realized,
                 "Profit or loss from your sold %s holdings");
-        Div unrealizedProfit = createStatsItem("Unrealized Profit", unrealized,
+        Div unrealizedProfit = new PortfolioStatsDisplay("Unrealized Profit", unrealized,
                 "Potential profit or loss if you were to sell all assets now");
         String ratio = portfolioPerformanceTracker.getPortfolioBuySellRatio();
         String[] ratioParts = ratio.split(":");
-        Div buySellRatio = createStatsItem("Buy/Sell Ratio", ratio,
+        Div buySellRatio = new PortfolioStatsDisplay("Buy/Sell Ratio", ratio,
                 String.format("%s%% of transactions are buys, %s%% are sells, in dollar equivalent", ratioParts[0].trim(), ratioParts[1]));
-        Div avgHoldingTime = createStatsItem("Avg Holding Time", avgTimeHolding,
+        Div avgHoldingTime = new PortfolioStatsDisplay("Avg Holding Time", avgTimeHolding,
                 "Average holding time for all assets, from the first bought");
 
         Div body = new Div();
@@ -244,26 +242,6 @@ public class PortfolioTrackerView extends Main {
         container.add(assetImage, performanceDetails);
         container.addClickListener(e -> UI.getCurrent().navigate(AssetDetailsView.class, asset.getSymbol()));
         return container;
-    }
-
-    private Div createStatsItem(String labelText, String valueText, String tooltipText) {
-        return createStatsItem(labelText, new Paragraph(valueText), tooltipText);
-    }
-
-    private Div createStatsItem(String labelText, Component valueComponent, String tooltipText) {
-        Paragraph label = new Paragraph(labelText);
-        label.addClassName("stats-title");
-        valueComponent.addClassName("stats-item");
-
-        if (tooltipText != null && !tooltipText.isEmpty()) {
-            MonoIcon infoIcon = PictogramIcon.INFORMATION_OUTLINE.create();
-            Tooltip tooltip = Tooltip.forComponent(infoIcon);
-            tooltip.setPosition(Tooltip.TooltipPosition.TOP);
-            tooltip.setText(tooltipText);
-            label.add(infoIcon);
-        }
-
-        return new Container("portfolio-stats-details", label, valueComponent);
     }
 
 }

@@ -37,7 +37,7 @@ public class EditTransactionDialog extends Dialog {
     private final Select<CryptoTransaction.TransactionType> typeField = new Select<>();
     private final AmountField amountField = new AmountField("Amount");
     private final CurrencyField marketPriceField = new CurrencyField("Price");
-    private final CurrencyField totalPriceField = new CurrencyField("Total");
+    private final CurrencyField totalCostField = new CurrencyField("Total");
     private final DatePicker datePicker = new DatePicker("Date");
     private final TextArea notesField = new TextArea("Notes");
 
@@ -66,7 +66,7 @@ public class EditTransactionDialog extends Dialog {
                 .addComponent(typeField)
                 .addComponent(amountField)
                 .addComponent(marketPriceField)
-                .addComponent(totalPriceField)
+                .addComponent(totalCostField)
                 .addComponent(notesField)
                 .addComponent(datePicker)
                 .build();
@@ -82,22 +82,22 @@ public class EditTransactionDialog extends Dialog {
         amountField.setValueChangeMode(ValueChangeMode.EAGER);
         amountField.addKeyUpListener(e -> {
             double totalPrice = amountField.doubleValue() * marketPriceField.doubleValue();
-            totalPriceField.setValue(totalPrice);
+            totalCostField.setValue(totalPrice);
             binder.validate();
         });
 
         marketPriceField.setValueChangeMode(ValueChangeMode.EAGER);
         marketPriceField.addKeyUpListener(e -> {
             double totalPrice = amountField.doubleValue() * marketPriceField.doubleValue();
-            totalPriceField.setValue(totalPrice);
+            totalCostField.setValue(totalPrice);
             binder.validate();
         });
 
-        totalPriceField.setValueChangeMode(ValueChangeMode.EAGER);
-        totalPriceField.addKeyUpListener(e -> {
+        totalCostField.setValueChangeMode(ValueChangeMode.EAGER);
+        totalCostField.addKeyUpListener(e -> {
             double amount = 0;
             if (marketPriceField.doubleValue() != 0) {
-                String textPrice = totalPriceField.getValue().replaceAll(",", "");
+                String textPrice = totalCostField.getValue().replaceAll(",", "");
                 double totalPrice = Double.parseDouble(textPrice.isEmpty() ? "0" : textPrice);
                 amount = totalPrice / marketPriceField.doubleValue();
             }
@@ -130,7 +130,7 @@ public class EditTransactionDialog extends Dialog {
         assetSymbolField.setValue(asset);
         typeField.setValue(transaction.getType());
         amountField.setValue(transaction.getOrderQuantity());
-        totalPriceField.setValue(transaction.getOrderTotalCost());
+        totalCostField.setValue(transaction.getOrderTotalCost());
         marketPriceField.setValue(transaction.getMarketPrice());
         datePicker.setValue(transaction.getDate());
     }
@@ -158,7 +158,7 @@ public class EditTransactionDialog extends Dialog {
                 .withValidator(price -> price > 0, "Price should be bigger than 0")
                 .bind(CryptoTransaction::getMarketPrice, CryptoTransaction::setMarketPrice);
 
-        binder.forField(totalPriceField)
+        binder.forField(totalCostField)
                 .asRequired("Please fill this field")
                 .withConverter(new FlexiblePriceConvertor())
                 .withValidator(price -> price >= 1, "Total price should be at least one dollar")

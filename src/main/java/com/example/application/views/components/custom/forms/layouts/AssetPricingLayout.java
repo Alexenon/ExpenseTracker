@@ -15,6 +15,11 @@ import com.vaadin.flow.router.BeforeEnterObserver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+/*
+ * TODO: Understand which one to use AssetPricingLayout or BuySellForm
+ *   - if this one, then refactor -> remove last method
+ * */
+
 /**
  * Component to gather the buy/sell price, invested and tokens amount, placed using input fields
  */
@@ -29,7 +34,7 @@ public class AssetPricingLayout extends Div implements BeforeEnterObserver {
 
     private final AmountField amountField = new AmountField("Amount");
     private final CurrencyField buyPriceField = new CurrencyField("Buy Price");
-    private final CurrencyField totalPriceField = new CurrencyField("Total");
+    private final CurrencyField totalCostField = new CurrencyField("Total");
     private final CurrencyField sellPriceField = new CurrencyField("Sell Price");
 
     @Override
@@ -48,7 +53,7 @@ public class AssetPricingLayout extends Div implements BeforeEnterObserver {
         amountField.setValue("");
         // TODO: Add average buy price here
         buyPriceField.setValue(getAssetMarketPrice(assetSymbolField));
-        totalPriceField.setValue(0);
+        totalCostField.setValue(0);
         // TODO: Add current asset price
         sellPriceField.setValue("");
     }
@@ -58,30 +63,30 @@ public class AssetPricingLayout extends Div implements BeforeEnterObserver {
             amountField.setValue(assetSymbolField.getAmountTokens());
             amountField.setSuffixComponent(new Span(assetSymbolField.getSymbol()));
             buyPriceField.setValue(getAssetMarketPrice(assetSymbolField));
-            totalPriceField.setValue(amountField.doubleValue() * buyPriceField.doubleValue());
+            totalCostField.setValue(amountField.doubleValue() * buyPriceField.doubleValue());
         });
 
         amountField.setValueChangeMode(ValueChangeMode.EAGER);
         amountField.addKeyUpListener(e -> {
             double totalPrice = amountField.doubleValue() * buyPriceField.doubleValue();
-            totalPriceField.setValue(totalPrice);
+            totalCostField.setValue(totalPrice);
         });
 
         buyPriceField.setValueChangeMode(ValueChangeMode.EAGER);
         buyPriceField.addKeyUpListener(e -> {
             double totalPrice = amountField.doubleValue() * buyPriceField.doubleValue();
-            totalPriceField.setValue(totalPrice);
+            totalCostField.setValue(totalPrice);
         });
 
-        totalPriceField.setValueChangeMode(ValueChangeMode.EAGER);
-        totalPriceField.addKeyUpListener(e -> {
-            double amountValue = MathUtils.safeZeroDivision(totalPriceField.doubleValue(), buyPriceField.doubleValue());
+        totalCostField.setValueChangeMode(ValueChangeMode.EAGER);
+        totalCostField.addKeyUpListener(e -> {
+            double amountValue = MathUtils.safeZeroDivision(totalCostField.doubleValue(), buyPriceField.doubleValue());
             amountField.setValue(amountValue);
         });
     }
 
     protected Div createInputFieldsContainer() {
-        return new Div(assetSymbolField, amountField, buyPriceField, totalPriceField, sellPriceField);
+        return new Div(assetSymbolField, amountField, buyPriceField, totalCostField, sellPriceField);
     }
 
     protected double getAssetMarketPrice(ComboBox<Asset> assetSymbolField) {
@@ -89,7 +94,7 @@ public class AssetPricingLayout extends Div implements BeforeEnterObserver {
         if (selectedAsset == null) {
             return 0;
         } else {
-            return instrumentsFacadeService.getAssetPrice(selectedAsset);
+            return instrumentsFacadeService.getAssetMarketPrice(selectedAsset);
         }
     }
 

@@ -135,12 +135,12 @@ public class TransactionsGrid extends Div {
                         "</div>")
                 .withProperty("className", this::getProfitLossClassName)
                 .withProperty("profit", transaction -> {
-                    double currentPrice = instrumentsFacadeService.getAssetPrice(transaction.getAsset());
+                    double currentPrice = instrumentsFacadeService.getAssetMarketPrice(transaction.getAsset());
                     double profit = ProfitUtils.netProfit(transaction, currentPrice);
                     return CurrencyFormatter.withDefaults().format(profit);
                 })
                 .withProperty("profitPercentage", transaction -> {
-                    double currentPrice = instrumentsFacadeService.getAssetPrice(transaction.getAsset());
+                    double currentPrice = instrumentsFacadeService.getAssetMarketPrice(transaction.getAsset());
                     double percentage = ProfitUtils.growthPercentage(transaction.getMarketPrice(), currentPrice);
                     return PercentageFormatter.withDefaults().format(percentage);
                 });
@@ -151,7 +151,7 @@ public class TransactionsGrid extends Div {
     }
 
     private String getProfitLossClassName(CryptoTransaction transaction) {
-        double currentPrice = instrumentsFacadeService.getAssetPrice(transaction.getAsset());
+        double currentPrice = instrumentsFacadeService.getAssetMarketPrice(transaction.getAsset());
         double profit = ProfitUtils.netProfit(transaction, currentPrice);
 
         if (profit == 0)

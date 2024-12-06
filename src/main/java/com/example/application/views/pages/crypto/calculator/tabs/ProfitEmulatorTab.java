@@ -4,12 +4,12 @@ import com.example.application.entities.crypto.Asset;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.views.components.custom.fields.AssetComboBox;
-import com.example.application.views.components.custom.forms.layouts.BuySellForm;
+import com.example.application.views.components.custom.forms.layouts.TransactionalLayout;
 import com.example.application.views.components.custom.icons.MonoIcon;
 import com.example.application.views.components.custom.icons.PictogramIcon;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.select.Select;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.theme.lumo.LumoIcon;
 
 import java.util.ArrayList;
@@ -26,14 +26,17 @@ import java.util.List;
 
 public class ProfitEmulatorTab extends BaseCalculatorTab {
 
+    private final InstrumentsFacadeService instrumentsFacadeService;
     private final PortfolioPerformanceTracker portfolioPerformanceTracker;
 
     private final AssetComboBox assetSymbolField;
-    private final List<BuySellForm> buySellForms = new ArrayList<>();
+    private final List<TransactionalLayout> transactionalLayouts = new ArrayList<>();
+    private final Div assetDetailsContainer = new Div();
 
     public ProfitEmulatorTab(InstrumentsFacadeService instrumentsFacadeService,
                              PortfolioPerformanceTracker portfolioPerformanceTracker) {
         super("Profit Buy/Sell Emulator", instrumentsFacadeService);
+        this.instrumentsFacadeService = instrumentsFacadeService;
         this.portfolioPerformanceTracker = portfolioPerformanceTracker;
         this.assetSymbolField = new AssetComboBox(instrumentsFacadeService);
         buildTab();
@@ -46,15 +49,7 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
             }
 
             Asset selectedAsset = field.getValue();
-            buySellForms.forEach(form -> {
-                double buyPrice = portfolioPerformanceTracker.getAverageBuyPrice(selectedAsset);
-                double amountOfTokens = instrumentsFacadeService.getAmountOfTokens(selectedAsset);
-                double totalInvested = buyPrice * amountOfTokens;
-                form.getBuyPriceField().setValue(buyPrice);
-                form.getAmountField().setValue(amountOfTokens);
-                form.getTotalPriceField().setValue(totalInvested);
-                form.getSellPriceField().setValue(instrumentsFacadeService.getAssetPrice(selectedAsset));
-            });
+            transactionalLayouts.forEach(layout -> layout.setDefaultValues(selectedAsset));
         });
     }
 
@@ -65,37 +60,49 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
         addNewLayoutBtn.addClickListener(e -> createNewLayout());
         addNewLayoutBtn.addClassName("add-entity-btn");
 
-        BuySellForm defaultForm = new BuySellForm();
-        defaultForm.addClassName("buy-sell-layout");
-        buySellForms.add(defaultForm);
+        TransactionalLayout defaultLayout = new TransactionalLayout(instrumentsFacadeService, portfolioPerformanceTracker);
+        defaultLayout.addClassName("buy-sell-layout");
+        transactionalLayouts.add(defaultLayout);
 
-        return new Div(assetSymbolField, addNewLayoutBtn, defaultForm);
+        return new Div(assetSymbolField, addNewLayoutBtn, defaultLayout);
     }
 
     @Override
     protected Button createDisplayResultsBtn() {
-        return new Button();
+        return new Button("Don't click");
+    }
+
+    private void updateAssetDetailsContainer(Asset asset) {
+        if (asset == null) {
+            assetDetailsContainer.setVisible(false);
+            return;
+        }
+
+        assetDetailsContainer.setVisible(true);
+
+    }
+
+    private Div assetDetailsLayout(Asset asset) {
+        Div div = new Div();
+
+
+        return div;
+    }
+
+    private Div statsItem(String labelText, double value) {
+        return new Div(new Paragraph(labelText), new Paragraph(String.valueOf(value)));
     }
 
     private void createNewLayout() {
-        BuySellForm newFormLayout = new BuySellForm();
-        newFormLayout.addClassName("buy-sell-layout");
-
-        Select<String> typeField = new Select<>();
-        typeField.setLabel("TRANSACTION TYPE");
-        typeField.setItems(List.of("BUY", "SELL"));
-        typeField.setValue("BUY");
-        newFormLayout.addComponentAsFirst(typeField);
-        newFormLayout.addComponentAtIndex(5, typeField);
-
-        // TODO: Add other listeners for amountField, total...
+        TransactionalLayout newLayout = new TransactionalLayout(instrumentsFacadeService, portfolioPerformanceTracker);
+        newLayout.addClassName("buy-sell-layout");
 
         MonoIcon deleteBtn = PictogramIcon.TRASH_CAN_OUTLINE.create();
-        deleteBtn.addClickListener(e -> newFormLayout.removeFromParent());
+        deleteBtn.addClickListener(e -> newLayout.removeFromParent());
 
-        newFormLayout.add(deleteBtn);
-        buySellForms.add(newFormLayout);
-        inputFieldsContainer.add(newFormLayout);
+        newLayout.add(deleteBtn);
+        transactionalLayouts.add(newLayout);
+        inputFieldsContainer.add(newLayout);
     }
 }
 

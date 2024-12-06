@@ -41,7 +41,7 @@ public class SellProfitTab extends BaseCalculatorTab {
     private final AssetComboBox assetSymbolField;
     private final AmountField amountField = new AmountField("Amount");
     private final CurrencyField buyPriceField = new CurrencyField("Buy Price");
-    private final CurrencyField totalPriceField = new CurrencyField("Total");
+    private final CurrencyField totalCostField = new CurrencyField("Total");
     private final CurrencyField sellPriceField = new CurrencyField("Sell Price");
 
     @Autowired
@@ -69,7 +69,7 @@ public class SellProfitTab extends BaseCalculatorTab {
         amountField.setValue(amountOfTokens);
         buyPriceField.setValue(averageBuyPrice);
         sellPriceField.setValue(assetSymbolField.getMarketPrice());
-        totalPriceField.setValue(amountOfTokens * averageBuyPrice);
+        totalCostField.setValue(amountOfTokens * averageBuyPrice);
     }
 
     private void initializeFieldsListeners() {
@@ -81,32 +81,32 @@ public class SellProfitTab extends BaseCalculatorTab {
         amountField.setValueChangeMode(ValueChangeMode.EAGER);
         amountField.addKeyUpListener(e -> {
             double totalPrice = amountField.doubleValue() * buyPriceField.doubleValue();
-            totalPriceField.setValue(totalPrice);
+            totalCostField.setValue(totalPrice);
         });
 
         buyPriceField.setValueChangeMode(ValueChangeMode.EAGER);
         buyPriceField.addKeyUpListener(e -> {
             double totalPrice = amountField.doubleValue() * buyPriceField.doubleValue();
-            totalPriceField.setValue(totalPrice);
+            totalCostField.setValue(totalPrice);
         });
 
-        totalPriceField.setValueChangeMode(ValueChangeMode.EAGER);
-        totalPriceField.addKeyUpListener(e -> {
-            double amountValue = MathUtils.safeZeroDivision(totalPriceField.doubleValue(), buyPriceField.doubleValue());
+        totalCostField.setValueChangeMode(ValueChangeMode.EAGER);
+        totalCostField.addKeyUpListener(e -> {
+            double amountValue = MathUtils.safeZeroDivision(totalCostField.doubleValue(), buyPriceField.doubleValue());
             amountField.setValue(amountValue);
         });
     }
 
     @Override
     protected Div createInputFieldsContainer() {
-        return new Div(assetSymbolField, amountField, buyPriceField, totalPriceField, sellPriceField);
+        return new Div(assetSymbolField, amountField, buyPriceField, totalCostField, sellPriceField);
     }
 
     @Override
     protected Button createDisplayResultsBtn() {
         Button calculateBtn = new Button("Calculate");
         calculateBtn.addClickListener(e -> {
-            double invested = totalPriceField.doubleValue();
+            double invested = totalCostField.doubleValue();
             double buyPrice = buyPriceField.doubleValue();
             double sellPrice = sellPriceField.doubleValue();
             double amountTokens = amountField.doubleValue();
@@ -157,7 +157,7 @@ public class SellProfitTab extends BaseCalculatorTab {
 
     private Paragraph getTokensProfitWrapper() {
         String selectedSymbol = assetSymbolField.getSymbol();
-        double tokensToSellToBeInZero = MathUtils.safeZeroDivision(totalPriceField.doubleValue(), sellPriceField.doubleValue());
+        double tokensToSellToBeInZero = MathUtils.safeZeroDivision(totalCostField.doubleValue(), sellPriceField.doubleValue());
         double profitTokens = amountField.doubleValue() - tokensToSellToBeInZero;
         double profitTokensValue = profitTokens * buyPriceField.doubleValue();
         return new Paragraph(String.format("%s %s ≈ $%.2f", amountFormatter.format(profitTokens), selectedSymbol, profitTokensValue));

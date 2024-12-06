@@ -11,34 +11,34 @@ import org.springframework.stereotype.Component;
  * Component to gather the buy price, sell price, invested amount, and amount of tokens placed using input fields
  * */
 @Component
-public class BuySellForm extends Div {
+public class BuySellLayout extends Div {
 
     private final AmountField amountField = new AmountField("Amount");
     private final CurrencyField buyPriceField = new CurrencyField("Buy Price");
-    private final CurrencyField totalPriceField = new CurrencyField("Total");
+    private final CurrencyField totalCostField = new CurrencyField("Total");
     private final CurrencyField sellPriceField = new CurrencyField("Sell Price");
 
-    public BuySellForm() {
+    public BuySellLayout() {
         initializeFieldsListeners();
-        add(amountField, buyPriceField, totalPriceField, sellPriceField);
+        add(amountField, buyPriceField, totalCostField, sellPriceField);
     }
 
     private void initializeFieldsListeners() {
         amountField.setValueChangeMode(ValueChangeMode.EAGER);
         amountField.addKeyUpListener(e -> {
             double totalPrice = amountField.doubleValue() * buyPriceField.doubleValue();
-            totalPriceField.setValue(totalPrice);
+            totalCostField.setValue(totalPrice);
         });
 
         buyPriceField.setValueChangeMode(ValueChangeMode.EAGER);
         buyPriceField.addKeyUpListener(e -> {
             double totalPrice = amountField.doubleValue() * buyPriceField.doubleValue();
-            totalPriceField.setValue(totalPrice);
+            totalCostField.setValue(totalPrice);
         });
 
-        totalPriceField.setValueChangeMode(ValueChangeMode.EAGER);
-        totalPriceField.addKeyUpListener(e -> {
-            double amountValue = MathUtils.safeZeroDivision(totalPriceField.doubleValue(), buyPriceField.doubleValue());
+        totalCostField.setValueChangeMode(ValueChangeMode.EAGER);
+        totalCostField.addKeyUpListener(e -> {
+            double amountValue = MathUtils.safeZeroDivision(totalCostField.doubleValue(), buyPriceField.doubleValue());
             amountField.setValue(amountValue);
         });
     }
@@ -51,8 +51,8 @@ public class BuySellForm extends Div {
         return buyPriceField;
     }
 
-    public CurrencyField getTotalPriceField() {
-        return totalPriceField;
+    public CurrencyField gettotalCostField() {
+        return totalCostField;
     }
 
     public CurrencyField getSellPriceField() {
