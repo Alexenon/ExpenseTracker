@@ -4,6 +4,7 @@ import com.example.application.entities.crypto.Asset;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.views.components.custom.fields.AssetComboBox;
+import com.example.application.views.components.custom.fields.stats.ProfitStatsDisplay;
 import com.example.application.views.components.custom.forms.layouts.TransactionalLayout;
 import com.example.application.views.components.custom.icons.MonoIcon;
 import com.example.application.views.components.custom.icons.PictogramIcon;
@@ -79,14 +80,6 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
         }
 
         assetDetailsContainer.setVisible(true);
-
-    }
-
-    private Div assetDetailsLayout(Asset asset) {
-        Div div = new Div();
-
-
-        return div;
     }
 
     private Div statsItem(String labelText, double value) {
@@ -103,6 +96,52 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
         newLayout.add(deleteBtn);
         transactionalLayouts.add(newLayout);
         inputFieldsContainer.add(newLayout);
+    }
+
+    private Div transactionDetailsLayout(Asset asset) {
+        Div div = new Div();
+
+        double totalAmountBought = 0.0;
+
+        // TODO: Update these values
+        div.add(
+                new ProfitStatsDisplay("Avg Buy:", "20 ARB / $220.00"),
+                new ProfitStatsDisplay("Avg Sell:", "20 ARB / $220.00"),
+                new ProfitStatsDisplay("Amount of tokens left:", "30 ARB ~ $34.56"),
+
+                new ProfitStatsDisplay("Buy Trading Volume", "3496 ARB = $220"), // No decimal points
+                new ProfitStatsDisplay("Buy Trading Volume", "12946 ARB = $220"),
+
+                new ProfitStatsDisplay("Total BUY:", "20 ARB / $220.00"),
+                new ProfitStatsDisplay("Total SOLD:", "20 ARB / $220.00")
+        );
+
+        return div;
+    }
+
+    // Details about MarketCap, currentPrice, ...
+    private Div assetDetailsLayout(Asset asset) {
+        Div div = new Div();
+
+        /*
+                      | Current | Avg Buy | Avg Sell |
+         | Market Cap |  1.38 B | 1.19 B  | 1.79 B   |
+         | FDV        |   ...   |   ...   |    ...   |
+
+
+        https://codepen.io/caplock221b/pen/WNraREK
+        https://stackoverflow.com/questions/35571603/removing-outer-border-in-html-table
+        * */
+
+        // TODO: Update this fields
+        div.add(
+                new ProfitStatsDisplay("Market Cap", "459 B"),
+                new ProfitStatsDisplay("FDV", "1.38 T -> 2.39 T"),
+                new ProfitStatsDisplay("Price", "20 ARB / $220.00")
+
+        );
+
+        return div;
     }
 }
 

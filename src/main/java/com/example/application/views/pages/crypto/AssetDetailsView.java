@@ -302,9 +302,7 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
     }
 
     private Icon getStarIcon(boolean isMarkedAsFavorite) {
-        return isMarkedAsFavorite
-                ? VaadinIcon.STAR.create()
-                : VaadinIcon.STAR_O.create();
+        return isMarkedAsFavorite ? VaadinIcon.STAR.create() : VaadinIcon.STAR_O.create();
     }
 
     private Section createWatchlistSection(AssetWatcher.ActionType actionType) {
