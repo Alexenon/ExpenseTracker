@@ -11,14 +11,25 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
+
+import static com.example.application.utils.investment.ProfitUtils.ONE_HUNDRED_PERCENT;
 
 /*
     TODO: LONG TERM -> Implement next methods
        - % in Market, how much tokens had been sold and how much are still holding
-       - Total Time Holding + Asset Avg Time Holding
        - ROI
        - Cumulative Profit Loss
+       [!!!] Make methods like `calculateTotalQuantityForBuyTransactions()`, to have 2 paramets
+                1. List of transactions
+                2. Asset or asset filter
+            To be 100% that there will be no error on calculating such stuff
+            ALSO: Don't allow to get by List<Transaction> ----> getAverageBuy(asset, startDate, endDate)
+
+       TODO:
+          [!] Divide stastics in 3 categories
+                - overall statistics (starting from first day of trading)
+                - current statistics (just for the assets that are in user portfolio)
+                - flexible statistics (For a range period: LAST 30 DAYS, 90 DAYS, 180 DAYS, 360 DAYS)
 * */
 
 @Service
@@ -38,7 +49,6 @@ public class PortfolioPerformanceTracker {
         List<CryptoTransaction> transactions = instrumentsFacadeService.getTransactionsByAsset(asset);
         double totalCost = calculateTotalCostForBuyTransactions(transactions);
         double totalQuantity = calculateTotalQuantityForBuyTransactions(transactions);
-
         return calculateAveragePrice(totalCost, totalQuantity);
     }
 
@@ -49,7 +59,6 @@ public class PortfolioPerformanceTracker {
         List<CryptoTransaction> transactions = instrumentsFacadeService.getTransactionsByAsset(asset);
         double totalSellCost = calculateTotalCostForSellTransactions(transactions);
         double totalQuantitySold = calculateTotalQuantityForSellTransactions(transactions);
-
         return calculateAveragePrice(totalSellCost, totalQuantitySold);
     }
 
@@ -72,6 +81,7 @@ public class PortfolioPerformanceTracker {
         return calculateAveragePrice(totalCost, totalQuantity);
     }
 
+    //region ASSET STATS
     public double getAssetTotalWorth(Asset asset) {
         return instrumentsFacadeService.getAmountOfTokens(asset) * instrumentsFacadeService.getAssetMarketPrice(asset);
     }
@@ -112,8 +122,8 @@ public class PortfolioPerformanceTracker {
         double sellCost = calculateTotalCostForSellTransactions(transactions);
         double totalCost = buyCost + sellCost;
 
-        double buyRatio = buyCost / totalCost * 100;
-        double sellRatio = sellCost / totalCost * 100;
+        double buyRatio = buyCost / totalCost * ONE_HUNDRED_PERCENT;
+        double sellRatio = sellCost / totalCost * ONE_HUNDRED_PERCENT;
 
         return String.format("%d : %d", Math.round(buyRatio), Math.round(sellRatio));
     }
@@ -159,6 +169,15 @@ public class PortfolioPerformanceTracker {
         return totalWeightedHoldingTime / totalSoldQuantity;
     }
 
+    /**
+     * @return the asset diversity percentage in the portfolio, range (0 - 100)%
+     */
+    public int getAssetDiversityPercentage(Asset asset) {
+        return Math.toIntExact(Math.round(getAssetTotalWorth(asset) / getPortfolioWorth() * ONE_HUNDRED_PERCENT));
+    }
+    //endregion
+
+    //region PORTFOLIO STATS
     private long getHoldingTimeInDays(CryptoTransaction buyTransaction, CryptoTransaction sellTransaction) {
         return getHoldingTimeInDays(buyTransaction.getDate(), sellTransaction.getDate());
     }
@@ -167,17 +186,24 @@ public class PortfolioPerformanceTracker {
         return ChronoUnit.DAYS.between(buyDate, sellDate);
     }
 
+    /**
+     * How much is estimated the worth of all holding assets (Overall Unrealized profit)
+     */
     public double getPortfolioWorth() {
-        return instrumentsFacadeService.getWalletBalances().stream()
+        return instrumentsFacadeService.getWalletBalances()
+                .stream()
                 .mapToDouble(balance -> balance.getAmount() * instrumentsFacadeService.getAssetMarketPrice(balance.getAsset()))
                 .sum();
     }
 
+    /**
+     * How much was invested in all holding assets at this moment
+     */
     public double getPortfolioCost() {
-        return instrumentsFacadeService.getAllTransactions().stream()
-                .collect(Collectors.groupingBy(CryptoTransaction::getAsset,
-                        Collectors.summingDouble(t -> (t.isBuyTransaction() ? 1 : -1) * t.getOrderTotalCost())))
-                .values().stream().mapToDouble(Double::doubleValue).sum();
+        return instrumentsFacadeService.getAllTransactions()
+                .stream()
+                .mapToDouble(t -> (t.isBuyTransaction() ? 1 : -1) * t.getOrderTotalCost())
+                .sum();
     }
 
     public double getPortfolioProfit() {
@@ -187,7 +213,7 @@ public class PortfolioPerformanceTracker {
     public double getPortfolioRealizedProfit() {
         return instrumentsFacadeService.getAllAssetsEverBought()
                 .stream()
-                .mapToDouble(this::getAssetTotalProfit)
+                .mapToDouble(this::getAssetRealizedProfit)
                 .sum();
     }
 
@@ -209,27 +235,18 @@ public class PortfolioPerformanceTracker {
         double sellCost = calculateTotalCostForSellTransactions(transactions);
         double totalCost = buyCost + sellCost;
 
-        double buyRatio = buyCost / totalCost * 100;
-        double sellRatio = sellCost / totalCost * 100;
+        double buyRatio = buyCost / totalCost * ONE_HUNDRED_PERCENT;
+        double sellRatio = sellCost / totalCost * ONE_HUNDRED_PERCENT;
 
         return String.format("%d : %d", Math.round(buyRatio), Math.round(sellRatio));
     }
 
     public double getPortfolioProfitPercentage() {
-        return getPortfolioWorth() / getPortfolioCost() * 100 - 100;
+        return getPortfolioWorth() / getPortfolioCost() * ONE_HUNDRED_PERCENT - ONE_HUNDRED_PERCENT;
     }
+    //endregion
 
-    /**
-     * @return the asset diversity percentage in the portfolio, range (0 - 100)%
-     */
-    public int getAssetDiversityPercentage(Asset asset) {
-        return Math.toIntExact(Math.round(getAssetTotalWorth(asset) / getPortfolioWorth() * 100));
-    }
-
-    /*
-     * Helper methods to calculate
-     * */
-
+    //region CALCULATION METHODS
     private double calculateTotalCostForBuyTransactions(List<CryptoTransaction> transactions) {
         return transactions.stream()
                 .filter(CryptoTransaction::isBuyTransaction)
@@ -267,5 +284,6 @@ public class PortfolioPerformanceTracker {
         double averagePriceBeforeSale = calculateAveragePrice(totalCost, totalQuantity);
         return totalCost - (quantitySold * averagePriceBeforeSale);
     }
+    //endregion
 
 }

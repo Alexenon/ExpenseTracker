@@ -3,6 +3,7 @@ package com.example.application.views.components;
 import com.example.application.entities.crypto.Asset;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
+import com.example.application.utils.common.number.AmountFormatter;
 import com.example.application.utils.common.number.CurrencyFormatter;
 import com.example.application.utils.common.number.PercentageFormatter;
 import com.example.application.views.components.core.Container;
@@ -52,6 +53,8 @@ import java.util.function.ToDoubleFunction;
     _______________________________________________________________________________________________________________________________________
 */
 public class AssetsGrid extends Div {
+
+    private static final String MISSING_DATA_SIGN = "-";
 
     private final InstrumentsFacadeService instrumentsFacadeService;
     private final PortfolioPerformanceTracker portfolioPerformanceTracker;
@@ -197,7 +200,6 @@ public class AssetsGrid extends Div {
                 .setAutoWidth(true)
                 .setTooltipGenerator(a -> "The closest %s buy price that was added in the watcher".formatted(a.getSymbol()));
 
-
         grid.addColumn(columnPriceRenderer(AssetGridItem::getClosestSell))
                 .setHeader("Closest Sell")
                 .setTextAlign(ColumnTextAlign.CENTER)
@@ -282,19 +284,15 @@ public class AssetsGrid extends Div {
                     Number price = priceProvider.apply(asset);
                     NumberFormat nf = NumberFormat.getCurrencyInstance(Locale.US);
 
-                    return price.doubleValue() <= 0 ? "-" : nf.format(price);
+                    return price.doubleValue() <= 0 ? MISSING_DATA_SIGN : nf.format(price);
                 });
     }
 
     private LitRenderer<AssetGridItem> columnAmountRenderer(ValueProvider<AssetGridItem, Number> amountProvider) {
         return LitRenderer.<AssetGridItem>of("<p>${item.amount}</p>")
-                .withProperty("amount", asset -> {
-                    Number amount = amountProvider.apply(asset);
-                    NumberFormat nf = NumberFormat.getNumberInstance();
-                    nf.setMaximumFractionDigits(6);
-
-                    return amount.doubleValue() <= 0 ? "-" : nf.format(amount);
-                });
+                .withProperty("amount", asset -> asset.tokenAmount <= 0
+                        ? MISSING_DATA_SIGN
+                        : AmountFormatter.withDefaults().format(asset.tokenAmount) + " " + asset.getSymbol());
     }
 
     private LitRenderer<AssetGridItem> columnPercentageRenderer(ValueProvider<AssetGridItem, Number> percentageProvider) {

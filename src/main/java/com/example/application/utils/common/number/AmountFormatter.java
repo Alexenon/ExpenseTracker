@@ -33,4 +33,8 @@ public class AmountFormatter extends DecimalFormatter {
         return StringUtils.stripTrailingZeroes(numberFormat.format(d));
     }
 
+    public String format(Double d, String symbol) {
+        return String.format("%s %s", format(d), symbol);
+    }
+
 }

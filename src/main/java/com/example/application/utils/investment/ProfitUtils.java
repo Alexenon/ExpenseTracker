@@ -5,7 +5,9 @@ import com.example.application.utils.common.MathUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.List;
 
+// TODO: Add common methods from PortfolioPerformanceTracker
 public class ProfitUtils {
 
     public static final int ONE_HUNDRED_PERCENT = 100;
@@ -77,5 +79,38 @@ public class ProfitUtils {
     public static double breakEvenPercentage(double buyPrice, double currentPrice) {
         return MathUtils.safeZeroDivision(buyPrice - currentPrice, buyPrice) * ONE_HUNDRED_PERCENT;
     }
+
+    /**
+     * Calculates the total realized profit from provided transactions
+     */
+    public static double getTransactionsRealizedProfit(List<CryptoTransaction> transactions) {
+        double totalCost = 0.0;
+        double remainingQuantity = 0.0;
+        double realizedProfit = 0.0;
+
+        for (CryptoTransaction transaction : transactions) {
+            if (transaction.isBuyTransaction()) {
+                totalCost += transaction.getOrderTotalCost();
+                remainingQuantity += transaction.getOrderQuantity();
+            } else {
+                double sellQuantity = transaction.getOrderQuantity();
+                if (sellQuantity > remainingQuantity) {
+                    throw new IllegalArgumentException("Selling more than owned");
+                }
+
+                // Calculate proportional cost of sold tokens
+                double averageCostPerUnit = MathUtils.safeZeroDivision(totalCost, remainingQuantity);
+                double costOfSoldTokens = averageCostPerUnit * sellQuantity;
+                realizedProfit += transaction.getOrderTotalCost() - costOfSoldTokens;
+
+                // Update remaining portfolio cost and quantity
+                totalCost -= costOfSoldTokens;
+                remainingQuantity -= sellQuantity;
+            }
+        }
+
+        return realizedProfit;
+    }
+
 
 }

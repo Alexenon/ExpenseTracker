@@ -34,6 +34,15 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+/*
+    TODO:
+        [!] Total Trading Volume
+        [!] Add to be more diverse -> LAST 30 DAYS, LAST 180 DAYS
+
+
+
+ * */
+
 @PermitAll
 @PageTitle("Portfolio Tracker")
 @Route(value = "portfolio-tracker", layout = MainLayout.class)

@@ -6,6 +6,7 @@ import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.utils.common.MathUtils;
 import com.example.application.utils.common.StringUtils;
+import com.example.application.utils.common.number.AmountFormatter;
 import com.example.application.utils.common.number.CompactFormatter;
 import com.example.application.utils.common.number.CurrencyFormatter;
 import com.example.application.utils.common.number.PercentageFormatter;
@@ -228,30 +229,23 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         PricePercentageWrapper profitLossContainer = new PricePercentageWrapper(assetProfitLoss, profitLossPercentage);
         profitLossContainer.setPercentageBadgeBackground(false);
 
-        Container diversityContainer = Container.builder("portfolio-diversity")
-                .addComponent(() -> {
-                    NumericValueParagraph valueParagraph = new NumericValueParagraph(assetDiversityPercentage, percentageFormatter);
-                    valueParagraph.getStyle().setColor("blue");
-                    return valueParagraph;
-                })
-                .addComponent(new ProgressBar(0, 100, assetDiversityPercentage))
-                .build();
-
-        Div totalCost = new PortfolioStatsDisplay("Total Cost", costValue);
-        Div totalWorth = new PortfolioStatsDisplay("Total Worth", worthValue);
-        Div profitLoss = new PortfolioStatsDisplay("Profit Loss", profitLossContainer);
-        Div diversity = new PortfolioStatsDisplay("Portfolio Diversity", diversityContainer);
         String ratio = portfolioPerformanceTracker.getAssetBuySellRatio(asset);
         String[] ratioParts = ratio.split(":");
-        Div buySellRatio = new PortfolioStatsDisplay("Buy/Sell Ratio", ratio,
-                String.format("%s%% of transactions are buys, %s%% are sells, in dollar equivalent", ratioParts[0].trim(), ratioParts[1]));
         String avgTimeHolding = String.format("%.1f days", portfolioPerformanceTracker.getAssetAverageHoldingDays(asset));
-        Div avgHoldingTime = new PortfolioStatsDisplay("Avg Holding Time", avgTimeHolding,
-                "Average holding time from the first buy");
+        String tokensAmount = AmountFormatter.withDefaults().format(instrumentsFacadeService.getAmountOfTokens(asset));
 
         Div body = new Div();
         body.addClassName("section-card-wrapper");
-        body.add(totalWorth, profitLoss, totalCost, diversity, buySellRatio, avgHoldingTime);
+        body.add(
+                new PortfolioStatsDisplay("Total Cost", costValue),
+                new PortfolioStatsDisplay("Total Worth", worthValue),
+                new PortfolioStatsDisplay("Amount of tokens", tokensAmount),
+                new PortfolioStatsDisplay("Profit Loss", profitLossContainer),
+                new PortfolioStatsDisplay("Portfolio Diversity", getAssetDiversityContainer(assetDiversityPercentage)),
+                new PortfolioStatsDisplay("Buy/Sell Ratio", ratio,
+                        String.format("%s%% of transactions are buys, %s%% are sells, in dollar equivalent", ratioParts[0].trim(), ratioParts[1])),
+                new PortfolioStatsDisplay("Avg Holding Time", avgTimeHolding, "Average holding time from the first buy")
+        );
 
         return new Section(header, body);
     }
@@ -355,5 +349,17 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
 
         return new Section(header, transactionsGrid, seeAllTransactionsBtn);
     }
+
+    private Container getAssetDiversityContainer(int assetDiversityPercentage) {
+        return Container.builder("portfolio-diversity")
+                .addComponent(() -> {
+                    NumericValueParagraph valueParagraph = new NumericValueParagraph(assetDiversityPercentage, percentageFormatter);
+                    valueParagraph.getStyle().setColor("blue");
+                    return valueParagraph;
+                })
+                .addComponent(new ProgressBar(0, 100, assetDiversityPercentage))
+                .build();
+    }
+
 
 }

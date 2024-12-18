@@ -4,6 +4,7 @@ import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.utils.common.number.AmountFormatter;
 import com.example.application.utils.common.number.CompactFormatter;
 import com.example.application.utils.common.number.CurrencyFormatter;
+import com.example.application.utils.common.number.PercentageFormatter;
 import com.example.application.views.components.core.Container;
 import com.example.application.views.components.custom.icons.MonoIcon;
 import com.example.application.views.components.custom.icons.PictogramIcon;
@@ -23,6 +24,7 @@ public abstract class BaseCalculatorTab extends Tab {
     protected AmountFormatter amountFormatter = AmountFormatter.withDefaults();
     protected CompactFormatter compactFormatter = CompactFormatter.withDefaults();
     protected CurrencyFormatter currencyFormatter = CurrencyFormatter.withDefaults();
+    protected PercentageFormatter percentageFormatter = PercentageFormatter.withDefaults();
 
     protected Div inputFieldsContainer;
     protected Button displayResultsBtn;

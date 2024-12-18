@@ -99,4 +99,5 @@ public class TransactionalLayout extends Div {
     public CurrencyField getTotalCostField() {
         return totalCostField;
     }
+
 }
