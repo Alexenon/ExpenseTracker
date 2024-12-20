@@ -12,12 +12,15 @@ import com.example.application.views.components.custom.fields.stats.ProfitStatsD
 import com.example.application.views.components.custom.forms.layouts.TransactionalLayout;
 import com.example.application.views.components.custom.icons.MonoIcon;
 import com.example.application.views.components.custom.icons.PictogramIcon;
+import com.vaadin.flow.component.Html;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.theme.lumo.LumoIcon;
 import lombok.extern.slf4j.Slf4j;
 
+import java.math.BigInteger;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,7 +41,7 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
 
     private final AssetComboBox assetSymbolField;
     private final List<TransactionalLayout> transactionalLayouts = new ArrayList<>();
-    private final Container assetMetaDetailsContainer = new Container("profit-meta-data-details");
+    private final Container assetMetaDetailsContainer = new Container("profit-meta-data");
 
     public ProfitEmulatorTab(InstrumentsFacadeService instrumentsFacadeService,
                              PortfolioPerformanceTracker portfolioPerformanceTracker) {
@@ -77,7 +80,6 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
         return new Div(assetSymbolField, addNewLayoutBtn, defaultLayout);
     }
 
-    // TODO: Update this fields
     @Override
     protected Button createDisplayResultsBtn() {
         return new Button("Calculate", e -> {
@@ -126,13 +128,11 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
                     https://stackoverflow.com/questions/35571603/removing-outer-border-in-html-table
             * */
 
+            double currentPrice = assetSymbolField.getMarketPrice();
+
             // TODO: Update this fields
             assetMetaDetailsContainer.removeAll();
-            assetMetaDetailsContainer.add(
-                    new ProfitStatsDisplay("Price", "20 ARB / $220.00"),
-                    new ProfitStatsDisplay("Market Cap", "459 B"),
-                    new ProfitStatsDisplay("FDV", "1.38 T -> 2.39 T")
-            );
+            assetMetaDetailsContainer.add(getTable(assetSymbolField.getSelectedAsset(), avgBuy, avgSell));
         });
     }
 
@@ -154,7 +154,10 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
         newLayout.addClassName("buy-sell-layout");
 
         MonoIcon deleteBtn = PictogramIcon.TRASH_CAN_OUTLINE.create();
-        deleteBtn.addClickListener(e -> newLayout.removeFromParent());
+        deleteBtn.addClickListener(e -> {
+            transactionalLayouts.remove(newLayout);
+            newLayout.removeFromParent();
+        });
 
         newLayout.add(deleteBtn);
         transactionalLayouts.add(newLayout);
@@ -171,6 +174,53 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
 
                     return new CryptoTransaction(selectedAsset, marketPrice, orderTotalCost, type);
                 }).toList();
+    }
+
+    private Html getTable(Asset asset, double averageBuyPrice, double averageSellPrice) {
+        double currentPrice = instrumentsFacadeService.getAssetMarketPrice(asset);
+
+        BigInteger totalMarketSupply = instrumentsFacadeService.getAssetSupplyTotal(asset);
+        double currentFDV = ProfitUtils.fdv(totalMarketSupply, currentPrice);
+        double avgBuyFDV = ProfitUtils.fdv(totalMarketSupply, averageBuyPrice);
+        double avgSellFDV = ProfitUtils.fdv(totalMarketSupply, averageSellPrice);
+
+        BigInteger circulationSupply = instrumentsFacadeService.getAssetSupplyCirculating(asset);
+        double currentMarketCap = ProfitUtils.marketCap(circulationSupply, currentPrice);
+        double avgBuyMarketCap = ProfitUtils.marketCap(circulationSupply, averageBuyPrice);
+        double avgSellMarketCap = ProfitUtils.marketCap(circulationSupply, averageSellPrice);
+
+        return new Html(MessageFormat.format("""
+                <table class="inside-border">
+                  <tr>
+                    <td></td>
+                    <td>Current</td>
+                    <td>Avg Buy</td>
+                    <td>Avg Sell</td>
+                  </tr>
+                  <tr>
+                    <td>Price</td>
+                    <td>{0}</td>
+                    <td>{1}</td>
+                    <td>{2}</td>
+                  </tr>
+                  <tr>
+                    <td>Market Cap</td>
+                    <td>{3}</td>
+                    <td>{4}</td>
+                    <td>{5}</td>
+                  </tr>
+                  <tr>
+                    <td>FDV</td>
+                    <td>{6}</td>
+                    <td>{7}</td>
+                    <td>{8}</td>
+                  </tr>
+                </table>
+                """,
+                currencyFormatter.format(currentPrice), currencyFormatter.format(averageBuyPrice), currencyFormatter.format(averageSellPrice),
+                compactFormatter.format(currentMarketCap), compactFormatter.format(avgBuyMarketCap), compactFormatter.format(avgSellMarketCap),
+                compactFormatter.format(currentFDV), compactFormatter.format(avgBuyFDV), compactFormatter.format(avgSellFDV))
+        );
     }
 
 }

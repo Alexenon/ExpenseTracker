@@ -69,3 +69,36 @@ vaadin-tabs::part(tabs) {
     justify-content: space-between;
     align-items: center;
 }
+
+
+/*
+    OTHERS
+*/
+
+
+.profit-meta-data {
+    display: block;
+}
+
+.inside-border td {
+    padding: 5px;
+    border: 2px solid black;
+    border-collapse: collapse;
+}
+
+.inside-border tr:first-child td {
+    border-top: none;
+}
+
+.inside-border tr:last-child td {
+    border-bottom: none;
+}
+
+.inside-border tr td:first-child {
+    border-left: none;
+}
+
+.inside-border tr td:last-child {
+    border-right: none;
+}
+

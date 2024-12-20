@@ -23,7 +23,7 @@ public class ProfitStatsDisplay extends StatsComponent {
 
     public ProfitStatsDisplay(Component labelComponent, Component valueComponent, String tooltipText) {
         super(labelComponent, valueComponent, tooltipText);
-        addClassName("profit-stats-details");
+        addClassName("result-item");
         labelComponent.addClassName("stats-title");
         valueComponent.addClassName("stats-item");
     }
