@@ -15,6 +15,7 @@ import com.example.application.views.components.custom.icons.PictogramIcon;
 import com.vaadin.flow.component.Html;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.theme.lumo.LumoIcon;
 import lombok.extern.slf4j.Slf4j;
@@ -86,12 +87,14 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
             String symbol = assetSymbolField.getSymbol();
             List<CryptoTransaction> allTransactions = getListOfTransactions();
 
+            double price = instrumentsFacadeService.getAssetMarketPrice(assetSymbolField.getSelectedAsset());
             double avgBuy = ProfitCalculator.getAverageBuyPrice(allTransactions);
             double avgSell = ProfitCalculator.getAverageSellPrice(allTransactions);
             double amountOfRemainingTokens = ProfitCalculator.getAmountOfRemainingTokens(allTransactions);
             double realizedProfit = ProfitCalculator.getRealizedProfit(allTransactions);
             double unrealizedProfit = amountOfRemainingTokens * assetSymbolField.getMarketPrice();
             double totalProfit = realizedProfit + unrealizedProfit;
+            double worthRemainingTokens = amountOfRemainingTokens * price;
 
             String buyVolumeInfo = currencyFormatter.format(ProfitCalculator.calculateTotalCostForBuyTransactions(allTransactions));
             String sellVolumeInfo = currencyFormatter.format(ProfitCalculator.calculateTotalCostForSellTransactions(allTransactions));
@@ -104,6 +107,7 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
                     new ProfitStatsDisplay("Avg Buy:", currencyFormatter.format(avgBuy)),
                     new ProfitStatsDisplay("Avg Sell:", currencyFormatter.format(avgSell)),
 
+                    new Hr(),
                     new ProfitStatsDisplay("Avg Growth Rate", percentageFormatter.format(ProfitUtils.growthPercentage(avgBuy, avgSell))),
                     new ProfitStatsDisplay("Realized Profit", currencyFormatter.format(realizedProfit)),
                     new ProfitStatsDisplay("Unrealized Profit", currencyFormatter.format(unrealizedProfit)),
@@ -113,7 +117,9 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
                     new ProfitStatsDisplay("Buy Trading Volume", buyVolumeInfo),
                     new ProfitStatsDisplay("Sell Trading Volume", sellVolumeInfo),
 
+                    new Hr(),
                     new ProfitStatsDisplay("Amount of tokens left:", amountFormatter.format(amountOfRemainingTokens, symbol)),
+                    new ProfitStatsDisplay("Worth of remaining tokens:", currencyFormatter.format(worthRemainingTokens)),
                     new ProfitStatsDisplay("Cost for remaining tokens:", remainingCostInfo)
             );
 

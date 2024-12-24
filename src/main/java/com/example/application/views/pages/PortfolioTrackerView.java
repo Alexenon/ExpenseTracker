@@ -37,10 +37,6 @@ import java.util.stream.Collectors;
 /*
     TODO:
         [!] Total Trading Volume
-        [!] Add to be more diverse -> LAST 30 DAYS, LAST 180 DAYS
-
-
-
  * */
 
 @PermitAll
@@ -90,7 +86,7 @@ public class PortfolioTrackerView extends Main {
         Section section = new Section();
         section.addClassName("asset-details-header");
 
-        NumericValueParagraph worth = new NumericValueParagraph(portfolioPerformanceTracker.getPortfolioWorth());
+        NumericValueParagraph worth = new NumericValueParagraph(portfolioPerformanceTracker.getPortfolioWorth(), currencyFormatter);
         double percentage = portfolioPerformanceTracker.getPortfolioProfitPercentage();
         double profit = portfolioPerformanceTracker.getPortfolioProfit();
         PricePercentageWrapper profitWrapper = new PricePercentageWrapper(profit, percentage);
@@ -163,7 +159,7 @@ public class PortfolioTrackerView extends Main {
         Div profitStats = new PortfolioStatsDisplay("Profit", new NumericValueParagraph(profit, currencyFormatter, true),
                 "Total profit if you were to sell all assets now");
         Div realizedProfit = new PortfolioStatsDisplay("Realized Profit", realized,
-                "Profit or loss from your sold %s holdings");
+                "Profit/Loss from your sold holdings");
         Div unrealizedProfit = new PortfolioStatsDisplay("Unrealized Profit", unrealized,
                 "Potential profit or loss if you were to sell all assets now");
         String ratio = portfolioPerformanceTracker.getPortfolioBuySellRatio();
@@ -187,18 +183,14 @@ public class PortfolioTrackerView extends Main {
     }
 
     private Section performanceSection() {
+        Map<Asset, Double> assetsProfits = getMostProfitableAssetsByProfit();
+        if (assetsProfits.isEmpty()) {
+            return new Section();
+        }
+
         Section section = new Section();
         H3 title = new H3("Performance");
         title.setClassName("section-title");
-
-        // The Assets that are the most profitable, by TOTAL profit
-        Map<Asset, Double> assetsProfits = instrumentsFacadeService.getAssetsWithNonZeroAmount()
-                .stream()
-                .collect(Collectors.toMap(asset -> asset, portfolioPerformanceTracker::getAssetTotalProfit, (a, b) -> b));
-
-        if(assetsProfits.isEmpty()) {
-            return new Section();
-        }
 
         Asset mostProfitableAsset = Collections.max(assetsProfits.entrySet(), Map.Entry.comparingByValue()).getKey();
         Asset leastProfitableAsset = Collections.min(assetsProfits.entrySet(), Map.Entry.comparingByValue()).getKey();
@@ -212,7 +204,6 @@ public class PortfolioTrackerView extends Main {
         Asset leastTradedAsset = Collections.min(assetsNrTransactions.entrySet(), Map.Entry.comparingByValue()).getKey();
 
 
-
         Div body = new Div();
         body.addClassNames("section-card-wrapper");
         body.add(
@@ -224,6 +215,12 @@ public class PortfolioTrackerView extends Main {
 
         section.add(title, body);
         return section;
+    }
+
+    private Map<Asset, Double> getMostProfitableAssetsByProfit() {
+        return instrumentsFacadeService.getAssetsWithNonZeroAmount()
+                .stream()
+                .collect(Collectors.toMap(asset -> asset, portfolioPerformanceTracker::getAssetTotalProfit, (a, b) -> b));
     }
 
     private Div createPerformanceItem(String labelText, Asset asset) {

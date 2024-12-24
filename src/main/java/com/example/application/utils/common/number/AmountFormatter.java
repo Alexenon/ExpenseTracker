@@ -17,20 +17,29 @@ public class AmountFormatter extends DecimalFormatter {
         numberFormat.setMinimumFractionDigits(0);
     }
 
-    // TODO: Work on this more
     @Override
-    public String format(Double d) {
-        if (d >= 1000) {
+    public String format(Double value) {
+        value = Math.abs(value);
+
+        if (value >= 1000) {
             numberFormat.setMaximumFractionDigits(0);
-        } else if (d >= 1) {
+        } else if (value >= 1) {
+            numberFormat.setMaximumFractionDigits(2);
+        } else if (value >= 0.1) {
+            numberFormat.setMaximumFractionDigits(3);
+        } else if (value >= 0.01) {
             numberFormat.setMaximumFractionDigits(4);
-        } else if (d >= 0.001) {
+        } else if (value >= 0.001) {
+            numberFormat.setMaximumFractionDigits(5);
+        } else if (value >= 0.0001) {
             numberFormat.setMaximumFractionDigits(6);
+        } else if (value >= 0.00001) {
+            numberFormat.setMaximumFractionDigits(7);
         } else {
             numberFormat.setMaximumFractionDigits(8);
         }
 
-        return StringUtils.stripTrailingZeroes(numberFormat.format(d));
+        return StringUtils.stripTrailingZeroes(numberFormat.format(value));
     }
 
     public String format(Double d, String symbol) {
