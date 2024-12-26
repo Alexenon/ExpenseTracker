@@ -22,13 +22,13 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
+import java.util.function.Consumer;
 
 // TODO:
 //  - boolean subtractFromGivenAsset
 //  - Add slider for percentage buy/transfer
 public class AddTransactionDialog extends Dialog {
 
-    private final Asset asset;
     private final CryptoTransaction transaction;
     private final InstrumentsFacadeService instrumentsFacadeService;
     private final Binder<CryptoTransaction> binder = new Binder<>(CryptoTransaction.class);
@@ -45,13 +45,8 @@ public class AddTransactionDialog extends Dialog {
     private final Button cancelButton = new Button("Cancel");
     private final Span symbolSuffix = new Span();
 
-    public AddTransactionDialog(InstrumentsFacadeService instrumentsFacadeService) {
-        this(null, instrumentsFacadeService);
-    }
-
     @Autowired
-    public AddTransactionDialog(Asset asset, InstrumentsFacadeService instrumentsFacadeService) {
-        this.asset = asset;
+    public AddTransactionDialog(InstrumentsFacadeService instrumentsFacadeService) {
         this.instrumentsFacadeService = instrumentsFacadeService;
         this.assetSymbolField = new AssetComboBox(instrumentsFacadeService);
         this.transaction = new CryptoTransaction();
@@ -130,7 +125,7 @@ public class AddTransactionDialog extends Dialog {
         typeField.setItems(CryptoTransaction.TransactionType.values());
 
         // Initialize with values
-        assetSymbolField.setValue(asset);
+        assetSymbolField.setValue(null);
         typeField.setValue(CryptoTransaction.TransactionType.BUY);
         amountField.setValue("");
         marketPriceField.setValue(assetSymbolField.getMarketPrice());
@@ -172,6 +167,14 @@ public class AddTransactionDialog extends Dialog {
 
         binder.forField(datePicker)
                 .bind(CryptoTransaction::getDate, CryptoTransaction::setDate);
+    }
+
+    public void addSaveBtnClickListener(Consumer<?> listener) {
+        saveButton.addClickListener(e -> listener.accept(null));
+    }
+
+    public void setAsset(Asset asset) {
+        assetSymbolField.setValue(asset);
     }
 
 }

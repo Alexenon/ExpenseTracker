@@ -1,6 +1,5 @@
 package com.example.application.views.components.custom.dialogs.transactions;
 
-import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.CryptoTransaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.views.components.core.Container;
@@ -23,12 +22,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.function.Consumer;
 
-// TODO:
-//  - boolean subtractFromGivenAsset
-//  - Add slider for percentage buy/transfer
 public class EditTransactionDialog extends Dialog {
 
-    private final Asset asset;
     private final CryptoTransaction transaction;
     private final InstrumentsFacadeService instrumentsFacadeService;
     private final Binder<CryptoTransaction> binder = new Binder<>(CryptoTransaction.class);
@@ -46,9 +41,8 @@ public class EditTransactionDialog extends Dialog {
     private final Span symbolSuffix = new Span();
 
     @Autowired
-    public EditTransactionDialog(Asset asset, CryptoTransaction transaction,
+    public EditTransactionDialog(CryptoTransaction transaction,
                                  InstrumentsFacadeService instrumentsFacadeService) {
-        this.asset = asset;
         this.transaction = transaction;
         this.instrumentsFacadeService = instrumentsFacadeService;
         this.assetSymbolField = new AssetComboBox(instrumentsFacadeService);
@@ -127,7 +121,7 @@ public class EditTransactionDialog extends Dialog {
         typeField.setItems(CryptoTransaction.TransactionType.values());
 
         // Initialize with values
-        assetSymbolField.setValue(asset);
+        assetSymbolField.setValue(transaction.getAsset());
         typeField.setValue(transaction.getType());
         amountField.setValue(transaction.getOrderQuantity());
         totalCostField.setValue(transaction.getOrderTotalCost());
@@ -171,11 +165,15 @@ public class EditTransactionDialog extends Dialog {
                 .bind(CryptoTransaction::getDate, CryptoTransaction::setDate);
     }
 
-    public void addClickSaveBtnListener(Consumer<?> listener) {
-        saveButton.addClickListener(e -> listener.accept(null));
+    public void addSaveListener(Consumer<?> listener) {
+        saveButton.addClickListener(e -> {
+            if (binder.validate().isOk()) {
+                listener.accept(null);
+            }
+        });
     }
 
-    public void addClickCancelBtnListener(Consumer<?> listener) {
+    public void addCancelListener(Consumer<?> listener) {
         cancelButton.addClickListener(e -> listener.accept(null));
     }
 

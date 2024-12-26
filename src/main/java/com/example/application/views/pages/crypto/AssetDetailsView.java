@@ -48,7 +48,6 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
 
     @Autowired
     private InstrumentsFacadeService instrumentsFacadeService;
-
     @Autowired
     private PortfolioPerformanceTracker portfolioPerformanceTracker;
 
@@ -58,7 +57,7 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
     @Override
     public void setParameter(BeforeEvent beforeEvent, String symbol) {
         this.asset = Objects.requireNonNull(instrumentsFacadeService.getAssetBySymbol(symbol));
-        this.addTransactionDialog = new AddTransactionDialog(asset, instrumentsFacadeService);
+        this.addTransactionDialog = new AddTransactionDialog(instrumentsFacadeService);
 
         buildPage();
         // Scroll to top of the page, on initialization
@@ -67,6 +66,7 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
 
     private void buildPage() {
         setClassName("coin-details-content");
+        addTransactionDialog.setAsset(asset);
 
         add(
                 headerDetailsSection(),

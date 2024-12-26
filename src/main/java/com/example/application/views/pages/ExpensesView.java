@@ -72,7 +72,7 @@ public class ExpensesView extends Main {
             logger.info("Clicked on Add button");
             AddExpenseDialog dialog = new AddExpenseDialog(expenseService, categoryService, singleFormatI18n);
             dialog.open();
-            dialog.addClickSaveBtnListener(grid -> updateGrid());
+            dialog.addSaveBtnClickListener(grid -> updateGrid());
         });
 
         final HorizontalLayout toolBar = new HorizontalLayout(filterText, addBtn);
@@ -100,7 +100,7 @@ public class ExpensesView extends Main {
                                 singleFormatI18n
                         );
                         dialog.open();
-                        dialog.addClickSaveBtnListener(grid -> updateGrid());
+                        dialog.addSaveBtnClickListener(grid -> updateGrid());
                     });
                 })
         ).setHeader("Edit");

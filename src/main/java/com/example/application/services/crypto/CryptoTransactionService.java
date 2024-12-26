@@ -37,37 +37,41 @@ public class CryptoTransactionService {
     }
 
     public CryptoTransaction saveTransaction(CryptoTransaction transaction) {
-        if(transaction.getOrderQuantity() == 0) {
+        if (transaction.getOrderQuantity() == 0) {
             transaction.setOrderQuantity(transaction.getOrderTotalCost() / transaction.getMarketPrice());
         }
 
         CryptoTransaction savedTransaction = transactionRepository.save(transaction);
         System.out.printf("Saved Transaction -> %s\n", savedTransaction);
 
-        // Find the WalletBalance for the asset in the wallet
-        WalletBalance walletBalance = walletBalanceRepository
-                .findByWalletAndAsset(transaction.getWallet(), transaction.getAsset())
-                .orElseThrow(() -> new IllegalStateException("Wallet balance not found"));
-
-        // Update the wallet balance amount
-        if (transaction.isSellTransaction()) {
-            if (walletBalance.getAmount() < transaction.getOrderQuantity()) {
-                throw new IllegalArgumentException("Insufficient balance to complete the sell transaction.");
-            }
-
-            walletBalance.setAmount(walletBalance.getAmount() - transaction.getOrderQuantity());
-        } else if (transaction.isBuyTransaction()) {
-            walletBalance.setAmount(walletBalance.getAmount() + transaction.getOrderQuantity());
-        }
-
-        walletBalanceRepository.save(walletBalance);
+        WalletBalance walletBalance = findWalletBalanceByTransaction(transaction);
+        processTransaction(walletBalance, savedTransaction);
 
         return savedTransaction;
+    }
+
+    private void processTransaction(WalletBalance walletBalance, CryptoTransaction transaction) {
+        double processAmount = transaction.isBuyTransaction()
+                ? transaction.getOrderQuantity()
+                : transaction.getOrderQuantity() * -1;
+
+        double newBalance = walletBalance.getAmount() + processAmount;
+
+        if (newBalance < 0)
+            throw new IllegalArgumentException("Insufficient balance to fill the transaction.");
+
+        walletBalance.setAmount(newBalance);
+        walletBalanceRepository.save(walletBalance);
+    }
+
+    public WalletBalance findWalletBalanceByTransaction(CryptoTransaction transaction) {
+        return walletBalanceRepository
+                .findByWalletAndAsset(transaction.getWallet(), transaction.getAsset())
+                .orElseThrow(() -> new IllegalStateException("Wallet balance not found"));
     }
 
     public void deleteTransaction(CryptoTransaction transaction) {
         transactionRepository.delete(transaction);
     }
-
 
 }

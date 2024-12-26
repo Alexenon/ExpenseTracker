@@ -169,7 +169,7 @@ public class AddExpenseDialog extends Dialog implements HasNotifications {
         }
     }
 
-    public void addClickSaveBtnListener(Consumer<ExpensesView> listener) {
+    public void addSaveBtnClickListener(Consumer<ExpensesView> listener) {
         saveButton.addClickListener(e -> listener.accept(null));
     }
 
