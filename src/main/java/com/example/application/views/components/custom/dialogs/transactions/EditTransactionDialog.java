@@ -6,6 +6,7 @@ import com.example.application.views.components.core.Container;
 import com.example.application.views.components.custom.fields.AmountField;
 import com.example.application.views.components.custom.fields.AssetComboBox;
 import com.example.application.views.components.custom.fields.CurrencyField;
+import com.example.application.views.components.utils.HasNotifications;
 import com.example.application.views.components.utils.convertors.FlexibleAmountConvertor;
 import com.example.application.views.components.utils.convertors.FlexiblePriceConvertor;
 import com.vaadin.flow.component.Key;
@@ -17,14 +18,17 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.validator.DoubleRangeValidator;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.function.Consumer;
 
-public class EditTransactionDialog extends Dialog {
+// TODO: Close button weird behavior -> after switching the asset and closing and reopening, the asset choosen remains....
+public class EditTransactionDialog extends Dialog implements HasNotifications {
 
     private final CryptoTransaction transaction;
+    private final CryptoTransaction initialTransaction;
     private final InstrumentsFacadeService instrumentsFacadeService;
     private final Binder<CryptoTransaction> binder = new Binder<>(CryptoTransaction.class);
 
@@ -41,9 +45,9 @@ public class EditTransactionDialog extends Dialog {
     private final Span symbolSuffix = new Span();
 
     @Autowired
-    public EditTransactionDialog(CryptoTransaction transaction,
-                                 InstrumentsFacadeService instrumentsFacadeService) {
+    public EditTransactionDialog(CryptoTransaction transaction, InstrumentsFacadeService instrumentsFacadeService) {
         this.transaction = transaction;
+        this.initialTransaction = new CryptoTransaction(transaction);
         this.instrumentsFacadeService = instrumentsFacadeService;
         this.assetSymbolField = new AssetComboBox(instrumentsFacadeService);
 
@@ -103,13 +107,20 @@ public class EditTransactionDialog extends Dialog {
         saveButton.addClickShortcut(Key.ENTER);
         saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
         saveButton.addClickListener(e -> {
-            CryptoTransaction savedTransaction = instrumentsFacadeService.saveTransaction(binder.getBean());
-            this.close();
-            System.out.printf("Saved -> %s\n", savedTransaction);
+            if (binder.validate().isOk()) {
+                instrumentsFacadeService.saveTransaction(binder.getBean());
+                restoreBalanceIfAssetChanged();
+                this.close();
+            } else {
+                showErrorNotification("Error! Please fill the fields with as required");
+            }
         });
 
         cancelButton.addClickShortcut(Key.ESCAPE);
-        cancelButton.addClickListener(e -> this.close());
+        cancelButton.addClickListener(e -> {
+            binder.refreshFields();
+            this.close();
+        });
 
         getFooter().add(saveButton, cancelButton);
     }
@@ -121,12 +132,12 @@ public class EditTransactionDialog extends Dialog {
         typeField.setItems(CryptoTransaction.TransactionType.values());
 
         // Initialize with values
-        assetSymbolField.setValue(transaction.getAsset());
-        typeField.setValue(transaction.getType());
-        amountField.setValue(transaction.getOrderQuantity());
-        totalCostField.setValue(transaction.getOrderTotalCost());
-        marketPriceField.setValue(transaction.getMarketPrice());
-        datePicker.setValue(transaction.getDate());
+        assetSymbolField.setValue(initialTransaction.getAsset());
+        typeField.setValue(initialTransaction.getType());
+        amountField.setValue(initialTransaction.getOrderQuantity());
+        totalCostField.setValue(initialTransaction.getOrderTotalCost());
+        marketPriceField.setValue(initialTransaction.getMarketPrice());
+        datePicker.setValue(initialTransaction.getDate());
     }
 
     private void initializeBinder() {
@@ -143,18 +154,21 @@ public class EditTransactionDialog extends Dialog {
         binder.forField(amountField)
                 .asRequired("Please fill this field")
                 .withConverter(new FlexibleAmountConvertor())
-                .withValidator(amount -> amount > 0, "Price should be bigger than 0")
+                .withValidator(new DoubleRangeValidator("Invalid decimal value", (double) 0, Double.MAX_VALUE))
+                .withValidator(amount -> amount > 0, "Amount should be bigger than 0")
                 .bind(CryptoTransaction::getOrderQuantity, CryptoTransaction::setOrderQuantity);
 
         binder.forField(marketPriceField)
                 .asRequired("Please fill this field")
                 .withConverter(new FlexiblePriceConvertor())
-                .withValidator(price -> price > 0, "Price should be bigger than 0")
+                .withValidator(new DoubleRangeValidator("Invalid decimal value", (double) 0, Double.MAX_VALUE))
+                .withValidator(amount -> amount > 0, "Market price should be bigger than 0")
                 .bind(CryptoTransaction::getMarketPrice, CryptoTransaction::setMarketPrice);
 
         binder.forField(totalCostField)
                 .asRequired("Please fill this field")
                 .withConverter(new FlexiblePriceConvertor())
+                .withValidator(new DoubleRangeValidator("Invalid decimal value", (double) 0, Double.MAX_VALUE))
                 .withValidator(price -> price >= 1, "Total price should be at least one dollar")
                 .bind(CryptoTransaction::getOrderTotalCost, CryptoTransaction::setOrderTotalCost);
 
@@ -177,8 +191,20 @@ public class EditTransactionDialog extends Dialog {
         cancelButton.addClickListener(e -> listener.accept(null));
     }
 
+    // TODO: Dont forget to restore USD, when the feature will be added
+    private void restoreBalanceIfAssetChanged() {
+        System.out.printf("Check %s %s\n", initialTransaction.getAsset().getSymbol(), binder.getBean().getAsset().getSymbol());
+
+        if (initialTransaction.getAsset() != binder.getBean().getAsset()) {
+            double amount = initialTransaction.getOrderQuantity();
+            double amountToRestore = initialTransaction.isSellTransaction() ? amount : -amount;
+            System.out.printf("Reverting %f %s\n", amountToRestore, initialTransaction.getAsset().getSymbol());
+            instrumentsFacadeService.fillWalletBalance(initialTransaction.getAsset(), amountToRestore);
+        }
+    }
+
     public CryptoTransaction getTransaction() {
-        return transaction;
+        return binder.getBean();
     }
 
 }

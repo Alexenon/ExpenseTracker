@@ -25,4 +25,8 @@ public class Wallet {
     @Column(nullable = false)
     private LocalDateTime dateCreated = LocalDateTime.now();
 
+    @Override
+    public String toString() {
+        return "Wallet{id=%d, user='%s', dateCreated=%s}".formatted(id, user.getUsername(), dateCreated);
+    }
 }

@@ -70,6 +70,7 @@ public class TransactionDetailsDialog extends Dialog {
             EditTransactionDialog editTransactionDialog = new EditTransactionDialog(transaction, instrumentsFacadeService);
 
             editTransactionDialog.addSaveListener(dialog -> {
+//                instrumentsFacadeService.deleteTransaction(transaction);
                 transaction = editTransactionDialog.getTransaction();
                 rebuildForm();
             });
