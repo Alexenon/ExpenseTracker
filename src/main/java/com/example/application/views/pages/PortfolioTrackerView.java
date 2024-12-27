@@ -61,10 +61,10 @@ public class PortfolioTrackerView extends DefaultPage {
     protected void initializePage() {
         getStyle().set("margin", "100px 30px 30px 30px");
         initializeChart();
+        initializeGrids();
     }
 
-    @Override
-    protected void initializeComponents() {
+    protected void initializeGrids() {
         assetsGrid = new AssetsGrid(instrumentsFacadeService, portfolioPerformanceTracker);
         assetsGrid.setGridFullSize(true);
         assetsGrid.setItems(instrumentsFacadeService.getAssetsWithNonZeroAmount());
@@ -100,7 +100,11 @@ public class PortfolioTrackerView extends DefaultPage {
 
         Button addTransactionBtn = new Button("Add Transaction", LumoIcon.PLUS.create());
         addTransactionBtn.setIconAfterText(false);
-        addTransactionBtn.addClickListener(e -> new AddTransactionDialog(instrumentsFacadeService).open());
+        addTransactionBtn.addClickListener(e -> {
+            AddTransactionDialog dialog = new AddTransactionDialog(instrumentsFacadeService);
+            dialog.open();
+            dialog.addSaveBtnClickListener(l -> rebuildPage());
+        });
         section.add(addTransactionBtn);
 
         return section;

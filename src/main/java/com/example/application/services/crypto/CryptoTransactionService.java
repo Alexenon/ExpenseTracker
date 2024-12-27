@@ -53,7 +53,7 @@ public class CryptoTransactionService {
     private void processTransaction(WalletBalance walletBalance, CryptoTransaction transaction) {
         double processAmount = transaction.isBuyTransaction()
                 ? transaction.getOrderQuantity()
-                : transaction.getOrderQuantity() * -1;
+                : -transaction.getOrderQuantity();
 
         double newBalance = walletBalance.getAmount() + processAmount;
 

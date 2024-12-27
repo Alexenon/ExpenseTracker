@@ -1,10 +1,11 @@
 package com.example.application.views.pages;
 
+import com.example.application.views.components.utils.HasNotifications;
 import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 
-public abstract class DefaultPage extends Main implements BeforeEnterObserver {
+public abstract class DefaultPage extends Main implements BeforeEnterObserver, HasNotifications {
 
     /**
      * This method represents the initialization of page
@@ -24,14 +25,6 @@ public abstract class DefaultPage extends Main implements BeforeEnterObserver {
      */
     protected abstract void buildPage();
 
-    /**
-     * Method designed to initialize child components with types like:
-     * <li>values
-     * <li>styles
-     * <li>listeners
-     */
-    protected abstract void initializeComponents();
-
     protected void rebuildPage() {
         this.removeAll();
         buildPage();
@@ -40,8 +33,12 @@ public abstract class DefaultPage extends Main implements BeforeEnterObserver {
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         initializePage();
-        initializeComponents();
-        buildPage();
+        rebuildPage();
+
+//        if (getComponentCount() == 0) {
+//            buildPage();
+//        }
     }
+
 
 }

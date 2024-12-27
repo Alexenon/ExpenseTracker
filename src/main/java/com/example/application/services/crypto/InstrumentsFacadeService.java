@@ -54,6 +54,10 @@ public class InstrumentsFacadeService {
         return instrumentsService.getAssetBySymbol(symbol.name());
     }
 
+    public double getAmountOfTokens(Asset asset) {
+        return asset == null ? 0 : getWalletBalanceByAsset(asset).getAmount();
+    }
+
     public List<Asset> getAssetsWithNonZeroAmount() {
         return getWalletBalances()
                 .stream()
@@ -139,8 +143,8 @@ public class InstrumentsFacadeService {
         return instrumentsService.getWalletBalancesByWalletAndAsset(getAuthenticatedUserWallet(), asset);
     }
 
-    public double getAmountOfTokens(Asset asset) {
-        return asset == null ? 0 : getWalletBalanceByAsset(asset).getAmount();
+    public WalletBalance fillWalletBalance(Asset asset, double amountToBeAdded) {
+        return instrumentsService.fillWalletBalance(getAuthenticatedUserWallet(), asset, amountToBeAdded);
     }
     //</editor-fold>
 
