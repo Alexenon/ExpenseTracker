@@ -12,6 +12,7 @@ import com.example.application.views.components.utils.convertors.FlexiblePriceCo
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Span;
@@ -22,9 +23,10 @@ import com.vaadin.flow.data.validator.DoubleRangeValidator;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Objects;
 import java.util.function.Consumer;
 
-// TODO: Close button weird behavior -> after switching the asset and closing and reopening, the asset choosen remains....
+// TODO: Show current/remaining amount for an asset
 public class EditTransactionDialog extends Dialog implements HasNotifications {
 
     private final CryptoTransaction transaction;
@@ -57,6 +59,7 @@ public class EditTransactionDialog extends Dialog implements HasNotifications {
     private void buildForm() {
         setHeaderTitle("Transaction");
         initializeFields();
+        initializeFieldsValues();
         initializeBinder();
 
         Container formBody = Container.builder("transaction-modal")
@@ -106,19 +109,10 @@ public class EditTransactionDialog extends Dialog implements HasNotifications {
 
         saveButton.addClickShortcut(Key.ENTER);
         saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
-        saveButton.addClickListener(e -> {
-            if (binder.validate().isOk()) {
-                instrumentsFacadeService.saveTransaction(binder.getBean());
-                restoreBalanceIfAssetChanged();
-                this.close();
-            } else {
-                showErrorNotification("Error! Please fill the fields with as required");
-            }
-        });
 
         cancelButton.addClickShortcut(Key.ESCAPE);
         cancelButton.addClickListener(e -> {
-            binder.refreshFields();
+            initializeFieldsValues();
             this.close();
         });
 
@@ -127,11 +121,11 @@ public class EditTransactionDialog extends Dialog implements HasNotifications {
 
     private void initializeFields() {
         assetSymbolField.addValueChangeListener(l -> marketPriceField.setValue(assetSymbolField.getMarketPrice()));
-
         typeField.setLabel("Transaction Type");
         typeField.setItems(CryptoTransaction.TransactionType.values());
+    }
 
-        // Initialize with values
+    private void initializeFieldsValues() {
         assetSymbolField.setValue(initialTransaction.getAsset());
         typeField.setValue(initialTransaction.getType());
         amountField.setValue(initialTransaction.getOrderQuantity());
@@ -179,28 +173,49 @@ public class EditTransactionDialog extends Dialog implements HasNotifications {
                 .bind(CryptoTransaction::getDate, CryptoTransaction::setDate);
     }
 
-    public void addSaveListener(Consumer<?> listener) {
-        saveButton.addClickListener(e -> {
-            if (binder.validate().isOk()) {
-                listener.accept(null);
-            }
-        });
-    }
-
-    public void addCancelListener(Consumer<?> listener) {
-        cancelButton.addClickListener(e -> listener.accept(null));
-    }
-
+    // TODO: Rename maybe this, and move to the service facade class
     // TODO: Dont forget to restore USD, when the feature will be added
     private void restoreBalanceIfAssetChanged() {
         System.out.printf("Check %s %s\n", initialTransaction.getAsset().getSymbol(), binder.getBean().getAsset().getSymbol());
+        double amount = initialTransaction.getOrderQuantity();
+        double amountToRestore = initialTransaction.isSellTransaction() ? amount : -amount;
+        System.out.printf("Reverting %f %s\n", amountToRestore, initialTransaction.getAsset().getSymbol());
+        instrumentsFacadeService.fillWalletBalance(initialTransaction.getAsset(), amountToRestore);
+    }
 
-        if (initialTransaction.getAsset() != binder.getBean().getAsset()) {
-            double amount = initialTransaction.getOrderQuantity();
-            double amountToRestore = initialTransaction.isSellTransaction() ? amount : -amount;
-            System.out.printf("Reverting %f %s\n", amountToRestore, initialTransaction.getAsset().getSymbol());
-            instrumentsFacadeService.fillWalletBalance(initialTransaction.getAsset(), amountToRestore);
+    public void addSaveListener(Consumer<?> listener) {
+        saveButton.addClickListener(e -> handleTransactionSave(listener));
+    }
+
+    private void handleTransactionSave(Consumer<?> listener) {
+        if (!binder.validate().isOk()) {
+            showErrorNotification("Error! Please fill the fields correctly");
+            return;
         }
+
+        if (hasAssetChanged()) {
+            ConfirmDialog confirmDialog = new ConfirmDialog();
+            confirmDialog.setHeader("Warning: Changing asset for completed transaction");
+            confirmDialog.setText("Modifying the asset for a completed transaction may cause calculation errors and compromise record accuracy. Proceed with this change?");
+            confirmDialog.setConfirmText("Save");
+            confirmDialog.setCancelable(true);
+            confirmDialog.addConfirmListener(l -> saveTransaction(listener));
+            confirmDialog.open();
+        } else {
+            saveTransaction(listener);
+        }
+    }
+
+    private boolean hasAssetChanged() {
+        return !Objects.equals(initialTransaction.getAsset(), binder.getBean().getAsset());
+    }
+
+    private void saveTransaction(Consumer<?> listener) {
+        instrumentsFacadeService.saveTransaction(binder.getBean());
+        restoreBalanceIfAssetChanged();
+        showSuccessfulNotification("The transaction was saved succesfully");
+        this.close();
+        listener.accept(null);
     }
 
     public CryptoTransaction getTransaction() {

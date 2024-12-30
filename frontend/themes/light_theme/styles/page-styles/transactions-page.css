@@ -8,8 +8,8 @@
 .transaction-details-card {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    padding: 13px 15px;
+    gap: 6px;
+    padding: 15px;
     border-radius: 16px;
     border: 1px solid var(--o10Color);
     margin-bottom: 10px;
@@ -27,12 +27,6 @@
     font-size: 15px;
     line-height: 18px;
     color: var(--o50Color);
-}
-
-.transaction-profit-loss-badge-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
 }
 
 .info-value-item {

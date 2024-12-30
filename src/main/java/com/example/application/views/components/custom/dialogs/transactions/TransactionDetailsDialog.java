@@ -8,6 +8,7 @@ import com.example.application.utils.common.number.CurrencyFormatter;
 import com.example.application.utils.investment.ProfitUtils;
 import com.example.application.views.components.core.Container;
 import com.example.application.views.components.custom.fields.PricePercentageWrapper;
+import com.example.application.views.components.custom.fields.stats.ProfitStatsDisplay;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -22,9 +23,10 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
 
-
 // TODO:
 //  - [!] ICONS: vaadin:trending-down | vaadin:trending-up
+//  - [!] Notes are missing
+//  - [!] Edit btn looks very ugly position
 public class TransactionDetailsDialog extends Dialog {
 
     private static final AmountFormatter amountFormatter = AmountFormatter.withDefaults();
@@ -68,9 +70,7 @@ public class TransactionDetailsDialog extends Dialog {
         editBtn.addClassName("edit-btn");
         editBtn.addClickListener(e -> {
             EditTransactionDialog editTransactionDialog = new EditTransactionDialog(transaction, instrumentsFacadeService);
-
             editTransactionDialog.addSaveListener(dialog -> {
-//                instrumentsFacadeService.deleteTransaction(transaction);
                 transaction = editTransactionDialog.getTransaction();
                 rebuildForm();
             });
@@ -126,17 +126,16 @@ public class TransactionDetailsDialog extends Dialog {
                 .addComponent(new PricePercentageWrapper(usdProfit, percentageProfit))
                 .build();
 
+        String symbol = transaction.getAsset().getSymbol();
+        double price = instrumentsFacadeService.getAssetMarketPrice(transaction.getAsset());
+        double tokensAmount = instrumentsFacadeService.getAmountOfTokens(transaction.getAsset());
+
         return Container.builder("transaction-details-card")
                 .addComponents(profitLossContainer)
                 .addElement(new Element("hr"))
-                .addComponent(() -> {
-                    double price = instrumentsFacadeService.getAssetMarketPrice(transaction.getAsset());
-                    return Container.builder()
-                            .addClassName("transaction-profit-loss-badge-item")
-                            .addComponent(new Paragraph("Current Value"))
-                            .addComponent(new Paragraph(currencyFormatter.format(price)))
-                            .build();
-                })
+                .addComponent(new ProfitStatsDisplay("Current Price", currencyFormatter.format(price)))
+                .addElement(new Element("hr"))
+                .addComponent(new ProfitStatsDisplay("Current Amount", amountFormatter.format(tokensAmount, symbol)))
                 .build();
     }
 

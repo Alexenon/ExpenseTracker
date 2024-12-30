@@ -37,6 +37,8 @@ import java.util.stream.Collectors;
 /*
     TODO:
         [!] Total Trading Volume
+        [!] Add chart options -> byCost, byWorth
+        [!] Fix chart categories to not display 0 values
  * */
 
 @PermitAll

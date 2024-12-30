@@ -1,5 +1,6 @@
 package com.example.application.views.components.custom.fields.stats;
 
+import com.example.application.utils.common.number.DecimalFormatter;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Paragraph;
 
@@ -15,6 +16,10 @@ public class ProfitStatsDisplay extends StatsComponent {
 
     public ProfitStatsDisplay(String label, String value, String tooltipText) {
         this(new Paragraph(label), new Paragraph(value), tooltipText);
+    }
+
+    public ProfitStatsDisplay(String label, double value, DecimalFormatter formatter) {
+        this(new Paragraph(label), new Paragraph(formatter.format(value)), null);
     }
 
     public ProfitStatsDisplay(String label, Component valueComponent, String tooltipText) {

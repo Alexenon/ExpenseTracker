@@ -110,7 +110,8 @@ public class AddTransactionDialog extends Dialog implements HasNotifications {
         saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
         saveButton.addClickListener(e -> {
             if (binder.validate().isOk()) {
-                CryptoTransaction savedTransaction = instrumentsFacadeService.saveTransaction(binder.getBean());
+                instrumentsFacadeService.saveTransaction(binder.getBean());
+                showSuccessfulNotification("The transaction was saved succesfully");
                 this.close();
             } else {
                 showErrorNotification("Error! Please fill the fields with as required");
