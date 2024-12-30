@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
 
 @PermitAll
 @PageTitle("Portfolio Tracker")
-@Route(value = "portfolio-tracker", layout = MainLayout.class)
+@Route(value = "portfolio", layout = MainLayout.class)
 @JsModule("./themes/light_theme/components/javascript/fillPieChart.js")
 @JavaScript("https://fastly.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js")
 public class PortfolioTrackerView extends DefaultPage {
@@ -62,8 +62,6 @@ public class PortfolioTrackerView extends DefaultPage {
     @Override
     protected void initializePage() {
         getStyle().set("margin", "100px 30px 30px 30px");
-        initializeChart();
-        initializeGrids();
     }
 
     protected void initializeGrids() {
@@ -74,10 +72,13 @@ public class PortfolioTrackerView extends DefaultPage {
         transactionsGrid = new TransactionsGrid(instrumentsFacadeService);
         transactionsGrid.setItems(instrumentsFacadeService.getAllTransactions());
         transactionsGrid.setPageSize(10);
+        transactionsGrid.addUpdateItemListener(l -> rebuildPage());
     }
 
     @Override
     protected void buildPage() {
+        initializeChart();
+        initializeGrids();
         add(
                 headerSection(),
                 statisticsSection(),

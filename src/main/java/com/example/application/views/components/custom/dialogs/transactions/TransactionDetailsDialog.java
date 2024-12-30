@@ -22,6 +22,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
+import java.util.function.Consumer;
 
 // TODO:
 //  - [!] ICONS: vaadin:trending-down | vaadin:trending-up
@@ -68,14 +69,6 @@ public class TransactionDetailsDialog extends Dialog {
         closeBtn.addClassName("modal-close-btn");
 
         editBtn.addClassName("edit-btn");
-        editBtn.addClickListener(e -> {
-            EditTransactionDialog editTransactionDialog = new EditTransactionDialog(transaction, instrumentsFacadeService);
-            editTransactionDialog.addSaveListener(dialog -> {
-                transaction = editTransactionDialog.getTransaction();
-                rebuildForm();
-            });
-            editTransactionDialog.open();
-        });
     }
 
     private Div detailsTransaction() {
@@ -109,8 +102,9 @@ public class TransactionDetailsDialog extends Dialog {
     }
 
     private Div detailsProfitLoss() {
+        Asset asset = transaction.getAsset();
         double buyPrice = transaction.getMarketPrice();
-        double sellPrice = instrumentsFacadeService.getAssetMarketPrice(transaction.getAsset());
+        double sellPrice = instrumentsFacadeService.getAssetMarketPrice(asset);
         double totalCost = transaction.getOrderTotalCost();
 
         double usdProfit = ProfitUtils.netProfit(buyPrice, sellPrice, totalCost);
@@ -126,16 +120,15 @@ public class TransactionDetailsDialog extends Dialog {
                 .addComponent(new PricePercentageWrapper(usdProfit, percentageProfit))
                 .build();
 
-        String symbol = transaction.getAsset().getSymbol();
-        double price = instrumentsFacadeService.getAssetMarketPrice(transaction.getAsset());
-        double tokensAmount = instrumentsFacadeService.getAmountOfTokens(transaction.getAsset());
+        double price = instrumentsFacadeService.getAssetMarketPrice(asset);
+        double tokensAmount = instrumentsFacadeService.getAmountOfTokens(asset);
 
         return Container.builder("transaction-details-card")
                 .addComponents(profitLossContainer)
                 .addElement(new Element("hr"))
                 .addComponent(new ProfitStatsDisplay("Current Price", currencyFormatter.format(price)))
                 .addElement(new Element("hr"))
-                .addComponent(new ProfitStatsDisplay("Current Amount", amountFormatter.format(tokensAmount, symbol)))
+                .addComponent(new ProfitStatsDisplay("Current Amount", amountFormatter.format(tokensAmount, asset)))
                 .build();
     }
 
@@ -163,6 +156,18 @@ public class TransactionDetailsDialog extends Dialog {
     private void rebuildForm() {
         removeAll();
         buildForm();
+    }
+
+    public void addUpdateTransactionListener(Consumer<?> listener) {
+        editBtn.addClickListener(e -> {
+            EditTransactionDialog editTransactionDialog = new EditTransactionDialog(transaction, instrumentsFacadeService);
+            editTransactionDialog.addSaveListener(dialog -> {
+                transaction = editTransactionDialog.getTransaction();
+                rebuildForm();
+                listener.accept(null);
+            });
+            editTransactionDialog.open();
+        });
     }
 
 }

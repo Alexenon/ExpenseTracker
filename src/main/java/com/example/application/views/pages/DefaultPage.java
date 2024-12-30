@@ -34,11 +34,10 @@ public abstract class DefaultPage extends Main implements BeforeEnterObserver, H
     public void beforeEnter(BeforeEnterEvent event) {
         initializePage();
         rebuildPage();
-
-//        if (getComponentCount() == 0) {
-//            buildPage();
-//        }
     }
+
+
+
 
 
 }

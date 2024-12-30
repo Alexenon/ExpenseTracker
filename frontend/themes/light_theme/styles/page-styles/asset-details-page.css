@@ -5,6 +5,8 @@
     position: relative;
 }
 
+/* SECTION */
+
 .section-card-wrapper {
     display: flex;
     align-items: center;
@@ -24,7 +26,13 @@
     align-items: center;
 }
 
-.section-header > vaadin-button {
+.section-header > .header-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.section-header vaadin-button {
     border: 1px solid var(--o10Color);
     padding: 6px 16px 6px 12px;
     border-radius: 12px;

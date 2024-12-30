@@ -1,5 +1,6 @@
 package com.example.application.utils.common.number;
 
+import com.example.application.entities.crypto.Asset;
 import com.example.application.utils.common.StringUtils;
 
 import java.text.NumberFormat;
@@ -44,6 +45,10 @@ public class AmountFormatter extends DecimalFormatter {
 
     public String format(Double d, String symbol) {
         return String.format("%s %s", format(d), symbol);
+    }
+
+    public String format(Double d, Asset asset) {
+        return format(d, asset.getSymbol());
     }
 
 }

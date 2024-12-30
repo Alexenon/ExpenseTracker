@@ -133,8 +133,8 @@ public class InstrumentsService {
         AmountFormatter amountFormatter = AmountFormatter.withDefaults();
 
         System.out.printf("Fill %s with %s. Left amount: %s\n", wallet,
-                amountFormatter.format(tokensAmountToBeAdded, asset.getSymbol()),
-                amountFormatter.format(balanceAfterSupply, asset.getSymbol()));
+                amountFormatter.format(tokensAmountToBeAdded, asset),
+                amountFormatter.format(balanceAfterSupply, asset));
 
         if (balanceAfterSupply < 0) {
             throw new InvalidBalanceAmount("The balance amount cannot be negative.");
