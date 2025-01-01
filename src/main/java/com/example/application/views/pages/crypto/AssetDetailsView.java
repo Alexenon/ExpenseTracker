@@ -19,6 +19,8 @@ import com.example.application.views.components.custom.fields.CurrencyField;
 import com.example.application.views.components.custom.fields.PricePercentageWrapper;
 import com.example.application.views.components.custom.fields.stats.PortfolioStatsDisplay;
 import com.example.application.views.layouts.MainLayout;
+import com.example.application.views.pages.DefaultPage;
+import com.vaadin.flow.component.ScrollOptions;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
@@ -38,17 +40,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.math.BigInteger;
 import java.util.Objects;
 
+// FIXME: When page is loaded, it scroll to the PriceWatchlistComponent
+
 @PermitAll
 @PageTitle("Asset Details")
-@Route(value = "details", layout = MainLayout.class)
-public class AssetDetailsView extends Main implements HasUrlParameter<String> {
+@Route(value = "asset", layout = MainLayout.class)
+public class AssetDetailsView extends DefaultPage implements HasUrlParameter<String> {
 
     private static final CurrencyFormatter currencyFormatter = CurrencyFormatter.withDefaults();
     private static final PercentageFormatter percentageFormatter = PercentageFormatter.withDefaults();
 
     @Autowired
     private InstrumentsFacadeService instrumentsFacadeService;
-
     @Autowired
     private PortfolioPerformanceTracker portfolioPerformanceTracker;
 
@@ -58,16 +61,18 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
     @Override
     public void setParameter(BeforeEvent beforeEvent, String symbol) {
         this.asset = Objects.requireNonNull(instrumentsFacadeService.getAssetBySymbol(symbol));
-        this.addTransactionDialog = new AddTransactionDialog(asset, instrumentsFacadeService);
-
-        buildPage();
-        // Scroll to top of the page, on initialization
-        getElement().executeJs("window.scrollTo(0,0)");
+        this.addTransactionDialog = new AddTransactionDialog(instrumentsFacadeService);
     }
 
-    private void buildPage() {
+    @Override
+    protected void initializePage() {
         setClassName("coin-details-content");
+        addTransactionDialog.setAsset(asset); // TODO: Try to create two transactions one after another with different values
+        addAttachListener(l -> scrollTo(0, 0));
+    }
 
+    @Override
+    protected void buildPage() {
         add(
                 headerDetailsSection(),
                 holdingsSection(),
@@ -232,7 +237,7 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         String ratio = portfolioPerformanceTracker.getAssetBuySellRatio(asset);
         String[] ratioParts = ratio.split(":");
         String avgTimeHolding = String.format("%.1f days", portfolioPerformanceTracker.getAssetAverageHoldingDays(asset));
-        String tokensAmount = AmountFormatter.withDefaults().format(instrumentsFacadeService.getAmountOfTokens(asset));
+        String tokensAmount = AmountFormatter.withDefaults().format(instrumentsFacadeService.getAmountOfTokens(asset), asset);
 
         Div body = new Div();
         body.addClassName("section-card-wrapper");
@@ -311,7 +316,13 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
                 .addComponent(() -> {
                     Button addWatchlistBtn = new Button("Add Watchlist", LumoIcon.PLUS.create());
                     addWatchlistBtn.setIconAfterText(false);
-                    addWatchlistBtn.addClickListener(e -> watchlistComponent.addNewPriceLayout());
+                    addWatchlistBtn.addClickListener(e -> {
+                        watchlistComponent.addNewPriceLayout();
+                        ScrollOptions scrollOptions = new ScrollOptions();
+                        scrollOptions.setBehavior(ScrollOptions.Behavior.SMOOTH);
+                        scrollOptions.setBlock(ScrollOptions.Alignment.END);
+                        watchlistComponent.scrollIntoView(scrollOptions);
+                    });
                     return addWatchlistBtn;
                 })
                 .build();
@@ -327,27 +338,23 @@ public class AssetDetailsView extends Main implements HasUrlParameter<String> {
         TransactionsGrid transactionsGrid = new TransactionsGrid(instrumentsFacadeService);
         transactionsGrid.setItems(instrumentsFacadeService.getTransactionsByAsset(asset));
         transactionsGrid.setPageSize(10);
+        transactionsGrid.addUpdateItemListener(l -> rebuildPage());
 
-        Container header = Container.builder("section-header")
-                .addComponent(() -> {
-                    H3 title = new H3("Transactions");
-                    title.setClassName("section-title");
-                    return title;
-                })
-                .addComponent(() -> {
-                    Button addTransactionBtn = new Button("Add Transaction", LumoIcon.PLUS.create());
-                    addTransactionBtn.setIconAfterText(false);
-                    addTransactionBtn.addClickListener(e -> {
-                        addTransactionDialog.open();
-                        transactionsGrid.setItems(instrumentsFacadeService.getTransactionsByAsset(asset));
-                    });
-                    return addTransactionBtn;
-                })
-                .build();
+        H3 title = new H3("Transactions");
+        title.setClassName("section-title");
 
-        Button seeAllTransactionsBtn = new Button("See more transactions");
+        Button addTransactionBtn = new Button("Add Transaction", LumoIcon.PLUS.create());
+        addTransactionBtn.setIconAfterText(false);
+        addTransactionBtn.addClickListener(e -> {
+            addTransactionDialog.open();
+            transactionsGrid.setItems(instrumentsFacadeService.getTransactionsByAsset(asset));
+        });
+        Button seeAllTransactionsBtn = new Button("See all transactions");
+        Container buttonsContainer = new Container("header-buttons", addTransactionBtn, seeAllTransactionsBtn);
 
-        return new Section(header, transactionsGrid, seeAllTransactionsBtn);
+        Container header = new Container("section-header", title, buttonsContainer);
+
+        return new Section(header, transactionsGrid);
     }
 
     private Container getAssetDiversityContainer(int assetDiversityPercentage) {

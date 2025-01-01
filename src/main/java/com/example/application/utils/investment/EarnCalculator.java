@@ -72,7 +72,7 @@ public class EarnCalculator {
     }
 
     public static double earnYearly(double stackingAmount, double annualPercentageRate) {
-        if (annualPercentageRate <= -1)
+        if (annualPercentageRate < 0)
             throw new IllegalArgumentException("Percentage amount should be greater or equal to zero");
 
         return stackingAmount * (annualPercentageRate / 100);

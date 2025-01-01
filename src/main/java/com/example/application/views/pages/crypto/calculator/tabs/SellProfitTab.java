@@ -14,6 +14,7 @@ import com.example.application.views.components.custom.fields.CurrencyField;
 import com.example.application.views.components.custom.fields.PricePercentageWrapper;
 import com.example.application.views.components.custom.icons.MonoIcon;
 import com.example.application.views.components.custom.icons.PictogramIcon;
+import com.vaadin.flow.component.ScrollOptions;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Hr;
@@ -142,9 +143,11 @@ public class SellProfitTab extends BaseCalculatorTab {
                             "The amount of tokens remained after safe holding exit")
             );
 
-            // FIXME: THIS DOESN'T WORK
-            // Scroll smothly to the bottom of the tab
-            this.getElement().executeJs("this.scrollTo({ top: this.scrollHeight, behavior: 'smooth' });");
+            // Scroll to the bottom of element
+            ScrollOptions options = new ScrollOptions();
+            options.setBehavior(ScrollOptions.Behavior.SMOOTH);
+            options.setBlock(ScrollOptions.Alignment.END);
+            resultsContainer.getElement().scrollIntoView(options);
         });
 
         return calculateBtn;

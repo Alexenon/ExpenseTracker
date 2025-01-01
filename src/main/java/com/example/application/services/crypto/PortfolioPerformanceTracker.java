@@ -161,7 +161,7 @@ public class PortfolioPerformanceTracker {
             totalSoldQuantity += transaction.getOrderQuantity();
         }
 
-        if (totalSoldQuantity == 0) {
+        if (totalSoldQuantity == 0 && !buyTransactionsTillSale.isEmpty()) {
             LocalDate firstBoughtDate = buyTransactionsTillSale.getFirst().getDate();
             return getHoldingTimeInDays(firstBoughtDate, LocalDate.now());
         }

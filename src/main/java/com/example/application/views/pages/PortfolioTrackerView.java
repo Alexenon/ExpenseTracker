@@ -37,33 +37,48 @@ import java.util.stream.Collectors;
 /*
     TODO:
         [!] Total Trading Volume
+        [!] Add chart options -> byCost, byWorth
+        [!] Fix chart categories to not display 0 values
  * */
 
 @PermitAll
 @PageTitle("Portfolio Tracker")
-@Route(value = "portfolio-tracker", layout = MainLayout.class)
+@Route(value = "portfolio", layout = MainLayout.class)
 @JsModule("./themes/light_theme/components/javascript/fillPieChart.js")
 @JavaScript("https://fastly.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js")
-public class PortfolioTrackerView extends Main {
+public class PortfolioTrackerView extends DefaultPage {
 
     private final static CurrencyFormatter currencyFormatter = CurrencyFormatter.withDefaults();
 
-    private final InstrumentsFacadeService instrumentsFacadeService;
-    private final PortfolioPerformanceTracker portfolioPerformanceTracker;
+    @Autowired
+    private InstrumentsFacadeService instrumentsFacadeService;
+    @Autowired
+    private PortfolioPerformanceTracker portfolioPerformanceTracker;
 
-    private final AssetsGrid assetsGrid;
-    private final TransactionsGrid transactionsGrid;
+    private AssetsGrid assetsGrid;
+    private TransactionsGrid transactionsGrid;
     private final Div assetsDiversityChart = new Div();
 
-    @Autowired
-    public PortfolioTrackerView(InstrumentsFacadeService instrumentsFacadeService,
-                                PortfolioPerformanceTracker portfolioPerformanceTracker) {
-        this.instrumentsFacadeService = instrumentsFacadeService;
-        this.portfolioPerformanceTracker = portfolioPerformanceTracker;
-        this.assetsGrid = new AssetsGrid(instrumentsFacadeService, portfolioPerformanceTracker);
-        this.transactionsGrid = new TransactionsGrid(instrumentsFacadeService);
+    @Override
+    protected void initializePage() {
+        getStyle().set("margin", "100px 30px 30px 30px");
+    }
 
-        initializePage();
+    protected void initializeGrids() {
+        assetsGrid = new AssetsGrid(instrumentsFacadeService, portfolioPerformanceTracker);
+        assetsGrid.setGridFullSize(true);
+        assetsGrid.setItems(instrumentsFacadeService.getAssetsWithNonZeroAmount());
+
+        transactionsGrid = new TransactionsGrid(instrumentsFacadeService);
+        transactionsGrid.setItems(instrumentsFacadeService.getAllTransactions());
+        transactionsGrid.setPageSize(10);
+        transactionsGrid.addUpdateItemListener(l -> rebuildPage());
+    }
+
+    @Override
+    protected void buildPage() {
+        initializeChart();
+        initializeGrids();
         add(
                 headerSection(),
                 statisticsSection(),
@@ -71,15 +86,6 @@ public class PortfolioTrackerView extends Main {
                 gridSection("Assets", assetsGrid),
                 gridSection("Transactions", transactionsGrid)
         );
-        initializeChart();
-    }
-
-    private void initializePage() {
-        getStyle().set("margin", "100px 30px 30px 30px");
-        assetsGrid.setGridFullSize(true);
-        assetsGrid.setItems(instrumentsFacadeService.getAssetsWithNonZeroAmount());
-        transactionsGrid.setItems(instrumentsFacadeService.getAllTransactions());
-        transactionsGrid.setPageSize(10);
     }
 
     private Section headerSection() {
@@ -97,7 +103,11 @@ public class PortfolioTrackerView extends Main {
 
         Button addTransactionBtn = new Button("Add Transaction", LumoIcon.PLUS.create());
         addTransactionBtn.setIconAfterText(false);
-        addTransactionBtn.addClickListener(e -> new AddTransactionDialog(instrumentsFacadeService).open());
+        addTransactionBtn.addClickListener(e -> {
+            AddTransactionDialog dialog = new AddTransactionDialog(instrumentsFacadeService);
+            dialog.open();
+            dialog.addSaveBtnClickListener(l -> rebuildPage());
+        });
         section.add(addTransactionBtn);
 
         return section;

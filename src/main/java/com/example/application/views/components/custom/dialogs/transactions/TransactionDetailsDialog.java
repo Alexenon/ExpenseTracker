@@ -8,6 +8,7 @@ import com.example.application.utils.common.number.CurrencyFormatter;
 import com.example.application.utils.investment.ProfitUtils;
 import com.example.application.views.components.core.Container;
 import com.example.application.views.components.custom.fields.PricePercentageWrapper;
+import com.example.application.views.components.custom.fields.stats.ProfitStatsDisplay;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -21,17 +22,18 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
-
+import java.util.function.Consumer;
 
 // TODO:
 //  - [!] ICONS: vaadin:trending-down | vaadin:trending-up
+//  - [!] Notes are missing
+//  - [!] Edit btn looks very ugly position
 public class TransactionDetailsDialog extends Dialog {
 
     private static final AmountFormatter amountFormatter = AmountFormatter.withDefaults();
     private static final CurrencyFormatter currencyFormatter = CurrencyFormatter.withDefaults();
 
-    private final Asset asset;
-    private final CryptoTransaction transaction;
+    private CryptoTransaction transaction;
     private final InstrumentsFacadeService instrumentsFacadeService;
 
     private final Paragraph editBtn = new Paragraph("Edit");
@@ -41,25 +43,25 @@ public class TransactionDetailsDialog extends Dialog {
     public TransactionDetailsDialog(CryptoTransaction transaction, InstrumentsFacadeService instrumentsFacadeService) {
         this.transaction = transaction;
         this.instrumentsFacadeService = instrumentsFacadeService;
-        this.asset = transaction.getAsset();
 
+        initializeForm();
         buildForm();
     }
 
-    private void buildForm() {
+    private void initializeForm() {
         setClassName("transaction-details-modal");
         setHeaderTitle("Transaction");
-
         initializeFields();
+        getHeader().add(closeBtn);
+    }
 
+    private void buildForm() {
         add(
                 detailsTransaction(),
                 detailsProfitLoss(),
                 createInfoItem("Date", formatDate(transaction.getDate())),
                 createInfoItem("Notes", transaction.getNotes())
         );
-
-        getHeader().add(closeBtn);
     }
 
     private void initializeFields() {
@@ -67,25 +69,14 @@ public class TransactionDetailsDialog extends Dialog {
         closeBtn.addClassName("modal-close-btn");
 
         editBtn.addClassName("edit-btn");
-        editBtn.addClickListener(e -> {
-            EditTransactionDialog editTransactionDialog = new EditTransactionDialog(asset, transaction, instrumentsFacadeService);
-
-            editTransactionDialog.addClickSaveBtnListener(dialog -> close());
-            editTransactionDialog.addClickCancelBtnListener(dialog -> {
-                this.close();
-                CryptoTransaction newTransaction = editTransactionDialog.getTransaction();
-                TransactionDetailsDialog newDetailsDialog = new TransactionDetailsDialog(newTransaction, instrumentsFacadeService);
-                newDetailsDialog.open();
-            });
-            editTransactionDialog.open();
-        });
     }
 
     private Div detailsTransaction() {
+        Asset asset = transaction.getAsset();
+        String symbol = asset.getSymbol();
         String formattedPrice = currencyFormatter.format(transaction.getMarketPrice());
-        String formattedAmount = amountFormatter.format(transaction.getOrderQuantity())
-                + " " + transaction.getAsset().getSymbol();
-        Paragraph pricePerTokenField = new Paragraph(String.format("(1 %s = %s)", asset.getSymbol(), formattedPrice));
+        String formattedAmount = amountFormatter.format(transaction.getOrderQuantity(), symbol);
+        Paragraph pricePerTokenField = new Paragraph(String.format("(1 %s = %s)", symbol, formattedPrice));
         Paragraph totalCostField = new Paragraph(currencyFormatter.format(transaction.getOrderTotalCost()));
 
         Div priceDetails = Container.builder()
@@ -93,7 +84,7 @@ public class TransactionDetailsDialog extends Dialog {
                 .addComponent(new HorizontalLayout(totalCostField, pricePerTokenField))
                 .build();
 
-        Image symbolImage = new Image(instrumentsFacadeService.getAssetImgUrl(asset), asset.getSymbol());
+        Image symbolImage = new Image(instrumentsFacadeService.getAssetImgUrl(asset), symbol);
         symbolImage.setClassName("coin-overview-image");
 
         Div body = Container.builder()
@@ -111,8 +102,9 @@ public class TransactionDetailsDialog extends Dialog {
     }
 
     private Div detailsProfitLoss() {
+        Asset asset = transaction.getAsset();
         double buyPrice = transaction.getMarketPrice();
-        double sellPrice = instrumentsFacadeService.getAssetMarketPrice(transaction.getAsset());
+        double sellPrice = instrumentsFacadeService.getAssetMarketPrice(asset);
         double totalCost = transaction.getOrderTotalCost();
 
         double usdProfit = ProfitUtils.netProfit(buyPrice, sellPrice, totalCost);
@@ -128,14 +120,15 @@ public class TransactionDetailsDialog extends Dialog {
                 .addComponent(new PricePercentageWrapper(usdProfit, percentageProfit))
                 .build();
 
+        double price = instrumentsFacadeService.getAssetMarketPrice(asset);
+        double tokensAmount = instrumentsFacadeService.getAmountOfTokens(asset);
+
         return Container.builder("transaction-details-card")
                 .addComponents(profitLossContainer)
                 .addElement(new Element("hr"))
-                .addComponent(() -> Container.builder()
-                        .addClassName("transaction-profit-loss-badge-item")
-                        .addComponent(new Paragraph("Current Value"))
-                        .addComponent(new Paragraph(currencyFormatter.format(instrumentsFacadeService.getAssetMarketPrice(asset))))
-                        .build())
+                .addComponent(new ProfitStatsDisplay("Current Price", currencyFormatter.format(price)))
+                .addElement(new Element("hr"))
+                .addComponent(new ProfitStatsDisplay("Current Amount", amountFormatter.format(tokensAmount, asset)))
                 .build();
     }
 
@@ -147,6 +140,7 @@ public class TransactionDetailsDialog extends Dialog {
                 .build();
     }
 
+    // TODO: Add separate class -> DateFormatter
     private String formatDate(LocalDate date) {
         DateTimeFormatter formatter = new DateTimeFormatterBuilder()
                 .appendText(ChronoField.MONTH_OF_YEAR)
@@ -157,6 +151,23 @@ public class TransactionDetailsDialog extends Dialog {
                 .toFormatter();
 
         return date.format(formatter);
+    }
+
+    private void rebuildForm() {
+        removeAll();
+        buildForm();
+    }
+
+    public void addUpdateTransactionListener(Consumer<?> listener) {
+        editBtn.addClickListener(e -> {
+            EditTransactionDialog editTransactionDialog = new EditTransactionDialog(transaction, instrumentsFacadeService);
+            editTransactionDialog.addSaveListener(dialog -> {
+                transaction = editTransactionDialog.getTransaction();
+                rebuildForm();
+                listener.accept(null);
+            });
+            editTransactionDialog.open();
+        });
     }
 
 }

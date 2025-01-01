@@ -22,6 +22,7 @@ import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.validator.DoubleRangeValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -129,6 +130,7 @@ public class EditExpenseDialog extends Dialog implements HasNotifications {
 
         binder.forField(amountField)
                 .asRequired("Please fill this field")
+                .withValidator(new DoubleRangeValidator("Invalid decimal value", (double) 0, Double.MAX_VALUE))
                 .withValidator(amount -> amount >= 0, "Amount should be greater or equal to 0")
                 .bind(ExpenseRequest::getAmount, ExpenseRequest::setAmount);
 
@@ -181,7 +183,7 @@ public class EditExpenseDialog extends Dialog implements HasNotifications {
         }
     }
 
-    public void addClickSaveBtnListener(Consumer<ExpensesView> listener) {
+    public void addSaveBtnClickListener(Consumer<ExpensesView> listener) {
         saveButton.addClickListener(e -> listener.accept(null));
     }
 

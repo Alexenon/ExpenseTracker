@@ -18,6 +18,7 @@ import com.example.application.utils.common.number.AmountFormatter;
 import com.example.application.utils.common.number.CurrencyFormatter;
 import com.example.application.utils.common.number.PercentageFormatter;
 import com.example.application.utils.investment.ProfitUtils;
+import com.example.application.views.components.core.Container;
 import com.example.application.views.components.custom.dialogs.transactions.TransactionDetailsDialog;
 import com.example.application.views.components.custom.fields.AssetComboBox;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
@@ -35,6 +36,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Consumer;
 
 public class TransactionsGrid extends Div {
 
@@ -49,33 +51,29 @@ public class TransactionsGrid extends Div {
         this.instrumentsFacadeService = instrumentsFacadeService;
         this.nameSearchField = new AssetComboBox(instrumentsFacadeService);
         initializeGrid();
+        initializeGridColumns();
         initializeFilteringBySearch();
         add(gridHeader(), grid);
     }
 
     private Div gridHeader() {
-        Div header = new Div(nameSearchField, typeSearchField);
-        header.addClassName("assets-grid-header");
-        return header;
+        return new Container("assets-grid-header", nameSearchField, typeSearchField);
     }
 
     private void initializeGrid() {
+        grid.setColumnReorderingAllowed(true);
+    }
+
+    private void initializeGridColumns() {
         grid.addColumn(t -> t.getAsset().getSymbol()).setHeader("Name").setFrozen(true);
         grid.addColumn(quantityColumnRenderer()).setHeader("Quantity");
         grid.addColumn(priceColumnRenderer()).setHeader("Price");
         grid.addColumn(priceColumnRenderer(CryptoTransaction::getOrderTotalCost)).setHeader("Total");
         grid.addColumn(CryptoTransaction::getDate).setHeader("Date");
         grid.addColumn(profitLossColumnRenderer()).setHeader("Profit/Loss").setFrozenToEnd(true);
-
-        grid.setColumnReorderingAllowed(true);
         grid.getColumns().forEach(column -> {
             column.setSortable(true);
             column.setAutoWidth(true);
-        });
-
-        grid.addItemClickListener(row -> {
-            TransactionDetailsDialog detailsDialog = new TransactionDetailsDialog(row.getItem(), instrumentsFacadeService);
-            detailsDialog.open();
         });
     }
 
@@ -130,9 +128,9 @@ public class TransactionsGrid extends Div {
 
     private LitRenderer<CryptoTransaction> profitLossColumnRenderer() {
         return LitRenderer.<CryptoTransaction>of("<div class='transaction-profit-loss ${item.className}'>" +
-                        "  <p class='text-l'>${item.profit}</p>" +
-                        "  <p class='text-s'>${item.profitPercentage}</p>" +
-                        "</div>")
+                                                 "  <p class='text-l'>${item.profit}</p>" +
+                                                 "  <p class='text-s'>${item.profitPercentage}</p>" +
+                                                 "</div>")
                 .withProperty("className", this::getProfitLossClassName)
                 .withProperty("profit", transaction -> {
                     double currentPrice = instrumentsFacadeService.getAssetMarketPrice(transaction.getAsset());
@@ -159,6 +157,18 @@ public class TransactionsGrid extends Div {
 
         // FIXME: EMMM??? -> REFACTOR
         return profit > 0 ? "value-increase" : "value-decrease";
+    }
+
+    public void addUpdateItemListener(Consumer<?> listener) {
+        grid.addItemClickListener(row -> {
+            TransactionDetailsDialog detailsDialog = new TransactionDetailsDialog(row.getItem(), instrumentsFacadeService);
+            detailsDialog.open();
+            detailsDialog.addUpdateTransactionListener(l -> {
+                listener.accept(null);
+                grid.removeAllColumns();
+                initializeGridColumns();
+            });
+        });
     }
 
 }

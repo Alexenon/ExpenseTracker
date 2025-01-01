@@ -5,11 +5,14 @@ import com.example.application.entities.User;
 import com.example.application.entities.crypto.*;
 import com.example.application.repositories.crypto.AssetRepository;
 import com.example.application.repositories.crypto.WalletBalanceRepository;
+import com.example.application.utils.common.number.AmountFormatter;
+import com.example.application.utils.exceptions.InvalidBalanceAmount;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class InstrumentsService {
@@ -116,6 +119,34 @@ public class InstrumentsService {
 
     public List<WalletBalance> getWalletBalancesByWallet(Wallet wallet) {
         return walletBalanceRepository.findByWallet(wallet);
+    }
+
+    /**
+     * Updates wallet balance with an amount that should be added or removed using a positive/negative tokens amount
+     * <p> Example: + 200 ARB
+     */
+    public WalletBalance fillWalletBalance(Wallet wallet, Asset asset, double tokensAmountToBeAdded) {
+        Objects.requireNonNull(asset);
+        WalletBalance walletBalance = getWalletBalancesByWalletAndAsset(wallet, asset);
+        double balanceAfterSupply = getWalletBalanceAfterSupply(walletBalance, tokensAmountToBeAdded);
+
+        AmountFormatter amountFormatter = AmountFormatter.withDefaults();
+
+        System.out.printf("Fill %s with %s. Left amount: %s\n", wallet,
+                amountFormatter.format(tokensAmountToBeAdded, asset),
+                amountFormatter.format(balanceAfterSupply, asset));
+
+        if (balanceAfterSupply < 0) {
+            throw new InvalidBalanceAmount("The balance amount cannot be negative.");
+        }
+
+        walletBalance.setAmount(balanceAfterSupply);
+        walletBalanceRepository.save(walletBalance);
+        return walletBalance;
+    }
+
+    public double getWalletBalanceAfterSupply(WalletBalance walletBalance, double tokensAmountToBeAdded) {
+        return walletBalance.getAmount() + tokensAmountToBeAdded;
     }
 
     // TODO: FIND A WAY TO EXTRACT THIS FROM DATABASE WITHOUT EXCEPTION

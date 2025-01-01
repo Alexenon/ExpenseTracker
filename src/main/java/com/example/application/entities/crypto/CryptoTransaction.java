@@ -69,6 +69,18 @@ public class CryptoTransaction {
         this.date = date;
     }
 
+    public CryptoTransaction(CryptoTransaction transaction) {
+        this.id = transaction.id;
+        this.wallet = transaction.wallet;
+        this.asset = transaction.asset;
+        this.marketPrice = transaction.marketPrice;
+        this.orderTotalCost = transaction.orderTotalCost;
+        this.orderQuantity = transaction.orderQuantity;
+        this.type = transaction.type;
+        this.notes = transaction.notes;
+        this.date = transaction.date;
+    }
+
     public boolean isBuyTransaction() {
         return this.type == TransactionType.BUY;
     }
