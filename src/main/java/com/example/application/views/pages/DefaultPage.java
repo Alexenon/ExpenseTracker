@@ -1,11 +1,12 @@
 package com.example.application.views.pages;
 
 import com.example.application.views.components.utils.HasNotifications;
+import com.example.application.views.components.utils.HasScroll;
 import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 
-public abstract class DefaultPage extends Main implements BeforeEnterObserver, HasNotifications {
+public abstract class DefaultPage extends Main implements BeforeEnterObserver, HasNotifications, HasScroll {
 
     /**
      * This method represents the initialization of page
@@ -35,9 +36,6 @@ public abstract class DefaultPage extends Main implements BeforeEnterObserver, H
         initializePage();
         rebuildPage();
     }
-
-
-
 
 
 }

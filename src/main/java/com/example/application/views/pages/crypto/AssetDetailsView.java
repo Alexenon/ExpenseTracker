@@ -20,6 +20,7 @@ import com.example.application.views.components.custom.fields.PricePercentageWra
 import com.example.application.views.components.custom.fields.stats.PortfolioStatsDisplay;
 import com.example.application.views.layouts.MainLayout;
 import com.example.application.views.pages.DefaultPage;
+import com.vaadin.flow.component.ScrollOptions;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
@@ -39,11 +40,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.math.BigInteger;
 import java.util.Objects;
 
-// FIXME: SCROLLS INTO THE Watchlist section everytime
+// FIXME: When page is loaded, it scroll to the PriceWatchlistComponent
 
 @PermitAll
 @PageTitle("Asset Details")
-@Route(value = "asset-details", layout = MainLayout.class)
+@Route(value = "asset", layout = MainLayout.class)
 public class AssetDetailsView extends DefaultPage implements HasUrlParameter<String> {
 
     private static final CurrencyFormatter currencyFormatter = CurrencyFormatter.withDefaults();
@@ -66,9 +67,8 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
     @Override
     protected void initializePage() {
         setClassName("coin-details-content");
-        addTransactionDialog.setAsset(asset);
-        // Scroll to top of the page, on initialization
-        getElement().executeJs("window.scrollTo(0,0)");
+        addTransactionDialog.setAsset(asset); // TODO: Try to create two transactions one after another with different values
+        addAttachListener(l -> scrollTo(0, 0));
     }
 
     @Override
@@ -316,7 +316,13 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
                 .addComponent(() -> {
                     Button addWatchlistBtn = new Button("Add Watchlist", LumoIcon.PLUS.create());
                     addWatchlistBtn.setIconAfterText(false);
-                    addWatchlistBtn.addClickListener(e -> watchlistComponent.addNewPriceLayout());
+                    addWatchlistBtn.addClickListener(e -> {
+                        watchlistComponent.addNewPriceLayout();
+                        ScrollOptions scrollOptions = new ScrollOptions();
+                        scrollOptions.setBehavior(ScrollOptions.Behavior.SMOOTH);
+                        scrollOptions.setBlock(ScrollOptions.Alignment.END);
+                        watchlistComponent.scrollIntoView(scrollOptions);
+                    });
                     return addWatchlistBtn;
                 })
                 .build();

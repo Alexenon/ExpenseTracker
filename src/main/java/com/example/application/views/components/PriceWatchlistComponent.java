@@ -6,7 +6,6 @@ import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.utils.common.StringUtils;
 import com.example.application.views.components.core.Container;
 import com.example.application.views.components.custom.fields.CurrencyField;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -106,10 +105,6 @@ public class PriceWatchlistComponent extends Div {
             addClassName("section-card-wrapper");
             addClassName("price-watcher-wrapper");
 
-            // Scrolls smoothly to the center of newly created element
-            UI.getCurrent().getPage()
-                    .executeJs("arguments[0].scrollIntoView({ behavior: 'smooth', block: 'center' });", this);
-
             Container content = Container.builder("price-watcher-card-content")
                     .addComponent(status)
                     .addComponent(buildBody())
@@ -194,9 +189,9 @@ public class PriceWatchlistComponent extends Div {
             binder.forField(markAsCompleted)
                     .bind(AssetWatcher::isCompleted, AssetWatcher::setCompleted);
 
-            binder.setValidatorsDisabled(true);
             // Initially load the bean into the form
             binder.readBean(assetWatcher);
+            binder.setValidatorsDisabled(true);
         }
 
         /**
