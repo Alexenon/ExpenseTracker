@@ -17,19 +17,12 @@ import static com.example.application.utils.investment.ProfitUtils.ONE_HUNDRED_P
 /*
     TODO: LONG TERM -> Implement next methods
        - % in Market, how much tokens had been sold and how much are still holding
-       - ROI
        - Cumulative Profit Loss
        [!!!] Make methods like `calculateTotalQuantityForBuyTransactions()`, to have 2 paramets
                 1. List of transactions
                 2. Asset or asset filter
             To be 100% that there will be no error on calculating such stuff
             ALSO: Don't allow to get by List<Transaction> ----> getAverageBuy(asset, startDate, endDate)
-
-       TODO:
-          [!] Divide stastics in 3 categories
-                - overall statistics (starting from first day of trading)
-                - current statistics (just for the assets that are in user portfolio)
-                - flexible statistics (For a range period: LAST 30 DAYS, 90 DAYS, 180 DAYS, 360 DAYS)
 * */
 
 @Service

@@ -34,16 +34,28 @@ vaadin-tabs::part(tabs) {
     align-self: center;
 }
 
+.layout-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+}
+
 .buy-sell-layout {
     display: flex;
     flex-direction: row;
-    align-items: center;
+    align-items: flex-end;
     gap: 20px;
     width: 100%;
 }
 
 .buy-sell-layout > vaadin-text-field {
     width: 200px;
+}
+
+.buy-sell-layout > mono-icon {
+    margin-bottom: 8px;
 }
 
 

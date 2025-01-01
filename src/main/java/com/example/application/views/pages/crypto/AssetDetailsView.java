@@ -40,7 +40,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.math.BigInteger;
 import java.util.Objects;
 
-// FIXME: When page is loaded, it scroll to the PriceWatchlistComponent
+/*
+    TODO: Add @Slf4j annotation with logs
+    FIXME: When page is loaded, it scroll to the PriceWatchlistComponent
+*/
 
 @PermitAll
 @PageTitle("Asset Details")

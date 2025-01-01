@@ -61,7 +61,7 @@ public class TransactionalLayout extends Div {
         });
     }
 
-    public void setDefaultValues(Asset asset) {
+    public void setValue(Asset asset) {
         if(asset == null) {
             amountField.setValue("");
             marketPriceField.setValue("");
@@ -75,6 +75,8 @@ public class TransactionalLayout extends Div {
         totalCostField.setValue(amountOfTokens * marketPriceField.doubleValue());
     }
 
+    // TODO: Dont use avg price for marketPrice, use current price
+    //  - But add another field with average buy, current amount
     private double getAvgPriceByType(Asset asset) {
         if(instrumentsFacadeService.getTransactionsByAsset(asset).isEmpty())
             return instrumentsFacadeService.getAssetMarketPrice(asset);

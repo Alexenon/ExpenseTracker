@@ -25,7 +25,6 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-
 /*
     | Type  | Symbol | Price | Amount tokens / currency | Total |
     | Buy   | SOL    | $110  | 0.23 SOL ~ $120          | $200  |
@@ -42,11 +41,13 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
 
     private final AssetComboBox assetSymbolField;
     private final List<TransactionalLayout> transactionalLayouts = new ArrayList<>();
-    private final Container assetMetaDetailsContainer = new Container("profit-meta-data");
+    private final Button addNewLayoutBtn = new Button("Add Transaction", LumoIcon.PLUS.create());
+    private final Container layoutsContainer = new Container("layout-container");
+    private final Container metadataDetailsContainer = new Container("profit-meta-data");
 
     public ProfitEmulatorTab(InstrumentsFacadeService instrumentsFacadeService,
                              PortfolioPerformanceTracker portfolioPerformanceTracker) {
-        super("Profit Buy/Sell Emulator", instrumentsFacadeService);
+        super("Buy & Sell Emulator", instrumentsFacadeService);
         this.instrumentsFacadeService = instrumentsFacadeService;
         this.portfolioPerformanceTracker = portfolioPerformanceTracker;
         this.assetSymbolField = new AssetComboBox(instrumentsFacadeService);
@@ -60,16 +61,19 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
             }
 
             Asset selectedAsset = field.getValue();
-            transactionalLayouts.forEach(layout -> layout.setDefaultValues(selectedAsset));
+            transactionalLayouts.forEach(layout -> layout.setValue(selectedAsset));
             updateVisibilityForMetaData(selectedAsset);
         });
 
-        add(assetMetaDetailsContainer);
+        add(metadataDetailsContainer);
+
+        assetSymbolField.getElement().getStyle()
+                .set("width", "350px")
+                .set("align-self", "center");
     }
 
     @Override
     protected Div createInputFieldsContainer() {
-        Button addNewLayoutBtn = new Button("Add Transaction", LumoIcon.PLUS.create());
         addNewLayoutBtn.setIconAfterText(false);
         addNewLayoutBtn.addClickListener(e -> createNewLayout());
         addNewLayoutBtn.addClassName("add-entity-btn");
@@ -77,13 +81,14 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
         TransactionalLayout defaultLayout = new TransactionalLayout(instrumentsFacadeService, portfolioPerformanceTracker);
         defaultLayout.addClassName("buy-sell-layout");
         transactionalLayouts.add(defaultLayout);
+        layoutsContainer.add(defaultLayout);
 
-        return new Div(assetSymbolField, addNewLayoutBtn, defaultLayout);
+        return new Div(assetSymbolField, layoutsContainer, addNewLayoutBtn);
     }
 
     @Override
     protected Button createDisplayResultsBtn() {
-        return new Button("Calculate", e -> {
+        Button button = new Button("Calculate", e -> {
             String symbol = assetSymbolField.getSymbol();
             List<CryptoTransaction> allTransactions = getListOfTransactions();
 
@@ -137,18 +142,15 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
             double currentPrice = assetSymbolField.getMarketPrice();
 
             // TODO: Update this fields
-            assetMetaDetailsContainer.removeAll();
-            assetMetaDetailsContainer.add(getTable(assetSymbolField.getSelectedAsset(), avgBuy, avgSell));
+            metadataDetailsContainer.removeAll();
+            metadataDetailsContainer.add(getTable(assetSymbolField.getSelectedAsset(), avgBuy, avgSell));
         });
+        button.addClassName("add-entity-btn");
+        return button;
     }
 
     private void updateVisibilityForMetaData(Asset asset) {
-        if (asset == null) {
-            assetMetaDetailsContainer.setVisible(false);
-            return;
-        }
-
-        assetMetaDetailsContainer.setVisible(true);
+        metadataDetailsContainer.setVisible(asset != null);
     }
 
     private Div statsItem(String labelText, double value) {
@@ -167,7 +169,7 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
 
         newLayout.add(deleteBtn);
         transactionalLayouts.add(newLayout);
-        inputFieldsContainer.add(newLayout);
+        layoutsContainer.add(newLayout);
     }
 
     private List<CryptoTransaction> getListOfTransactions() {
@@ -196,33 +198,33 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
         double avgSellMarketCap = ProfitUtils.marketCap(circulationSupply, averageSellPrice);
 
         return new Html(MessageFormat.format("""
-                <table class="inside-border">
-                  <tr>
-                    <td></td>
-                    <td>Current</td>
-                    <td>Avg Buy</td>
-                    <td>Avg Sell</td>
-                  </tr>
-                  <tr>
-                    <td>Price</td>
-                    <td>{0}</td>
-                    <td>{1}</td>
-                    <td>{2}</td>
-                  </tr>
-                  <tr>
-                    <td>Market Cap</td>
-                    <td>{3}</td>
-                    <td>{4}</td>
-                    <td>{5}</td>
-                  </tr>
-                  <tr>
-                    <td>FDV</td>
-                    <td>{6}</td>
-                    <td>{7}</td>
-                    <td>{8}</td>
-                  </tr>
-                </table>
-                """,
+                        <table class="inside-border">
+                          <tr>
+                            <td></td>
+                            <td>Current</td>
+                            <td>Avg Buy</td>
+                            <td>Avg Sell</td>
+                          </tr>
+                          <tr>
+                            <td>Price</td>
+                            <td>{0}</td>
+                            <td>{1}</td>
+                            <td>{2}</td>
+                          </tr>
+                          <tr>
+                            <td>Market Cap</td>
+                            <td>{3}</td>
+                            <td>{4}</td>
+                            <td>{5}</td>
+                          </tr>
+                          <tr>
+                            <td>FDV</td>
+                            <td>{6}</td>
+                            <td>{7}</td>
+                            <td>{8}</td>
+                          </tr>
+                        </table>
+                        """,
                 currencyFormatter.format(currentPrice), currencyFormatter.format(averageBuyPrice), currencyFormatter.format(averageSellPrice),
                 compactFormatter.format(currentMarketCap), compactFormatter.format(avgBuyMarketCap), compactFormatter.format(avgSellMarketCap),
                 compactFormatter.format(currentFDV), compactFormatter.format(avgBuyFDV), compactFormatter.format(avgSellFDV))
