@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigInteger;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /*
@@ -150,7 +151,8 @@ public class InstrumentsFacadeService {
 
     //<editor-fold desc="METADATA">
     public AssetMetadata getAssetMetadata(Asset asset) {
-        return instrumentsProvider.getMetadata().get(asset);
+        return Objects.requireNonNull(instrumentsProvider.getMetadata().get(asset),
+                "Couldn't retrieve asset metadata for: " + asset);
     }
 
     public double getAssetMarketPrice(Asset asset) {

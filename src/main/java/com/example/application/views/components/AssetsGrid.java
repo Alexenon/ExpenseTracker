@@ -401,7 +401,7 @@ public class AssetsGrid extends Div {
                         .avgSell(portfolioPerformanceTracker.getAverageSellPrice(asset))
                         .realizedProfit(portfolioPerformanceTracker.getAssetRealizedProfit(asset))
                         .unrealizedProfit(portfolioPerformanceTracker.getAssetUnrealizedProfit(asset))
-                        .totalCost(portfolioPerformanceTracker.getAssetTotalCost(asset))
+                        .totalCost(portfolioPerformanceTracker.getAssetRemainingTokensCost(asset))
                         .totalWorth(portfolioPerformanceTracker.getAssetTotalWorth(asset))
                         .diversityPercentage(portfolioPerformanceTracker.getAssetDiversityPercentage(asset))
                         .build())

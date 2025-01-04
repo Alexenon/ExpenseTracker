@@ -33,6 +33,25 @@ import java.util.List;
     | Sell  | SOL    | $130  | 0.23 SOL ~ $120          | $200  |
 * */
 
+/*
+    TODO: Add dropdown stats component
+
+    TODO: Add buySellRatio with details:
+        - 30 : 70
+        - 4 buys ($340) : 9 sold ($1120)
+
+    TODO: Add Trading Volume with details:
+        -  BUY "3496 ARB = $220", avg buy ...
+        -  SELL "3496 ARB = $220", avg sell ...
+        -  TOTAL VOLUME: "3496 ARB = $220"
+        (maybe without decimal points for trading $ amount)
+
+    TODO: Add AvgBuy/Sell details
+        - 20 ARB / $220.00      (display average buy amount and average buy price)
+
+    The TradingVolume + BuySellRatio can be merged into one stat
+* */
+
 @Slf4j
 public class ProfitEmulatorTab extends BaseCalculatorTab {
 
@@ -90,58 +109,49 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
     protected Button createDisplayResultsBtn() {
         Button button = new Button("Calculate", e -> {
             String symbol = assetSymbolField.getSymbol();
-            List<CryptoTransaction> allTransactions = getListOfTransactions();
+            List<CryptoTransaction> transactions = getListOfTransactions();
 
             double price = instrumentsFacadeService.getAssetMarketPrice(assetSymbolField.getSelectedAsset());
-            double avgBuy = ProfitCalculator.getAverageBuyPrice(allTransactions);
-            double avgSell = ProfitCalculator.getAverageSellPrice(allTransactions);
-            double amountOfRemainingTokens = ProfitCalculator.getAmountOfRemainingTokens(allTransactions);
-            double realizedProfit = ProfitCalculator.getRealizedProfit(allTransactions);
+            double avgBuy = ProfitCalculator.getAverageBuyPrice(transactions);
+            double avgSell = ProfitCalculator.getAverageSellPrice(transactions);
+            double amountOfRemainingTokens = ProfitCalculator.getAmountOfRemainingTokens(transactions);
+            double realizedProfit = ProfitCalculator.getRealizedNetProfit(transactions);  // TODO: HERE IS SOMETHING STRANGE
             double unrealizedProfit = amountOfRemainingTokens * assetSymbolField.getMarketPrice();
             double totalProfit = realizedProfit + unrealizedProfit;
-            double worthRemainingTokens = amountOfRemainingTokens * price;
 
-            String buyVolumeInfo = currencyFormatter.format(ProfitCalculator.calculateTotalCostForBuyTransactions(allTransactions));
-            String sellVolumeInfo = currencyFormatter.format(ProfitCalculator.calculateTotalCostForSellTransactions(allTransactions));
-            String remainingCostInfo = currencyFormatter.format(ProfitCalculator.getTransactionsRemainingCost(allTransactions));
+            double totalCost = ProfitCalculator.calculateTotalCostForBuyTransactions(transactions);
+            double worthRemainingTokens = amountOfRemainingTokens * price;
+            double netProfit = worthRemainingTokens - totalProfit;
+
+            String buyVolumeInfo = currencyFormatter.format(ProfitCalculator.calculateTotalCostForBuyTransactions(transactions));
+            String sellVolumeInfo = currencyFormatter.format(ProfitCalculator.calculateTotalCostForSellTransactions(transactions));
+            String remainingCostInfo = currencyFormatter.format(ProfitCalculator.getRemainingTokensCost(transactions));
 
             resultsContainer.removeAll();
             resultsContainer.add(
-                    // TODO: for avgBuy/sell: 20 ARB / $220.00
-                    //  - explanation (display average buy amount and average buy price)
                     new ProfitStatsDisplay("Avg Buy:", currencyFormatter.format(avgBuy)),
                     new ProfitStatsDisplay("Avg Sell:", currencyFormatter.format(avgSell)),
+                    new ProfitStatsDisplay("Avg Growth Rate", percentageFormatter.format(ProfitUtils.growthPercentage(avgBuy, avgSell))),
 
                     new Hr(),
-                    new ProfitStatsDisplay("Avg Growth Rate", percentageFormatter.format(ProfitUtils.growthPercentage(avgBuy, avgSell))),
-                    new ProfitStatsDisplay("Realized Profit", currencyFormatter.format(realizedProfit)),
-                    new ProfitStatsDisplay("Unrealized Profit", currencyFormatter.format(unrealizedProfit)),
-                    new ProfitStatsDisplay("Total Profit", currencyFormatter.format(totalProfit)),
-
-                    // TODO EXAMPLE: "3496 ARB = $220"   - without decimal points
-                    new ProfitStatsDisplay("Buy Trading Volume", buyVolumeInfo),
-                    new ProfitStatsDisplay("Sell Trading Volume", sellVolumeInfo),
+                    new ProfitStatsDisplay("Total Cost", currencyFormatter.format(totalCost)),
 
                     new Hr(),
                     new ProfitStatsDisplay("Amount of tokens left:", amountFormatter.format(amountOfRemainingTokens, symbol)),
                     new ProfitStatsDisplay("Worth of remaining tokens:", currencyFormatter.format(worthRemainingTokens)),
-                    new ProfitStatsDisplay("Cost for remaining tokens:", remainingCostInfo)
+                    new ProfitStatsDisplay("Cost for remaining tokens:", remainingCostInfo),
+
+                    new Hr(),
+                    new ProfitStatsDisplay("Realized Profit", currencyFormatter.format(realizedProfit)),
+                    new ProfitStatsDisplay("Unrealized Profit", currencyFormatter.format(unrealizedProfit)),
+                    new ProfitStatsDisplay("Total Profit", currencyFormatter.format(totalProfit)),
+                    new ProfitStatsDisplay("Net Profit", currencyFormatter.format(netProfit)),
+
+                    new Hr(),
+                    new ProfitStatsDisplay("Buy Trading Volume", buyVolumeInfo),
+                    new ProfitStatsDisplay("Sell Trading Volume", sellVolumeInfo)
             );
 
-            /*
-                                  | Current | Avg Buy | Avg Sell |
-                     | Price      |  1.38 B | 1.19 B  | 1.79 B   |
-                     | Market Cap |  1.38 B | 1.19 B  | 1.79 B   |
-                     | FDV        |   ...   |   ...   |    ...   |
-
-
-                    https://codepen.io/caplock221b/pen/WNraREK
-                    https://stackoverflow.com/questions/35571603/removing-outer-border-in-html-table
-            * */
-
-            double currentPrice = assetSymbolField.getMarketPrice();
-
-            // TODO: Update this fields
             metadataDetailsContainer.removeAll();
             metadataDetailsContainer.add(getTable(assetSymbolField.getSelectedAsset(), avgBuy, avgSell));
         });
@@ -184,6 +194,7 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
                 }).toList();
     }
 
+    // TODO: Update this
     private Html getTable(Asset asset, double averageBuyPrice, double averageSellPrice) {
         double currentPrice = instrumentsFacadeService.getAssetMarketPrice(asset);
 

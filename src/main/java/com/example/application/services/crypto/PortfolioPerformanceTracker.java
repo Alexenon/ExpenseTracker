@@ -2,15 +2,12 @@ package com.example.application.services.crypto;
 
 import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.CryptoTransaction;
-import com.example.application.utils.common.MathUtils;
+import com.example.application.utils.investment.ProfitCalculator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
 
 import static com.example.application.utils.investment.ProfitUtils.ONE_HUNDRED_PERCENT;
 
@@ -36,42 +33,11 @@ public class PortfolioPerformanceTracker {
     }
 
     public double getAverageBuyPrice(Asset asset) {
-        if (asset == null)
-            return 0;
-
-        List<CryptoTransaction> transactions = instrumentsFacadeService.getTransactionsByAsset(asset);
-        double totalCost = calculateTotalCostForBuyTransactions(transactions);
-        double totalQuantity = calculateTotalQuantityForBuyTransactions(transactions);
-        return calculateAveragePrice(totalCost, totalQuantity);
+        return asset == null ? 0 : ProfitCalculator.getAverageBuyPrice(instrumentsFacadeService.getTransactionsByAsset(asset));
     }
 
     public double getAverageSellPrice(Asset asset) {
-        if (asset == null)
-            return 0;
-
-        List<CryptoTransaction> transactions = instrumentsFacadeService.getTransactionsByAsset(asset);
-        double totalSellCost = calculateTotalCostForSellTransactions(transactions);
-        double totalQuantitySold = calculateTotalQuantityForSellTransactions(transactions);
-        return calculateAveragePrice(totalSellCost, totalQuantitySold);
-    }
-
-    public double getAveragePriceForRemainingTokens(Asset asset) {
-        if (asset == null)
-            return 0;
-
-        double totalCost = 0;
-        double totalQuantity = 0;
-        for (CryptoTransaction transaction : instrumentsFacadeService.getTransactionsByAsset(asset)) {
-            if (transaction.isBuyTransaction()) {
-                totalCost += transaction.getOrderTotalCost();
-                totalQuantity += transaction.getOrderQuantity();
-            } else if (transaction.isSellTransaction()) {
-                totalCost = adjustCostForSale(transaction, totalCost, totalQuantity);
-                totalQuantity -= transaction.getOrderQuantity();
-            }
-        }
-
-        return calculateAveragePrice(totalCost, totalQuantity);
+        return asset == null ? 0 : ProfitCalculator.getAverageSellPrice(instrumentsFacadeService.getTransactionsByAsset(asset));
     }
 
     //region ASSET STATS
@@ -79,87 +45,36 @@ public class PortfolioPerformanceTracker {
         return instrumentsFacadeService.getAmountOfTokens(asset) * instrumentsFacadeService.getAssetMarketPrice(asset);
     }
 
+    public double getAssetRemainingTokensCost(Asset asset) {
+        return ProfitCalculator.getRemainingTokensCost(instrumentsFacadeService.getTransactionsByAsset(asset));
+    }
+
     public double getAssetTotalCost(Asset asset) {
-        return calculateTotalCostForBuyTransactions(instrumentsFacadeService.getTransactionsByAsset(asset));
+        return ProfitCalculator.calculateTotalCostForBuyTransactions(instrumentsFacadeService.getTransactionsByAsset(asset));
     }
 
     public double getAssetTotalProfit(Asset asset) {
         return getAssetRealizedProfit(asset) + getAssetUnrealizedProfit(asset);
     }
 
-    public double getAssetTotalNetProfit(Asset asset) {
-        return getAssetTotalProfit(asset) - getAssetTotalCost(asset);
-    }
-
     public double getAssetRealizedProfit(Asset asset) {
-        double quantitySold = instrumentsFacadeService.getTransactionsByAsset(asset)
-                .stream()
-                .filter(CryptoTransaction::isSellTransaction)
-                .mapToDouble(CryptoTransaction::getOrderQuantity)
-                .sum();
-
-        return (getAverageSellPrice(asset) - getAverageBuyPrice(asset)) * quantitySold;
+        return ProfitCalculator.getRealizedNetProfit(instrumentsFacadeService.getTransactionsByAsset(asset));
     }
 
     public double getAssetUnrealizedProfit(Asset asset) {
-        return getAssetTotalWorth(asset);
+        return getAssetTotalWorth(asset) - getAssetRemainingTokensCost(asset);
     }
 
-    public double getAssetProfitPercentage(Asset asset) {
-        return getAssetTotalWorth(asset) / getAssetTotalCost(asset);
+    public double getAssetNetProfitPercentage(Asset asset) {
+        return getAssetTotalWorth(asset) / getAssetRemainingTokensCost(asset);
     }
 
     public String getAssetBuySellRatio(Asset asset) {
-        List<CryptoTransaction> transactions = instrumentsFacadeService.getTransactionsByAsset(asset);
-        double buyCost = calculateTotalCostForBuyTransactions(transactions);
-        double sellCost = calculateTotalCostForSellTransactions(transactions);
-        double totalCost = buyCost + sellCost;
-
-        double buyRatio = buyCost / totalCost * ONE_HUNDRED_PERCENT;
-        double sellRatio = sellCost / totalCost * ONE_HUNDRED_PERCENT;
-
-        return String.format("%d : %d", Math.round(buyRatio), Math.round(sellRatio));
+        return ProfitCalculator.getBuySellRatio(instrumentsFacadeService.getTransactionsByAsset(asset));
     }
 
     public double getAssetAverageHoldingDays(Asset asset) {
-        List<CryptoTransaction> sortedAssetTransactions = instrumentsFacadeService.getTransactionsByAsset(asset)
-                .stream()
-                .sorted(Comparator.comparing(CryptoTransaction::getDate))
-                .toList();
-
-        List<CryptoTransaction> buyTransactionsTillSale = new ArrayList<>();
-        double totalWeightedHoldingTime = 0;
-        double totalSoldQuantity = 0;
-
-        for (CryptoTransaction transaction : sortedAssetTransactions) {
-            if (transaction.isBuyTransaction()) {
-                buyTransactionsTillSale.add(transaction);
-                continue;
-            }
-
-            // Process sell transactions
-            double quantityToSell = transaction.getOrderQuantity();
-            long weightedHoldingTime = 0;
-
-            for (CryptoTransaction buyTransaction : buyTransactionsTillSale) {
-                if (quantityToSell <= 0) break;
-
-                double buyQuantity = buyTransaction.getOrderQuantity();
-                double soldQuantityFromThisBuy = Math.min(buyQuantity, quantityToSell);
-                weightedHoldingTime += (long) (getHoldingTimeInDays(buyTransaction, transaction) * soldQuantityFromThisBuy);
-                quantityToSell -= soldQuantityFromThisBuy;
-            }
-
-            totalWeightedHoldingTime += weightedHoldingTime;
-            totalSoldQuantity += transaction.getOrderQuantity();
-        }
-
-        if (totalSoldQuantity == 0 && !buyTransactionsTillSale.isEmpty()) {
-            LocalDate firstBoughtDate = buyTransactionsTillSale.getFirst().getDate();
-            return getHoldingTimeInDays(firstBoughtDate, LocalDate.now());
-        }
-
-        return totalWeightedHoldingTime / totalSoldQuantity;
+        return ProfitCalculator.getAverageHoldingDays(instrumentsFacadeService.getTransactionsByAsset(asset));
     }
 
     /**
@@ -199,8 +114,11 @@ public class PortfolioPerformanceTracker {
                 .sum();
     }
 
-    public double getPortfolioProfit() {
-        return getPortfolioWorth() - getPortfolioCost();
+    /**
+     * Represents the total profit, realized + unrealized
+     */
+    public double getPortfolioTotalProfit() {
+        return getPortfolioUnrealizedProfit() + getPortfolioRealizedProfit();
     }
 
     public double getPortfolioRealizedProfit() {
@@ -211,7 +129,10 @@ public class PortfolioPerformanceTracker {
     }
 
     public double getPortfolioUnrealizedProfit() {
-        return getPortfolioWorth() - getPortfolioCost();
+        return instrumentsFacadeService.getAssetsWithNonZeroAmount()
+                .stream()
+                .mapToDouble(this::getAssetUnrealizedProfit)
+                .sum();
     }
 
     public double getPortfolioAverageHoldingDays() {
@@ -223,59 +144,11 @@ public class PortfolioPerformanceTracker {
     }
 
     public String getPortfolioBuySellRatio() {
-        List<CryptoTransaction> transactions = instrumentsFacadeService.getAllTransactions();
-        double buyCost = calculateTotalCostForBuyTransactions(transactions);
-        double sellCost = calculateTotalCostForSellTransactions(transactions);
-        double totalCost = buyCost + sellCost;
-
-        double buyRatio = buyCost / totalCost * ONE_HUNDRED_PERCENT;
-        double sellRatio = sellCost / totalCost * ONE_HUNDRED_PERCENT;
-
-        return String.format("%d : %d", Math.round(buyRatio), Math.round(sellRatio));
+        return ProfitCalculator.getBuySellRatio(instrumentsFacadeService.getAllTransactions());
     }
 
     public double getPortfolioProfitPercentage() {
         return getPortfolioWorth() / getPortfolioCost() * ONE_HUNDRED_PERCENT - ONE_HUNDRED_PERCENT;
-    }
-    //endregion
-
-    //region CALCULATION METHODS
-    private double calculateTotalCostForBuyTransactions(List<CryptoTransaction> transactions) {
-        return transactions.stream()
-                .filter(CryptoTransaction::isBuyTransaction)
-                .mapToDouble(CryptoTransaction::getOrderTotalCost)
-                .sum();
-    }
-
-    private double calculateTotalCostForSellTransactions(List<CryptoTransaction> transactions) {
-        return transactions.stream()
-                .filter(CryptoTransaction::isSellTransaction)
-                .mapToDouble(CryptoTransaction::getOrderTotalCost)
-                .sum();
-    }
-
-    private double calculateTotalQuantityForBuyTransactions(List<CryptoTransaction> transactions) {
-        return transactions.stream()
-                .filter(CryptoTransaction::isBuyTransaction)
-                .mapToDouble(CryptoTransaction::getOrderQuantity)
-                .sum();
-    }
-
-    private double calculateTotalQuantityForSellTransactions(List<CryptoTransaction> transactions) {
-        return transactions.stream()
-                .filter(CryptoTransaction::isSellTransaction)
-                .mapToDouble(CryptoTransaction::getOrderQuantity)
-                .sum();
-    }
-
-    private double calculateAveragePrice(double totalCost, double totalQuantity) {
-        return MathUtils.safeZeroDivision(totalCost, totalQuantity);
-    }
-
-    private double adjustCostForSale(CryptoTransaction transaction, double totalCost, double totalQuantity) {
-        double quantitySold = transaction.getOrderQuantity();
-        double averagePriceBeforeSale = calculateAveragePrice(totalCost, totalQuantity);
-        return totalCost - (quantitySold * averagePriceBeforeSale);
     }
     //endregion
 

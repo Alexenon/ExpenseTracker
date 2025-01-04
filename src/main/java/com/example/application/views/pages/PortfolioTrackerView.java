@@ -94,7 +94,7 @@ public class PortfolioTrackerView extends DefaultPage {
 
         NumericValueParagraph worth = new NumericValueParagraph(portfolioPerformanceTracker.getPortfolioWorth(), currencyFormatter);
         double percentage = portfolioPerformanceTracker.getPortfolioProfitPercentage();
-        double profit = portfolioPerformanceTracker.getPortfolioProfit();
+        double profit = portfolioPerformanceTracker.getPortfolioTotalProfit();
         PricePercentageWrapper profitWrapper = new PricePercentageWrapper(profit, percentage);
 
         Container portfolioWorthWrapper = new Container("price-wrapper", worth, profitWrapper);
@@ -118,7 +118,7 @@ public class PortfolioTrackerView extends DefaultPage {
 
         Map<String, Double> assetsDiversity = instrumentsFacadeService.getAssetsWithNonZeroAmount()
                 .stream()
-                .collect(Collectors.toMap(Asset::getSymbol, portfolioPerformanceTracker::getAssetTotalCost, (a, b) -> b));
+                .collect(Collectors.toMap(Asset::getSymbol, portfolioPerformanceTracker::getAssetRemainingTokensCost, (a, b) -> b));
 
         JsonArray jsonOptionData = Json.createArray();
         AtomicInteger index = new AtomicInteger(0);
@@ -154,7 +154,7 @@ public class PortfolioTrackerView extends DefaultPage {
         H3 title = new H3("Portfolio Statistics");
         title.setClassName("section-title");
 
-        double profit = portfolioPerformanceTracker.getPortfolioProfit();
+        double totalProfit = portfolioPerformanceTracker.getPortfolioTotalProfit();
         String nrOfAssets = String.valueOf(instrumentsFacadeService.getAssetsWithNonZeroAmount().size());
         String realized = currencyFormatter.format(portfolioPerformanceTracker.getPortfolioRealizedProfit());
         String unrealized = currencyFormatter.format(portfolioPerformanceTracker.getPortfolioUnrealizedProfit());
@@ -166,10 +166,10 @@ public class PortfolioTrackerView extends DefaultPage {
                 "Total amount of dollars invested to buy all the assets");
         Div numberOfAssets = new PortfolioStatsDisplay("No. of Assets", nrOfAssets,
                 "Current number of assets that are in your portfolio");
-        Div profitStats = new PortfolioStatsDisplay("Profit", new NumericValueParagraph(profit, currencyFormatter, true),
-                "Total profit if you were to sell all assets now");
+        Div profitStats = new PortfolioStatsDisplay("Total Profit", new NumericValueParagraph(totalProfit, currencyFormatter, true),
+                "Represents the realized profit + unrealized profit");
         Div realizedProfit = new PortfolioStatsDisplay("Realized Profit", realized,
-                "Profit/Loss from your sold holdings");
+                "Profit or Loss from all your sold holdings");
         Div unrealizedProfit = new PortfolioStatsDisplay("Unrealized Profit", unrealized,
                 "Potential profit or loss if you were to sell all assets now");
         String ratio = portfolioPerformanceTracker.getPortfolioBuySellRatio();
@@ -246,7 +246,7 @@ public class PortfolioTrackerView extends DefaultPage {
         assetImage.addClassNames("coin-overview-image", "performance-asset-image");
 
         double profit = portfolioPerformanceTracker.getAssetTotalProfit(asset);
-        double percentageProfit = portfolioPerformanceTracker.getAssetProfitPercentage(asset);
+        double percentageProfit = portfolioPerformanceTracker.getAssetNetProfitPercentage(asset);
         PricePercentageWrapper pricePercentageWrapper = new PricePercentageWrapper(profit, percentageProfit);
         pricePercentageWrapper.addClassName("performance-values");
 

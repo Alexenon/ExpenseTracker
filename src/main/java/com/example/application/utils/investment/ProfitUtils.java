@@ -7,7 +7,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
 
-// TODO: Add common methods from PortfolioPerformanceTracker
 public class ProfitUtils {
 
     public static final int ONE_HUNDRED_PERCENT = 100;

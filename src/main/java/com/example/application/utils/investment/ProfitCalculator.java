@@ -3,10 +3,11 @@ package com.example.application.utils.investment;
 import com.example.application.entities.crypto.CryptoTransaction;
 import com.example.application.utils.common.MathUtils;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
 
+import static com.example.application.utils.investment.ProfitUtils.ONE_HUNDRED_PERCENT;
 
 /**
  * FIFO Implementation (first in first out)
@@ -37,8 +38,10 @@ public class ProfitCalculator {
 
     /**
      * Calculates the total realized profit from provided transactions
+     *
+     * <p>If there are just BUYS transactions, then the value will be {@code 0}
      */
-    public static double getRealizedProfit(List<CryptoTransaction> transactions) {
+    public static double getRealizedNetProfit(List<CryptoTransaction> transactions) {
         double totalCost = 0.0;
         double remainingQuantity = 0.0;
         double realizedProfit = 0.0;
@@ -67,7 +70,11 @@ public class ProfitCalculator {
         return realizedProfit;
     }
 
-    public static double getTransactionsRemainingCost(List<CryptoTransaction> transactions) {
+    /**
+     * Calculates the cost of remaining tokens, where if contains SELL transactions, then the cost value
+     * is substracted confirming with transaction order cost
+     * */
+    public static double getRemainingTokensCost(List<CryptoTransaction> transactions) {
         Queue<Batch> fifoQueue = new LinkedList<>();
         double remainingCost = 0.0;
 
@@ -106,6 +113,57 @@ public class ProfitCalculator {
         return remainingCost;
     }
 
+    public static String getBuySellRatio(List<CryptoTransaction> transactions) {
+        double buyCost = calculateTotalCostForBuyTransactions(transactions);
+        double sellCost = calculateTotalCostForSellTransactions(transactions);
+        double totalCost = buyCost + sellCost;
+
+        double buyRatio = buyCost / totalCost * ONE_HUNDRED_PERCENT;
+        double sellRatio = sellCost / totalCost * ONE_HUNDRED_PERCENT;
+
+        return String.format("%d : %d", Math.round(buyRatio), Math.round(sellRatio));
+    }
+
+    public static double getAverageHoldingDays(List<CryptoTransaction> transactions) {
+        List<CryptoTransaction> sortedAssetTransactions = transactions.stream()
+                .sorted(Comparator.comparing(CryptoTransaction::getDate))
+                .toList();
+
+        List<CryptoTransaction> buyTransactionsTillSale = new ArrayList<>();
+        double totalWeightedHoldingTime = 0;
+        double totalSoldQuantity = 0;
+
+        for (CryptoTransaction transaction : sortedAssetTransactions) {
+            if (transaction.isBuyTransaction()) {
+                buyTransactionsTillSale.add(transaction);
+                continue;
+            }
+
+            // Process sell transactions
+            double quantityToSell = transaction.getOrderQuantity();
+            long weightedHoldingTime = 0;
+
+            for (CryptoTransaction buyTransaction : buyTransactionsTillSale) {
+                if (quantityToSell <= 0) break;
+
+                double buyQuantity = buyTransaction.getOrderQuantity();
+                double soldQuantityFromThisBuy = Math.min(buyQuantity, quantityToSell);
+                weightedHoldingTime += (long) (getHoldingTimeInDays(buyTransaction, transaction) * soldQuantityFromThisBuy);
+                quantityToSell -= soldQuantityFromThisBuy;
+            }
+
+            totalWeightedHoldingTime += weightedHoldingTime;
+            totalSoldQuantity += transaction.getOrderQuantity();
+        }
+
+        if (totalSoldQuantity == 0) {
+            LocalDate firstBoughtDate = buyTransactionsTillSale.getFirst().getDate();
+            return getHoldingTimeInDays(firstBoughtDate, LocalDate.now());
+        }
+
+        return totalWeightedHoldingTime / totalSoldQuantity;
+    }
+
     //region CALCULATION METHODS
     public static double calculateTotalCostForBuyTransactions(List<CryptoTransaction> transactions) {
         return transactions.stream()
@@ -139,8 +197,16 @@ public class ProfitCalculator {
         return calculateTotalQuantityForBuyTransactions(transactions) - calculateTotalQuantityForSellTransactions(transactions);
     }
 
-    private static double calculateAveragePrice(double totalCost, double totalQuantity) {
+    public static double calculateAveragePrice(double totalCost, double totalQuantity) {
         return MathUtils.safeZeroDivision(totalCost, totalQuantity);
+    }
+
+    private static long getHoldingTimeInDays(CryptoTransaction buyTransaction, CryptoTransaction sellTransaction) {
+        return getHoldingTimeInDays(buyTransaction.getDate(), sellTransaction.getDate());
+    }
+
+    private static long getHoldingTimeInDays(LocalDate buyDate, LocalDate sellDate) {
+        return ChronoUnit.DAYS.between(buyDate, sellDate);
     }
     //endregion
 

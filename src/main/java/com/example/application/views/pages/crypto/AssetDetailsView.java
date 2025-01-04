@@ -226,10 +226,12 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
                 })
                 .build();
 
-        double assetCost = portfolioPerformanceTracker.getAssetTotalCost(asset);
+        double assetCost = portfolioPerformanceTracker.getAssetRemainingTokensCost(asset);
         double assetWorth = portfolioPerformanceTracker.getAssetTotalWorth(asset);
         double assetProfitLoss = portfolioPerformanceTracker.getAssetTotalProfit(asset);
-        double profitLossPercentage = portfolioPerformanceTracker.getAssetProfitPercentage(asset);
+        double assetRealized = portfolioPerformanceTracker.getAssetRealizedProfit(asset);
+        double assetUnrealized = portfolioPerformanceTracker.getAssetUnrealizedProfit(asset);
+        double profitLossPercentage = portfolioPerformanceTracker.getAssetNetProfitPercentage(asset);
         int assetDiversityPercentage = portfolioPerformanceTracker.getAssetDiversityPercentage(asset);
 
         NumericValueParagraph costValue = new NumericValueParagraph(assetCost, currencyFormatter);
@@ -248,7 +250,9 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
                 new PortfolioStatsDisplay("Total Cost", costValue),
                 new PortfolioStatsDisplay("Total Worth", worthValue),
                 new PortfolioStatsDisplay("Amount of tokens", tokensAmount),
-                new PortfolioStatsDisplay("Profit Loss", profitLossContainer),
+                new PortfolioStatsDisplay("Total Profit/Loss", profitLossContainer),
+                new PortfolioStatsDisplay("Realized Profit", new NumericValueParagraph(assetRealized, currencyFormatter)),
+                new PortfolioStatsDisplay("Unrealized Profit", new NumericValueParagraph(assetUnrealized, currencyFormatter)),
                 new PortfolioStatsDisplay("Portfolio Diversity", getAssetDiversityContainer(assetDiversityPercentage)),
                 new PortfolioStatsDisplay("Buy/Sell Ratio", ratio,
                         String.format("%s%% of transactions are buys, %s%% are sells, in dollar equivalent", ratioParts[0].trim(), ratioParts[1])),
