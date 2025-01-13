@@ -46,6 +46,8 @@ import java.util.List;
         -  TOTAL VOLUME: "3496 ARB = $220"
         (maybe without decimal points for trading $ amount)
 
+
+
     TODO: Add AvgBuy/Sell details
         - 20 ARB / $220.00      (display average buy amount and average buy price)
 

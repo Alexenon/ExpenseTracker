@@ -35,6 +35,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoIcon;
 import jakarta.annotation.security.PermitAll;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigInteger;
@@ -45,6 +46,7 @@ import java.util.Objects;
     FIXME: When page is loaded, it scroll to the PriceWatchlistComponent
 */
 
+@Slf4j
 @PermitAll
 @PageTitle("Asset Details")
 @Route(value = "asset", layout = MainLayout.class)
@@ -70,8 +72,8 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
     @Override
     protected void initializePage() {
         setClassName("coin-details-content");
-        addTransactionDialog.setAsset(asset); // TODO: Try to create two transactions one after another with different values
-        addAttachListener(l -> scrollTo(0, 0));
+        addTransactionDialog.setAsset(asset);
+        scrollTopPage();
     }
 
     @Override
@@ -210,7 +212,6 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
         return section;
     }
 
-    // https://coinstats.app/coins/usd-coin/holdings/
     private Section holdingsSection() {
         Container header = Container.builder("section-header")
                 .addComponent(() -> {
@@ -247,9 +248,9 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
         Div body = new Div();
         body.addClassName("section-card-wrapper");
         body.add(
-                new PortfolioStatsDisplay("Total Cost", costValue),
+                new PortfolioStatsDisplay("Tokens amount", tokensAmount),
                 new PortfolioStatsDisplay("Total Worth", worthValue),
-                new PortfolioStatsDisplay("Amount of tokens", tokensAmount),
+                new PortfolioStatsDisplay("Total Cost", costValue),
                 new PortfolioStatsDisplay("Total Profit/Loss", profitLossContainer),
                 new PortfolioStatsDisplay("Realized Profit", new NumericValueParagraph(assetRealized, currencyFormatter)),
                 new PortfolioStatsDisplay("Unrealized Profit", new NumericValueParagraph(assetUnrealized, currencyFormatter)),

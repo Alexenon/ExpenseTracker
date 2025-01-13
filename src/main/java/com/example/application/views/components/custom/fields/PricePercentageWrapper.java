@@ -14,10 +14,8 @@ public class PricePercentageWrapper extends Div {
     private final NumericValueParagraph price;
     private final PercentageBadge percentage;
 
-    CurrencyFormatter currencyFormatter = new CurrencyFormatter();
-
     public PricePercentageWrapper(double priceValue, double percentageValue) {
-        price = new NumericValueParagraph(priceValue, currencyFormatter, true);
+        price = new NumericValueParagraph(priceValue, CurrencyFormatter.withDefaults(), true);
         percentage = new PercentageBadge(percentageValue);
         add(price, percentage);
         addClassName("price-profit-wrapper");

@@ -2,6 +2,7 @@ package com.example.application.views.pages;
 
 import com.example.application.views.components.utils.HasNotifications;
 import com.example.application.views.components.utils.HasScroll;
+import com.vaadin.flow.component.ScrollOptions;
 import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
@@ -37,5 +38,12 @@ public abstract class DefaultPage extends Main implements BeforeEnterObserver, H
         rebuildPage();
     }
 
+    public void scrollTopPage() {
+        ScrollOptions scrollOptions = new ScrollOptions();
+        scrollOptions.setBehavior(ScrollOptions.Behavior.AUTO);
+        scrollOptions.setBlock(ScrollOptions.Alignment.START);
+        scrollOptions.setInline(ScrollOptions.Alignment.START);
+        this.getElement().scrollIntoView(scrollOptions);
+    }
 
 }

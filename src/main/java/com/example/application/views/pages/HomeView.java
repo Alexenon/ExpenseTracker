@@ -2,6 +2,7 @@ package com.example.application.views.pages;
 
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.views.components.custom.dialogs.transactions.AddTransactionDialog;
+import com.example.application.views.components.utils.HasScroll;
 import com.example.application.views.layouts.MainLayout;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.contextmenu.MenuItem;
@@ -24,7 +25,7 @@ import java.util.List;
 @AnonymousAllowed
 @PageTitle("Home")
 @Route(value = "", layout = MainLayout.class)
-public class HomeView extends Main {
+public class HomeView extends Main implements HasScroll {
 
     @Autowired
     private InstrumentsFacadeService service;
@@ -35,17 +36,7 @@ public class HomeView extends Main {
         text.addClassNames(LumoUtility.FontSize.XLARGE);
         add(text);
 
-        RadioButtonGroup<String> radioButtonGroup = new RadioButtonGroup<>();
-        radioButtonGroup.addClassName("multi-button");
-        radioButtonGroup.setItems("None", "Token", "USD", "Percentage");
-        radioButtonGroup.setRenderer(new ComponentRenderer<>(item -> switch (item) {
-            case "Token" -> new Button(item, LumoIcon.CHECKMARK.create());
-            case "USD" -> new Button(item, LumoIcon.PLUS.create());
-            case "Percentage" -> new Button(item, LumoIcon.MINUS.create());
-            default -> new Button(item, LumoIcon.CROSS.create());
-        }));
-        radioButtonGroup.setValue("foo");
-        add(radioButtonGroup);
+        add(getButtonGroup());
 
         // Items
 
@@ -60,11 +51,30 @@ public class HomeView extends Main {
         });
         add(menuBar);
 
-
         Button btn = new Button("Add Transaction");
         btn.addClickListener(e -> new AddTransactionDialog(service).open());
         add(btn);
+
+        Button scrollDown = new Button("Scroll down", e -> scrollBy(this, 0, -100));
+        Button scrollUp = new Button("Scroll up", e -> scrollBy(this, 0, 100));
+        Button scrollHome = new Button("Scroll home", e -> scrollTo(0, 0));
+        add(scrollDown, scrollUp, scrollHome);
     }
+
+    private static RadioButtonGroup<String> getButtonGroup() {
+        RadioButtonGroup<String> radioButtonGroup = new RadioButtonGroup<>();
+        radioButtonGroup.addClassName("multi-button");
+        radioButtonGroup.setItems("None", "Token", "USD", "Percentage");
+        radioButtonGroup.setRenderer(new ComponentRenderer<>(item -> switch (item) {
+            case "Token" -> new Button(item, LumoIcon.CHECKMARK.create());
+            case "USD" -> new Button(item, LumoIcon.PLUS.create());
+            case "Percentage" -> new Button(item, LumoIcon.MINUS.create());
+            default -> new Button(item, LumoIcon.CROSS.create());
+        }));
+        radioButtonGroup.setValue("foo");
+        return radioButtonGroup;
+    }
+
 }
 
 
