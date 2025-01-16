@@ -12,6 +12,7 @@ import com.example.application.views.components.custom.NumericValueParagraph;
 import com.example.application.views.components.custom.dialogs.transactions.AddTransactionDialog;
 import com.example.application.views.components.custom.fields.PricePercentageWrapper;
 import com.example.application.views.components.custom.fields.stats.PortfolioStatsDisplay;
+import com.example.application.views.components.custom.fields.stats.dropdown.DropdownStats;
 import com.example.application.views.layouts.MainLayout;
 import com.example.application.views.pages.crypto.AssetDetailsView;
 import com.vaadin.flow.component.Component;
@@ -172,6 +173,16 @@ public class PortfolioTrackerView extends DefaultPage {
                 "Profit or Loss from all your sold holdings");
         Div unrealizedProfit = new PortfolioStatsDisplay("Unrealized Profit", unrealized,
                 "Potential profit or loss if you were to sell all assets now");
+
+        Div content = new Div(
+                new H3("Unrealized P/L"),
+                new Paragraph("Profit Loss of the assets you currently hold compared to the current price."),
+                new PortfolioStatsDisplay("Realized Profit", realized),
+                new PortfolioStatsDisplay("UnRealized Profit", realized),
+                new PortfolioStatsDisplay("Total Realized Profit", realized)
+        );
+        Div allProfitStats = new DropdownStats("Profit", content);
+
         String ratio = portfolioPerformanceTracker.getPortfolioBuySellRatio();
         String[] ratioParts = ratio.split(":");
         Div buySellRatio = new PortfolioStatsDisplay("Buy/Sell Ratio", ratio,
@@ -184,7 +195,7 @@ public class PortfolioTrackerView extends DefaultPage {
         body.add(
                 totalWorth, totalCost, numberOfAssets,
                 profitStats, realizedProfit, unrealizedProfit,
-                buySellRatio, avgHoldingTime
+                buySellRatio, avgHoldingTime, allProfitStats
         );
         statisticSectionDetails.add(title, body);
 

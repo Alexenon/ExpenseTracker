@@ -2,11 +2,14 @@ package com.example.application.views.pages;
 
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.views.components.custom.dialogs.transactions.AddTransactionDialog;
+import com.example.application.views.components.custom.fields.stats.dropdown.DropdownStats;
 import com.example.application.views.components.utils.HasScroll;
 import com.example.application.views.layouts.MainLayout;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.contextmenu.SubMenu;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -35,6 +38,12 @@ public class HomeView extends Main implements HasScroll {
         Paragraph text = new Paragraph("Welcome to Home page!");
         text.addClassNames(LumoUtility.FontSize.XLARGE);
         add(text);
+
+
+        Div stats = new Div(new H3("Realized Profit"), new Paragraph("This is the realized profit: $234.39"));
+        DropdownStats dropdownStats = new DropdownStats("Realized", stats);
+        add(dropdownStats);
+
 
         add(getButtonGroup());
 

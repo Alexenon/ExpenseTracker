@@ -235,3 +235,20 @@ vaadin-number-field::part(input-field) {
     flex-direction: column;
     align-items: center;
 }
+
+.popup-display-item {
+/*    right: 0px;*/
+/*    max-width: 326px;*/
+}
+
+@keyframes fromTopToBottom_animation {
+    0% {
+        transform: translateY(-1vh);
+        opacity: 0
+    }
+
+    to {
+        transform: translateY(8px);
+        opacity: 1
+    }
+}
