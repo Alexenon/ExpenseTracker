@@ -71,7 +71,7 @@ public class TransactionDetailsDialog extends Dialog {
     }
 
     private Div detailsTransaction() {
-        Asset asset = transaction.getAsset();
+        Asset asset = transaction.getTradedAsset();
         String symbol = asset.getSymbol();
         String formattedPrice = currencyFormatter.format(transaction.getMarketPrice());
         String formattedAmount = amountFormatter.format(transaction.getOrderQuantity(), symbol);
@@ -101,7 +101,7 @@ public class TransactionDetailsDialog extends Dialog {
     }
 
     private Div detailsProfitLoss() {
-        Asset asset = transaction.getAsset();
+        Asset asset = transaction.getTradedAsset();
         double buyPrice = transaction.getMarketPrice();
         double sellPrice = instrumentsFacadeService.getAssetMarketPrice(asset);
         double totalCost = transaction.getOrderTotalCost();

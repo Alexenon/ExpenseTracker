@@ -101,7 +101,7 @@ public class InstrumentsService {
         return transactionService.findBy(wallet, asset);
     }
 
-    public List<CryptoTransaction> getTransactionsBy(Wallet wallet, Asset asset, CryptoTransaction.TransactionType type) {
+    public List<CryptoTransaction> getTransactionsBy(Wallet wallet, Asset asset, CryptoTransaction.Type type) {
         return transactionService.findBy(wallet, asset, type);
     }
 

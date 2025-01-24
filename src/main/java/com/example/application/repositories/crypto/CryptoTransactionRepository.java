@@ -13,8 +13,8 @@ public interface CryptoTransactionRepository extends JpaRepository<CryptoTransac
 
     List<CryptoTransaction> findByWallet(Wallet wallet);
 
-    List<CryptoTransaction> findByWalletAndAsset(Wallet wallet, Asset asset);
+    List<CryptoTransaction> findByWalletAndTradedAsset(Wallet wallet, Asset asset);
 
-    List<CryptoTransaction> findByWalletAndAssetAndType(Wallet wallet, Asset asset, CryptoTransaction.TransactionType type);
+    List<CryptoTransaction> findByWalletAndTradedAssetAndType(Wallet wallet, Asset asset, CryptoTransaction.Type type);
 
 }

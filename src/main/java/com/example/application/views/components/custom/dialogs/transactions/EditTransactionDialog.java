@@ -35,7 +35,7 @@ public class EditTransactionDialog extends Dialog implements HasNotifications {
     private final Binder<CryptoTransaction> binder = new Binder<>(CryptoTransaction.class);
 
     private final AssetComboBox assetSymbolField;
-    private final Select<CryptoTransaction.TransactionType> typeField = new Select<>();
+    private final Select<CryptoTransaction.Type> typeField = new Select<>();
     private final AmountField amountField = new AmountField("Amount");
     private final CurrencyField marketPriceField = new CurrencyField("Price");
     private final CurrencyField totalCostField = new CurrencyField("Total");
@@ -122,11 +122,11 @@ public class EditTransactionDialog extends Dialog implements HasNotifications {
     private void initializeFields() {
         assetSymbolField.addValueChangeListener(l -> marketPriceField.setValue(assetSymbolField.getMarketPrice()));
         typeField.setLabel("Transaction Type");
-        typeField.setItems(CryptoTransaction.TransactionType.values());
+        typeField.setItems(CryptoTransaction.Type.values());
     }
 
     private void initializeFieldsValues() {
-        assetSymbolField.setValue(initialTransaction.getAsset());
+        assetSymbolField.setValue(initialTransaction.getTradedAsset());
         typeField.setValue(initialTransaction.getType());
         amountField.setValue(initialTransaction.getOrderQuantity());
         totalCostField.setValue(initialTransaction.getOrderTotalCost());
@@ -139,7 +139,7 @@ public class EditTransactionDialog extends Dialog implements HasNotifications {
 
         binder.forField(assetSymbolField)
                 .asRequired("Please fill this field")
-                .bind(CryptoTransaction::getAsset, CryptoTransaction::setAsset);
+                .bind(CryptoTransaction::getTradedAsset, CryptoTransaction::setTradedAsset);
 
         binder.forField(typeField)
                 .asRequired("Please fill this field")
@@ -176,11 +176,11 @@ public class EditTransactionDialog extends Dialog implements HasNotifications {
     // TODO: Rename maybe this, and move to the service facade class
     // TODO: Dont forget to restore USD, when the feature will be added
     private void restoreBalanceIfAssetChanged() {
-        System.out.printf("Check %s %s\n", initialTransaction.getAsset().getSymbol(), binder.getBean().getAsset().getSymbol());
+        System.out.printf("Check %s %s\n", initialTransaction.getTradedAsset().getSymbol(), binder.getBean().getTradedAsset().getSymbol());
         double amount = initialTransaction.getOrderQuantity();
         double amountToRestore = initialTransaction.isSellTransaction() ? amount : -amount;
-        System.out.printf("Reverting %f %s\n", amountToRestore, initialTransaction.getAsset().getSymbol());
-        instrumentsFacadeService.fillWalletBalance(initialTransaction.getAsset(), amountToRestore);
+        System.out.printf("Reverting %f %s\n", amountToRestore, initialTransaction.getTradedAsset().getSymbol());
+        instrumentsFacadeService.fillWalletBalance(initialTransaction.getTradedAsset(), amountToRestore);
     }
 
     public void addSaveListener(Consumer<?> listener) {
@@ -207,7 +207,7 @@ public class EditTransactionDialog extends Dialog implements HasNotifications {
     }
 
     private boolean hasAssetChanged() {
-        return !Objects.equals(initialTransaction.getAsset(), binder.getBean().getAsset());
+        return !Objects.equals(initialTransaction.getTradedAsset(), binder.getBean().getTradedAsset());
     }
 
     private void saveTransaction(Consumer<?> listener) {

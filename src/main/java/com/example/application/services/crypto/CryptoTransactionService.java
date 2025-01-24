@@ -29,11 +29,11 @@ public class CryptoTransactionService {
     }
 
     public List<CryptoTransaction> findBy(Wallet wallet, Asset asset) {
-        return transactionRepository.findByWalletAndAsset(wallet, asset);
+        return transactionRepository.findByWalletAndTradedAsset(wallet, asset);
     }
 
-    public List<CryptoTransaction> findBy(Wallet wallet, Asset asset, CryptoTransaction.TransactionType type) {
-        return transactionRepository.findByWalletAndAssetAndType(wallet, asset, type);
+    public List<CryptoTransaction> findBy(Wallet wallet, Asset asset, CryptoTransaction.Type type) {
+        return transactionRepository.findByWalletAndTradedAssetAndType(wallet, asset, type);
     }
 
     public CryptoTransaction saveTransaction(CryptoTransaction transaction) {
@@ -66,7 +66,7 @@ public class CryptoTransactionService {
 
     public WalletBalance findWalletBalanceByTransaction(CryptoTransaction transaction) {
         return walletBalanceRepository
-                .findByWalletAndAsset(transaction.getWallet(), transaction.getAsset())
+                .findByWalletAndAsset(transaction.getWallet(), transaction.getTradedAsset())
                 .orElseThrow(() -> new IllegalStateException("Wallet balance not found"));
     }
 

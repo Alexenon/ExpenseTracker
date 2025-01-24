@@ -36,7 +36,7 @@ public class AddTransactionDialog extends Dialog implements HasNotifications {
     private final Binder<CryptoTransaction> binder = new Binder<>(CryptoTransaction.class);
 
     private final AssetComboBox assetSymbolField;
-    private final Select<CryptoTransaction.TransactionType> typeField = new Select<>();
+    private final Select<CryptoTransaction.Type> typeField = new Select<>();
     private final AmountField amountField = new AmountField("Amount");
     private final CurrencyField marketPriceField = new CurrencyField("Price");
     private final CurrencyField totalCostField = new CurrencyField("Total");
@@ -128,11 +128,11 @@ public class AddTransactionDialog extends Dialog implements HasNotifications {
         assetSymbolField.addValueChangeListener(l -> marketPriceField.setValue(assetSymbolField.getMarketPrice()));
 
         typeField.setLabel("Transaction Type");
-        typeField.setItems(CryptoTransaction.TransactionType.values());
+        typeField.setItems(CryptoTransaction.Type.values());
 
         // Initialize with values
         assetSymbolField.setValue(null);
-        typeField.setValue(CryptoTransaction.TransactionType.BUY);
+        typeField.setValue(CryptoTransaction.Type.BUY);
         amountField.setValue("");
         marketPriceField.setValue(assetSymbolField.getMarketPrice());
         totalCostField.setValue(0);
@@ -144,7 +144,7 @@ public class AddTransactionDialog extends Dialog implements HasNotifications {
 
         binder.forField(assetSymbolField)
                 .asRequired("Please fill this field")
-                .bind(CryptoTransaction::getAsset, CryptoTransaction::setAsset);
+                .bind(CryptoTransaction::getTradedAsset, CryptoTransaction::setTradedAsset);
 
         binder.forField(typeField)
                 .asRequired("Please fill this field")

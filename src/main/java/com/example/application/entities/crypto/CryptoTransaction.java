@@ -11,7 +11,7 @@ import java.util.Objects;
 /*
 * TODO:
 *   - Add SpotPairs - BTC/USDT, BTC/USDC, ...
-*   - TRANSFER - Add asset amount from external sources
+*   - TRANSFER / DEPOSIT - Add asset amount from external sources
     - CONVERT  - Switch from one asset to another
 * */
 
@@ -29,8 +29,12 @@ public class CryptoTransaction {
     private Wallet wallet;
 
     @ManyToOne
-    @JoinColumn(name = "asset_id", nullable = false)
-    private Asset asset;
+    @JoinColumn(name = "traded_asset_id", nullable = false)
+    private Asset tradedAsset;
+
+    @ManyToOne
+    @JoinColumn(name = "payment_asset_id", nullable = false)
+    private Asset paymentAsset;
 
     @Column(name = "market_price", nullable = false)
     @DecimalMin(value = "0.0", inclusive = false, message = "Market price must be greater than 0")
@@ -46,7 +50,7 @@ public class CryptoTransaction {
 
     @Column(name = "type", nullable = false)
     @Enumerated(EnumType.STRING)
-    private TransactionType type;
+    private Type type;
 
     @Column(name = "notes", length = 250)
     private String notes;
@@ -54,13 +58,13 @@ public class CryptoTransaction {
     @Column(nullable = false)
     private LocalDate date;
 
-    public CryptoTransaction(Asset asset, double marketPrice, double orderTotalCost, TransactionType type) {
-        this(asset, marketPrice, orderTotalCost, type, null, LocalDate.now());
+    public CryptoTransaction(Asset tradedAsset, double marketPrice, double orderTotalCost, Type type) {
+        this(tradedAsset, marketPrice, orderTotalCost, type, null, LocalDate.now());
     }
 
-    public CryptoTransaction(Asset asset, double marketPrice, double orderTotalCost,
-                             TransactionType type, String notes, LocalDate date) {
-        this.asset = asset;
+    public CryptoTransaction(Asset tradedAsset, double marketPrice, double orderTotalCost,
+                             Type type, String notes, LocalDate date) {
+        this.tradedAsset = tradedAsset;
         this.marketPrice = marketPrice;
         this.orderTotalCost = orderTotalCost;
         this.orderQuantity = orderTotalCost / marketPrice;
@@ -72,7 +76,8 @@ public class CryptoTransaction {
     public CryptoTransaction(CryptoTransaction transaction) {
         this.id = transaction.id;
         this.wallet = transaction.wallet;
-        this.asset = transaction.asset;
+        this.tradedAsset = transaction.tradedAsset;
+        this.paymentAsset = transaction.paymentAsset;
         this.marketPrice = transaction.marketPrice;
         this.orderTotalCost = transaction.orderTotalCost;
         this.orderQuantity = transaction.orderQuantity;
@@ -82,14 +87,14 @@ public class CryptoTransaction {
     }
 
     public boolean isBuyTransaction() {
-        return this.type == TransactionType.BUY;
+        return this.type == Type.BUY;
     }
 
     public boolean isSellTransaction() {
-        return this.type == TransactionType.SELL;
+        return this.type == Type.SELL;
     }
 
-    public enum TransactionType {
+    public enum Type {
         BUY,
         SELL
     }
@@ -98,7 +103,7 @@ public class CryptoTransaction {
     public String toString() {
         return "CryptoTransaction{" +
                "id=" + id +
-               ", asset=" + asset +
+               ", asset=" + tradedAsset +
                ", marketPrice=" + marketPrice +
                ", orderTotalCost=" + orderTotalCost +
                ", orderQuantity=" + orderQuantity +

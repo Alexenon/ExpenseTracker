@@ -19,7 +19,7 @@ public class TransactionalLayout extends Div {
     private final AmountField amountField = new AmountField("Amount");
     private final CurrencyField marketPriceField = new CurrencyField("Market Price");
     private final CurrencyField totalCostField = new CurrencyField("Total");
-    private final Select<CryptoTransaction.TransactionType> typeField = new Select<>();
+    private final Select<CryptoTransaction.Type> typeField = new Select<>();
 
     public TransactionalLayout(InstrumentsFacadeService instrumentsFacadeService,
                                PortfolioPerformanceTracker portfolioPerformanceTracker) {
@@ -32,13 +32,13 @@ public class TransactionalLayout extends Div {
 
     private void initializeFields() {
         typeField.setLabel("Transaction Type");
-        typeField.setItems(CryptoTransaction.TransactionType.values());
+        typeField.setItems(CryptoTransaction.Type.values());
 
         add(amountField , marketPriceField, totalCostField, typeField);
     }
 
     private void initializeFieldsValues() {
-        typeField.setValue(CryptoTransaction.TransactionType.BUY);
+        typeField.setValue(CryptoTransaction.Type.BUY);
     }
 
     private void initializeFieldsListeners() {
@@ -81,12 +81,12 @@ public class TransactionalLayout extends Div {
         if(instrumentsFacadeService.getTransactionsByAsset(asset).isEmpty())
             return instrumentsFacadeService.getAssetMarketPrice(asset);
 
-        return typeField.getValue().equals(CryptoTransaction.TransactionType.BUY)
+        return typeField.getValue().equals(CryptoTransaction.Type.BUY)
                 ? portfolioPerformanceTracker.getAverageBuyPrice(asset)
                 : portfolioPerformanceTracker.getAverageSellPrice(asset);
     }
 
-    public Select<CryptoTransaction.TransactionType> getTypeField() {
+    public Select<CryptoTransaction.Type> getTypeField() {
         return typeField;
     }
 

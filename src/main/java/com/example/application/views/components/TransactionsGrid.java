@@ -43,7 +43,7 @@ public class TransactionsGrid extends Div {
     private final InstrumentsFacadeService instrumentsFacadeService;
 
     private final AssetComboBox nameSearchField;
-    private final MultiSelectComboBox<CryptoTransaction.TransactionType> typeSearchField = new MultiSelectComboBox<>("Transaction Type");
+    private final MultiSelectComboBox<CryptoTransaction.Type> typeSearchField = new MultiSelectComboBox<>("Transaction Type");
     private final Grid<CryptoTransaction> grid = new Grid<>();
     private final GridListDataView<CryptoTransaction> gridDataView = grid.setItems();
 
@@ -65,7 +65,7 @@ public class TransactionsGrid extends Div {
     }
 
     private void initializeGridColumns() {
-        grid.addColumn(t -> t.getAsset().getSymbol()).setHeader("Name").setFrozen(true);
+        grid.addColumn(t -> t.getTradedAsset().getSymbol()).setHeader("Name").setFrozen(true);
         grid.addColumn(quantityColumnRenderer()).setHeader("Quantity");
         grid.addColumn(priceColumnRenderer()).setHeader("Price");
         grid.addColumn(priceColumnRenderer(CryptoTransaction::getOrderTotalCost)).setHeader("Total");
@@ -84,17 +84,17 @@ public class TransactionsGrid extends Div {
         nameSearchField.setAllowCustomValue(false);
         nameSearchField.addValueChangeListener(e -> applyFilter());
 
-        typeSearchField.setItems(CryptoTransaction.TransactionType.values());
+        typeSearchField.setItems(CryptoTransaction.Type.values());
         typeSearchField.setClearButtonVisible(true);
         typeSearchField.addValueChangeListener(e -> applyFilter());
     }
 
     private void applyFilter() {
         Asset selectedAsset = nameSearchField.getValue();
-        Set<CryptoTransaction.TransactionType> selectedTypes = typeSearchField.getSelectedItems();
+        Set<CryptoTransaction.Type> selectedTypes = typeSearchField.getSelectedItems();
 
         gridDataView.setFilter(transaction -> {
-            boolean nameFilter = selectedAsset == null || transaction.getAsset().equals(selectedAsset);
+            boolean nameFilter = selectedAsset == null || transaction.getTradedAsset().equals(selectedAsset);
             boolean typeFilter = selectedTypes.isEmpty() || selectedTypes.contains(transaction.getType());
 
             return nameFilter && typeFilter;
@@ -123,7 +123,7 @@ public class TransactionsGrid extends Div {
                     String sign = t.isBuyTransaction() ? "+" : "-";
                     return String.format("%s %s", sign, amountFormatter.format(quantity));
                 })
-                .withProperty("symbol", t -> t.getAsset().getSymbol());
+                .withProperty("symbol", t -> t.getTradedAsset().getSymbol());
     }
 
     private LitRenderer<CryptoTransaction> profitLossColumnRenderer() {
@@ -133,12 +133,12 @@ public class TransactionsGrid extends Div {
                                                  "</div>")
                 .withProperty("className", this::getProfitLossClassName)
                 .withProperty("profit", transaction -> {
-                    double currentPrice = instrumentsFacadeService.getAssetMarketPrice(transaction.getAsset());
+                    double currentPrice = instrumentsFacadeService.getAssetMarketPrice(transaction.getTradedAsset());
                     double profit = ProfitUtils.netProfit(transaction, currentPrice);
                     return CurrencyFormatter.withDefaults().format(profit);
                 })
                 .withProperty("profitPercentage", transaction -> {
-                    double currentPrice = instrumentsFacadeService.getAssetMarketPrice(transaction.getAsset());
+                    double currentPrice = instrumentsFacadeService.getAssetMarketPrice(transaction.getTradedAsset());
                     double percentage = ProfitUtils.growthPercentage(transaction.getMarketPrice(), currentPrice);
                     return PercentageFormatter.withDefaults().format(percentage);
                 });
@@ -149,7 +149,7 @@ public class TransactionsGrid extends Div {
     }
 
     private String getProfitLossClassName(CryptoTransaction transaction) {
-        double currentPrice = instrumentsFacadeService.getAssetMarketPrice(transaction.getAsset());
+        double currentPrice = instrumentsFacadeService.getAssetMarketPrice(transaction.getTradedAsset());
         double profit = ProfitUtils.netProfit(transaction, currentPrice);
 
         if (profit == 0)

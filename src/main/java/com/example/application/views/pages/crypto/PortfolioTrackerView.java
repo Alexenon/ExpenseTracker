@@ -212,7 +212,7 @@ public class PortfolioTrackerView extends DefaultPage {
         // The Assets that are most traded, by NUMBER of trades
         Map<Asset, Long> assetsNrTransactions = instrumentsFacadeService.getAllTransactions()
                 .stream()
-                .collect(Collectors.groupingBy(CryptoTransaction::getAsset, Collectors.counting()));
+                .collect(Collectors.groupingBy(CryptoTransaction::getTradedAsset, Collectors.counting()));
 
         Asset mostTradedAsset = Collections.max(assetsNrTransactions.entrySet(), Map.Entry.comparingByValue()).getKey();
         Asset leastTradedAsset = Collections.min(assetsNrTransactions.entrySet(), Map.Entry.comparingByValue()).getKey();

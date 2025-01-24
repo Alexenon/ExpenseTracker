@@ -213,7 +213,7 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
                     Asset selectedAsset = assetSymbolField.getSelectedAsset();
                     double marketPrice = layout.getMarketPriceField().doubleValue();
                     double orderTotalCost = layout.getTotalCostField().doubleValue();
-                    CryptoTransaction.TransactionType type = layout.getTypeField().getValue();
+                    CryptoTransaction.Type type = layout.getTypeField().getValue();
 
                     return new CryptoTransaction(selectedAsset, marketPrice, orderTotalCost, type);
                 }).toList();
