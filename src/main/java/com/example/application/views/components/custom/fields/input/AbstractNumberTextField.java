@@ -1,5 +1,6 @@
-package com.example.application.views.components.custom.fields;
+package com.example.application.views.components.custom.fields.input;
 
+import com.vaadin.flow.component.shared.HasSuffix;
 import com.vaadin.flow.component.textfield.TextField;
 import org.vaadin.textfieldformatter.NumeralFieldFormatter;
 
@@ -7,7 +8,14 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Locale;
 
-public abstract class AbstractNumberTextField extends TextField {
+/*
+    FIXME:
+        - Refactor all this, don't override the numberFormat -> Looks weird
+        - Use DecimalFormatter directly instead of numberFormat
+        - Add max allowed digits -> Try 111111111111 then 22222222222, .....
+        - Is it required NumeralFieldFormatter ? Its working without it perfectly, but requires binder validation trigger
+ * */
+public abstract class AbstractNumberTextField extends TextField implements HasSuffix {
 
     protected NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.US);
     protected NumeralFieldFormatter formatter;

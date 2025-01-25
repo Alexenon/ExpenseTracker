@@ -15,6 +15,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /*
     TODO: Rename
@@ -88,6 +89,10 @@ public class InstrumentsFacadeService {
                 .map(CryptoTransaction::getAsset)
                 .distinct()
                 .toList();
+    }
+
+    public List<Asset> getPaymentAssets() {
+        return Stream.of("USD", "USDT", "USDC", "DAI").map(this::getAssetBySymbol).toList();
     }
 
     //</editor-fold>

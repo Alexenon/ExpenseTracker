@@ -20,7 +20,7 @@ import com.example.application.utils.common.number.PercentageFormatter;
 import com.example.application.utils.investment.ProfitUtils;
 import com.example.application.views.components.core.Container;
 import com.example.application.views.components.custom.dialogs.transactions.TransactionDetailsDialog;
-import com.example.application.views.components.custom.fields.AssetComboBox;
+import com.example.application.views.components.custom.fields.input.AssetComboBox;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.dataview.GridListDataView;

@@ -4,9 +4,10 @@ import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.CryptoTransaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.views.components.core.Container;
-import com.example.application.views.components.custom.fields.AmountField;
-import com.example.application.views.components.custom.fields.AssetComboBox;
-import com.example.application.views.components.custom.fields.CurrencyField;
+import com.example.application.views.components.custom.fields.input.AmountField;
+import com.example.application.views.components.custom.fields.input.AssetComboBox;
+import com.example.application.views.components.custom.fields.input.CurrencyField;
+import com.example.application.views.components.custom.fields.input.PriceField;
 import com.example.application.views.components.utils.HasNotifications;
 import com.example.application.views.components.utils.convertors.FlexibleAmountConvertor;
 import com.example.application.views.components.utils.convertors.FlexiblePriceConvertor;
@@ -26,9 +27,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.time.LocalDate;
 import java.util.function.Consumer;
 
-// TODO:
-//  - boolean subtractFromGivenAsset
-//  - Add slider for percentage buy/transfer
+/*
+    TODO:
+        [!] subtract from asset on BUYING/SELLING -> checkbox
+        [!] automatic add USDT or any other currency on SELLING (on coinstats this is not supported)
+        [?] Add slider for percentage buy/transfer
+* */
 public class AddTransactionDialog extends Dialog implements HasNotifications {
 
     private final CryptoTransaction transaction;
@@ -38,7 +42,7 @@ public class AddTransactionDialog extends Dialog implements HasNotifications {
     private final AssetComboBox assetSymbolField;
     private final Select<CryptoTransaction.Type> typeField = new Select<>();
     private final AmountField amountField = new AmountField("Amount");
-    private final CurrencyField marketPriceField = new CurrencyField("Price");
+    private final PriceField marketPriceField = new PriceField("Price");
     private final CurrencyField totalCostField = new CurrencyField("Total");
     private final DatePicker datePicker = new DatePicker("Date");
     private final TextArea notesField = new TextArea("Notes");
@@ -129,6 +133,7 @@ public class AddTransactionDialog extends Dialog implements HasNotifications {
 
         typeField.setLabel("Transaction Type");
         typeField.setItems(CryptoTransaction.Type.values());
+        marketPriceField.setPaymentItems(instrumentsFacadeService.getPaymentAssets());
 
         // Initialize with values
         assetSymbolField.setValue(null);
@@ -145,6 +150,10 @@ public class AddTransactionDialog extends Dialog implements HasNotifications {
         binder.forField(assetSymbolField)
                 .asRequired("Please fill this field")
                 .bind(CryptoTransaction::getTradedAsset, CryptoTransaction::setTradedAsset);
+
+        binder.forField(marketPriceField.getPaymentSelector())
+                .asRequired("Please fill this field")
+                .bind(CryptoTransaction::getPaymentAsset, CryptoTransaction::setPaymentAsset);
 
         binder.forField(typeField)
                 .asRequired("Please fill this field")

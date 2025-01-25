@@ -32,14 +32,8 @@ public enum Symbols {
     ETH("Ethereum"),
     SOL("Solana"),
 
-    // FIAT
-    USD("USD"),
-    EUR("EURO"),
-    CAD("CANADIAN DOLLAR"),
-    GBP("BRITISH POUND"),
-    RUB("RUSSIAN RUBLE"),
-
     // STABLECOINS
+    USD("USD"),
     USDT("Tether"),
     USDC("USD Coin"),
     DAI("Dai");

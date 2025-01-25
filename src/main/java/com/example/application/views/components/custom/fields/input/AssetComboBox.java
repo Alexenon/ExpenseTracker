@@ -1,4 +1,4 @@
-package com.example.application.views.components.custom.fields;
+package com.example.application.views.components.custom.fields.input;
 
 import com.example.application.entities.crypto.Asset;
 import com.example.application.services.crypto.InstrumentsFacadeService;

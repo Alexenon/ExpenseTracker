@@ -37,9 +37,7 @@ public class CryptoTransactionService {
     }
 
     public CryptoTransaction saveTransaction(CryptoTransaction transaction) {
-        if (transaction.getOrderQuantity() == 0) {
-            transaction.setOrderQuantity(transaction.getOrderTotalCost() / transaction.getMarketPrice());
-        }
+        updateTransactionAmountIfRequired(transaction);
 
         CryptoTransaction savedTransaction = transactionRepository.save(transaction);
         System.out.printf("Saved Transaction -> %s\n", savedTransaction);
@@ -48,6 +46,12 @@ public class CryptoTransactionService {
         processTransaction(walletBalance, savedTransaction);
 
         return savedTransaction;
+    }
+
+    private static void updateTransactionAmountIfRequired(CryptoTransaction transaction) {
+        if (transaction.getOrderQuantity() == 0) {
+            transaction.setOrderQuantity(transaction.getOrderTotalCost() / transaction.getMarketPrice());
+        }
     }
 
     private void processTransaction(WalletBalance walletBalance, CryptoTransaction transaction) {

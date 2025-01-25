@@ -1,8 +1,8 @@
 package com.example.application.views.components.custom.forms.layouts;
 
 import com.example.application.utils.common.MathUtils;
-import com.example.application.views.components.custom.fields.AmountField;
-import com.example.application.views.components.custom.fields.CurrencyField;
+import com.example.application.views.components.custom.fields.input.AmountField;
+import com.example.application.views.components.custom.fields.input.CurrencyField;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import org.springframework.stereotype.Component;

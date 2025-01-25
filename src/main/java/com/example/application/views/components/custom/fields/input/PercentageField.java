@@ -1,4 +1,4 @@
-package com.example.application.views.components.custom.fields;
+package com.example.application.views.components.custom.fields.input;
 
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.textfield.TextField;
