@@ -10,6 +10,7 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 @SpringBootApplication
 public class Application extends SpringBootServletInitializer {
 
+    // https://github.com/ECharts-Java/ECharts-Java
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
     }

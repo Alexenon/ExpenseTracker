@@ -1,0 +1,111 @@
+/*
+    https://codepen.io/hexagoncircle/pen/wvBmvOG
+*/
+:root {
+  --border-size: 0.125rem;
+  --duration: 250ms;
+  --ease: cubic-bezier(0.215, 0.61, 0.355, 1);
+  --font-family: monospace;
+  --color-primary: white;
+  --color-secondary: black;
+  --color-tertiary: dodgerblue;
+  --space: 0.5rem;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.multi-button {
+  display: flex;
+  width: 100%;
+}
+
+.multi-button vaadin-radio-button::part(radio) {
+    display: none;
+}
+
+vaadin-radio-group::part(group-field) {
+    display: flex;
+}
+
+.multi-button vaadin-radio-button {
+  flex-grow: 1;
+  cursor: pointer;
+  position: relative;
+  padding:
+    calc(var(--space) / 1.125)
+    var(--space)
+    var(--space);
+  border: var(--border-size) solid black;
+  color: var(--color-secondary);
+  background-color: var(--color-primary);
+  padding: 0px;
+  transition: flex-grow var(--duration) var(--ease);
+}
+
+.multi-button vaadin-radio-button + vaadin-radio-button {
+  border-left: var(--border-size) solid black;
+  margin-left: calc(var(--border-size) * -1);
+}
+
+.multi-button vaadin-radio-button:hover,
+.multi-button vaadin-radio-button:focus,
+.multi-button vaadin-radio-button[focused],
+.multi-button vaadin-radio-button[checked] {
+  flex-grow: 2;
+  color: white;
+  outline: none;
+  text-shadow: none;
+  background-color: var(--color-secondary);
+}
+
+/*
+    TODO: This have bugs
+        - After [checked] and click everywhere else, text is set to black
+        - After [checked] and click everywhere else, the hover translations brokes
+        - Add -> user-select: none;
+*/
+
+.multi-button vaadin-button {
+    width: 100%;
+    color: var(--color-secondary);
+}
+
+.multi-button vaadin-button:hover,
+.multi-button vaadin-button:focus {
+    color: white;
+    outline: none;
+}
+
+.multi-button vaadin-radio-button:focus,
+.multi-button vaadin-radio-button[focused],
+.multi-button vaadin-radio-button[checked] {
+    outline: var(--border-size) dashed var(--color-primary);
+    outline-offset: calc(var(--border-size) * -3);
+}
+
+/*.multi-button vaadin-radio-button[checked]:focused vaadin-button {
+    color: black;
+}
+
+.multi-button vaadin-radio-button[checked]:not(:hover) vaadin-button {
+    color: black;
+}
+
+.multi-button vaadin-radio-button[checked]:not(:focus) vaadin-button {
+    color: white;
+}*/
+
+.multi-button:hover vaadin-radio-button:focus:not(:hover),
+.multi-button:hover vaadin-radio-button[focused]:not(:hover)
+ {
+  flex-grow: 1;
+  color: black;
+  background-color: white;
+  outline-color: black;
+}
+
+.multi-button vaadin-radio-button[active] {
+  transform: translateY(var(--border-size));
+}

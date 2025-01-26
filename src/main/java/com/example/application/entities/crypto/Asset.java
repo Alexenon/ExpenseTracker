@@ -1,0 +1,51 @@
+package com.example.application.entities.crypto;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity(name = "assets")
+public class Asset {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
+
+    @Column(nullable = false)
+    private String symbol;
+
+    @Column(nullable = false)
+    private String fullName;
+
+    @Column(name = "comment")
+    private String comment;
+
+    @Column(nullable = false)
+    private boolean markedAsFavorite;
+
+    @Column(nullable = false)
+    private LocalDateTime lastTimeUpdated = LocalDateTime.now();
+
+    public Asset(String symbol, String fullName) {
+        this(0, symbol, fullName, "", false, LocalDateTime.now());
+    }
+
+    @Override
+    public String toString() {
+        return "Asset{" +
+                "id=" + id +
+                ", symbol='" + symbol + '\'' +
+                ", fullName='" + fullName + '\'' +
+                ", comment='" + comment + '\'' +
+                ", markedAsFavorite=" + markedAsFavorite +
+                ", lastTimeUpdated=" + lastTimeUpdated +
+                '}';
+    }
+}
+

@@ -29,10 +29,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-/*
- * TODO: Integrate userSecurity service directly into the expense service
- * */
-
 @PermitAll
 @PageTitle("Dashboard")
 @Route(value = "dashboard", layout = MainLayout.class)
@@ -55,24 +51,6 @@ public class DashboardView extends Main {
         initialize();
         initializeGrid();
         initializeChart();
-
-
-        List<MonthlyExpensesProjection> all = expenseService.getMonthlyExpensesByUser(LocalDate.now());
-
-
-        all.stream()
-                .collect(Collectors.groupingBy(
-                        MonthlyExpensesProjection::getCategoryName,
-                        Collectors.summingDouble(p -> p.getAmount() * p.getTimesTriggered())
-                )).forEach((category, total) ->
-                        System.out.println("Category: " + category + ", Total Spent: " + total)
-                );
-
-
-        double total = all.stream().mapToDouble(p -> p.getTimesTriggered() * p.getAmount()).sum();
-        System.out.println("Total = " + total);
-
-
     }
 
     private void initialize() {
@@ -81,6 +59,28 @@ public class DashboardView extends Main {
         HorizontalLayout container = new HorizontalLayout(chartPie, grid);
         container.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
         add(container);
+    }
+
+    private void initializeChart() {
+        Map<String, Double> totalMonthlyExpensesGroupedByCategory = expenseService.getMonthlyExpensesByUser(LocalDate.now())
+                .stream()
+                .collect(Collectors.groupingBy(
+                        MonthlyExpensesProjection::getCategoryName,
+                        Collectors.summingDouble(p -> p.getAmount() * p.getTimesTriggered())
+                ));
+
+        JsonArray jsonOptionData = Json.createArray();
+        AtomicInteger index = new AtomicInteger(0);
+        totalMonthlyExpensesGroupedByCategory.forEach((categoryName, totalSum) -> {
+            JsonObject jsonObject = Json.createObject();
+            jsonObject.put("name", categoryName);
+            jsonObject.put("value", totalSum);
+            jsonOptionData.set(index.get(), jsonObject);
+
+            index.addAndGet(1);
+        });
+
+        UI.getCurrent().getPage().executeJs("fillExpensesChart($0);", jsonOptionData.toJson());
     }
 
     private void initializeGrid() {
@@ -156,29 +156,6 @@ public class DashboardView extends Main {
                 .replace("]", "")
                 .replace("\"", "")
                 .split(","));
-    }
-
-    private void initializeChart() {
-        Map<String, Double> totalMonthlyExpensesGroupedByCategory = expenseService.getMonthlyExpensesByUser(LocalDate.now())
-                .stream()
-                .collect(Collectors.groupingBy(
-                        MonthlyExpensesProjection::getCategoryName,
-                        Collectors.summingDouble(p -> p.getAmount() * p.getTimesTriggered())
-                ));
-
-        AtomicInteger index = new AtomicInteger(0);
-        JsonArray jsonOptionData = Json.createArray();
-
-        totalMonthlyExpensesGroupedByCategory.forEach((categoryName, totalSum) -> {
-            JsonObject jsonObject = Json.createObject();
-            jsonObject.put("name", categoryName);
-            jsonObject.put("value", totalSum);
-            jsonOptionData.set(index.get(), jsonObject);
-
-            index.addAndGet(1);
-        });
-
-        UI.getCurrent().getPage().executeJs("fillChartPie($0);", jsonOptionData.toJson());
     }
 
 

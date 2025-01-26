@@ -1,0 +1,85 @@
+/*
+    Transaction Details Modal
+*/
+
+.transaction-details-modal {
+}
+
+.transaction-details-card {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 15px;
+    border-radius: 16px;
+    border: 1px solid var(--o10Color);
+    margin-bottom: 10px;
+}
+
+.transaction-details-card .edit-btn {
+    text-decoration: underline;
+    position: relative;
+    margin-left: 250px;
+    cursor: pointer;
+}
+
+.transaction-profit-loss-badge-label {
+    font-weight: 400;
+    font-size: 15px;
+    line-height: 18px;
+    color: var(--o50Color);
+}
+
+.info-value-item {
+    color: black;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+}
+
+.transaction-profit-loss {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: space-between;
+}
+
+/*
+    Coin name container inside a dropdown
+ */
+
+vaadin-combo-box-item > .coin-overview-name-container {
+}
+
+vaadin-combo-box-item > .coin-overview-name-container > .coin-overview-image {
+    width: 30px;
+    height: 30px;
+}
+
+vaadin-combo-box-item > .coin-overview-name-container > span {
+    color: black;
+    font-size: 16px;
+    font-weight: 450;
+    font-weight: bold;
+    margin-right: 6px;
+}
+
+vaadin-combo-box-item > .coin-overview-name-container > p {
+    color: #7f7f7f;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 26px;
+    max-width: 100px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+/*
+    Transaction Modal
+*/
+.transaction-modal {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 300px;
+}

@@ -1,6 +1,6 @@
 package com.example.application.views.pages.exception_pages;
 
-import com.example.application.views.components.complex_components.ErrorContainer;
+import com.example.application.views.components.custom.ErrorContainer;
 import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.ErrorParameter;
@@ -21,17 +21,15 @@ public abstract class ExceptionView<T extends Exception> extends Main implements
     @Override
     public int setErrorParameter(BeforeEnterEvent event, ErrorParameter<T> parameter) {
         errorContainer.setErrorTitle(errorTitle());
-        errorContainer.setErrorDescription(getErrorMessage(parameter));
+        errorContainer.setErrorDescription(getErrorDescription(parameter));
         errorContainer.setImageSource(imageSource());
         parameter.getException().printStackTrace();
 
         return httpStatus();
     }
 
-    protected String getErrorMessage(ErrorParameter<T> parameter) {
-        return parameter.hasCustomMessage()
-                ? parameter.getCustomMessage()
-                : parameter.getException().getMessage();
+    protected String getErrorDescription(ErrorParameter<T> parameter) {
+        return parameter.getException().toString();
     }
 
     protected abstract int httpStatus();

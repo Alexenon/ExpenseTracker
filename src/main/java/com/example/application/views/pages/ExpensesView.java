@@ -5,8 +5,8 @@ import com.example.application.services.CategoryService;
 import com.example.application.services.ExpenseService;
 import com.example.application.services.SecurityService;
 import com.example.application.utils.ExpenseConvertor;
-import com.example.application.views.components.complex_components.dialogs.AddExpenseDialog;
-import com.example.application.views.components.complex_components.dialogs.EditExpenseDialog;
+import com.example.application.views.components.custom.dialogs.AddExpenseDialog;
+import com.example.application.views.components.custom.dialogs.EditExpenseDialog;
 import com.example.application.views.layouts.MainLayout;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
@@ -72,7 +72,7 @@ public class ExpensesView extends Main {
             logger.info("Clicked on Add button");
             AddExpenseDialog dialog = new AddExpenseDialog(expenseService, categoryService, singleFormatI18n);
             dialog.open();
-            dialog.addClickSaveBtnListener(grid -> updateGrid());
+            dialog.addSaveBtnClickListener(grid -> updateGrid());
         });
 
         final HorizontalLayout toolBar = new HorizontalLayout(filterText, addBtn);
@@ -100,7 +100,7 @@ public class ExpensesView extends Main {
                                 singleFormatI18n
                         );
                         dialog.open();
-                        dialog.addClickSaveBtnListener(grid -> updateGrid());
+                        dialog.addSaveBtnClickListener(grid -> updateGrid());
                     });
                 })
         ).setHeader("Edit");

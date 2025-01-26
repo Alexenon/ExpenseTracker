@@ -2,7 +2,9 @@ package com.example.application.services;
 
 import com.example.application.data.requests.RegisterUserRequest;
 import com.example.application.entities.User;
+import com.example.application.entities.crypto.Wallet;
 import com.example.application.repositories.UserRepository;
+import com.example.application.services.crypto.WalletService;
 import com.example.application.utils.exceptions.UserExistException;
 import jakarta.transaction.Transactional;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -19,19 +21,25 @@ import java.util.Optional;
 public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
+    private final WalletService walletService;
     private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository,
+                       WalletService walletService,
+                       PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.walletService = walletService;
         this.passwordEncoder = passwordEncoder;
     }
 
-    public Optional<User> findByUsernameIgnoreCase(String username) {
-        return userRepository.findByUsernameIgnoreCase(username);
+    public User findByUsername(String username) {
+        return userRepository.findByUsernameIgnoreCase(username)
+                .orElseThrow(() -> new UserExistException("There is already a user with this username"));
     }
 
-    public Optional<User> findByEmailIgnoreCase(String email) {
-        return userRepository.findByEmailIgnoreCase(email);
+    public User findByEmail(String email) {
+        return userRepository.findByEmailIgnoreCase(email)
+                .orElseThrow(() -> new UserExistException("There is already a user with this email"));
     }
 
     public Optional<User> findByUsernameOrEmailIgnoreCase(String usernameOrEmail) {
@@ -70,19 +78,35 @@ public class UserService implements UserDetailsService {
         return createNewUser(user);
     }
 
+    @Transactional
     public User createNewUser(User user) {
-        if (findByUsernameIgnoreCase(user.getUsername()).isPresent()) {
+        if (checkIfUsernameExists(user.getUsername())) {
             throw new UserExistException("There is already a user with this username");
         }
-        if (findByEmailIgnoreCase(user.getEmail()).isPresent()) {
+        if (checkIfEmailExists(user.getEmail())) {
             throw new UserExistException("There is already a user with this email");
         }
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setRoles(Collections.singleton(User.Role.USER_ROLE));
-        user.setEmail(user.getEmail().toLowerCase());
+        user.setEmail(user.getEmail().trim().toLowerCase());
+        User savedUser = userRepository.save(user);
 
-        return userRepository.save(user);
+        // Create and attach a new wallet to this user
+        Wallet wallet = new Wallet();
+        wallet.setUser(savedUser);
+        walletService.saveWallet(wallet);
+
+        return savedUser;
     }
+
+    public boolean checkIfUsernameExists(String username) {
+        return userRepository.findByUsernameIgnoreCase(username).isPresent();
+    }
+
+    public boolean checkIfEmailExists(String email) {
+        return userRepository.findByEmailIgnoreCase(email).isPresent();
+    }
+
 
 }

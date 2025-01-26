@@ -25,7 +25,7 @@ public class NotFoundView extends ExceptionView<NotFoundException> {
     }
 
     @Override
-    protected String getErrorMessage(ErrorParameter<NotFoundException> parameter) {
+    protected String getErrorDescription(ErrorParameter<NotFoundException> parameter) {
         return "Couldn't find the page you were looking for";
     }
 }
