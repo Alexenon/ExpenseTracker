@@ -6,20 +6,20 @@ import com.example.application.entities.Expense;
 import com.example.application.entities.User;
 import com.example.application.services.CategoryService;
 import com.example.application.services.SecurityService;
+import com.example.application.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
-/*
-    FIXME:
-        Throws error for unauthenticated user on API side - FIXING BY NOT ALLOWING UNAUTHENTICATED USERS TO THIS METHOD
-    REFACTOR:
-        Think about API part, allowing to POST for other users too, or just for logged in
- * */
+import java.util.Objects;
 
 @Component
 @RequiredArgsConstructor
 public class ExpenseConvertor {
+
+    @Autowired
+    private final UserService userService;
 
     @Autowired
     private final CategoryService categoryService;
@@ -27,8 +27,19 @@ public class ExpenseConvertor {
     @Autowired
     private final SecurityService securityService;
 
+    /* TODO: REFACTOR THIS
+     *   Throws error for unauthenticated user on API side - FIXING BY NOT ALLOWING UNAUTHENTICATED USERS TO THIS METHOD
+     *   Think about API part, allowing to POST for other users too, or just for logged in
+     * */
+
     public Expense convertToExpense(ExpenseRequest expenseRequest) {
-        return convertToExpense(expenseRequest, securityService.getAuthenticatedUser());
+        String userEmailOrUsername = Objects.requireNonNullElse(expenseRequest.getUserEmailOrUsername(),
+                securityService.getAuthenticatedUser().getUsername());
+
+        User user = userService.findByUsernameOrEmailIgnoreCase(userEmailOrUsername)
+                .orElseThrow(() -> new UsernameNotFoundException("User with such username or email not found!"));
+
+        return convertToExpense(expenseRequest, user);
     }
 
     public Expense convertToExpense(ExpenseRequest expenseRequest, User user) {

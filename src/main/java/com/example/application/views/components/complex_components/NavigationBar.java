@@ -1,6 +1,9 @@
 package com.example.application.views.components.complex_components;
 
-import com.example.application.views.pages.*;
+import com.example.application.views.pages.DashboardView;
+import com.example.application.views.pages.ExpensesView;
+import com.example.application.views.pages.HomeView;
+import com.example.application.views.pages.YearyExpensesView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.html.Div;
@@ -10,18 +13,13 @@ import com.vaadin.flow.router.RouterLink;
 
 import java.util.List;
 
-/*
-    TODO: Add Contact Page
-* */
-
 @Tag(Tag.NAV)
 public class NavigationBar extends Nav {
 
     private final Image logoImage = new Image("/images/logos/logo-white-background.png", "Logo image");
     private final RouterLink expensesLink = new RouterLink("Expenses", ExpensesView.class);
     private final RouterLink dashboardLink = new RouterLink("Dashboard", DashboardView.class);
-    private final RouterLink yearlyLink = new RouterLink("Yearly", YearyExpensesView.class);
-    private final RouterLink assetsLink = new RouterLink("Portfolio", PortfolioTrackerView.class);
+    private final RouterLink contactLink = new RouterLink("Yearly", YearyExpensesView.class);
 
     public NavigationBar() {
         addClassName("navbar");
@@ -43,11 +41,11 @@ public class NavigationBar extends Nav {
     }
 
     public List<Component> getAllRoutes() {
-        return List.of(logoImage, expensesLink, dashboardLink, yearlyLink, assetsLink);
+        return List.of(logoImage, expensesLink, dashboardLink, contactLink);
     }
 
     public List<Component> getTextLinks() {
-        return List.of(expensesLink, dashboardLink, yearlyLink, assetsLink);
+        return List.of(expensesLink, dashboardLink, contactLink);
     }
 
 }

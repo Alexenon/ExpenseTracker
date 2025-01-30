@@ -16,13 +16,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
-/*
-    TODO: Add Facade Service
-        - Fix convertToExpense
-        - Fix updateExpense
-        - Remove old implementations of monthly expenses
-* */
-
 @Service
 public class ExpenseService {
 
@@ -43,12 +36,8 @@ public class ExpenseService {
         return repository.getAll(userEmailOrUsername);
     }
 
-    public List<ExpenseDTO> getAllExpensesByUser(User user) {
-        return getAllExpensesByUser(user.getUsername());
-    }
-
     public List<ExpenseDTO> getAllExpensesByUser() {
-        return getAllExpensesByUser(securityService.getAuthenticatedUser());
+        return getAllExpensesByUser(securityService.getAuthenticatedUser().getUsername());
     }
 
     public Expense saveExpense(Expense expense) {
@@ -115,12 +104,13 @@ public class ExpenseService {
         return repository.findExpensesPerYear(year);
     }
 
+
     /**
      * @param date is converted if it's:
      *             <ul>
      *                  <li>CURRENT MONTH -> remains same
-     *                  <li>PREVIOUS MONTH -> into another date with its last day of month
-     *                  <li>NEXT MONTH -> into another date with its first day of month
+     *                  <li>PREVIOUS MONTH ->  into another date with its last day of month
+     *                  <li>NEXT MONTH ->  into another date with its first day of month
      *              </ul>
      */
     @Transactional
@@ -137,13 +127,8 @@ public class ExpenseService {
     }
 
     @Transactional
-    public List<MonthlyExpensesProjection> getMonthlyExpensesByUser(User user, LocalDate date) {
-        return getMonthlyExpensesByUser(user.getUsername(), date);
-    }
-
-    @Transactional
     public List<MonthlyExpensesProjection> getMonthlyExpensesByUser(LocalDate date) {
-        return getMonthlyExpensesByUser(securityService.getAuthenticatedUser(), date);
+        return getMonthlyExpensesByUser(securityService.getAuthenticatedUser().getUsername(), date);
     }
 
     public Expense convertToExpense(ExpenseRequest expenseRequest) {

@@ -17,6 +17,10 @@
     font-weight: bold;
 }
 
+.tooltip-category::after {
+    content: ":";
+}
+
 .tooltip-percent {
     color: #fff;
     background-color: #4C5058;

@@ -21,15 +21,17 @@ public abstract class ExceptionView<T extends Exception> extends Main implements
     @Override
     public int setErrorParameter(BeforeEnterEvent event, ErrorParameter<T> parameter) {
         errorContainer.setErrorTitle(errorTitle());
-        errorContainer.setErrorDescription(getErrorDescription(parameter));
+        errorContainer.setErrorDescription(getErrorMessage(parameter));
         errorContainer.setImageSource(imageSource());
         parameter.getException().printStackTrace();
 
         return httpStatus();
     }
 
-    protected String getErrorDescription(ErrorParameter<T> parameter) {
-        return parameter.getException().toString();
+    protected String getErrorMessage(ErrorParameter<T> parameter) {
+        return parameter.hasCustomMessage()
+                ? parameter.getCustomMessage()
+                : parameter.getException().getMessage();
     }
 
     protected abstract int httpStatus();
