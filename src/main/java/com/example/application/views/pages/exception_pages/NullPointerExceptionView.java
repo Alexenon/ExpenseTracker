@@ -1,6 +1,5 @@
 package com.example.application.views.pages.exception_pages;
 
-import com.vaadin.flow.router.ErrorParameter;
 import com.vaadin.flow.router.PageTitle;
 import jakarta.annotation.security.PermitAll;
 import jakarta.servlet.http.HttpServletResponse;
@@ -23,9 +22,4 @@ public class NullPointerExceptionView extends ExceptionView<NullPointerException
         return "./images/error-pages/404.png";
     }
 
-    @Override
-    protected String getErrorDescription(ErrorParameter<NullPointerException> parameter) {
-        parameter.getException().printStackTrace();
-        return super.getErrorDescription(parameter);
-    }
 }

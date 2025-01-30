@@ -36,9 +36,4 @@ public class User {
         ADMIN_ROLE,
         SUPER_ADMIN_ROLE
     }
-
-    @Override
-    public String toString() {
-        return "User{username='%s', email='%s', roles=%s, id=%d}".formatted(username, email, roles, id);
-    }
 }

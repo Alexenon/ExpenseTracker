@@ -1,6 +1,6 @@
 package com.example.application.views.components;
 
-import com.example.application.views.components.custom.forms.LoginForm;
+import com.example.application.views.components.complex_components.forms.LoginForm;
 import com.vaadin.flow.component.HtmlComponent;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.html.Div;

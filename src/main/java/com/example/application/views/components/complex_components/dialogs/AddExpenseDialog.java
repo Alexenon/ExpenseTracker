@@ -1,0 +1,185 @@
+package com.example.application.views.components.complex_components.dialogs;
+
+import com.example.application.data.requests.ExpenseRequest;
+import com.example.application.entities.Expense;
+import com.example.application.services.CategoryService;
+import com.example.application.services.ExpenseService;
+import com.example.application.views.components.utils.HasNotifications;
+import com.example.application.views.pages.ExpensesView;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.select.Select;
+import com.vaadin.flow.component.textfield.NumberField;
+import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Binder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Arrays;
+import java.util.function.Consumer;
+
+import static java.time.temporal.ChronoUnit.DAYS;
+
+public class AddExpenseDialog extends Dialog implements HasNotifications {
+
+    private static final Logger logger = LoggerFactory.getLogger(AddExpenseDialog.class);
+
+    private final ExpenseService expenseService;
+    private final CategoryService categoryService;
+    private final DatePicker.DatePickerI18n singleFormatI18n;
+
+    private final TextField nameField = new TextField("Expense Name");
+    private final TextArea descriptionField = new TextArea("Description");
+    private final NumberField amountField = new NumberField("Amount");
+    private final Select<Expense.Timestamp> timestampField = new Select<>();
+    private final ComboBox<String> categoryField = new ComboBox<>("Category");
+    private final DatePicker startDateField = new DatePicker("Start Date");
+    private final DatePicker expireDateField = new DatePicker("Expire Date");
+    private final Button saveButton = new Button("Save");
+    private final Button cancelButton = new Button("Cancel");
+
+    private Binder<ExpenseRequest> binder;
+
+    @Autowired
+    public AddExpenseDialog(ExpenseService expenseService,
+                            CategoryService categoryService,
+                            DatePicker.DatePickerI18n singleFormatI18n) {
+        this.expenseService = expenseService;
+        this.categoryService = categoryService;
+        this.singleFormatI18n = singleFormatI18n;
+
+        setHeaderTitle("Add New Expense");
+        initFields();
+        initBinder();
+        add(createDialogLayout());
+    }
+
+    private VerticalLayout createDialogLayout() {
+        Component[] components = {nameField, descriptionField, amountField, categoryField, timestampField, startDateField, expireDateField};
+        VerticalLayout dialogLayout = new VerticalLayout(components);
+        dialogLayout.setPadding(false);
+        dialogLayout.setSpacing(false);
+        dialogLayout.setAlignItems(FlexComponent.Alignment.STRETCH);
+        dialogLayout.getStyle().set("width", "22rem").set("max-width", "100%");
+        Arrays.stream(components).forEach(e -> e.getStyle().set("margin-bottom", "1rem"));
+
+        return dialogLayout;
+    }
+
+    private void initFields() {
+        timestampField.setLabel("Interval");
+        timestampField.setItems(Expense.Timestamp.values());
+        timestampField.setHelperText("Select how often this expense will be triggered");
+        timestampField.addValueChangeListener(timestamp -> {
+            boolean timestampIsOnce = timestamp.getValue().equals(Expense.Timestamp.ONCE);
+
+            if (timestampIsOnce)
+                expireDateField.setValue(null);
+
+            expireDateField.setVisible(!timestampIsOnce);
+        });
+
+        categoryField.setItems(categoryService.getAllCategoryNames());
+        categoryField.setHelperText("Select the category which fits this expense");
+        amountField.setSuffixComponent(new Span("MDL"));
+
+        startDateField.setI18n(singleFormatI18n);
+        startDateField.setHelperText("Format: YYYY-MM-DD");
+        startDateField.setValue(LocalDate.now(ZoneId.systemDefault()));
+
+        expireDateField.setVisible(false); // Expire date field initial is disabled
+        expireDateField.setI18n(singleFormatI18n);
+        expireDateField.setTooltipText("Select expire date");
+        expireDateField.setPlaceholder("Optional: Choose expire date");
+        expireDateField.setHelperText("Format: YYYY-MM-DD");
+
+        cancelButton.addClickShortcut(Key.ESCAPE);
+        cancelButton.addClickListener(e -> {
+            logger.info("Exited `Add New Expense` form");
+            this.close();
+        });
+
+        saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
+        saveButton.addClickListener(e -> defaultClickSaveBtnListener());
+
+        this.getFooter().add(cancelButton, saveButton);
+    }
+
+    private void initBinder() {
+        binder = new Binder<>(ExpenseRequest.class);
+        binder.setBean(new ExpenseRequest());
+        binder.forField(nameField)
+                .asRequired("Please fill this field")
+                .withValidator(name -> name.length() >= 3, "Name must contain at least 3 characters")
+                .bind(ExpenseRequest::getName, ExpenseRequest::setName);
+
+        binder.forField(amountField)
+                .asRequired("Please fill this field")
+                .withValidator(amount -> amount >= 0, "Amount should be greater or equal to 0")
+                .bind(ExpenseRequest::getAmount, ExpenseRequest::setAmount);
+
+        binder.forField(categoryField)
+                .asRequired("Please fill this field")
+                .bind(ExpenseRequest::getCategoryName, ExpenseRequest::setCategoryName);
+
+        binder.forField(timestampField)
+                .asRequired("Please fill this field")
+                .bind(ExpenseRequest::getTimestamp, ExpenseRequest::setTimestamp);
+
+        binder.forField(startDateField)
+                .asRequired("Please fill this field")
+                .bind(ExpenseRequest::getStartDate, ExpenseRequest::setStartDate);
+
+        binder.forField(expireDateField)
+                .withValidator(expireDate -> expireDate == null || expireDate.isAfter(startDateField.getValue()),
+                        "Expire date should be after start date")
+                .withValidator(expireDate -> !timestampField.getValue().equals(Expense.Timestamp.WEEKLY)
+                                             || DAYS.between(startDateField.getValue(), expireDate) >= 7,
+                        "Should pass at least 7 days to end subscription")
+                .withValidator(expireDate -> !timestampField.getValue().equals(Expense.Timestamp.MONTHLY)
+                                             || DAYS.between(startDateField.getValue(), expireDate) >= 30,
+                        "Should pass at least 1 month to end subscription")
+                .bind(ExpenseRequest::getExpireDate, ExpenseRequest::setExpireDate);
+
+        binder.bind(descriptionField, ExpenseRequest::getDescription, ExpenseRequest::setDescription);
+    }
+
+    private void defaultClickSaveBtnListener() {
+        logger.info("Clicked on Save button inside `Add New Expense` form");
+        if (binder.validate().isOk()) {
+            logger.info("Saved expense using data provided inside `Add New Expense` form");
+            expenseService.saveExpense(getExpenseFromBinder());
+            showSuccessfulNotification("Expense submitted successfully!");
+            this.close();
+        } else {
+            logger.warn("Submitting `Add New Expense` form with validation errors");
+            showErrorNotification("An error occurred while submitting Add New Expense form");
+        }
+    }
+
+    public void addClickSaveBtnListener(Consumer<ExpensesView> listener) {
+        saveButton.addClickListener(e -> listener.accept(null));
+    }
+
+    private Expense getExpenseFromBinder() {
+        return expenseService.convertToExpense(binder.getBean());
+    }
+
+    @Override
+    public void open() {
+        super.open();
+        logger.info("Opened `Add New Expense` form");
+    }
+}

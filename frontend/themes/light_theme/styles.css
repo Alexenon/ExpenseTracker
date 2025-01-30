@@ -1,15 +1,7 @@
-/* TODO: '@import' component doesn't work inside pages css files  */
-
 @import 'styles/component-styles/header.css';
 @import 'styles/component-styles/chart.css';
-@import 'styles/component-styles/multi-button-group.css';
 @import 'styles/page-styles/error-page.css';
 @import 'styles/page-styles/auth-pages.css';
-
-@import 'styles/page-styles/assets-page.css';
-@import 'styles/page-styles/asset-details-page.css';
-@import 'styles/page-styles/calculator-page.css';
-@import 'styles/page-styles/transactions-page.css';
 
 :root {
     --main: #00BFA6;
@@ -17,34 +9,12 @@
     --header-background: rgb(255, 255, 255);
     --color-white: white;
     --color-black: rgb(51, 40, 40);
-    --color-orange: #ff9332;
     --color-gray: rgb(123, 123, 123);
     --table-background: rgb(220, 214, 211);
     --input-border: #d1d1d1;
     --invalid-border: #d93025;
     --invalid: #d93025;
     --show-hide: #919191;
-    --o3Color: #f7f7f7;
-    --o5Color: #f2f2f2;
-    --o10Color: #e5e5e5;
-    --o15Color: #d9d9d9;
-    --o20Color: #cccccc;
-    --o25Color: #bfbfbf;
-    --o30Color: #b2b2b2;
-    --o35Color: #a6a6a6;
-    --o40Color: #999999;
-    --o45Color: #8c8c8c;
-    --o50Color: #7f7f7f;
-    --o55Color: #737373;
-    --o60Color: #666666;
-    --o70Color: #4c4c4c;
-    --o75Color: #404040;
-    --o80Color: #333333;
-    --BlueLightColor: #3b82f6;
-    --GreenLightColor: #34b349;
-    --GreenDarkColor: #6ccf59;
-    --RedLightColor: #f02934;
-    --RedDarkColor: #ff4d4d;
 }
 
 * {
@@ -56,10 +26,6 @@
     text-decoration: none;
     box-sizing: border-box;
     font-family: 'Poppins', sans-serif;
-}
-
-p {
-    margin: 0;
 }
 
 a,
@@ -82,156 +48,8 @@ mono-icon {
     line-height: 0px;
 }
 
-/*img.rounded {
-*//*
-    object-fit: cover;
-    border-radius: 50%;
-*//*
-
-*//*    border-radius: 100%;
-    background: #eee no-repeat center;
-    background-size: cover;*//*
-
-
-    -webkit-border-radius: 50%;
-    -moz-border-radius: 50%;
-    -ms-border-radius: 50%;
-    -o-border-radius: 50%;
-    border-radius: 50%;
-    background-size:cover;
-}*/
-
-vaadin-text-area::part(input-field),
-vaadin-number-field::part(input-field) {
-/*    background: white;
-    padding: 0;*/
-}
-
-vaadin-text-field > [slot="prefix"],
-vaadin-number-field > [slot="prefix"] {
-    margin: 0;
-}
-
-vaadin-button.no-background {
-    background: none;
-}
-
 .page-content {
     height: 100%;
     margin-top: 60px;
     padding: 50px;
-}
-
-/* TODO: Check this */
-.button-radio-group vaadin-radio-button::part(radio) {
-    display: none;
-}
-
-.button-radio-group vaadin-radio-button {
-    margin: 0;
-    padding: 0;
-    border: none;
-    font-size: 20px;
-    /*    border-radius: 5px;
-        border: 1px solid black;*/
-    background: none;
-    transition: all ease 0.3s;
-}
-
-.button-radio-group vaadin-button {
-    background: none;
-    height: 30px;
-    width: auto;
-    border: 0.125rem solid black;
-}
-
-/*
-    Modal Form -> close button [X]
-*/
-vaadin-button.modal-close-btn {
-    color: var(--o40Color);
-    background: none;
-}
-
-vaadin-button.modal-close-btn > vaadin-icon {
-    height: 40px;
-    width: 40px;
-    cursor: pointer;
-}
-
-#table {
-    right: -15px;
-}
-
-#outerscroller {
-    right: -15px;
-}
-
-#scroller {
-    left: -15px;
-    overflow: hidden;
-}
-
-vaadin-grid {
-    overflow: hidden;
-}
-
-vaadin-select::part(input-field),
-vaadin-combo-box::part(input-field),
-vaadin-text-field::part(input-field),
-vaadin-date-picker::part(input-field),
-vaadin-number-field::part(input-field) {
-    height: 2.5rem;
-}
-
-vaadin-select::part(input-field),
-vaadin-text-area::part(input-field),
-vaadin-combo-box::part(input-field),
-vaadin-text-field::part(input-field),
-vaadin-date-picker::part(input-field),
-vaadin-number-field::part(input-field) {
-    width: 100%;
-    border-radius: .75rem;
-    border-width: 1px;
-    border-style: solid;
-    border-color: rgb(209 213 219);
-    background-color: rgb(255 255 255);
-    padding-left: .75rem;
-    padding-right: .75rem;
-    font-size: 1rem;
-    line-height: 1.5rem;
-    font-weight: 500;
-    color: rgb(17 24 39);
-    caret-color: var(--BlueLightColor);
-}
-
-
-
-/*
-    COMMON COMPONENTS
-*/
-
-.add-entity-btn {
-    border: 1px solid var(--o20Color);
-    padding: 6px 16px 6px 12px;
-    border-radius: 12px;
-    background-color: white;
-    font-size: 16px;
-    color: black;
-}
-
-/*
-    COMMON STYLES
-*/
-
-.centered-row {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-}
-
-.centered-col {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
 }
