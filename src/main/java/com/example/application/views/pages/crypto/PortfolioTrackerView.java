@@ -114,6 +114,9 @@ public class PortfolioTrackerView extends DefaultPage {
         });
         section.add(addTransactionBtn);
 
+        Button importBtn = new Button("Import/Export", e -> new ImportDialog().open());
+        section.add(importBtn);
+
         return section;
     }
 
