@@ -2,6 +2,7 @@ package com.example.application.views.components;
 
 import com.example.application.data.enums.Symbols;
 import com.example.application.data.models.NumberType;
+import com.example.application.entities.crypto.Asset;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.views.components.complex_components.PriceBadge;
@@ -381,6 +382,9 @@ public class AssetsGrid extends Div {
     }
 
     private List<AssetGridItem> getConvertedGridItems() {
+
+        List<Asset> assets = instrumentsFacadeService.getAllAssets();
+
         return instrumentsFacadeService.getAllAssets()
                 .stream()
                 .map(asset -> AssetGridItem.builder()

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigInteger;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 /*
     TODO: Rename
@@ -127,43 +128,44 @@ public class InstrumentsFacadeService {
 
     //<editor-fold desc="METADATA">
     public AssetMetadata getAssetMetadata(Asset asset) {
-        return instrumentsProvider.getMetadata().get(asset);
+        return Objects.requireNonNull(instrumentsProvider.getMetadata().get(asset),
+                "Missing metadata for asset " + asset.getSymbol());
     }
 
     public String getAssetFullName(Asset asset) {
-        return instrumentsProvider.getMetadata().get(asset).getName();
+        return getAssetMetadata(asset).getName();
     }
 
     public double getAssetPrice(Asset asset) {
-        return instrumentsProvider.getMetadata().get(asset).getPriceUsd();
+        return getAssetMetadata(asset).getPriceUsd();
     }
 
     public String getAssetDescriptionSummary(Asset asset) {
-        return instrumentsProvider.getMetadata().get(asset).getAssetDescriptionSummary();
+        return getAssetMetadata(asset).getAssetDescriptionSummary();
     }
 
     public double getAssetTotalMarketCap(Asset asset) {
-        return instrumentsProvider.getMetadata().get(asset).getTotalMktCapUsd();
+        return getAssetMetadata(asset).getTotalMktCapUsd();
     }
 
     public BigInteger getAssetSupplyTotal(Asset asset) {
-        return instrumentsProvider.getMetadata().get(asset).getSupplyTotal();
+        return getAssetMetadata(asset).getSupplyTotal();
     }
 
     public BigInteger getAssetSupplyCirculating(Asset asset) {
-        return instrumentsProvider.getMetadata().get(asset).getSupplyCirculating();
+        return getAssetMetadata(asset).getSupplyCirculating();
     }
 
     public double getAsset24HourChangePercentage(Asset asset) {
-        return instrumentsProvider.getMetadata().get(asset).getSpotMoving24HourChangePercentageUsd();
+        return getAssetMetadata(asset).getSpotMoving24HourChangePercentageUsd();
     }
 
     public double getAsset24HourVolume(Asset asset) {
-        return instrumentsProvider.getMetadata().get(asset).getSpotMoving24HourQuoteVolumeUsd();
+        return getAssetMetadata(asset).getSpotMoving24HourQuoteVolumeUsd();
     }
 
     public String getAssetImgUrl(Asset asset) {
-        return instrumentsProvider.getMetadata().get(asset).getLogoUrl();
+        return getAssetMetadata(asset).getLogoUrl();
     }
 
     public void updateAssetMetadata() {

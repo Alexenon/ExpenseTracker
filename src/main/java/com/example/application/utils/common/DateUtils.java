@@ -1,4 +1,4 @@
-package com.example.application.utils;
+package com.example.application.utils.common;
 
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;

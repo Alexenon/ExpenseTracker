@@ -21,10 +21,7 @@ import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -52,9 +49,7 @@ public class DashboardView extends Main {
         initializeGrid();
         initializeChart();
 
-
         List<MonthlyExpensesProjection> all = expenseService.getMonthlyExpensesByUser(LocalDate.now());
-
 
         all.stream()
                 .collect(Collectors.groupingBy(
@@ -64,11 +59,8 @@ public class DashboardView extends Main {
                         System.out.println("Category: " + category + ", Total Spent: " + total)
                 );
 
-
         double total = all.stream().mapToDouble(p -> p.getTimesTriggered() * p.getAmount()).sum();
         System.out.println("Total = " + total);
-
-
     }
 
     private void initialize() {
@@ -145,7 +137,7 @@ public class DashboardView extends Main {
 
     private List<String> getLegendHiddenCategories(String legendHiddenStr) {
         if (legendHiddenStr == null || legendHiddenStr.isEmpty()) {
-            return List.of();
+            return Collections.emptyList();
         }
 
         return Arrays.asList(legendHiddenStr.replace("[", "")
@@ -155,16 +147,15 @@ public class DashboardView extends Main {
     }
 
     private void initializeChart() {
-        Map<String, Double> totalMonthlyExpensesGroupedByCategory = expenseService.getMonthlyExpensesByUser(LocalDate.now())
+        Map<String, Double> totalMonthlyExpensesGroupedByCategory = expenseService.getMonthlyExpensesByUser()
                 .stream()
                 .collect(Collectors.groupingBy(
                         MonthlyExpensesProjection::getCategoryName,
                         Collectors.summingDouble(p -> p.getAmount() * p.getTimesTriggered())
                 ));
 
-        AtomicInteger index = new AtomicInteger(0);
         JsonArray jsonOptionData = Json.createArray();
-
+        AtomicInteger index = new AtomicInteger(0);
         totalMonthlyExpensesGroupedByCategory.forEach((categoryName, totalSum) -> {
             JsonObject jsonObject = Json.createObject();
             jsonObject.put("name", categoryName);
