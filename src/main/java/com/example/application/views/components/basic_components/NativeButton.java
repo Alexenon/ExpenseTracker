@@ -1,4 +1,4 @@
-package com.example.application.views.components.native_components;
+package com.example.application.views.components.basic_components;
 
 import com.vaadin.flow.component.*;
 
