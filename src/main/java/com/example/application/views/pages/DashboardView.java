@@ -9,7 +9,6 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.router.PageTitle;
@@ -34,7 +33,7 @@ import java.util.stream.Collectors;
 @Route(value = "dashboard", layout = MainLayout.class)
 @JsModule("./themes/light_theme/components/javascript/fillPieChart.js")
 @JavaScript("https://fastly.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js")
-public class DashboardView extends Main {
+public class DashboardView extends AbstractPage {
 
     private final ExpenseService expenseService;
 

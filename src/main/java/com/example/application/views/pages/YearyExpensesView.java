@@ -5,7 +5,6 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.router.PageTitle;
@@ -17,7 +16,7 @@ import jakarta.annotation.security.PermitAll;
 @Route(value = "yearly", layout = MainLayout.class)
 @JsModule("./themes/light_theme/components/javascript/expensesAllTime.js")
 @JavaScript("https://fastly.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js")
-public class YearyExpensesView extends Main {
+public class YearyExpensesView extends AbstractPage {
 
     YearyExpensesView() {
         addClassName("page-content");

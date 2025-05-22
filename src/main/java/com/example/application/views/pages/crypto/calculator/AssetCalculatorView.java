@@ -3,10 +3,10 @@ package com.example.application.views.pages.crypto.calculator;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.views.layouts.MainLayout;
+import com.example.application.views.pages.AbstractPage;
 import com.example.application.views.pages.crypto.calculator.tabs.ProfitEmulatorTab;
 import com.example.application.views.pages.crypto.calculator.tabs.SellProfitTab;
 import com.example.application.views.pages.crypto.calculator.tabs.StakingProfitTab;
-import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.TabSheet;
 import com.vaadin.flow.router.PageTitle;
@@ -17,7 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @PermitAll
 @PageTitle("Calculator")
 @Route(value = "details", layout = MainLayout.class)
-public class AssetCalculatorView extends Main {
+public class AssetCalculatorView extends AbstractPage {
 
     private final InstrumentsFacadeService instrumentsFacadeService;
     private final PortfolioPerformanceTracker portfolioPerformanceTracker;

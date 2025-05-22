@@ -3,7 +3,7 @@ package com.example.application.views.pages.crypto;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.views.components.TransactionsGrid;
 import com.example.application.views.layouts.MainLayout;
-import com.vaadin.flow.component.html.Main;
+import com.example.application.views.pages.AbstractPage;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @PermitAll
 @PageTitle("Transactions")
 @Route(value = "transactions", layout = MainLayout.class)
-public class TransactionsView extends Main {
+public class TransactionsView extends AbstractPage {
 
     private final InstrumentsFacadeService instrumentsFacadeService;
 

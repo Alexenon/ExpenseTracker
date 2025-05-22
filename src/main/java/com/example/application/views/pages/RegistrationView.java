@@ -20,7 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @PageTitle("Registration")
 @Route(value = "register")
 @CssImport("./themes/light_theme/styles/page-styles/auth-pages.css")
-public class RegistrationView extends Main implements HasNotifications {
+public class RegistrationView extends AbstractPage implements HasNotifications {
 
     private static final Logger logger = LoggerFactory.getLogger(RegistrationView.class);
 

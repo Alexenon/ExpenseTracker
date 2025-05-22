@@ -1,14 +1,18 @@
 package com.example.application.views.pages.exception_pages;
 
 import com.example.application.views.components.custom.ErrorContainer;
-import com.vaadin.flow.component.html.Main;
+import com.example.application.views.pages.AbstractPage;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.ErrorParameter;
 import com.vaadin.flow.router.HasErrorParameter;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @AnonymousAllowed
-public abstract class ExceptionView<T extends Exception> extends Main implements HasErrorParameter<T> {
+public abstract class ExceptionView<T extends Exception> extends AbstractPage implements HasErrorParameter<T> {
+
+    private static final Logger log = LoggerFactory.getLogger(ExceptionView.class);
 
     protected final ErrorContainer errorContainer;
 
@@ -23,7 +27,8 @@ public abstract class ExceptionView<T extends Exception> extends Main implements
         errorContainer.setErrorTitle(errorTitle());
         errorContainer.setErrorDescription(getErrorDescription(parameter));
         errorContainer.setImageSource(imageSource());
-        parameter.getException().printStackTrace();
+        log.error("Encountered client error: ");
+        log.error(parameter.getException().toString());
 
         return httpStatus();
     }
