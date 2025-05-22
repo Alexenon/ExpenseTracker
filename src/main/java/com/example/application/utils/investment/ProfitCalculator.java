@@ -14,11 +14,11 @@ import static com.example.application.utils.investment.ProfitUtils.ONE_HUNDRED_P
  * */
 public class ProfitCalculator {
 
-    static class Batch {
+    private static class Order {
         double quantity;
         double cost;
 
-        Batch(double quantity, double cost) {
+        Order(double quantity, double cost) {
             this.quantity = quantity;
             this.cost = cost;
         }
@@ -75,13 +75,13 @@ public class ProfitCalculator {
      * is substracted confirming with transaction order cost
      * */
     public static double getRemainingTokensCost(List<CryptoTransaction> transactions) {
-        Queue<Batch> fifoQueue = new LinkedList<>();
+        Queue<Order> fifoQueue = new LinkedList<>();
         double remainingCost = 0.0;
 
         for (CryptoTransaction transaction : transactions) {
             if (transaction.isBuyTransaction()) {
-                Batch newBatch = new Batch(transaction.getOrderQuantity(), transaction.getOrderTotalCost());
-                fifoQueue.offer(newBatch);
+                Order newOrder = new Order(transaction.getOrderQuantity(), transaction.getOrderTotalCost());
+                fifoQueue.offer(newOrder);
                 remainingCost += transaction.getOrderTotalCost();
             } else {
                 double sellQuantity = transaction.getOrderQuantity();
@@ -92,16 +92,16 @@ public class ProfitCalculator {
                         throw new IllegalArgumentException("Selling more than owned");
                     }
 
-                    Batch oldestBatch = fifoQueue.peek();
-                    if (sellQuantity >= oldestBatch.quantity) {
-                        sellCost += oldestBatch.cost;
-                        sellQuantity -= oldestBatch.quantity;
-                        fifoQueue.poll(); // Remove the batch from the queue
+                    Order oldestOrder = fifoQueue.peek();
+                    if (sellQuantity >= oldestOrder.quantity) {
+                        sellCost += oldestOrder.cost;
+                        sellQuantity -= oldestOrder.quantity;
+                        fifoQueue.poll(); // Remove the order from the queue
                     } else {
-                        double proportion = sellQuantity / oldestBatch.quantity;
-                        sellCost += proportion * oldestBatch.cost;
-                        oldestBatch.cost -= proportion * oldestBatch.cost;
-                        oldestBatch.quantity -= sellQuantity;
+                        double proportion = sellQuantity / oldestOrder.quantity;
+                        sellCost += proportion * oldestOrder.cost;
+                        oldestOrder.cost -= proportion * oldestOrder.cost;
+                        oldestOrder.quantity -= sellQuantity;
                         sellQuantity = 0;
                     }
                 }

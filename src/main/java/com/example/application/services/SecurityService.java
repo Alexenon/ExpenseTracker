@@ -7,6 +7,8 @@ import com.vaadin.flow.server.VaadinServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationServiceException;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -30,18 +32,20 @@ public class SecurityService {
 
     public Optional<UserDetails> getAuthenticatedUserDetails() {
         SecurityContext context = SecurityContextHolder.getContext();
-        Object principal = context.getAuthentication().getPrincipal();
+        Authentication authentication = context.getAuthentication();
 
-        if (principal instanceof UserDetails) {
-            return Optional.of((UserDetails) context.getAuthentication().getPrincipal());
-        }
+        // TODO: Add a separate error page, that should redirect to login page / home page
+        if (authentication == null)
+            throw new AuthenticationServiceException("Coudn't manage to receive authentication. Please re-login");
 
-        return Optional.empty();
+        return authentication.getPrincipal() instanceof UserDetails userDetails
+                ? Optional.of(userDetails)
+                : Optional.empty();
     }
 
     public User getAuthenticatedUser() {
         String username = getAuthenticatedUserDetails()
-                .orElseThrow(() -> new UnauthenticatedUserException("User is not authenticated. " +
+                .orElseThrow(() -> new UnauthenticatedUserException("Current user is not authenticated. " +
                                                                     "Please log in to access this resource."))
                 .getUsername();
 

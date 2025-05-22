@@ -15,6 +15,7 @@ import com.example.application.views.components.TransactionsGrid;
 import com.example.application.views.components.core.Container;
 import com.example.application.views.components.custom.NumericValueParagraph;
 import com.example.application.views.components.custom.dialogs.transactions.AddTransactionDialog;
+import com.example.application.views.components.custom.fields.AmountField;
 import com.example.application.views.components.custom.fields.CurrencyField;
 import com.example.application.views.components.custom.fields.PricePercentageWrapper;
 import com.example.application.views.components.custom.fields.stats.PortfolioStatsDisplay;
@@ -165,7 +166,7 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
         Image inputImage = new Image(instrumentsFacadeService.getAssetImgUrl(asset), asset.getSymbol());
         inputImage.setClassName("coin-overview-image");
 
-        CurrencyField tokenAmountField = new CurrencyField();
+        AmountField tokenAmountField = new AmountField();
         tokenAmountField.setValue(1);
 
         CurrencyField usdAmountField = new CurrencyField();
@@ -203,8 +204,9 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
 
         usdAmountField.setValueChangeMode(ValueChangeMode.EAGER);
         usdAmountField.addKeyUpListener(e -> {
-            double calculatedPrice = usdAmountField.doubleValue() / instrumentsFacadeService.getAssetMarketPrice(asset);
-            tokenAmountField.setValue(calculatedPrice);
+            double amount = usdAmountField.doubleValue();
+            double price = instrumentsFacadeService.getAssetMarketPrice(asset);
+            tokenAmountField.setValue(MathUtils.safeZeroDivision(amount, price));
         });
 
         Section section = new Section(title, sectionBody);

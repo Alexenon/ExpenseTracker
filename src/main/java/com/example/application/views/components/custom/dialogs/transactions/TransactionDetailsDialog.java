@@ -67,7 +67,6 @@ public class TransactionDetailsDialog extends Dialog {
     private void initializeFields() {
         closeBtn.addClickShortcut(Key.ESCAPE);
         closeBtn.addClassName("modal-close-btn");
-
         editBtn.addClassName("edit-btn");
     }
 

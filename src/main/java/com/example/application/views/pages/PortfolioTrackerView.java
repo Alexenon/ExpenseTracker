@@ -174,7 +174,7 @@ public class PortfolioTrackerView extends DefaultPage {
                 "Potential profit or loss if you were to sell all assets now");
         String ratio = portfolioPerformanceTracker.getPortfolioBuySellRatio();
         String[] ratioParts = ratio.split(":");
-        Div buySellRatio = new PortfolioStatsDisplay("Buy/Sell Ratio", ratio,
+        Div buySellRatio = new PortfolioStatsDisplay("Buy/Sell % Ratio", ratio,
                 String.format("%s%% of transactions are buys, %s%% are sells, in dollar equivalent", ratioParts[0].trim(), ratioParts[1]));
         Div avgHoldingTime = new PortfolioStatsDisplay("Avg Holding Time", avgTimeHolding,
                 "Average holding time for all assets, from the first bought");

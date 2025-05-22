@@ -32,6 +32,19 @@ import java.math.BigInteger;
         - Inflation: If inflation is 3%, the inflation-adjusted profit would be  20,000 / (1+0.03) = 19,417.47.
         - Compound Growth: Reinvesting $20,000 at a 15% annual return for 5 years yields 20,000 * ( 1 + 0.15 ) 5 = 40,228.86
         - Market Cap: What market cap will be at that sell price -> which top will enter
+
+    FIXME:
+        - When user don't have amount of such tokens then:
+            1. BuyPriceField = current price
+            2. SellPriceField = empty
+            3. AmountField = empty
+            4. Total = don't touch, automatically will be calculated
+            5. Force user to add SellPrice
+
+    TODO: Ideally, move as two separate features into 2 different calculators:
+        - Profit sell calculator
+        - What happens when achieve such price, without having amount of tokens
+        * [Maybe add a checkbox to give user to exclude placing amount/total cost]
 * */
 
 @Component
@@ -40,9 +53,9 @@ public class SellProfitTab extends BaseCalculatorTab {
     private final PortfolioPerformanceTracker portfolioPerformanceTracker;
 
     private final AssetComboBox assetSymbolField;
-    private final AmountField amountField = new AmountField("Amount");
+    private final AmountField amountField = new AmountField("Amount of tokens");
     private final CurrencyField buyPriceField = new CurrencyField("Buy Price");
-    private final CurrencyField totalCostField = new CurrencyField("Total");
+    private final CurrencyField totalCostField = new CurrencyField("Total Cost");
     private final CurrencyField sellPriceField = new CurrencyField("Sell Price");
 
     @Autowired
