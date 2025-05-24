@@ -27,9 +27,7 @@ public abstract class ExceptionView<T extends Exception> extends AbstractPage im
         errorContainer.setErrorTitle(errorTitle());
         errorContainer.setErrorDescription(getErrorDescription(parameter));
         errorContainer.setImageSource(imageSource());
-        log.error("Encountered client error: ");
-        log.error(parameter.getException().toString());
-
+        log.error("Encountered client error: {}", parameter.getCaughtException().toString());
         return httpStatus();
     }
 

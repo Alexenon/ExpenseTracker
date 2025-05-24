@@ -1,0 +1,163 @@
+.heading {
+    margin: 150px 0 0 0;
+    background: #fff;
+    color: #444;
+    text-align: center;
+}
+
+.heading h1 {
+    font-size: 5rem;
+    color: #28c14c;
+}
+
+.subheading {
+    color: #28c14c;
+    font-size: 2rem;
+    font-weight: 300;
+    margin: 10px 0 30px;
+    font-weight: 500;
+}
+
+.subheading p {
+    color: #444;
+}
+
+.download-btn {
+    background: #28c14c;
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    font-size: 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-bottom: 60px;
+}
+
+.features {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 30px;
+    padding: 0 20px 80px;
+}
+
+.feature-box {
+    background: #f1fef4;
+    padding: 20px;
+    border-radius: 12px;
+    width: 220px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.feature-box mono-icon {
+    width: 40px;
+    margin-bottom: 15px;
+}
+
+.feature-box p {
+    font-size: 1rem;
+    font-weight: 500;
+    margin: 0;
+}
+
+/*
+    New Section: Features Our Users Love
+*/
+.features-section-title {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-top: 60px;
+    margin-bottom: 40px;
+}
+
+.user-features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 40px;
+    padding: 0 40px 100px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.user-feature {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.user-feature mono-icon {
+    background-color: #e3f9ec;
+    border-radius: 12px;
+    padding: 10px 10px 10px 15px;
+    width: 60px;
+    margin-bottom: 16px;
+}
+
+.user-feature h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #222;
+}
+
+.user-feature p {
+    font-size: 0.95rem;
+    color: #555;
+    max-width: 240px;
+}
+
+/*
+    Footer section
+*/
+
+.footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 32px;
+    font-family: sans-serif;
+    background-color: #fff;
+    border-top: 1px solid #eee;
+}
+
+.footer-left {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.footer-links {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.footer-links a {
+    text-decoration: none;
+    color: #333;
+    font-size: 14px;
+}
+
+.footer-right {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.social-icons a {
+    display: inline-block;
+    margin: 0 4px;
+}
+
+.support-button {
+    background-color: #2ecc71;
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 20px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: bold;
+}
+

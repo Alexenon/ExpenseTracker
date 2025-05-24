@@ -1,54 +1,80 @@
 package com.example.application.views.components.core;
 
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.html.Paragraph;
-
-import java.util.function.Consumer;
+import com.vaadin.flow.component.html.Span;
 
 public class ComponentBuilder<T extends Component> {
 
-    private final T instance;
-    private Consumer<T> instanceConsumer;
+    private final T component;
+
+    public ComponentBuilder(T component) {
+        this.component = component;
+    }
 
     public ComponentBuilder(Class<T> clazz) {
         try {
-            this.instance = clazz.getDeclaredConstructor().newInstance();
-            this.instanceConsumer = (component) -> component = instance;
+            this.component = clazz.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
             throw new RuntimeException("Failed to create component instance", e);
         }
     }
 
-    public static void main(String[] args) {
-        Component parentDiv = new ComponentBuilder<>(Div.class)
-                .add(childDiv -> {
-                    childDiv.addClassName("child");
-                    childDiv.add(new Paragraph("Some text"));
-                })
-                .build();
-
-        parentDiv.addClassName("parent");
-    }
-
-    public ComponentBuilder<T> add(Consumer<T> consumer) {
-        instanceConsumer = instanceConsumer.andThen(consumer);
+    public ComponentBuilder<T> addClass(String className) {
+        if (component != null) {
+            component.addClassName(className);
+        }
         return this;
     }
 
-    public ComponentBuilder<T> setSize(String size) {
-        if (size == null) {
-            instance.getStyle().remove("width");
-            instance.getStyle().remove("height");
-        } else {
-            instance.getStyle().set("width", size);
-            instance.getStyle().set("height", size);
+    public ComponentBuilder<T> add(Component childComponent) {
+        if (component instanceof HasComponents allowed) {
+            allowed.add(childComponent);
+        }
+        return this;
+    }
+
+    public ComponentBuilder<T> add(Component... childComponents) {
+        if (component instanceof HasComponents allowed) {
+            allowed.add(childComponents);
+        }
+        return this;
+    }
+
+    public ComponentBuilder<T> setText(String text) {
+        if (component instanceof HasText allowed) {
+            allowed.setText(text);
+        }
+        return this;
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public ComponentBuilder<T> addClickListener(ComponentEventListener<ClickEvent<T>> clickListener) {
+        if (component instanceof ClickNotifier allowed) {
+            allowed.addClickListener(clickListener);
         }
         return this;
     }
 
     public T build() {
-        instanceConsumer.accept(instance);
-        return instance;
+        return component;
     }
+
+    public static void main(String[] args) {
+        Paragraph component = new ComponentBuilder<>(Paragraph.class)
+                .setText("Text")
+                .addClass("my-class")
+                .add(new Span("my-span"))
+                .build();
+
+        Paragraph component2 = new ComponentBuilder<>(new Paragraph("Text"))
+                .addClass("my-class")
+                .add(new Span("my-span"))
+                .build();
+
+
+        System.out.println(component);
+    }
+
 }
+

@@ -68,7 +68,7 @@ public final class StakingProfitTab extends BaseCalculatorTab {
     @Override
     protected Button createDisplayResultsBtn() {
         Button calculateBtn = new Button("Calculate");
-
+        calculateBtn.addClassName("add-entity-btn");
         calculateBtn.addClickListener(e -> {
             double apr = aprField.doubleValue();
             double worth = worthField.doubleValue();

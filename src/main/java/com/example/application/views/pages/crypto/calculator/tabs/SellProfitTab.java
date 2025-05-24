@@ -119,6 +119,7 @@ public class SellProfitTab extends BaseCalculatorTab {
     @Override
     protected Button createDisplayResultsBtn() {
         Button calculateBtn = new Button("Calculate");
+        calculateBtn.addClassName("add-entity-btn");
         calculateBtn.addClickListener(e -> {
             double invested = totalCostField.doubleValue();
             double buyPrice = buyPriceField.doubleValue();

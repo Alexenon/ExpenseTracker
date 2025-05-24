@@ -48,6 +48,9 @@ import java.util.stream.Collectors;
 @JavaScript("https://fastly.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js")
 public class PortfolioTrackerView extends DefaultPage {
 
+    // TODO: Export all these formaters into a class CommonFormatters
+    //  where it would be all general formatters, like SHORT_CURRENCY_FORMATTER, LONG_CURRENCY_FORMATTER, ...
+    // TODO: Same for data formatters
     private final static CurrencyFormatter currencyFormatter = CurrencyFormatter.withDefaults();
 
     @Autowired
@@ -102,6 +105,7 @@ public class PortfolioTrackerView extends DefaultPage {
         section.add(portfolioWorthWrapper);
 
         Button addTransactionBtn = new Button("Add Transaction", LumoIcon.PLUS.create());
+        addTransactionBtn.addClassName("add-entity-btn");
         addTransactionBtn.setIconAfterText(false);
         addTransactionBtn.addClickListener(e -> {
             AddTransactionDialog dialog = new AddTransactionDialog(instrumentsFacadeService);

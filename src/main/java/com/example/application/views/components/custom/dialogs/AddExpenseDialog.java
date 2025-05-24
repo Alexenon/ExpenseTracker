@@ -28,10 +28,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.Arrays;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import static java.time.temporal.ChronoUnit.DAYS;
+import static java.time.temporal.ChronoUnit.MONTHS;
 
 public class AddExpenseDialog extends Dialog implements HasNotifications {
 
@@ -73,8 +74,10 @@ public class AddExpenseDialog extends Dialog implements HasNotifications {
         dialogLayout.setPadding(false);
         dialogLayout.setSpacing(false);
         dialogLayout.setAlignItems(FlexComponent.Alignment.STRETCH);
-        dialogLayout.getStyle().set("width", "22rem").set("max-width", "100%");
-        Arrays.stream(components).forEach(e -> e.getStyle().set("margin-bottom", "1rem"));
+        dialogLayout.getStyle()
+                .set("width", "22rem")
+                .set("max-width", "100%");
+        Stream.of(components).forEach(e -> e.getStyle().set("margin-bottom", "1rem"));
 
         return dialogLayout;
     }
@@ -145,13 +148,15 @@ public class AddExpenseDialog extends Dialog implements HasNotifications {
                 .bind(ExpenseRequest::getStartDate, ExpenseRequest::setStartDate);
 
         binder.forField(expireDateField)
-                .withValidator(expireDate -> expireDate == null || expireDate.isAfter(startDateField.getValue()),
+                .withValidator(expireDate -> expireDate != null && expireDate.isAfter(startDateField.getValue()),
                         "Expire date should be after start date")
-                .withValidator(expireDate -> !timestampField.getValue().equals(Expense.Timestamp.WEEKLY)
-                                             || DAYS.between(startDateField.getValue(), expireDate) >= 7,
+                .withValidator(expireDate -> expireDate != null && timestampField.getValue() != null
+                                             && timestampField.getValue().equals(Expense.Timestamp.WEEKLY)
+                                             && DAYS.between(startDateField.getValue(), expireDate) < 7,
                         "Should pass at least 7 days to end subscription")
-                .withValidator(expireDate -> !timestampField.getValue().equals(Expense.Timestamp.MONTHLY)
-                                             || DAYS.between(startDateField.getValue(), expireDate) >= 30,
+                .withValidator(expireDate -> expireDate != null && timestampField.getValue() != null
+                                             && timestampField.getValue().equals(Expense.Timestamp.MONTHLY)
+                                             && MONTHS.between(startDateField.getValue(), expireDate) < 1,
                         "Should pass at least 1 month to end subscription")
                 .bind(ExpenseRequest::getExpireDate, ExpenseRequest::setExpireDate);
 

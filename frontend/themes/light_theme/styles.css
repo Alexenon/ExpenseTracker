@@ -6,6 +6,7 @@
 @import 'styles/page-styles/error-page.css';
 @import 'styles/page-styles/auth-pages.css';
 
+@import 'styles/page-styles/home-page.css';
 @import 'styles/page-styles/assets-page.css';
 @import 'styles/page-styles/asset-details-page.css';
 @import 'styles/page-styles/calculator-page.css';
@@ -57,6 +58,14 @@
     box-sizing: border-box;
     font-family: 'Poppins', sans-serif;
 }
+
+/*
+
+:host(:not([no-scroll])) [content] {
+    overflow: hidden;
+}
+
+*/
 
 p {
     margin: 0;
@@ -223,6 +232,11 @@ vaadin-number-field::part(input-field) {
 /*
     COMMON STYLES
 */
+
+.centered-text {
+    text-align: center;
+    align-items: center;
+}
 
 .centered-row {
     display: flex;

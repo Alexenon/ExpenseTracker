@@ -34,7 +34,7 @@ public class Expense {
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate expireDate;
 
-    @Column(name = "timestamp", unique = true, nullable = false)
+    @Column(name = "timestamp", nullable = false)
     @Enumerated(EnumType.STRING)
     private Timestamp timestamp = Timestamp.ONCE;
 
