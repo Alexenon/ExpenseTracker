@@ -1,4 +1,4 @@
-package com.example.application.views.components.custom;
+package com.example.application.views.components.custom.display;
 
 import com.example.application.utils.common.number.DecimalFormatter;
 import com.example.application.utils.common.number.PercentageFormatter;

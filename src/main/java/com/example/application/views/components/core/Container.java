@@ -25,6 +25,11 @@ public class Container extends Div {
         addClassName(className);
     }
 
+    public Container(String... classNames) {
+        this();
+        addClassNames(classNames);
+    }
+
     public Container(String className, Component... components) {
         this(components);
         addClassName(className);
@@ -38,18 +43,26 @@ public class Container extends Div {
         return new Builder(className);
     }
 
+    public static Builder builder(String... classNames) {
+        return new Builder(classNames);
+    }
+
     /**
      * Builder class to create easier the nested containers
      */
     public static class Builder {
         private final Container instance;
 
-        public Builder() {
+        private Builder() {
             this.instance = new Container();
         }
 
         public Builder(String className) {
             this.instance = new Container(className);
+        }
+
+        public Builder(String... classNames) {
+            this.instance = new Container(classNames);
         }
 
         public Builder addElement(Element element) {

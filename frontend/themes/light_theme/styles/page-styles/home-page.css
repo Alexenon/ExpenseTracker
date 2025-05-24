@@ -120,10 +120,8 @@
     border-top: 1px solid #eee;
 }
 
-.footer-left {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+.footer-copywrite {
+    gap: 10px;
 }
 
 .footer-links {
@@ -138,26 +136,11 @@
     font-size: 14px;
 }
 
-.footer-right {
-    display: flex;
-    align-items: center;
-    gap: 24px;
+.footer-links a:hover {
+    color: #28c14c;
 }
 
-.social-icons a {
+.social-icons mono-icon {
     display: inline-block;
     margin: 0 4px;
 }
-
-.support-button {
-    background-color: #2ecc71;
-    color: #fff;
-    padding: 8px 16px;
-    border-radius: 20px;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-weight: bold;
-}
-

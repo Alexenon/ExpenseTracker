@@ -3,15 +3,8 @@ package com.example.application.views.components.custom.icons;
 /*
  * https://pictogrammers.com/library/mdi/
  *
- * https://pictogrammers.com/docs/guides/iconify/
- *
- *
  * TO ADD
- *  Webfont name:
- *      <span class="mdi mdi-tablet-cellphone"></span>
- * Transforms into:
- *      TABLET_CELLPHONE
- *
+ *      Webfont: <span class="mdi mdi-tablet-cellphone"></span>  =====> TABLET_CELLPHONE
  * */
 public enum PictogramIcon {
     LOGIN,
@@ -31,9 +24,12 @@ public enum PictogramIcon {
     PIGGY_BANK_OUTLINE,
     CASH_LOCK,
     CASH_PLUS,
-    GITHUB,
     SHIELD_LOCK,
-    BRIEFCASE_EDIT;
+    BRIEFCASE_EDIT,
+    // Apps
+    GITHUB,
+    FACEBOOK,
+    TWITTER;
 
     public MonoIcon create() {
         return new MonoIcon(this);

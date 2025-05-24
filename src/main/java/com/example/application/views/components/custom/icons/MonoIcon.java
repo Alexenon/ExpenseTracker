@@ -10,8 +10,10 @@ import com.vaadin.flow.component.icon.AbstractIcon;
 import java.util.Objects;
 
 /**
+ * Creates a {@code <mono-icon>} html element inside the DOM
+ *
  * @see PictogramIcon
- * */
+ */
 @Tag("mono-icon")
 @JavaScript("//code.iconify.design/1/1.0.6/iconify.min.js")
 public class MonoIcon extends AbstractIcon<MonoIcon> implements HasComponents {

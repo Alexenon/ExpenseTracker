@@ -8,8 +8,8 @@ import com.example.application.utils.common.number.CurrencyFormatter;
 import com.example.application.views.components.AssetsGrid;
 import com.example.application.views.components.TransactionsGrid;
 import com.example.application.views.components.core.Container;
-import com.example.application.views.components.custom.NumericValueParagraph;
 import com.example.application.views.components.custom.dialogs.transactions.AddTransactionDialog;
+import com.example.application.views.components.custom.display.NumericValueParagraph;
 import com.example.application.views.components.custom.fields.PricePercentageWrapper;
 import com.example.application.views.components.custom.fields.stats.PortfolioStatsDisplay;
 import com.example.application.views.layouts.MainLayout;
@@ -50,7 +50,7 @@ public class PortfolioTrackerView extends DefaultPage {
 
     // TODO: Export all these formaters into a class CommonFormatters
     //  where it would be all general formatters, like SHORT_CURRENCY_FORMATTER, LONG_CURRENCY_FORMATTER, ...
-    // TODO: Same for data formatters
+    // TODO: Same for data formatters and datePicker formatter
     private final static CurrencyFormatter currencyFormatter = CurrencyFormatter.withDefaults();
 
     @Autowired

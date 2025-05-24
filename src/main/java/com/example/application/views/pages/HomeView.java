@@ -7,7 +7,6 @@ import com.example.application.views.components.custom.icons.MonoIcon;
 import com.example.application.views.components.custom.icons.PictogramIcon;
 import com.example.application.views.components.utils.HasScroll;
 import com.example.application.views.layouts.MainLayout;
-import com.vaadin.flow.component.Html;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -27,7 +26,7 @@ public class HomeView extends AbstractPage implements HasScroll {
                 mainSection(),
                 ourFeaturesSection(),
                 ourUsersLikeSection(),
-                footer()
+                footer
         );
     }
 
@@ -77,9 +76,9 @@ public class HomeView extends AbstractPage implements HasScroll {
                         "Get notified of recurring bills and transactions before due date",
                         PictogramIcon.TRANSFER.create()
                 ))
-                .addComponent(() -> userFeature("Travel mode",          // TODO:::::::::::::::::::::::::::::::::::
-                        "All currencies supported with up-to-date exchange rate",
-                        PictogramIcon.ACCOUNT.create()
+                .addComponent(() -> userFeature(" Clear financial overview",
+                        "Dashboards with key stats, and balance view with your top expenses",
+                        PictogramIcon.FINANCE.create()
                 ))
                 .addComponent(() -> userFeature("Debt and loan",
                         "Manage your debts, loans and payment process in one place",
@@ -119,34 +118,4 @@ public class HomeView extends AbstractPage implements HasScroll {
                 .build();
     }
 
-    private Html footer() {
-        return new Html("""
-                <footer class="footer">
-                  <div class="footer-left">
-                    <p>© 2025 Finsify .,JSC. All rights reserved.</p>
-                    <nav class="footer-links">
-                      <a href="#">About us</a>
-                      <a href="#">Career</a>
-                      <a href="#">Blog</a>
-                      <a href="#">Status</a>
-                      <a href="#">Privacy Policy</a>
-                      <a href="#">Terms of Service</a>
-                    </nav>
-                  </div>
-                
-                  <div class="footer-right">
-                    <div class="social-icons">
-                      <a href="#"><img src="https://img.icons8.com/ios-glyphs/30/000000/facebook-new.png" alt="Facebook" /></a>
-                      <a href="#"><img src="https://img.icons8.com/ios-glyphs/30/000000/instagram-new.png" alt="Instagram" /></a>
-                      <a href="#"><img src="https://img.icons8.com/ios-glyphs/30/000000/twitter--v1.png" alt="Twitter" /></a>
-                    </div>
-                    </div>
-                </footer>
-                """);
-    }
-
 }
-
-
-
-

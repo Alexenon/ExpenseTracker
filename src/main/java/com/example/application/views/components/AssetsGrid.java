@@ -7,7 +7,7 @@ import com.example.application.utils.common.number.AmountFormatter;
 import com.example.application.utils.common.number.CurrencyFormatter;
 import com.example.application.utils.common.number.PercentageFormatter;
 import com.example.application.views.components.core.Container;
-import com.example.application.views.components.custom.PercentageBadge;
+import com.example.application.views.components.custom.display.PercentageBadge;
 import com.example.application.views.pages.crypto.AssetDetailsView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
