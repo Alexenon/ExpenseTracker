@@ -12,7 +12,7 @@ import java.time.temporal.ChronoUnit;
 import static com.example.application.utils.investment.ProfitUtils.ONE_HUNDRED_PERCENT;
 
 /*
-    TODO: LONG TERM -> Implement next methods
+    TODO: [LONG TERM] -> Implement next methods
        - % in Market, how much tokens had been sold and how much are still holding
        - Cumulative Profit Loss
        [!!!] Make methods like `calculateTotalQuantityForBuyTransactions()`, to have 2 paramets

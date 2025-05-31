@@ -16,7 +16,7 @@ import java.util.Objects;
 * */
 
 @Data
-@Entity
+@Entity(name = "crypto_transactions")
 @NoArgsConstructor
 public class CryptoTransaction {
 

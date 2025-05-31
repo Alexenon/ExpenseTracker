@@ -5,6 +5,7 @@ import com.example.application.entities.crypto.AssetWatcher;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.utils.common.StringUtils;
 import com.example.application.views.components.core.Container;
+import com.example.application.views.components.core.buttons.DualLabelToggleButton;
 import com.example.application.views.components.custom.fields.CurrencyField;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -19,7 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 
 /*
- * TODO: LONG TERM:
+ * TODO: [LONG TERM]:
  *  - Add percentage alternative
  *  - Add style for 'Save' and 'Delete' buttons
  * */
@@ -30,7 +31,7 @@ public class PriceWatchlistComponent extends Div {
     private final AssetWatcher.ActionType actionType;
     private final InstrumentsFacadeService instrumentsFacadeService;
 
-    private final List<AssetWatcher> assetWatchers;
+    private final List<AssetWatcher> userWatchers;
 
     private final Div priceLayoutContainer = new Div();
 
@@ -39,21 +40,17 @@ public class PriceWatchlistComponent extends Div {
         this.asset = asset;
         this.actionType = actionType;
         this.instrumentsFacadeService = instrumentsFacadeService;
-        this.assetWatchers = instrumentsFacadeService.getAssetWatchersByAssetAndActionType(asset, actionType);
+        this.userWatchers = instrumentsFacadeService.getAssetWatchersByAssetAndActionType(asset, actionType);
 
-        initialize();
+        add(priceLayoutContainer);
         fillComponent();
     }
 
-    private void initialize() {
-        add(priceLayoutContainer);
-    }
-
     private void fillComponent() {
-        if (assetWatchers.isEmpty()) {
+        if (userWatchers.isEmpty()) {
             addNewPriceLayout();
         } else {
-            assetWatchers.forEach(assetWatcher -> priceLayoutContainer.add(new WatchlistLayout(assetWatcher)));
+            userWatchers.forEach(assetWatcher -> priceLayoutContainer.add(new WatchlistLayout(assetWatcher)));
         }
     }
 
@@ -63,24 +60,24 @@ public class PriceWatchlistComponent extends Div {
 
     /**
      * PriceLayout used for tracking wanted sell/buy prices
-     * */
+     */
     private class WatchlistLayout extends Div {
 
         // TODO:
-        //  - Add "unsaved" / "draft" status
         //  - Binder validation should be triggered after save, and not on changing
 
         private final AssetWatcher assetWatcher;
         private final Binder<AssetWatcher> binder = new Binder<>(AssetWatcher.class);
-
         private final Paragraph status = new Paragraph();
         private final CurrencyField target = new CurrencyField("Price");
         private final CurrencyField targetAmount = new CurrencyField("Amount in USD");
         private final Checkbox markAsCompleted = new Checkbox("Mark as completed");
+        private final DualLabelToggleButton toggleBtn = new DualLabelToggleButton("$", "%");
         private final Button saveBtn = new Button("Save");
         private final Button deleteBtn = new Button("Delete");
         private final Button editBtn = new Button(LumoIcon.EDIT.create());
 
+        private boolean isDraft;
         private boolean isEditMode;
 
         /**
@@ -88,7 +85,8 @@ public class PriceWatchlistComponent extends Div {
          * to be retrieved from the database, with the input fields should be filled and saved.
          */
         public WatchlistLayout() {
-            this.isEditMode = true;
+            this.isDraft = true;
+            this.isEditMode = false;
             this.assetWatcher = new AssetWatcher();
             this.assetWatcher.setAsset(asset);
             this.assetWatcher.setTargetType(AssetWatcher.TargetType.PRICE);
@@ -102,8 +100,7 @@ public class PriceWatchlistComponent extends Div {
         }
 
         private void init() {
-            addClassName("section-card-wrapper");
-            addClassName("price-watcher-wrapper");
+            addClassNames("section-card-wrapper", "price-watcher-wrapper");
 
             Container content = Container.builder("price-watcher-card-content")
                     .addComponent(status)
@@ -113,6 +110,7 @@ public class PriceWatchlistComponent extends Div {
 
             add(content, editBtn);
 
+
             target.setLabel(StringUtils.uppercaseFirstLetter(actionType.name()) + " " + target.getLabel());
             target.setClassName("asset-amount-field");
             targetAmount.setClassName("asset-amount-field");
@@ -120,11 +118,16 @@ public class PriceWatchlistComponent extends Div {
             saveBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
             deleteBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_ERROR);
 
+            toggleBtn.addClickListener(e -> {
+                System.out.println(toggleBtn.isChecked());
+            });
+
             saveBtn.addClickListener(event -> {
                 binder.validate();
                 if (binder.writeBeanIfValid(assetWatcher)) {
                     System.out.println("Saving " + assetWatcher);
                     instrumentsFacadeService.saveAssetWatcher(assetWatcher);
+                    isDraft = false;
                     setEditMode(false);
                 } else {
                     System.out.println("Validation failed.");
@@ -145,20 +148,13 @@ public class PriceWatchlistComponent extends Div {
         }
 
         private Div buildBody() {
-            return Container.builder()
-                    .addClassName("card-wrapper-body")
-                    .addComponent(target)
-                    .addComponent(targetAmount)
-                    .addComponent(markAsCompleted)
-                    .build();
+            return new Container("card-wrapper-body", target, targetAmount,
+//                    toggleBtn,  // TODO: Add me again and continue styling
+                    markAsCompleted);
         }
 
         private Div buildFooter() {
-            return Container.builder()
-                    .addClassName("card-wrapper-footer")
-                    .addComponent(saveBtn)
-                    .addComponent(deleteBtn)
-                    .build();
+            return new Container("card-wrapper-footer", saveBtn, deleteBtn);
         }
 
         public void setEditMode(boolean editMode) {
@@ -203,9 +199,14 @@ public class PriceWatchlistComponent extends Div {
         }
 
         private void updateStatus() {
-            status.setText(markAsCompleted.getValue() ? "Ended" : "Ongoing");
-            status.removeClassNames("completed", "ongoing");
-            status.addClassName(markAsCompleted.getValue() ? "completed" : "ongoing");
+            String newStatus = retrieveStatus();
+            status.removeClassNames("draft", "completed", "ongoing");
+            status.setText(newStatus);
+            status.addClassName(newStatus.toLowerCase());
+        }
+
+        private String retrieveStatus() {
+            return isDraft ? "Draft" : markAsCompleted.getValue() ? "Completed" : "Ongoing";
         }
 
     }

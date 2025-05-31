@@ -31,6 +31,7 @@ import java.util.Arrays;
 import java.util.function.Consumer;
 
 import static java.time.temporal.ChronoUnit.DAYS;
+import static java.time.temporal.ChronoUnit.MONTHS;
 
 public class EditExpenseDialog extends Dialog implements HasNotifications {
 
@@ -147,14 +148,27 @@ public class EditExpenseDialog extends Dialog implements HasNotifications {
                 .bind(ExpenseRequest::getStartDate, ExpenseRequest::setStartDate);
 
         binder.forField(expireDateField)
-                .withValidator(expireDate -> expireDate == null || expireDate.isAfter(startDateField.getValue()),
+                .withValidator(
+                        expireDate -> expireDate == null || startDateField.getValue() == null
+                                      || expireDate.isAfter(startDateField.getValue()),
                         "Expire date should be after start date")
-                .withValidator(expireDate -> !timestampField.getValue().equals(Expense.Timestamp.WEEKLY)
-                                             || DAYS.between(startDateField.getValue(), expireDate) >= 7,
-                        "Should pass at least 7 days to end subscription")
-                .withValidator(expireDate -> !timestampField.getValue().equals(Expense.Timestamp.MONTHLY)
-                                             || DAYS.between(startDateField.getValue(), expireDate) >= 30,
-                        "Should pass at least 1 month to end subscription")
+                .withValidator(
+                        expireDate -> {
+                            if (expireDate == null || startDateField.getValue() == null) return true;
+
+                            return !timestampField.getValue().equals(Expense.Timestamp.WEEKLY)
+                                   || DAYS.between(startDateField.getValue(), expireDate) >= 7;
+                        }, "Should pass at least 7 days to end subscription"
+                )
+                .withValidator(
+                        expireDate -> {
+                            if (expireDate == null || startDateField.getValue() == null)
+                                return true;
+
+                            return !timestampField.getValue().equals(Expense.Timestamp.MONTHLY)
+                                   || MONTHS.between(startDateField.getValue(), expireDate) >= 1;
+                        }, "Should pass at least 1 month to end subscription"
+                )
                 .bind(ExpenseRequest::getExpireDate, ExpenseRequest::setExpireDate);
 
         binder.bind(descriptionField, ExpenseRequest::getDescription, ExpenseRequest::setDescription);

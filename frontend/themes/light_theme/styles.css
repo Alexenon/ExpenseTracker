@@ -249,3 +249,15 @@ vaadin-number-field::part(input-field) {
     flex-direction: column;
     align-items: center;
 }
+
+vcf-toggle-button vaadin-checkbox {
+    display: none;
+}
+
+vcf-toggle-button::part(checkbox) {
+    top: 20px;
+}
+
+vcf-toggle-button::part(checkbox)::before {
+    top: 20px;
+}

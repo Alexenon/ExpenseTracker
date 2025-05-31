@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 @Data
-@Entity(name = "asset_watcher")
+@Entity(name = "asset_watchers")
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
@@ -42,19 +42,24 @@ public class AssetWatcher {
     @Column(nullable = false)
     private boolean isCompleted;
 
+    public AssetWatcher(Asset asset, double target, double targetAmount, TargetType targetType, ActionType actionType) {
+        this(asset, target, targetAmount, targetType, actionType, false);
+    }
+
     /**
      * @param target       represents the price target or percentage target of the asset price
      * @param targetAmount represents the amount to invest when the target is reached
      * @param targetType   represents the type of the target - price / percentage
      * @param actionType   represents the type of the watcher - buy / sell
-     * //@param isCompleted  represents if the target was achieved
+     * @param isCompleted  represents if the target was achieved
      */
-    public AssetWatcher(Asset asset, double target, double targetAmount, TargetType targetType, ActionType actionType) {
+    public AssetWatcher(Asset asset, double target, double targetAmount, TargetType targetType, ActionType actionType, boolean isCompleted) {
         this.asset = asset;
         this.target = target;
         this.targetAmount = targetAmount;
         this.targetType = targetType;
         this.actionType = actionType;
+        this.isCompleted = isCompleted;
     }
 
     public enum TargetType {

@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 
 /*
  * TODO: Understand which one to use AssetPricingLayout or BuySellForm
- *   - if this one, then refactor -> remove last method
+ *   - if this one, then refactor -> remove last method "getAssetMarketPrice()"
  * */
 
 /**

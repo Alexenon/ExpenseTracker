@@ -22,17 +22,17 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
     @Query(value = """
             SELECT E.id, E.name, E.amount, C.name as 'Category',
                 E.description, E.timestamp, E.start_date
-            FROM expense E
-            INNER JOIN category C ON C.id = E.category_id
+            FROM expenses E
+            INNER JOIN categories C ON C.id = E.category_id
             """, nativeQuery = true)
     List<ExpenseDTO> getAll();
 
     @Query(value = """
             SELECT E.id, E.name, E.amount, C.name as 'Category',
                 E.description, E.timestamp, E.start_date as 'startDate', E.expire_date as 'expireDate'
-            FROM expense E
+            FROM expenses E
                 INNER JOIN users U ON U.id = E.user_id
-                INNER JOIN category C ON C.id = E.category_id
+                INNER JOIN categories C ON C.id = E.category_id
             WHERE U.username = :userEmailOrUsername OR U.email = :userEmailOrUsername
             """, nativeQuery = true)
     List<ExpenseDTO> getAll(@Param("userEmailOrUsername") String userEmailOrUsername);
@@ -40,8 +40,8 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
     @Query(value = """
             SELECT E.id, E.name, E.amount, C.name AS 'Category',
                 E.description, E.timestamp, E.start_date
-            FROM expense E
-            INNER JOIN category C ON C.id = E.category_id
+            FROM expenses E
+            INNER JOIN categories C ON C.id = E.category_id
             WHERE MONTH(E.start_date) = :month
             """, nativeQuery = true)
     List<ExpenseDTO> findExpensesPerMonth(@Param("month") int month);
@@ -49,8 +49,8 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
     @Query(value = """
             SELECT E.id, E.name, E.amount, C.name AS 'Category',
                 E.description, E.timestamp, E.start_date
-            FROM expense E
-            INNER JOIN category C ON C.id = E.category_id
+            FROM expenses E
+            INNER JOIN categories C ON C.id = E.category_id
             WHERE YEAR(E.start_date) = :year
             """, nativeQuery = true)
     List<ExpenseDTO> findExpensesPerYear(@Param("year") int year);
@@ -58,8 +58,8 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
     @Query(value = """
             SELECT E.id, E.name, E.amount, C.name AS 'Category',
                 E.description, E.timestamp, E.start_date
-            FROM expense E
-            INNER JOIN category C ON C.id = E.category_id
+            FROM expenses E
+            INNER JOIN categories C ON C.id = E.category_id
             WHERE C.name LIKE CONCAT('%', :categoryName, '%')
             """, nativeQuery = true)
     List<ExpenseDTO> findByCategory(@Param("categoryName") String categoryName);
@@ -76,11 +76,11 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
             ) as totalSpent
             FROM (
                 SELECT E.*, DATE_FORMAT(CONCAT(?2, '-01-01'), '%Y-%m-%d') AS year_date
-                FROM expense E
+                FROM expenses E
                 WHERE YEAR(E.start_date) = ?2
-            ) AS E
+            ) AS EF
                 INNER JOIN users U ON U.id = E.user_id
-                INNER JOIN category C ON C.id = E.category_id
+                INNER JOIN categories C ON C.id = E.category_id
             WHERE (E.expire_date IS NULL OR E.expire_date > year_date)
                 AND (U.username = ?1 OR U.email = ?1)
             GROUP BY C.name

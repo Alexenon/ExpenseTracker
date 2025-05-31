@@ -12,6 +12,7 @@ import com.example.application.utils.common.number.CurrencyFormatter;
 import com.example.application.utils.common.number.PercentageFormatter;
 import com.example.application.views.components.PriceWatchlistComponent;
 import com.example.application.views.components.TransactionsGrid;
+import com.example.application.views.components.core.ComponentBuilder;
 import com.example.application.views.components.core.Container;
 import com.example.application.views.components.custom.dialogs.transactions.AddTransactionDialog;
 import com.example.application.views.components.custom.display.NumericValueParagraph;
@@ -83,8 +84,7 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
                 headerDetailsSection(),
                 holdingsSection(),
                 notesAndConvertorSection(),
-                createWatchlistSection(AssetWatcher.ActionType.BUY),
-                createWatchlistSection(AssetWatcher.ActionType.SELL),
+                watchlistSection(),
                 marketStatsSection(),
                 aboutSection(),
                 transactionHistorySection()
@@ -103,11 +103,7 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
                     return image;
                 })
                 .addComponent(new H1(asset.getFullName()))
-                .addComponent(() -> {
-                    Span dot = new Span("•");
-                    dot.setClassName("dot");
-                    return dot;
-                })
+                .addComponent(() -> new ComponentBuilder<>(Span.class).setText("•").addClass("dot").build())
                 .addComponent(new Span(asset.getSymbol()))
                 .build();
 
@@ -314,7 +310,16 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
         return isMarkedAsFavorite ? VaadinIcon.STAR.create() : VaadinIcon.STAR_O.create();
     }
 
-    private Section createWatchlistSection(AssetWatcher.ActionType actionType) {
+    private Section watchlistSection() {
+        Section section = new Section(
+                createWatchlistSection(AssetWatcher.ActionType.BUY),
+                createWatchlistSection(AssetWatcher.ActionType.SELL)
+        );
+        section.addClassName("notes-convertor-section");
+        return section;
+    }
+
+    private Div createWatchlistSection(AssetWatcher.ActionType actionType) {
         PriceWatchlistComponent watchlistComponent = new PriceWatchlistComponent(asset, actionType, instrumentsFacadeService);
 
         Container header = Container.builder("section-header")
@@ -341,7 +346,7 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
                 .addComponent(watchlistComponent)
                 .build();
 
-        return new Section(header, body);
+        return new Container("watchlist", header, body);
     }
 
     private Section transactionHistorySection() {

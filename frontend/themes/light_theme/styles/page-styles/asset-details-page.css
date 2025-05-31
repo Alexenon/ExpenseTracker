@@ -16,7 +16,7 @@
     box-shadow: rgba(0, 0, 0, 0.02) 0px 8px 12px;
     border-radius: 24px;
     background: var(--white-color);
-    border: 1px solid #f2f2f2;
+    border: 1px solid var(--o10Color);
     margin-bottom: 30px;
 }
 
@@ -409,19 +409,30 @@ vaadin-number-field {
     gap: 10px;
 }
 
+.watchlist {
+    margin-top: 30px;
+    flex: 1;
+    max-width: calc(50% - 5px);
+}
+
 .watchlist-status {
     position: absolute;
     border-radius: 0px 200px 0px 40px;
     padding: 0px 7px;
-    top: -26px;
+    top: -21px;
     right: -75px;
     font-size: 12px;
 }
 
 .ongoing {
-    background: #f5f5dc;
+    background: #ffffc1;
 }
 
 .completed {
+    background: #74e190;
+}
+
+.draft {
     background: #c0ced3;
 }
+

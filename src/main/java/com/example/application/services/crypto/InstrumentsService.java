@@ -158,7 +158,7 @@ public class InstrumentsService {
      * OTHERS
      * */
 
-    public void updateDatabase() {
+    public void saveSymbolsInBatch() {
         Arrays.stream(Symbols.values()).forEach(asset -> {
             if (assetRepository.findBySymbol(asset.name()) == null) {
                 assetRepository.save(new Asset(asset.name(), asset.getFullName()));

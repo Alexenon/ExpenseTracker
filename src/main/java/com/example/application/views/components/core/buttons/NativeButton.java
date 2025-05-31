@@ -1,4 +1,4 @@
-package com.example.application.views.components.core;
+package com.example.application.views.components.core.buttons;
 
 import com.vaadin.flow.component.*;
 

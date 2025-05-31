@@ -12,7 +12,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /*
-  TODO: Use logged user to retrieve data, because this controller is used only by logged user
+  TODO: [LONG-TERM]
+   - Use logged user to retrieve data, because this controller is used only by logged user
    - Add verification that user is logged in + add this endpoint as secured
    - Add a separate controller for admin that can retrieve any data
    - Remove endpoints that user cannot access to

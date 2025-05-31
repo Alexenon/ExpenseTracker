@@ -1,7 +1,7 @@
 package com.example.application.views.components.custom.forms;
 
 import com.example.application.views.components.core.Form;
-import com.example.application.views.components.core.NativeButton;
+import com.example.application.views.components.core.buttons.NativeButton;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;

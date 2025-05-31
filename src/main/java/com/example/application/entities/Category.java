@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.ToString;
 
 @Data
-@Entity
+@Entity(name = "categories")
 @ToString
 public class Category {
 
@@ -18,4 +18,15 @@ public class Category {
     @JsonProperty(required = true)
     private String name;
 
+    public Category() {
+    }
+
+    public Category(String name) {
+        this.name = name;
+    }
+
+    public Category(long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
 }

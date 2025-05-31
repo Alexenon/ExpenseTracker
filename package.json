@@ -5,6 +5,7 @@
   "dependencies": {
     "@mdi/font": "^7.4.47",
     "@polymer/polymer": "3.5.1",
+    "@vaadin-component-factory/vcf-toggle-button": "1.0.4",
     "@vaadin/a11y-base": "24.2.4",
     "@vaadin/accordion": "24.2.4",
     "@vaadin/app-layout": "24.2.4",
@@ -93,6 +94,7 @@
   "vaadin": {
     "dependencies": {
       "@polymer/polymer": "3.5.1",
+      "@vaadin-component-factory/vcf-toggle-button": "1.0.4",
       "@vaadin/a11y-base": "24.2.4",
       "@vaadin/accordion": "24.2.4",
       "@vaadin/app-layout": "24.2.4",
@@ -178,7 +180,7 @@
       "workbox-core": "7.0.0",
       "workbox-precaching": "7.0.0"
     },
-    "hash": "74c243bfabc0e00a5b1ea1fe2470c39d05c39b5cdcf51733f333161b563dc2b9"
+    "hash": "1949ffd89087a09b6351d844f709255ebbf1a8935ff074901644ae90fdf582b4"
   },
   "overrides": {
     "@vaadin/bundles": "$@vaadin/bundles",
@@ -249,6 +251,7 @@
     "@vaadin/vaadin-themable-mixin": "$@vaadin/vaadin-themable-mixin",
     "date-fns": "$date-fns",
     "@mdi/font": "$@mdi/font",
-    "cleave.js": "$cleave.js"
+    "cleave.js": "$cleave.js",
+    "@vaadin-component-factory/vcf-toggle-button": "$@vaadin-component-factory/vcf-toggle-button"
   }
 }

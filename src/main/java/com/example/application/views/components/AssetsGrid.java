@@ -396,7 +396,7 @@ public class AssetsGrid extends Div {
                         .priceChangesPercentage24h(instrumentsFacadeService.getAsset24HourChangePercentage(asset))
                         .closestBuy(instrumentsFacadeService.getClosestBuyWatcherPrice(asset))
                         .closestSell(instrumentsFacadeService.getClosestSellWatcherPrice(asset))
-                        // TODO: Add volume column
+                        // TODO: Add volume column for: today, this week, this month, this year, total
                         .avgBuy(portfolioPerformanceTracker.getAverageBuyPrice(asset))
                         .avgSell(portfolioPerformanceTracker.getAverageSellPrice(asset))
                         .realizedProfit(portfolioPerformanceTracker.getAssetRealizedProfit(asset))
@@ -423,7 +423,7 @@ public class AssetsGrid extends Div {
 
     @Data
     @Builder
-    public static class AssetGridItem {
+    private static class AssetGridItem {
         private String name;
         private String symbol;
         private String imageUrl;

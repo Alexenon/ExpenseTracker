@@ -1,16 +1,17 @@
 package com.example.application.entities;
 
+import com.example.application.utils.common.formatters.Formatters;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.StringJoiner;
 
 @Data
-@Entity
+@Entity(name = "expenses")
 public class Expense {
 
     @Id
@@ -46,18 +47,6 @@ public class Expense {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Override
-    public String toString() {
-        DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        return String.format(
-                "Expense{%d, %s, %f, %s, %s, %s, %s, %s %s}",
-                id, name, amount, timestamp, category.getName(),
-                dateFormat.format(startDate),
-                (expireDate != null) ? dateFormat.format(expireDate) : "N/A",
-                description, user.getUsername()
-        );
-    }
-
     public enum Timestamp {
         ONCE,
         DAILY,
@@ -68,6 +57,22 @@ public class Expense {
         public static List<String> getTimestampNames() {
             return Arrays.stream(values()).map(Timestamp::name).toList();
         }
+    }
+
+    @Override
+    @SuppressWarnings("ConstantValue")
+    public String toString() {
+        return new StringJoiner(", ", Expense.class.getSimpleName() + "[", "]")
+                .add("id=" + id)
+                .add("name='" + name + "'")
+                .add("amount=" + amount)
+                .add("description='" + description + "'")
+                .add("startDate=" + (startDate == null ? "N/A" : Formatters.DATE.format(startDate)))
+                .add("expireDate=" + (expireDate == null ? "N/A" : Formatters.DATE.format(expireDate)))
+                .add("timestamp=" + timestamp)
+                .add("category=" + category)
+                .add("user=" + user)
+                .toString();
     }
 
 }

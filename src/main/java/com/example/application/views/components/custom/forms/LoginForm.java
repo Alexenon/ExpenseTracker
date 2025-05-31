@@ -1,23 +1,19 @@
 package com.example.application.views.components.custom.forms;
 
 import com.example.application.views.components.core.Form;
-import com.example.application.views.components.core.NativeButton;
+import com.example.application.views.components.core.buttons.NativeButton;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
-import lombok.Getter;
 
 @Tag("Form")
 public class LoginForm extends Form {
 
     private final H2 title;
-    @Getter
     private final TextField username;
-    @Getter
     private final PasswordField password;
-    @Getter
     private final NativeButton submitBtn;
 
     public LoginForm() {
@@ -43,7 +39,7 @@ public class LoginForm extends Form {
                 const usernameField = document.getElementById('username-field');
                 const usernameInput = usernameField.querySelector('input');
                 usernameInput.setAttribute('name', 'username');
-                                
+                
                 const passwordField = document.getElementById('password-field');
                 const passwordInput = passwordField.querySelector('input');
                 passwordInput.setAttribute('name', 'password');
@@ -57,4 +53,15 @@ public class LoginForm extends Form {
         title.setVisible(visible);
     }
 
+    public TextField getUsername() {
+        return username;
+    }
+
+    public PasswordField getPassword() {
+        return password;
+    }
+
+    public NativeButton getSubmitBtn() {
+        return submitBtn;
+    }
 }

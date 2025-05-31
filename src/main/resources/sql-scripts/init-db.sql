@@ -1,4 +1,4 @@
-USE expenses;
+USE income_mate_db;
 
 ------------------------------------------------- [DaysPassedInMonth] --------------------------------------------------
 
@@ -33,8 +33,6 @@ END //
 DELIMITER ;
 
 ------------------------------------------------ [MonthValidDays] --------------------------------------------------
-
-USE expenses;
 
 DROP FUNCTION IF EXISTS MonthValidDays;
 
@@ -96,6 +94,7 @@ SELECT
 
 ---------------------------------------------[ FIRST_DAY ]-----------------------------------------------
 
+DROP FUNCTION IF EXISTS FIRST_DAY;
 DELIMITER $$
 
 CREATE FUNCTION FIRST_DAY(input_date DATE)
@@ -112,6 +111,13 @@ DELIMITER ;
 DROP FUNCTION IF EXISTS END_DATE_FOR_MONTH;
 DELIMITER $$
 
+-- ==============================================================
+-- @returns INT or NULL
+--     - Returns NULL if:
+--         - startdate is in the future
+--         - both startdate and enddate are in the past (expired)
+--     - Otherwise returns days from startdate until end of month
+-- ==============================================================
 CREATE FUNCTION END_DATE_FOR_MONTH(
     date_to_check DATE,
     start_date DATE,
@@ -149,6 +155,14 @@ DELIMITER ;
 DROP FUNCTION IF EXISTS DAYS_PASSED_FOR_MONTH;
 DELIMITER $$
 
+-- ================================================================
+-- @returns INT
+--     - Returns 0 if:
+--         - startdate is in the future
+--         - both startdate and enddate are in the past (expired)
+--     - Otherwise returns the number of days passed that passed
+--       in the provided month in range from start_date to end_date
+-- ================================================================
 CREATE FUNCTION DAYS_PASSED_FOR_MONTH(
     date_to_check DATE,
     start_date DATE,
@@ -184,7 +198,6 @@ DELIMITER ;
 ------------------------------------------[ GetMonthlyExpenses ]-----------------------------------------
 
 DROP PROCEDURE IF EXISTS GetMonthlyExpenses;
-
 DELIMITER $$
 
 CREATE PROCEDURE GetMonthlyExpenses(
@@ -207,20 +220,24 @@ BEGIN
             WHEN E.timestamp = 'WEEKLY' THEN FLOOR(DAYS_PASSED_FOR_MONTH(date, E.start_date, E.expire_date) / 7) + 1
             ELSE DAYS_PASSED_FOR_MONTH(date, E.start_date, E.expire_date)
         END AS timesTriggered
-    FROM expense E
+    FROM expenses E
     INNER JOIN users U ON U.id = E.user_id
-    INNER JOIN category C ON C.id = E.category_id
-    WHERE (U.username = username OR U.email = username)
-      -- AND E.timestamp = 'ONCE' AND C.name = 'Others' -- HERE
-      AND (E.start_date < END_DATE_FOR_MONTH(date, E.start_date, E.expire_date))
-      AND (DAYS_PASSED_FOR_MONTH(date, E.start_date, E.expire_date) > 0)
-      AND (
-          (E.timestamp = 'WEEKLY' AND FLOOR(DAYS_PASSED_FOR_MONTH(date, E.start_date, E.expire_date) / 7) > 0)
-          OR (E.timestamp = 'MONTHLY' AND (E.expire_date IS NULL OR E.expire_date > DAYS_PASSED_FOR_MONTH(date, E.start_date, E.expire_date)))
-          OR (E.timestamp != 'WEEKLY' AND E.timestamp != 'MONTHLY')
-      );
+    INNER JOIN categories C ON C.id = E.category_id
+    WHERE
+		(U.username = username OR U.email = username)
+		AND
+			E.start_date = CURDATE()
+		OR
+			(
+				E.start_date < END_DATE_FOR_MONTH(date, E.start_date, E.expire_date)
+				AND (DAYS_PASSED_FOR_MONTH(date, E.start_date, E.expire_date) > 0)
+				AND (
+				  (E.timestamp = 'WEEKLY' AND FLOOR(DAYS_PASSED_FOR_MONTH(date, E.start_date, E.expire_date) / 7) > 0)
+				  OR (E.timestamp = 'MONTHLY' AND (E.expire_date IS NULL OR E.expire_date > DAYS_PASSED_FOR_MONTH(date, E.start_date, E.expire_date)))
+				  OR (E.timestamp != 'WEEKLY' AND E.timestamp != 'MONTHLY')
+				)
+			);
 END$$
-
 DELIMITER ;
 
 -------------------------------------------------------------------------------------------------------

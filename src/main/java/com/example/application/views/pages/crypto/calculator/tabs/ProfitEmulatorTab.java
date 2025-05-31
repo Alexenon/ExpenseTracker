@@ -147,7 +147,7 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
                     new ProfitStatsDisplay("Realized Profit", currencyFormatter.format(realizedProfit)),
                     new ProfitStatsDisplay("Unrealized Profit", currencyFormatter.format(unrealizedProfit)),
                     new ProfitStatsDisplay("Total Profit", currencyFormatter.format(totalProfit)),
-                    new ProfitStatsDisplay("Net Profit", currencyFormatter.format(netProfit)),
+//                    new ProfitStatsDisplay("Net Profit", currencyFormatter.format(netProfit)), // FIXME: DOENST DISPLAY RIGHT VALUES
 
                     new Hr(),
                     new ProfitStatsDisplay("Buy Trading Volume", buyVolumeInfo),

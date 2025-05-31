@@ -44,8 +44,9 @@ public class HomeView extends AbstractPage implements HasScroll {
                     return subheading;
                 })
                 .addComponent(() -> {
-                    NativeButton button = new NativeButton("Register for free");
+                    NativeButton button = new NativeButton("Sign up");
                     button.addClassName("download-btn");
+                    button.addClickListener(e -> getUI().ifPresent(ui -> ui.navigate(LoginView.class)));
                     return button;
                 })
                 .build();
