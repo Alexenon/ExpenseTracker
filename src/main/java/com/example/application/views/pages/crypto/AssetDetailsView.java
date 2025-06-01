@@ -166,6 +166,7 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
         tokenAmountField.setValue(1);
 
         CurrencyField usdAmountField = new CurrencyField();
+        usdAmountField.setPrefix(false);
         usdAmountField.setValue(instrumentsFacadeService.getAssetMarketPrice(asset));
 
         Container inputContainer = Container.builder()

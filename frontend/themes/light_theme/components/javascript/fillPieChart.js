@@ -23,8 +23,7 @@ window.fillExpensesChart = function fillExpensesChart(jsonDataString) {
                 return `
                     <div class="tooltip-content">
                         ${params.marker}
-                        <p class="tooltip-category">${params.name}</p>
-                        <p> : </p>
+                        <p class="tooltip-category">${params.name}:</p>
                         <p class="tooltip-value">${params.value}</p>
                         <p class="tooltip-currency">MDL</p>
                         <div class="tooltip-percent">${params.percent}%</div>
@@ -192,6 +191,9 @@ window.fillAssetsDiversityChart = function fillAssetsDiversityChart(jsonDataStri
         // option.tooltip.formatter = '0 MDL';
         option.series[0].color = 'lightgray';
         option.series[0].data = [{ name: "Empty", value: 0 }];
+    } else {
+        option.legend.show = true;
+        option.series[0].color = ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc'];
     }
 
     option && chart.setOption(option);

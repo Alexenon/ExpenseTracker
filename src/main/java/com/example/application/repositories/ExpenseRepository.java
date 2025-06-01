@@ -88,10 +88,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
     List<Object[]> findYearlyCategoriesTotalSum(String userEmailOrUsername, int year);
 
     @Procedure(procedureName = "GetMonthlyExpenses")
-    List<MonthlyExpensesProjection> findMonthlyExpenses(@Param("username") String username,
-                                                        @Param("date") LocalDate currentDate);
-
-
+    List<MonthlyExpensesProjection> findMonthlyExpenses(@Param("username") String username, @Param("date") LocalDate date);
 
 }
 

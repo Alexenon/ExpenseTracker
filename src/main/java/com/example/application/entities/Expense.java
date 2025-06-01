@@ -60,7 +60,6 @@ public class Expense {
     }
 
     @Override
-    @SuppressWarnings("ConstantValue")
     public String toString() {
         return new StringJoiner(", ", Expense.class.getSimpleName() + "[", "]")
                 .add("id=" + id)

@@ -113,9 +113,9 @@ DELIMITER $$
 
 -- ==============================================================
 -- @returns INT or NULL
---     - Returns NULL if:
+--     - returns NULL if:
 --         - startdate is in the future
---         - both startdate and enddate are in the past (expired)
+--         - both start_date and end_date are in the past (expired)
 --     - Otherwise returns days from startdate until end of month
 -- ==============================================================
 CREATE FUNCTION END_DATE_FOR_MONTH(
@@ -195,7 +195,7 @@ END$$
 DELIMITER ;
 
 
-------------------------------------------[ GetMonthlyExpenses ]-----------------------------------------
+----------------------------------------------[ GetMonthlyExpenses ]----------------------------------------------------
 
 DROP PROCEDURE IF EXISTS GetMonthlyExpenses;
 DELIMITER $$
@@ -215,29 +215,142 @@ BEGIN
         E.expire_date AS expireDate,
         DAYS_PASSED_FOR_MONTH(date, E.start_date, E.expire_date) AS daysPassed,
         END_DATE_FOR_MONTH(date, E.start_date, E.expire_date) AS endDate,
-        CASE
-            WHEN E.timestamp = 'MONTHLY' OR E.timestamp = 'YEARLY' THEN 1
-            WHEN E.timestamp = 'WEEKLY' THEN FLOOR(DAYS_PASSED_FOR_MONTH(date, E.start_date, E.expire_date) / 7) + 1
-            ELSE DAYS_PASSED_FOR_MONTH(date, E.start_date, E.expire_date)
-        END AS timesTriggered
+        MONTHLY_TIMES_EXPENSE_TRIGGERED(date, E.start_date, E.expire_date, E.timestamp) as timesTriggered
     FROM expenses E
     INNER JOIN users U ON U.id = E.user_id
     INNER JOIN categories C ON C.id = E.category_id
     WHERE
 		(U.username = username OR U.email = username)
-		AND
-			E.start_date = CURDATE()
-		OR
-			(
-				E.start_date < END_DATE_FOR_MONTH(date, E.start_date, E.expire_date)
-				AND (DAYS_PASSED_FOR_MONTH(date, E.start_date, E.expire_date) > 0)
-				AND (
-				  (E.timestamp = 'WEEKLY' AND FLOOR(DAYS_PASSED_FOR_MONTH(date, E.start_date, E.expire_date) / 7) > 0)
-				  OR (E.timestamp = 'MONTHLY' AND (E.expire_date IS NULL OR E.expire_date > DAYS_PASSED_FOR_MONTH(date, E.start_date, E.expire_date)))
-				  OR (E.timestamp != 'WEEKLY' AND E.timestamp != 'MONTHLY')
-				)
-			);
+		AND MONTHLY_TIMES_EXPENSE_TRIGGERED(date, E.start_date, E.expire_date, E.timestamp) > 0;
 END$$
 DELIMITER ;
 
--------------------------------------------------------------------------------------------------------
+------------------------------------------[ MONTHLY_TIMES_EXPENSE_TRIGGERED ]-------------------------------------------
+
+DROP FUNCTION IF EXISTS MONTHLY_TIMES_EXPENSE_TRIGGERED;
+DELIMITER $$
+
+-- ================================================================
+-- @returns INT
+--     - Returns 0 if:
+--         - startdate is in the future
+--         - both startdate and enddate are in the past (expired)
+--     - Otherwise returns the number of days passed that passed
+--       in the provided month in range from start_date to end_date
+-- ================================================================
+CREATE FUNCTION MONTHLY_TIMES_EXPENSE_TRIGGERED(
+    date_to_check DATE,
+    start_date DATE,
+    expire_date DATE,
+	expense_timestamp VARCHAR(255)
+)
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE first_day_of_month DATE DEFAULT DATE_FORMAT(date_to_check, '%Y-%m-01');
+    DECLARE last_day_of_month DATE DEFAULT LAST_DAY(date_to_check);
+    DECLARE days_passed INT DEFAULT 0;
+    DECLARE end_date DATE;
+    DECLARE result INT DEFAULT 0;
+
+    SET end_date = END_DATE_FOR_MONTH(date_to_check, start_date, expire_date);
+
+	-- If the end date is NULL, is expired or in future
+	IF end_date IS NULL THEN
+		RETURN 0;
+	END IF;
+
+	-- If today is the trigger date
+	IF start_date = CURDATE() THEN
+		RETURN 1;
+	END IF;
+
+    IF expense_timestamp = 'DAILY' THEN
+        SET result = DATEDIFF(end_date, GREATEST(start_date, first_day_of_month));
+    ELSEIF expense_timestamp = 'WEEKLY' THEN
+        SET result = WEEKS_PASSED(FIRST_WEEKDAY_OF_MONTH(date_to_check), end_date);
+    ELSE
+        SET result = 1;  -- For Once, Monthly, Yearly
+    END IF;
+
+    RETURN result;
+END$$
+DELIMITER ;
+
+
+------------------------------------------[ MONTHLY_TIMES_EXPENSE_TRIGGERED ]-------------------------------------------
+
+
+DROP FUNCTION IF EXISTS WEEKS_PASSED;
+DELIMITER //
+
+-- ================================================================
+-- @returns INT
+--     - Number of specific weekdays passed from start_date to end_date
+--     - The weekday is taken from the end_date (e.g., Monday if end_date is Monday)
+-- ================================================================
+CREATE FUNCTION WEEKS_PASSED(start_date DATE, end_date DATE)
+RETURNS INT
+DETERMINISTIC
+BEGIN
+  DECLARE target_weekday INT;
+  DECLARE first_target_date DATE;
+
+  -- If end_date < start_date, no weeks passed
+  IF end_date < start_date THEN
+    RETURN 0;
+  END IF;
+
+  SET target_weekday = WEEKDAY(end_date);  -- 0=Monday, ..., 6=Sunday
+
+  -- Find first date >= start_date with same weekday as end_date
+  SET first_target_date = start_date + INTERVAL ((7 + target_weekday - WEEKDAY(start_date)) % 7) DAY;
+
+  -- If that weekday hasn't occurred yet before end_date
+  IF first_target_date > end_date THEN
+    RETURN 0;
+  END IF;
+
+  RETURN FLOOR(DATEDIFF(end_date, first_target_date) / 7) + 1;
+END //
+
+DELIMITER ;
+
+
+-------------------------------------------------[ FIRST_WEEKDAY_OF_MONTH ]---------------------------------------------
+
+
+DROP FUNCTION IF EXISTS FIRST_WEEKDAY_OF_MONTH;
+DELIMITER //
+
+-- ======================================================================
+-- @returns DATE
+--     - The first occurrence of the weekday from reference_date
+--       within the same month as the reference_date
+--     - Example: reference_date = '2024-06-20' (Thursday),
+--       returns '2024-06-06' (first Thursday of June)
+-- ======================================================================
+CREATE FUNCTION FIRST_WEEKDAY_OF_MONTH(reference_date DATE)
+RETURNS DATE
+DETERMINISTIC
+BEGIN
+  DECLARE start_of_month DATE;
+  DECLARE target_dow INT;
+  DECLARE start_dow INT;
+  DECLARE days_to_add INT;
+
+  -- First day of the month of the reference_date
+  SET start_of_month = DATE_FORMAT(reference_date, '%Y-%m-01');
+
+  -- Normalize both to 0=Sunday, ..., 6=Saturday
+  SET target_dow = (DAYOFWEEK(reference_date) + 6) % 7;
+  SET start_dow = (DAYOFWEEK(start_of_month) + 6) % 7;
+
+  SET days_to_add = (7 + target_dow - start_dow) % 7;
+
+  RETURN DATE_ADD(start_of_month, INTERVAL days_to_add DAY);
+END //
+DELIMITER ;
+
+
+-------------------------------------------------[ ??? ]---------------------------------------------

@@ -80,7 +80,6 @@ public class PortfolioTrackerView extends DefaultPage {
 
     @Override
     protected void buildPage() {
-        initializeChart();
         initializeGrids();
         add(
                 headerSection(),
@@ -89,6 +88,7 @@ public class PortfolioTrackerView extends DefaultPage {
                 gridSection("Assets", assetsGrid),
                 gridSection("Transactions", transactionsGrid)
         );
+        initializeChart();
     }
 
     private Section headerSection() {

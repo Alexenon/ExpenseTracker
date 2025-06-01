@@ -1,9 +1,12 @@
 package com.example.application.views.components.custom.fields;
 
 import com.example.application.utils.common.StringUtils;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Paragraph;
 
 public class CurrencyField extends AbstractNumberTextField {
+
+    private final Component prefixComponent = new Paragraph("$");
 
     public CurrencyField() {
         this(null);
@@ -18,8 +21,15 @@ public class CurrencyField extends AbstractNumberTextField {
         numberFormat.setMinimumFractionDigits(2);
 
         setAllowedCharPattern("[0-9.]");
-        setPrefixComponent(new Paragraph("$"));
+        setPrefixComponent(prefixComponent);
         setFormatable(formatable);
+    }
+
+    public void setPrefix(boolean isPrefix) {
+        if (isPrefix && !prefixComponent.isAttached())
+            setPrefixComponent(prefixComponent);
+        else
+            prefixComponent.removeFromParent();
     }
 
     @Override
