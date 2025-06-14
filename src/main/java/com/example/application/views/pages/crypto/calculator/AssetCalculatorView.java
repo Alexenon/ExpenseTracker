@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 @PermitAll
 @PageTitle("Calculator")
-@Route(value = "details", layout = MainLayout.class)
+@Route(value = "calculator", layout = MainLayout.class)
 public class AssetCalculatorView extends AbstractPage {
 
     private final InstrumentsFacadeService instrumentsFacadeService;

@@ -53,6 +53,10 @@ public class InstrumentsService {
         return assetRepository.findBySymbol(symbol.name());
     }
 
+    public Asset saveAsset(Asset asset) {
+        return assetRepository.save(asset);
+    }
+
     /*
      * AssetWatcher
      * */

@@ -3,15 +3,15 @@ package com.example.application.views.components.custom;
 import com.example.application.views.components.core.Container;
 import com.example.application.views.components.custom.icons.MonoIcon;
 import com.example.application.views.components.custom.icons.PictogramIcon;
-import com.example.application.views.pages.ExpensesView;
+import com.example.application.views.pages.PolicyView;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.router.RouterLink;
 
 public class Footer extends com.vaadin.flow.component.html.Footer {
 
-    private final RouterLink termsLink = new RouterLink("Terms of Service", ExpensesView.class);
-    private final RouterLink policyLink = new RouterLink("Privacy Policy", ExpensesView.class);
+    private final RouterLink termsLink = new RouterLink("Terms of Service", PolicyView.class);
+    private final RouterLink policyLink = new RouterLink("Privacy Policy", PolicyView.class);
     private final MonoIcon githubIcon = PictogramIcon.GITHUB.create();
     private final MonoIcon facebookIcon = PictogramIcon.FACEBOOK.create();
     private final MonoIcon twitterIcon = PictogramIcon.TWITTER.create();

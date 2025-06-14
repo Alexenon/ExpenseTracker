@@ -142,7 +142,15 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
         TextArea notesArea = new TextArea();
         notesArea.setClassName("note-area");
         notesArea.setPlaceholder("Add your thoughts about coin here.");
+        notesArea.setValue(asset.getComment());
         Button saveBtn = new Button("Save");
+        saveBtn.addClickListener(e -> {
+            boolean saved = instrumentsFacadeService.saveAssetNote(asset, notesArea.getValue());
+            if (saved)
+                showSuccessfulNotification("Succesfully saved asset note");
+            else
+                showErrorNotification("Something went wrong");
+        });
 
         Container sectionBody = Container.builder()
                 .addClassNames("note-wrapper")

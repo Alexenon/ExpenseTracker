@@ -21,10 +21,6 @@ public class PricePercentageWrapper extends Div {
         addClassName("price-profit-wrapper");
     }
 
-    public void setPriceColor(boolean shouldBeColored) {
-        price.setHasColor(shouldBeColored);
-    }
-
     public void setPercentageBadgeBackground(boolean shouldBeColored) {
         percentage.setHasBackground(shouldBeColored);
     }

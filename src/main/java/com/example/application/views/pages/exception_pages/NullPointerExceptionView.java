@@ -3,19 +3,21 @@ package com.example.application.views.pages.exception_pages;
 import com.vaadin.flow.router.ErrorParameter;
 import com.vaadin.flow.router.PageTitle;
 import jakarta.annotation.security.PermitAll;
-import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 
+@Slf4j
 @PermitAll
 @PageTitle("Not Found")
 public class NullPointerExceptionView extends ExceptionView<NullPointerException> {
     @Override
-    protected int httpStatus() {
-        return HttpServletResponse.SC_NOT_FOUND;
+    protected HttpStatus httpStatus() {
+        return HttpStatus.INTERNAL_SERVER_ERROR;
     }
 
     @Override
     protected String errorTitle() {
-        return "This page was not found!";
+        return "Oops! Something went wrong.";
     }
 
     @Override
@@ -25,7 +27,6 @@ public class NullPointerExceptionView extends ExceptionView<NullPointerException
 
     @Override
     protected String getErrorDescription(ErrorParameter<NullPointerException> parameter) {
-        parameter.getException().printStackTrace();
         return super.getErrorDescription(parameter);
     }
 }

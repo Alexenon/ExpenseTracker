@@ -4,6 +4,7 @@ import com.example.application.utils.fetchers.api_responses.ApiResponse;
 import com.example.application.utils.fetchers.api_responses.AssetMetaDataApiResp;
 import com.example.application.utils.fetchers.api_responses.Coin;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.io.IOException;
 import java.net.URI;
@@ -53,7 +54,7 @@ public class CryptoCompareFetcher {
                 coinList.addAll(dataMap.values());
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println(ExceptionUtils.getStackTrace(e));
         }
         return coinList;
     }

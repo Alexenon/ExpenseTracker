@@ -44,6 +44,8 @@ public class PercentageBadge extends Div {
 
     public void setValue(double value) {
         this.value = value;
+        if (hasColor)
+            textField.setColorClassName(value);
         textField.setValue(value);
         setIcon();
         setBackgroundClassName();
@@ -87,17 +89,18 @@ public class PercentageBadge extends Div {
         return LumoIcon.MINUS.create();
     }
 
-    public boolean isHasColor() {
+    public boolean hasColor() {
         return hasColor;
     }
 
     public void setHasColor(boolean hasColor) {
         this.hasColor = hasColor;
-        textField.setHasColor(hasColor);
+        if (hasColor)
+            textField.setColorClassName(value);
         icon.setClassName(textField.getClassName());
     }
 
-    public boolean isHasBackground() {
+    public boolean hasBackground() {
         return hasBackground;
     }
 

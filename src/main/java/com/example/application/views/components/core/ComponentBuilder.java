@@ -41,6 +41,13 @@ public class ComponentBuilder<T extends Component> {
         return this;
     }
 
+    public ComponentBuilder<T> setStyle(String property, String value) {
+        if (component instanceof HasStyle allowed) {
+            allowed.getStyle().set(property, value);
+        }
+        return this;
+    }
+
     public ComponentBuilder<T> setText(String text) {
         if (component instanceof HasText allowed) {
             allowed.setText(text);

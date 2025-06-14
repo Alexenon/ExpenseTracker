@@ -138,11 +138,12 @@
         </dependency>
 
         <!-- Vaadin Add's on -->
-        <dependency>
-            <groupId>com.vaadin.componentfactory</groupId>
-            <artifactId>togglebutton</artifactId>
-            <version>1.0.2</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.vaadin.componentfactory</groupId>-->
+<!--            <artifactId>togglebutton</artifactId>-->
+<!--            <version>1.0.2</version>-->
+<!--        </dependency>-->
+
     </dependencies>
 
     <build>

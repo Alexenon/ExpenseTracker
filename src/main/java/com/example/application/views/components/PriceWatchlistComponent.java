@@ -5,13 +5,14 @@ import com.example.application.entities.crypto.AssetWatcher;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.utils.common.StringUtils;
 import com.example.application.views.components.core.Container;
-import com.example.application.views.components.core.buttons.DualLabelToggleButton;
 import com.example.application.views.components.custom.fields.CurrencyField;
+import com.example.application.views.components.utils.HasNotifications;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.converter.StringToDoubleConverter;
 import com.vaadin.flow.theme.lumo.LumoIcon;
@@ -25,7 +26,7 @@ import java.util.List;
  *  - Add style for 'Save' and 'Delete' buttons
  * */
 
-public class PriceWatchlistComponent extends Div {
+public class PriceWatchlistComponent extends Div implements HasNotifications {
 
     private final Asset asset;
     private final AssetWatcher.ActionType actionType;
@@ -72,7 +73,9 @@ public class PriceWatchlistComponent extends Div {
         private final CurrencyField target = new CurrencyField("Price");
         private final CurrencyField targetAmount = new CurrencyField("Amount in USD");
         private final Checkbox markAsCompleted = new Checkbox("Mark as completed");
-        private final DualLabelToggleButton toggleBtn = new DualLabelToggleButton("$", "%");
+        // FIXME: Invalid vaadin checkbox version, most probably broken by Add On
+        private final Container checkboxContainer = new Container("centered-row", markAsCompleted, new Span("Mark as completed"));
+//        private final DualLabelToggleButton toggleBtn = new DualLabelToggleButton("$", "%");
         private final Button saveBtn = new Button("Save");
         private final Button deleteBtn = new Button("Delete");
         private final Button editBtn = new Button(LumoIcon.EDIT.create());
@@ -118,20 +121,24 @@ public class PriceWatchlistComponent extends Div {
             saveBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
             deleteBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_ERROR);
 
-            toggleBtn.addClickListener(e -> {
-                System.out.println(toggleBtn.isChecked());
-            });
+//            toggleBtn.addClickListener(e -> {
+//                System.out.println(toggleBtn.isChecked());
+//            });
 
             saveBtn.addClickListener(event -> {
+                System.out.println("isDraft = " + isDraft);
                 binder.validate();
                 if (binder.writeBeanIfValid(assetWatcher)) {
                     System.out.println("Saving " + assetWatcher);
                     instrumentsFacadeService.saveAssetWatcher(assetWatcher);
                     isDraft = false;
+                    updateStatus();
                     setEditMode(false);
+                    showSuccessfulNotification("Sucessfully saved");
                 } else {
-                    System.out.println("Validation failed.");
+                    showErrorNotification("Something went wrong");
                 }
+                System.out.println("isDraft = " + isDraft);
             });
 
             markAsCompleted.addClickListener(e -> updateStatus());
@@ -150,7 +157,7 @@ public class PriceWatchlistComponent extends Div {
         private Div buildBody() {
             return new Container("card-wrapper-body", target, targetAmount,
 //                    toggleBtn,  // TODO: Add me again and continue styling
-                    markAsCompleted);
+                    checkboxContainer);
         }
 
         private Div buildFooter() {
@@ -162,7 +169,7 @@ public class PriceWatchlistComponent extends Div {
             target.setReadOnly(!isEditMode);
             targetAmount.setReadOnly(!isEditMode);
             status.setVisible(!isEditMode);
-            markAsCompleted.setVisible(isEditMode);
+            checkboxContainer.setVisible(isEditMode);
             saveBtn.setVisible(isEditMode);
             deleteBtn.setVisible(isEditMode);
             editBtn.setIcon(isEditMode ? LumoIcon.UNDO.create() : LumoIcon.EDIT.create());

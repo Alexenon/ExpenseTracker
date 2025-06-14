@@ -1,4 +1,4 @@
-package com.example.application.views.pages;
+package com.example.application.views.pages.expenses;
 
 import com.example.application.data.dtos.ExpenseDTO;
 import com.example.application.services.CategoryService;
@@ -8,6 +8,7 @@ import com.example.application.utils.ExpenseConvertor;
 import com.example.application.views.components.custom.dialogs.AddExpenseDialog;
 import com.example.application.views.components.custom.dialogs.EditExpenseDialog;
 import com.example.application.views.layouts.MainLayout;
+import com.example.application.views.pages.AbstractPage;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;

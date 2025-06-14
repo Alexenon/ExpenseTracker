@@ -5,7 +5,7 @@ import com.example.application.entities.Expense;
 import com.example.application.services.CategoryService;
 import com.example.application.services.ExpenseService;
 import com.example.application.views.components.utils.HasNotifications;
-import com.example.application.views.pages.ExpensesView;
+import com.example.application.views.pages.expenses.ExpensesView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
@@ -82,6 +82,8 @@ public class AddExpenseDialog extends Dialog implements HasNotifications {
     }
 
     private void initFields() {
+        nameField.getElement().setAttribute("autocomplete", "off");
+
         timestampField.setLabel("Interval");
         timestampField.setItems(Expense.Timestamp.values());
         timestampField.setHelperText("Select how often this expense will be triggered");

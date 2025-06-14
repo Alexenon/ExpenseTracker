@@ -1,14 +1,15 @@
 package com.example.application.views.components.custom.display;
 
 import com.example.application.utils.common.number.DecimalFormatter;
+import com.example.application.views.components.custom.fields.stats.HasColorfulValue;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.html.Paragraph;
 
 @Tag(Tag.P)
-public class NumericValueParagraph extends Paragraph {
+public class NumericValueParagraph extends Paragraph implements HasColorfulValue {
 
     private double value;
-    private boolean hasColor;
+    private boolean withColor;
     private DecimalFormatter formatter;
 
     public NumericValueParagraph() {
@@ -29,35 +30,14 @@ public class NumericValueParagraph extends Paragraph {
 
     public NumericValueParagraph(double value, DecimalFormatter formatter, boolean hasColor) {
         this.value = value;
-        this.hasColor = hasColor;
         this.formatter = formatter;
-        setClassNameByColor();
         setText(formatter.format(value));
+        if(hasColor)
+            setColorClassName(value);
     }
 
     public void setValue(double value) {
         this.value = value;
-        setClassNameByColor();
-    }
-
-    public void setHasColor(boolean withColor) {
-        this.hasColor = withColor;
-        setClassNameByColor();
-    }
-
-    private void setClassNameByColor() {
-        removeClassNames("value-increase", "value-decrease");
-        String className = getClassNameByValue();
-        if (hasColor && !className.isEmpty()) {
-            addClassName(className);
-        }
-    }
-
-    private String getClassNameByValue() {
-        if (value == 0)
-            return "";
-
-        return (value > 0) ? "value-increase" : "value-decrease";
     }
 
     public void setFormatter(DecimalFormatter formatter) {

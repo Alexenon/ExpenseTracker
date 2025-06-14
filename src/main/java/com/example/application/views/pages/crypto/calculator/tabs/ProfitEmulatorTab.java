@@ -6,7 +6,9 @@ import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.utils.investment.ProfitCalculator;
 import com.example.application.utils.investment.ProfitUtils;
+import com.example.application.views.components.core.ComponentBuilder;
 import com.example.application.views.components.core.Container;
+import com.example.application.views.components.custom.display.NumericValueParagraph;
 import com.example.application.views.components.custom.fields.AssetComboBox;
 import com.example.application.views.components.custom.fields.stats.ProfitStatsDisplay;
 import com.example.application.views.components.custom.forms.layouts.TransactionalLayout;
@@ -17,6 +19,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.theme.lumo.LumoIcon;
 import lombok.extern.slf4j.Slf4j;
 
@@ -129,25 +132,45 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
             String sellVolumeInfo = currencyFormatter.format(ProfitCalculator.calculateTotalCostForSellTransactions(transactions));
             String remainingCostInfo = currencyFormatter.format(ProfitCalculator.getRemainingTokensCost(transactions));
 
+            // COLOR:
+            //  - Total Profit (green)
+            //  - Total Cost (green)
+            //  - Amount Tokens left (blue)
+            //  - Worth remaining tokens (green)
+
+            NumericValueParagraph costParagraph = new NumericValueParagraph(totalCost, currencyFormatter, true);
+            NumericValueParagraph profitParagraph = new NumericValueParagraph(totalProfit, currencyFormatter, true);
+
+            Container tokensLeftContainer = Container.builder("centered-row")
+                    .addComponent(() -> new ComponentBuilder<>(Paragraph.class)
+                            .addClass("asset-amount")
+                            .setStyle("margin-right", "2px")
+                            .setText(amountFormatter.format(amountOfRemainingTokens)).build()
+                    )
+                    .addComponent(new Span(symbol))
+                    .build();
+            ProfitStatsDisplay tokensLeft = new ProfitStatsDisplay("Amount of tokens left:", tokensLeftContainer);
+
+
             resultsContainer.removeAll();
             resultsContainer.add(
-                    new ProfitStatsDisplay("Avg Buy:", currencyFormatter.format(avgBuy)),
-                    new ProfitStatsDisplay("Avg Sell:", currencyFormatter.format(avgSell)),
+                    new ProfitStatsDisplay("Avg Buy:", avgBuy, currencyFormatter),
+                    new ProfitStatsDisplay("Avg Sell:", avgSell, currencyFormatter),
                     new ProfitStatsDisplay("Avg Growth Rate", percentageFormatter.format(ProfitUtils.growthPercentage(avgBuy, avgSell))),
 
                     new Hr(),
-                    new ProfitStatsDisplay("Total Cost", currencyFormatter.format(totalCost)),
+                    new ProfitStatsDisplay("Total Cost", totalCost, currencyFormatter, true),
 
                     new Hr(),
-                    new ProfitStatsDisplay("Amount of tokens left:", amountFormatter.format(amountOfRemainingTokens, symbol)),
-                    new ProfitStatsDisplay("Worth of remaining tokens:", currencyFormatter.format(worthRemainingTokens)),
+                    tokensLeft,
+                    new ProfitStatsDisplay("Worth of remaining tokens:", worthRemainingTokens, currencyFormatter),
                     new ProfitStatsDisplay("Cost for remaining tokens:", remainingCostInfo),
 
                     new Hr(),
-                    new ProfitStatsDisplay("Realized Profit", currencyFormatter.format(realizedProfit)),
-                    new ProfitStatsDisplay("Unrealized Profit", currencyFormatter.format(unrealizedProfit)),
-                    new ProfitStatsDisplay("Total Profit", currencyFormatter.format(totalProfit)),
-//                    new ProfitStatsDisplay("Net Profit", currencyFormatter.format(netProfit)), // FIXME: DOENST DISPLAY RIGHT VALUES
+                    new ProfitStatsDisplay("Realized Profit", realizedProfit, currencyFormatter),
+                    new ProfitStatsDisplay("Unrealized Profit", unrealizedProfit, currencyFormatter),
+                    new ProfitStatsDisplay("Total Profit", totalProfit, currencyFormatter, true),
+//                    new ProfitStatsDisplay("Net Profit", currencyFormatter.format(netProfit)), // FIXME: DOESN'T DISPLAY RIGHT VALUES
 
                     new Hr(),
                     new ProfitStatsDisplay("Buy Trading Volume", buyVolumeInfo),

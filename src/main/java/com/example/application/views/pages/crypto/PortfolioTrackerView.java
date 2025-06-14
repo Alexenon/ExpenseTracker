@@ -1,4 +1,4 @@
-package com.example.application.views.pages;
+package com.example.application.views.pages.crypto;
 
 import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.CryptoTransaction;
@@ -13,7 +13,7 @@ import com.example.application.views.components.custom.display.NumericValueParag
 import com.example.application.views.components.custom.fields.PricePercentageWrapper;
 import com.example.application.views.components.custom.fields.stats.PortfolioStatsDisplay;
 import com.example.application.views.layouts.MainLayout;
-import com.example.application.views.pages.crypto.AssetDetailsView;
+import com.example.application.views.pages.DefaultPage;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;

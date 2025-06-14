@@ -1,10 +1,10 @@
 package com.example.application.views.components.custom;
 
-import com.example.application.views.pages.DashboardView;
-import com.example.application.views.pages.ExpensesView;
 import com.example.application.views.pages.HomeView;
-import com.example.application.views.pages.PortfolioTrackerView;
+import com.example.application.views.pages.crypto.PortfolioTrackerView;
 import com.example.application.views.pages.crypto.calculator.AssetCalculatorView;
+import com.example.application.views.pages.expenses.DashboardView;
+import com.example.application.views.pages.expenses.ExpensesView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.html.Div;

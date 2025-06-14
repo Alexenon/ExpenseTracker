@@ -4,14 +4,14 @@ import com.vaadin.flow.router.ErrorParameter;
 import com.vaadin.flow.router.NotFoundException;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
-import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpStatus;
 
 @AnonymousAllowed
 @PageTitle("Not Found")
 public class NotFoundView extends ExceptionView<NotFoundException> {
     @Override
-    protected int httpStatus() {
-        return HttpServletResponse.SC_NOT_FOUND;
+    protected HttpStatus httpStatus() {
+        return HttpStatus.NOT_FOUND;
     }
 
     @Override

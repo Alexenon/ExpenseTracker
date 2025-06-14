@@ -11,19 +11,14 @@ import com.vaadin.flow.component.textfield.TextField;
 @Tag("Form")
 public class LoginForm extends Form {
 
-    private final H2 title;
-    private final TextField username;
-    private final PasswordField password;
-    private final NativeButton submitBtn;
+    private final H2 title = new H2("Login");
+    private final TextField username = new TextField(null, "Enter your username");
+    private final NativeButton submitBtn = new NativeButton("Sign In");
+    private final PasswordField password = new PasswordField(null, "Enter password");
 
     public LoginForm() {
         this.setAction("login");
         this.setMethod("post");
-
-        title = new H2("Login");
-        username = new TextField(null, "Enter your username");
-        password = new PasswordField(null, "Enter password");
-        submitBtn = new NativeButton("Sign In");
 
         title.addClassName("form-title");
         username.setId("username-field");
@@ -31,7 +26,7 @@ public class LoginForm extends Form {
         submitBtn.addClassName("submit-btn");
 
         add(title, username, password, submitBtn);
-        setupAttributesForInputFields();
+        password.addAttachListener(e -> setupAttributesForInputFields());
     }
 
     private void setupAttributesForInputFields() {
@@ -39,6 +34,7 @@ public class LoginForm extends Form {
                 const usernameField = document.getElementById('username-field');
                 const usernameInput = usernameField.querySelector('input');
                 usernameInput.setAttribute('name', 'username');
+                usernameInput.setAttribute('autocomplete', 'username');
                 
                 const passwordField = document.getElementById('password-field');
                 const passwordInput = passwordField.querySelector('input');

@@ -4,41 +4,46 @@ import com.example.application.entities.crypto.Asset;
 import com.example.application.repositories.crypto.AssetRepository;
 import com.example.application.utils.fetchers.CryptoCompareFetcher;
 import com.example.application.utils.fetchers.api_responses.AssetMetadata;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
+@SuppressWarnings("LoggingSimilarMessage")
+@Slf4j
 @Component
 public class InstrumentsProvider {
 
     private final AssetRepository assetRepository;
-
-    private Map<Asset, AssetMetadata> metadataPerAsset;
+    private final Map<String, AssetMetadata> metadataPerAsset = new HashMap<>();
 
     @Autowired
     private InstrumentsProvider(AssetRepository assetRepository) {
         this.assetRepository = assetRepository;
-        this.metadataPerAsset = fetchMetadata();
+        fetchMetadata();
     }
 
-    private Map<Asset, AssetMetadata> fetchMetadata() {
-        Map<Asset, AssetMetadata> map = new HashMap<>();
-
-        assetRepository.findAll().forEach(asset -> {
+    private void fetchMetadata() {
+        List<Asset> assets = assetRepository.findAll();
+        log.info("Started fetching metadata for {} assets", assets.size());
+        assets.forEach(asset -> {
             try {
                 String symbolName = asset.getSymbol();
                 AssetMetadata assetMetadata = CryptoCompareFetcher.getCoinMetaData(symbolName).getData();
-                map.put(asset, assetMetadata);
+                Optional.of(CryptoCompareFetcher.getCoinMetaData(symbolName).getData())
+                        .ifPresent(metadata -> metadataPerAsset.put(symbolName, metadata));
             } catch (Exception e) {
-                System.out.printf("Failed to fetch metadata for asset: %s. Error: %s\n", asset.getSymbol(), e.getMessage());
+                log.error("Failed to fetch metadata for asset: {}. Error: {}", asset.getSymbol(), ExceptionUtils.getStackTrace(e));
             }
         });
 
-        return map;
+        log.info("Loaded meta data for {} instruments", metadataPerAsset.size());
     }
 
     // TODO: Compare results
@@ -46,26 +51,31 @@ public class InstrumentsProvider {
     /**
      * @return fetched metadata in parallel for performance improvement
      */
-    private Map<Asset, AssetMetadata> fetchMetadataInParallel() {
-        Map<Asset, AssetMetadata> map = new ConcurrentHashMap<>();
+    private Map<String, AssetMetadata> fetchMetadataInParallel() {
+        Map<String, AssetMetadata> map = new ConcurrentHashMap<>();
         assetRepository.findAll().parallelStream().forEach(asset -> {
             try {
                 String symbolName = asset.getSymbol();
-                AssetMetadata assetMetadata = CryptoCompareFetcher.getCoinMetaData(symbolName).getData();
-                map.put(asset, assetMetadata);
+                Optional.of(CryptoCompareFetcher.getCoinMetaData(symbolName).getData())
+                        .ifPresent(metadata -> map.put(symbolName, metadata));
             } catch (Exception e) {
-                System.out.printf("Failed to fetch metadata for asset: %s. Error: %s\n", asset.getSymbol(), e.getMessage());
+                log.error("Failed to fetch metadata for asset: {}. Error: {}", asset.getSymbol(), ExceptionUtils.getStackTrace(e));
             }
         });
+
+        log.info("Loaded meta data for {} instruments", metadataPerAsset.size());
         return map;
     }
 
-    public Map<Asset, AssetMetadata> getMetadata() {
-        return Objects.requireNonNull(metadataPerAsset, "The metadata for all assets is empty");
+    public Map<String, AssetMetadata> getMetadata() {
+        if (metadataPerAsset.isEmpty())
+            throw new NullPointerException("The metadata for all assets is empty");
+
+        return metadataPerAsset;
     }
 
-    public Map<Asset, AssetMetadata> getUpdatedMetadata() {
-        metadataPerAsset = fetchMetadata();
+    public Map<String, AssetMetadata> getUpdatedMetadata() {
+        fetchMetadata();
         return metadataPerAsset;
     }
 
