@@ -86,7 +86,7 @@ public class InstrumentsFacadeService {
         return getAllTransactions()
                 .stream()
                 .filter(CryptoTransaction::isBuyTransaction)
-                .map(CryptoTransaction::getAsset)
+                .map(CryptoTransaction::getTradedAsset)
                 .distinct()
                 .toList();
     }

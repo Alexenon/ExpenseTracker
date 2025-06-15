@@ -9,7 +9,7 @@ import com.example.application.utils.investment.ProfitUtils;
 import com.example.application.views.components.core.ComponentBuilder;
 import com.example.application.views.components.core.Container;
 import com.example.application.views.components.custom.display.NumericValueParagraph;
-import com.example.application.views.components.custom.fields.AssetComboBox;
+import com.example.application.views.components.custom.fields.input.AssetComboBox;
 import com.example.application.views.components.custom.fields.stats.ProfitStatsDisplay;
 import com.example.application.views.components.custom.forms.layouts.TransactionalLayout;
 import com.example.application.views.components.custom.icons.MonoIcon;
