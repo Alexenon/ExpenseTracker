@@ -1,19 +1,16 @@
 package com.example.application.services.crypto;
 
-import com.example.application.data.enums.Symbols;
+import com.example.application.data.enums.SymbolIndentifier;
 import com.example.application.data.models.InstrumentsProvider;
 import com.example.application.entities.crypto.*;
 import com.example.application.services.SecurityService;
 import com.example.application.services.UserService;
-import com.example.application.utils.fetchers.api_responses.AssetMetadata;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigInteger;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 /*
@@ -33,7 +30,6 @@ public class InstrumentsFacadeService {
 
     private final SecurityService securityService;
     private final InstrumentsService instrumentsService;
-    private final InstrumentsProvider instrumentsProvider;
 
     @Autowired
     public InstrumentsFacadeService(UserService userService,
@@ -42,7 +38,6 @@ public class InstrumentsFacadeService {
                                     InstrumentsProvider instrumentsProvider) {
         this.securityService = securityService;
         this.instrumentsService = instrumentsService;
-        this.instrumentsProvider = instrumentsProvider;
     }
 
     //<editor-fold desc="ASSET">
@@ -57,7 +52,7 @@ public class InstrumentsFacadeService {
     public boolean saveAssetNote(Asset asset, String note) {
         try {
             log.info("Saving note for asset {}, note: '{}'", asset, note);
-            asset.setComment(note);
+// SWITCH            asset.setComment(note);
             return instrumentsService.saveAsset(asset) != null;
         } catch (Exception e) {
             e.printStackTrace();
@@ -65,7 +60,7 @@ public class InstrumentsFacadeService {
         }
     }
 
-    public Asset getAssetBySymbol(Symbols symbol) {
+    public Asset getAssetBySymbol(SymbolIndentifier symbol) {
         return instrumentsService.getAssetBySymbol(symbol.name());
     }
 
@@ -163,52 +158,12 @@ public class InstrumentsFacadeService {
     }
     //</editor-fold>
 
-    //<editor-fold desc="METADATA">
-    public AssetMetadata getAssetMetadata(Asset asset) {
-        return Objects.requireNonNull(instrumentsProvider.getMetadata().get(asset.getSymbol()),
-                "Couldn't retrieve asset metadata for: " + asset);
-    }
-
-    public double getAssetMarketPrice(Asset asset) {
-        return asset == null ? 0 : getAssetMetadata(asset).getPriceUsd();
-    }
-
-    public String getAssetDescriptionSummary(Asset asset) {
-        return getAssetMetadata(asset).getAssetDescriptionSummary();
-    }
-
-    public double getAssetTotalMarketCap(Asset asset) {
-        return getAssetMetadata(asset).getTotalMktCapUsd();
-    }
-
-    public BigInteger getAssetSupplyTotal(Asset asset) {
-        return getAssetMetadata(asset).getSupplyTotal();
-    }
-
-    public BigInteger getAssetSupplyCirculating(Asset asset) {
-        return getAssetMetadata(asset).getSupplyCirculating();
-    }
-
-    public double getAsset24HourChangePercentage(Asset asset) {
-        return getAssetMetadata(asset).getSpotMoving24HourChangePercentageUsd();
-    }
-
-    public double getAsset24HourVolume(Asset asset) {
-        return getAssetMetadata(asset).getSpotMoving24HourQuoteVolumeUsd();
-    }
-
-    public String getAssetImgUrl(Asset asset) {
-        return getAssetMetadata(asset).getLogoUrl();
-    }
-
-    public void updateAssetMetadata() {
-        instrumentsProvider.getUpdatedMetadata();
-    }
-
-    //</editor-fold>
-
     private Wallet getAuthenticatedUserWallet() {
         return instrumentsService.getWalletByUser(securityService.getAuthenticatedUser());
+    }
+
+    public void updateAssetData() {
+        instrumentsService.updateAssetData();
     }
 
 }

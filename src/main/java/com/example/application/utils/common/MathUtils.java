@@ -10,23 +10,34 @@ import static com.example.application.utils.investment.ProfitUtils.ONE_HUNDRED_P
 public class MathUtils {
 
     /**
-     * Method to count whole part in a decimal number
-     */
-    public static int integerPlacesInNumber(String number) {
-        int indexOfDecimal = number.indexOf('.');
-        return indexOfDecimal < 0 ? number.length() : indexOfDecimal;
+     * @return a number that is either positive or negative depending on the provided {@code isPositive} value
+     * */
+    public static double withSign(double value, boolean isPositive) {
+        return isPositive ? Math.abs(value) : -Math.abs(value);
     }
 
     /**
-     * Method to count the decimal places in the string
+     * @return number that represents whole part in a decimal number(digits before comma)
+     */
+    public static int integerPlacesInNumber(String number) {
+        int indexOfDecimal = number.indexOf('.');
+        return indexOfDecimal <= 0 ? number.length() : indexOfDecimal;
+    }
+
+    /**
+     * @return number that represents whole part in a String representation of decimal number(digits before comma)
      */
     public static int decimalPlacesInNumber(String number) {
         int indexOfDecimal = number.indexOf('.');
-        return indexOfDecimal < 0 ? 0 : number.length() - indexOfDecimal - 1;
+        return indexOfDecimal <= 0 ? 0 : number.length() - indexOfDecimal - 1;
     }
 
     public static double safeZeroDivision(double dividend, double divisor) {
         return Double.compare(divisor, 0.0) == 0 ? 0 : dividend / divisor;
+    }
+
+    public static BigInteger percentageOf(BigInteger from, BigInteger to) {
+        return from.multiply(BigInteger.valueOf(ONE_HUNDRED_PERCENT)).divide(to);
     }
 
     /**
@@ -49,22 +60,20 @@ public class MathUtils {
         return IntStream.range(0, n).map(i -> (int) Math.pow(2, i)).sum();
     }
 
-    public static int percentageOf(BigInteger from, BigInteger to) {
-        return from.multiply(BigInteger.valueOf(ONE_HUNDRED_PERCENT)).divide(to).intValue();
-    }
-
     public static int percentageOf(double from, double to) {
         return to == 0
                 ? ONE_HUNDRED_PERCENT
                 : (int) (from * ONE_HUNDRED_PERCENT / to);
     }
 
-    // [34.000, 35.000, 36.000], 40.000  ->  36.000
-    // [34.000, 35.000, 36.000], 20.000  ->  34.000
-    // [34.000, 35.000, 36.000], 35.000  ->  35.000
-    // [34.000, 37.000, 40.000], 35.000  ->  34.000
-    // [34.000, 37.000, 40.000], 36.000  ->  37.000
-    // [34.000, 37.000, 40.000], 36.000  ->  37.000
+    /*
+        { [34.000, 35.000, 36.000], 40.000 }   ->   36.000
+        { [34.000, 35.000, 36.000], 20.000 }   ->   34.000
+        { [34.000, 35.000, 36.000], 35.000 }   ->   35.000
+        { [34.000, 37.000, 40.000], 35.000 }   ->   34.000
+        { [34.000, 37.000, 40.000], 36.000 }   ->   37.000
+        { [34.000, 36.000, 40.000], 35.000 }   ->   34.000 || 36.000
+    * */
     @SuppressWarnings("unused")
     private double closestPrice(List<Double> prices, double currentPrice) {
         double closestPrice = 0;

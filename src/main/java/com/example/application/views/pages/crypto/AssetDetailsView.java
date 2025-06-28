@@ -98,7 +98,7 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
 
         Container coinNameContainer = Container.builder("coin-overview-name-container")
                 .addComponent(() -> {
-                    Image image = new Image(instrumentsFacadeService.getAssetImgUrl(asset), asset.getSymbol());
+                    Image image = new Image(asset.getImageUrl(), asset.getSymbol());
                     image.setClassName("coin-overview-image");
                     return image;
                 })
@@ -107,23 +107,25 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
                 .addComponent(new Span(asset.getSymbol()))
                 .build();
 
-        double price = instrumentsFacadeService.getAssetMarketPrice(asset);
-        double percentage = instrumentsFacadeService.getAsset24HourChangePercentage(asset);
+        double price = asset.getMarketPrice();
+        double percentage = asset.getChangePercentage();
         PricePercentageWrapper priceWrapper = new PricePercentageWrapper(price, percentage);
         priceWrapper.addClassName("price-wrapper");
 
         Div coinInfoContainer = new Div(rank, coinNameContainer, priceWrapper);
-
-        Button markAsFavorite = new Button(getStarIcon(asset.isMarkedAsFavorite()));
-        markAsFavorite.addClassName("rounded-button");
-        markAsFavorite.addClickListener(e -> {
-            boolean isFavorite = asset.isMarkedAsFavorite();
-            asset.setMarkedAsFavorite(!isFavorite);
-            markAsFavorite.setIcon(getStarIcon(!isFavorite));
-        });
+// SWITCH
+//        Button markAsFavorite = new Button(getStarIcon(asset.isMarkedAsFavorite()));
+//        markAsFavorite.addClassName("rounded-button");
+//        markAsFavorite.addClickListener(e -> {
+//            boolean isFavorite = asset.isMarkedAsFavorite();
+//            asset.setMarkedAsFavorite(!isFavorite);
+//            markAsFavorite.setIcon(getStarIcon(!isFavorite));
+//        });
 
         section.addClassName("asset-details-header");
-        section.add(coinInfoContainer, markAsFavorite);
+        section.add(coinInfoContainer
+// SWITCH                , markAsFavorite
+        );
 
         return section;
     }
@@ -142,7 +144,7 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
         TextArea notesArea = new TextArea();
         notesArea.setClassName("note-area");
         notesArea.setPlaceholder("Add your thoughts about coin here.");
-        notesArea.setValue(asset.getComment());
+// SWITCH       notesArea.setValue(asset.getComment());
         Button saveBtn = new Button("Save");
         saveBtn.addClickListener(e -> {
             boolean saved = instrumentsFacadeService.saveAssetNote(asset, notesArea.getValue());
@@ -167,7 +169,7 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
         H3 title = new H3("Crypto Convertor");
         title.setClassName("section-title");
 
-        Image inputImage = new Image(instrumentsFacadeService.getAssetImgUrl(asset), asset.getSymbol());
+        Image inputImage = new Image(asset.getImageUrl(), asset.getSymbol());
         inputImage.setClassName("coin-overview-image");
 
         AmountField tokenAmountField = new AmountField();
@@ -175,7 +177,7 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
 
         CurrencyField usdAmountField = new CurrencyField();
         usdAmountField.setPrefix(false);
-        usdAmountField.setValue(instrumentsFacadeService.getAssetMarketPrice(asset));
+        usdAmountField.setValue(asset.getMarketPrice());
 
         Container inputContainer = Container.builder()
                 .addComponent(inputImage)
@@ -203,14 +205,14 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
 
         tokenAmountField.setValueChangeMode(ValueChangeMode.EAGER);
         tokenAmountField.addKeyUpListener(e -> {
-            double calculatedPrice = tokenAmountField.doubleValue() * instrumentsFacadeService.getAssetMarketPrice(asset);
+            double calculatedPrice = tokenAmountField.doubleValue() * asset.getMarketPrice();
             usdAmountField.setValue(calculatedPrice);
         });
 
         usdAmountField.setValueChangeMode(ValueChangeMode.EAGER);
         usdAmountField.addKeyUpListener(e -> {
             double amount = usdAmountField.doubleValue();
-            double price = instrumentsFacadeService.getAssetMarketPrice(asset);
+            double price = asset.getMarketPrice();
             tokenAmountField.setValue(MathUtils.safeZeroDivision(amount, price));
         });
 
@@ -276,14 +278,11 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
         title.setClassName("section-title");
         CompactFormatter compactFormatter = new CompactFormatter();
 
-        double assetTotalMarketCap = instrumentsFacadeService.getAssetTotalMarketCap(asset);
-        Div marketCap = new PortfolioStatsDisplay("Market Cap", compactFormatter.format(assetTotalMarketCap));
-
-        BigInteger assetTotalSupply = instrumentsFacadeService.getAssetSupplyTotal(asset);
-        double asset24HourVolume = instrumentsFacadeService.getAsset24HourVolume(asset);
-        BigInteger circulationSupplyValue = instrumentsFacadeService.getAssetSupplyCirculating(asset);
-        int percentageUseOfCirculationSupply = MathUtils.percentageOf(circulationSupplyValue, assetTotalSupply);
-        ProgressBar bar = new ProgressBar(0, 100, percentageUseOfCirculationSupply);
+        BigInteger assetTotalMarketCap = asset.getTotalMarketCap();
+        BigInteger assetTotalSupply = asset.getTotalSupply();
+        double asset24HourVolume = asset.getTodayVolume();
+        BigInteger circulationSupplyValue = asset.getCirculationSupply();
+        int percentageUseOfCirculationSupply = MathUtils.percentageOf(circulationSupplyValue, assetTotalSupply).intValue();
 
         Container circulationSupplyContainer = Container.builder("portfolio-diversity")
                 .addComponent(() -> {
@@ -292,25 +291,26 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
                     percentageText.getStyle().set("color", "blue");
                     return new HorizontalLayout(circulationText, percentageText);
                 })
-                .addComponent(bar)
+                .addComponent(new ProgressBar(0, 100, percentageUseOfCirculationSupply))
                 .build();
 
-        Div circulationSupply = new PortfolioStatsDisplay("Circulation Supply", circulationSupplyContainer);
+        Container sectionBody = Container.builder("section-card-wrapper", "market-stats-section")
+                .addComponents(
+                        new PortfolioStatsDisplay("Market Cap", compactFormatter.format(assetTotalMarketCap.doubleValue())),
+                        new PortfolioStatsDisplay("Circulation Supply", circulationSupplyContainer),
+                        new PortfolioStatsDisplay("Total Supply", compactFormatter.format(assetTotalSupply.doubleValue())),
+                        new PortfolioStatsDisplay("Volume 24h", compactFormatter.format(asset24HourVolume))
+                )
+                .build();
 
-        Div totalSupply = new PortfolioStatsDisplay("Total Supply", compactFormatter.format(assetTotalSupply.doubleValue()));
-        Div volume24Hour = new PortfolioStatsDisplay("Volume 24h", compactFormatter.format(asset24HourVolume));
-
-        Div body = new Div(marketCap, circulationSupply, totalSupply, volume24Hour);
-        body.addClassNames("section-card-wrapper", "market-stats-section");
-
-        section.add(title, body);
+        section.add(title, sectionBody);
         return section;
     }
 
     private Section aboutSection() {
         H3 title = new H3("About " + asset.getFullName());
         title.setClassName("section-title");
-        Paragraph description = new Paragraph(instrumentsFacadeService.getAssetDescriptionSummary(asset));
+        Paragraph description = new Paragraph(asset.getSummaryDescription());
         Container body = new Container("section-card-wrapper", description);
         return new Section(title, body);
     }

@@ -1,22 +1,27 @@
 package com.example.application.services.crypto;
 
-import com.example.application.data.enums.Symbols;
+import com.example.application.data.enums.SymbolIndentifier;
+import com.example.application.data.models.InstrumentsProvider;
 import com.example.application.entities.User;
 import com.example.application.entities.crypto.*;
 import com.example.application.repositories.crypto.AssetRepository;
 import com.example.application.repositories.crypto.WalletBalanceRepository;
 import com.example.application.utils.common.number.AmountFormatter;
 import com.example.application.utils.exceptions.InvalidBalanceAmount;
+import com.example.application.utils.fetchers.api_responses.AssetMetadata;
+import jakarta.validation.constraints.NotNull;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Service
+@Log4j2
 public class InstrumentsService {
 
+    private final InstrumentsProvider instrumentsProvider;
     private final WalletService walletService;
     private final AssetRepository assetRepository;
     private final AssetWatcherService assetWatcherService;
@@ -24,12 +29,14 @@ public class InstrumentsService {
     private final WalletBalanceRepository walletBalanceRepository;
 
     @Autowired
-    public InstrumentsService(WalletService walletService,
+    public InstrumentsService(InstrumentsProvider instrumentsProvider,
+                              WalletService walletService,
                               AssetRepository assetRepository,
                               CryptoTransactionService transactionService,
                               AssetWatcherService assetWatcherService,
                               WalletBalanceRepository walletBalanceRepository
     ) {
+        this.instrumentsProvider = instrumentsProvider;
         this.walletService = walletService;
         this.assetRepository = assetRepository;
         this.transactionService = transactionService;
@@ -49,7 +56,7 @@ public class InstrumentsService {
         return assetRepository.findBySymbol(symbolName.toUpperCase());
     }
 
-    public Asset getAssetBySymbol(Symbols symbol) {
+    public Asset getAssetBySymbol(SymbolIndentifier symbol) {
         return assetRepository.findBySymbol(symbol.name());
     }
 
@@ -132,10 +139,9 @@ public class InstrumentsService {
     public WalletBalance fillWalletBalance(Wallet wallet, Asset asset, double tokensAmountToBeAdded) {
         Objects.requireNonNull(asset);
         WalletBalance walletBalance = getWalletBalancesByWalletAndAsset(wallet, asset);
-        double balanceAfterSupply = getWalletBalanceAfterSupply(walletBalance, tokensAmountToBeAdded);
+        double balanceAfterSupply = calculateBalanceAfterSupply(walletBalance, tokensAmountToBeAdded);
 
         AmountFormatter amountFormatter = AmountFormatter.withDefaults();
-
         System.out.printf("Fill %s with %s. Left amount: %s\n", wallet,
                 amountFormatter.format(tokensAmountToBeAdded, asset),
                 amountFormatter.format(balanceAfterSupply, asset));
@@ -149,7 +155,7 @@ public class InstrumentsService {
         return walletBalance;
     }
 
-    public double getWalletBalanceAfterSupply(WalletBalance walletBalance, double tokensAmountToBeAdded) {
+    public double calculateBalanceAfterSupply(WalletBalance walletBalance, double tokensAmountToBeAdded) {
         return walletBalance.getAmount() + tokensAmountToBeAdded;
     }
 
@@ -158,18 +164,51 @@ public class InstrumentsService {
         return walletBalanceRepository.findByWalletWithNonZeroAmount(wallet.getId());
     }
 
-    /*
-     * OTHERS
-     * */
-
-    public void saveSymbolsInBatch() {
-        Arrays.stream(Symbols.values()).forEach(asset -> {
-            if (assetRepository.findBySymbol(asset.name()) == null) {
-                assetRepository.save(new Asset(asset.name(), asset.getFullName()));
-            }
-        });
-
-        System.out.println("Filled database with " + Symbols.values().length + " assets");
+    //<editor-fold desc="METADATA">
+    @Nullable
+    public AssetMetadata getAssetMetadata(@NotNull String symbol) {
+        Objects.requireNonNull(symbol, "symbol");
+        return instrumentsProvider.getMetadata().get(symbol);
     }
+
+    public void updateAssetData() {
+        Map<String, AssetMetadata> metadataMap = instrumentsProvider.getUpdatedMetadata();
+
+        if (metadataMap.isEmpty()) {
+            log.info("Metadata is empty. Skipping updating the database");
+            return;
+        }
+
+        Arrays.stream(SymbolIndentifier.values())
+                .forEach(indentifier -> {
+                    AssetMetadata assetMetadata = metadataMap.get(indentifier.name());
+                    updateAssetData(indentifier, assetMetadata);
+                });
+
+        System.out.println("Filled database with " + metadataMap + " assets");
+    }
+
+    private void updateAssetData(SymbolIndentifier indentifier, @Nullable AssetMetadata assetMetadata) {
+        if (assetMetadata == null) {
+            log.info("Couldn't manage to fetch the asset metadata");
+            return;
+        }
+
+        Asset asset = Optional.ofNullable(assetRepository.findBySymbol(indentifier.name())).orElse(new Asset());
+        asset.setSymbol(indentifier.name());
+        asset.setFullName(indentifier.getFullName());
+        Optional.ofNullable(assetMetadata.getPriceUsd()).ifPresent(asset::setMarketPrice);
+        Optional.ofNullable(assetMetadata.getAssetDescription()).ifPresent(asset::setDescription);
+        Optional.ofNullable(assetMetadata.getAssetDescriptionSummary()).ifPresent(asset::setSummaryDescription);
+        Optional.ofNullable(assetMetadata.getSpotMoving24HourQuoteVolumeUsd()).ifPresent(asset::setTodayVolume);
+        Optional.ofNullable(assetMetadata.getSpotMoving24HourChangePercentageUsd()).ifPresent(asset::setChangePercentage);
+        Optional.ofNullable(assetMetadata.getSupplyCirculating()).ifPresent(asset::setCirculationSupply);
+        Optional.ofNullable(assetMetadata.getSupplyTotal()).ifPresent(asset::setTotalSupply);
+        Optional.ofNullable(assetMetadata.getTotalMktCapUsd()).ifPresent(asset::setTotalMarketCap);
+        Optional.ofNullable(assetMetadata.getLogoUrl()).ifPresent(asset::setImageUrl);
+        assetRepository.save(asset);
+    }
+    //</editor-fold>
+
 
 }

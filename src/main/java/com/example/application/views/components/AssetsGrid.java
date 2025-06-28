@@ -310,7 +310,7 @@ public class AssetsGrid extends Div {
     private void initializeSyncButton() {
         syncButton.addClickListener(event -> {
             animateSyncButtonIcon();
-            instrumentsFacadeService.updateAssetMetadata();
+            instrumentsFacadeService.updateAssetData();
             setItems(gridAssets);
             grid.removeAllColumns();
             renderColumns();
@@ -390,10 +390,10 @@ public class AssetsGrid extends Div {
                 .map(asset -> AssetGridItem.builder()
                         .symbol(asset.getSymbol())
                         .name(asset.getFullName())
-                        .imageUrl(instrumentsFacadeService.getAssetImgUrl(asset))
-                        .price(instrumentsFacadeService.getAssetMarketPrice(asset))
+                        .imageUrl(asset.getImageUrl())
+                        .price(asset.getMarketPrice())
                         .tokenAmount(instrumentsFacadeService.getAmountOfTokens(asset))
-                        .priceChangesPercentage24h(instrumentsFacadeService.getAsset24HourChangePercentage(asset))
+                        .priceChangesPercentage24h(asset.getChangePercentage())
                         .closestBuy(instrumentsFacadeService.getClosestBuyWatcherPrice(asset))
                         .closestSell(instrumentsFacadeService.getClosestSellWatcherPrice(asset))
                         // TODO: Add volume column for: today, this week, this month, this year, total

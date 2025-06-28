@@ -21,7 +21,7 @@ public class DBOperationRunner implements CommandLineRunner {
     }
 
     private void updateDatabase() {
-        instrumentsService.saveSymbolsInBatch();
+        instrumentsService.updateAssetData();
         categoryService.saveCategoriesInBatch();
     }
 

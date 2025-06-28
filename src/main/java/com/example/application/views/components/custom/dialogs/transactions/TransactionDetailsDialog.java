@@ -83,7 +83,7 @@ public class TransactionDetailsDialog extends Dialog {
                 .addComponent(new HorizontalLayout(totalCostField, pricePerTokenField))
                 .build();
 
-        Image symbolImage = new Image(instrumentsFacadeService.getAssetImgUrl(asset), symbol);
+        Image symbolImage = new Image(asset.getImageUrl(), symbol);
         symbolImage.setClassName("coin-overview-image");
 
         Div body = Container.builder()
@@ -103,7 +103,7 @@ public class TransactionDetailsDialog extends Dialog {
     private Div detailsProfitLoss() {
         Asset asset = transaction.getAsset();
         double buyPrice = transaction.getMarketPrice();
-        double sellPrice = instrumentsFacadeService.getAssetMarketPrice(asset);
+        double sellPrice = asset.getMarketPrice();
         double totalCost = transaction.getOrderTotalCost();
 
         double usdProfit = ProfitUtils.netProfit(buyPrice, sellPrice, totalCost);
@@ -119,13 +119,12 @@ public class TransactionDetailsDialog extends Dialog {
                 .addComponent(new PricePercentageWrapper(usdProfit, percentageProfit))
                 .build();
 
-        double price = instrumentsFacadeService.getAssetMarketPrice(asset);
         double tokensAmount = instrumentsFacadeService.getAmountOfTokens(asset);
 
         return Container.builder("transaction-details-card")
                 .addComponents(profitLossContainer)
                 .addElement(new Element("hr"))
-                .addComponent(new ProfitStatsDisplay("Current Price", currencyFormatter.format(price)))
+                .addComponent(new ProfitStatsDisplay("Current Price", currencyFormatter.format(asset.getMarketPrice())))
                 .addElement(new Element("hr"))
                 .addComponent(new ProfitStatsDisplay("Current Amount", amountFormatter.format(tokensAmount, asset)))
                 .build();

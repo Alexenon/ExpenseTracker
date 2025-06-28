@@ -181,7 +181,7 @@ public class SellProfitTab extends BaseCalculatorTab {
     }
 
     private Div marketCapStatsWrapper(Asset asset, double buyPrice, double sellPrice) {
-        BigInteger circulationSupply = instrumentsFacadeService.getAssetSupplyCirculating(asset);
+        BigInteger circulationSupply = asset.getCirculationSupply();
         double prevMarketCap = ProfitUtils.marketCap(circulationSupply, buyPrice);
         double newMarketCap = ProfitUtils.marketCap(circulationSupply, sellPrice);
 
@@ -193,9 +193,9 @@ public class SellProfitTab extends BaseCalculatorTab {
     }
 
     private Div fdvStatsWrapper(Asset asset, double buyPrice, double sellPrice) {
-        BigInteger totalMarketSupply = instrumentsFacadeService.getAssetSupplyTotal(asset);
-        double currentValueFDV = ProfitUtils.fdv(totalMarketSupply, buyPrice);
-        double followingValueFDV = ProfitUtils.fdv(totalMarketSupply, sellPrice);
+        BigInteger totalSupply = asset.getTotalSupply();
+        double currentValueFDV = ProfitUtils.fdv(totalSupply, buyPrice);
+        double followingValueFDV = ProfitUtils.fdv(totalSupply, sellPrice);
 
         MonoIcon arrowIcon = PictogramIcon.ARROW_RIGHT_THIN.create();
         Paragraph previousFDV = new Paragraph(compactFormatter.format(currentValueFDV));

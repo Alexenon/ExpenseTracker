@@ -246,7 +246,7 @@ public class PortfolioTrackerView extends DefaultPage {
         Paragraph assetSymbol = new Paragraph(asset.getSymbol());
         assetSymbol.addClassName("performance-symbol");
 
-        Image assetImage = new Image(instrumentsFacadeService.getAssetImgUrl(asset), asset.getSymbol());
+        Image assetImage = new Image(asset.getImageUrl(), asset.getSymbol());
         assetImage.addClassNames("coin-overview-image", "performance-asset-image");
 
         double profit = portfolioPerformanceTracker.getAssetTotalProfit(asset);

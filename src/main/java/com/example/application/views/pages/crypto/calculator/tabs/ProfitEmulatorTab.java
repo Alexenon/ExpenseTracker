@@ -116,7 +116,7 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
             String symbol = assetSymbolField.getSymbol();
             List<CryptoTransaction> transactions = getListOfTransactions();
 
-            double price = instrumentsFacadeService.getAssetMarketPrice(assetSymbolField.getSelectedAsset());
+            double price = assetSymbolField.getSelectedAsset().getMarketPrice();
             double avgBuy = ProfitCalculator.getAverageBuyPrice(transactions);
             double avgSell = ProfitCalculator.getAverageSellPrice(transactions);
             double amountOfRemainingTokens = ProfitCalculator.getAmountOfRemainingTokens(transactions);
@@ -221,14 +221,14 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
 
     // TODO: Update this
     private Html getTable(Asset asset, double averageBuyPrice, double averageSellPrice) {
-        double currentPrice = instrumentsFacadeService.getAssetMarketPrice(asset);
+        double currentPrice = asset.getMarketPrice();
 
-        BigInteger totalMarketSupply = instrumentsFacadeService.getAssetSupplyTotal(asset);
+        BigInteger totalMarketSupply = asset.getTotalSupply();
         double currentFDV = ProfitUtils.fdv(totalMarketSupply, currentPrice);
         double avgBuyFDV = ProfitUtils.fdv(totalMarketSupply, averageBuyPrice);
         double avgSellFDV = ProfitUtils.fdv(totalMarketSupply, averageSellPrice);
 
-        BigInteger circulationSupply = instrumentsFacadeService.getAssetSupplyCirculating(asset);
+        BigInteger circulationSupply = asset.getCirculationSupply();
         double currentMarketCap = ProfitUtils.marketCap(circulationSupply, currentPrice);
         double avgBuyMarketCap = ProfitUtils.marketCap(circulationSupply, averageBuyPrice);
         double avgSellMarketCap = ProfitUtils.marketCap(circulationSupply, averageSellPrice);

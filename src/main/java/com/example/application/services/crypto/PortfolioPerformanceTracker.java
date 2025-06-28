@@ -42,7 +42,7 @@ public class PortfolioPerformanceTracker {
 
     //region ASSET STATS
     public double getAssetTotalWorth(Asset asset) {
-        return instrumentsFacadeService.getAmountOfTokens(asset) * instrumentsFacadeService.getAssetMarketPrice(asset);
+        return instrumentsFacadeService.getAmountOfTokens(asset) * asset.getMarketPrice();
     }
 
     public double getAssetRemainingTokensCost(Asset asset) {
@@ -100,7 +100,7 @@ public class PortfolioPerformanceTracker {
     public double getPortfolioWorth() {
         return instrumentsFacadeService.getWalletBalances()
                 .stream()
-                .mapToDouble(balance -> balance.getAmount() * instrumentsFacadeService.getAssetMarketPrice(balance.getAsset()))
+                .mapToDouble(balance -> balance.getAmount() * balance.getAsset().getMarketPrice())
                 .sum();
     }
 

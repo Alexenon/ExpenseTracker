@@ -25,10 +25,34 @@ public class WalletBalance {
     @JoinColumn(name = "asset_id", nullable = false)
     private Asset asset;
 
-    @Column(nullable = false)
+    @Column(name = "comment")
+    private String comment;
+
+    @Column(name = "marked_as_favorite", nullable = false)
+    private boolean markedAsFavorite = false;
+
+    @Column(name = "amount", nullable = false)
     private double amount = 0.0;
 
-    @Column(nullable = false, updatable = false)
+    @Column(name = "avg_buy_price", nullable = false)
+    private double avgBuyPrice = 0.0;
+
+    @Column(name = "avg_sell_price", nullable = false)
+    private double avgSellPrice = 0.0;
+
+    @Column(name = "cost", nullable = false)
+    private double cost = 0.0;
+
+//    @Column(name = "total_invested", precision = 19, scale = 4, nullable = false)
+//    private double totalInvested = 0.0;
+
+//    @Column(name = "total_realized", precision = 19, scale = 4, nullable = false)
+//    private double totalRealized = 0.0;
+
+    @Column(name = "last_time_updated", nullable = false)
+    private LocalDateTime lastTimeUpdated = LocalDateTime.now();
+
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
 }

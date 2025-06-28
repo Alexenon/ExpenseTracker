@@ -10,8 +10,9 @@ import java.util.*;
 import static com.example.application.utils.investment.ProfitUtils.ONE_HUNDRED_PERCENT;
 
 /**
- * FIFO Implementation (first in first out)
- * */
+ * Calculates profit and other metrics based on the all transactions that happened <br>
+ * FIFO implementation (first in first out)
+ */
 public class ProfitCalculator {
 
     private static class Order {
@@ -73,7 +74,7 @@ public class ProfitCalculator {
     /**
      * Calculates the cost of remaining tokens, where if contains SELL transactions, then the cost value
      * is substracted confirming with transaction order cost
-     * */
+     */
     public static double getRemainingTokensCost(List<CryptoTransaction> transactions) {
         Queue<Order> fifoQueue = new LinkedList<>();
         double remainingCost = 0.0;

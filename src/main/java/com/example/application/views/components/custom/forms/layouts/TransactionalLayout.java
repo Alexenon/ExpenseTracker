@@ -79,7 +79,7 @@ public class TransactionalLayout extends Div {
     //  - But add another field with average buy, current amount
     private double getAvgPriceByType(Asset asset) {
         if(instrumentsFacadeService.getTransactionsByAsset(asset).isEmpty())
-            return instrumentsFacadeService.getAssetMarketPrice(asset);
+            return asset.getMarketPrice();
 
         return typeField.getValue().equals(CryptoTransaction.TransactionType.BUY)
                 ? portfolioPerformanceTracker.getAverageBuyPrice(asset)

@@ -94,7 +94,7 @@ public class AssetPricingLayout extends Div implements BeforeEnterObserver {
         if (selectedAsset == null) {
             return 0;
         } else {
-            return instrumentsFacadeService.getAssetMarketPrice(selectedAsset);
+            return selectedAsset.getMarketPrice();
         }
     }
 
