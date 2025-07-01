@@ -5,7 +5,7 @@ import com.example.application.entities.crypto.CryptoTransaction;
 import com.example.application.entities.crypto.Wallet;
 import com.example.application.entities.crypto.WalletBalance;
 import com.example.application.repositories.crypto.WalletBalanceRepository;
-import com.example.application.utils.common.MathUtils;
+import com.example.application.utils.common.lang.MathUtils;
 import com.example.application.utils.exceptions.InvalidBalanceAmount;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,4 +1,4 @@
-package com.example.application.utils.common.number;
+package com.example.application.utils.common.formatters.number;
 
 import lombok.SneakyThrows;
 

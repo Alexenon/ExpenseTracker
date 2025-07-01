@@ -6,19 +6,22 @@ import com.example.application.entities.User;
 import com.example.application.entities.crypto.*;
 import com.example.application.repositories.crypto.AssetRepository;
 import com.example.application.repositories.crypto.WalletBalanceRepository;
-import com.example.application.utils.common.number.AmountFormatter;
+import com.example.application.utils.common.formatters.number.AmountFormatter;
 import com.example.application.utils.exceptions.InvalidBalanceAmount;
 import com.example.application.utils.fetchers.api_responses.AssetMetadata;
 import jakarta.validation.constraints.NotNull;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 @Service
-@Log4j2
+@Slf4j
 public class InstrumentsService {
 
     private final InstrumentsProvider instrumentsProvider;
@@ -174,23 +177,18 @@ public class InstrumentsService {
     public void updateAssetData() {
         Map<String, AssetMetadata> metadataMap = instrumentsProvider.getUpdatedMetadata();
 
-        if (metadataMap.isEmpty()) {
+        if (metadataMap == null || metadataMap.isEmpty()) {
             log.info("Metadata is empty. Skipping updating the database");
             return;
         }
 
-        Arrays.stream(SymbolIndentifier.values())
-                .forEach(indentifier -> {
-                    AssetMetadata assetMetadata = metadataMap.get(indentifier.name());
-                    updateAssetData(indentifier, assetMetadata);
-                });
-
-        System.out.println("Filled database with " + metadataMap + " assets");
+        metadataMap.forEach((key, value) -> updateAssetData(SymbolIndentifier.valueOf(key), value));
+        log.info("Updated database with {} assets", metadataMap.size());
     }
 
     private void updateAssetData(SymbolIndentifier indentifier, @Nullable AssetMetadata assetMetadata) {
         if (assetMetadata == null) {
-            log.info("Couldn't manage to fetch the asset metadata");
+            log.info("Received an empty asset metadata, skipping updating database");
             return;
         }
 

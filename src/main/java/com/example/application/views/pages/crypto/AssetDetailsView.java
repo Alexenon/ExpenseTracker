@@ -4,12 +4,12 @@ import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.AssetWatcher;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
-import com.example.application.utils.common.MathUtils;
-import com.example.application.utils.common.StringUtils;
-import com.example.application.utils.common.number.AmountFormatter;
-import com.example.application.utils.common.number.CompactFormatter;
-import com.example.application.utils.common.number.CurrencyFormatter;
-import com.example.application.utils.common.number.PercentageFormatter;
+import com.example.application.utils.common.formatters.number.AmountFormatter;
+import com.example.application.utils.common.formatters.number.CompactFormatter;
+import com.example.application.utils.common.formatters.number.CurrencyFormatter;
+import com.example.application.utils.common.formatters.number.PercentageFormatter;
+import com.example.application.utils.common.lang.MathUtils;
+import com.example.application.utils.common.lang.StringUtils;
 import com.example.application.views.components.PriceWatchlistComponent;
 import com.example.application.views.components.TransactionsGrid;
 import com.example.application.views.components.core.ComponentBuilder;
@@ -67,7 +67,7 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
 
     @Override
     public void setParameter(BeforeEvent beforeEvent, String symbol) {
-        this.asset = Objects.requireNonNull(instrumentsFacadeService.getAssetBySymbol(symbol));
+        this.asset = Objects.requireNonNull(instrumentsFacadeService.getAssetBySymbol(symbol), "Asset");
         this.addTransactionDialog = new AddTransactionDialog(instrumentsFacadeService);
     }
 
@@ -93,8 +93,10 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
 
     private Section headerDetailsSection() {
         Section section = new Section();
-        Paragraph rank = new Paragraph("RANK #4");
-        rank.setClassName("coin-overview-rank");
+        Paragraph rank = new ComponentBuilder<>(Paragraph.class)
+                .setText("RANK #4")
+                .addClass("coin-overview-rank")
+                .build();
 
         Container coinNameContainer = Container.builder("coin-overview-name-container")
                 .addComponent(() -> {

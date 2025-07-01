@@ -2,7 +2,7 @@ package com.example.application.views.components.custom.forms.layouts;
 
 import com.example.application.entities.crypto.Asset;
 import com.example.application.services.crypto.InstrumentsFacadeService;
-import com.example.application.utils.common.MathUtils;
+import com.example.application.utils.common.lang.MathUtils;
 import com.example.application.views.components.custom.fields.AmountField;
 import com.example.application.views.components.custom.fields.AssetComboBox;
 import com.example.application.views.components.custom.fields.CurrencyField;

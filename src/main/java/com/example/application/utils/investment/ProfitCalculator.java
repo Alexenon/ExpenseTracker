@@ -1,7 +1,7 @@
 package com.example.application.utils.investment;
 
 import com.example.application.entities.crypto.CryptoTransaction;
-import com.example.application.utils.common.MathUtils;
+import com.example.application.utils.common.lang.MathUtils;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;

@@ -1,7 +1,7 @@
 package com.example.application.views.components.custom.fields;
 
-import com.example.application.utils.common.number.CurrencyFormatter;
-import com.example.application.utils.common.number.DecimalFormatter;
+import com.example.application.utils.common.formatters.number.CurrencyFormatter;
+import com.example.application.utils.common.formatters.number.DecimalFormatter;
 import com.example.application.views.components.custom.display.NumericValueParagraph;
 import com.example.application.views.components.custom.display.PercentageBadge;
 import com.vaadin.flow.component.html.Div;

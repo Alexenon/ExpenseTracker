@@ -1,9 +1,9 @@
 package com.example.application.views.pages.crypto.calculator.tabs;
 
 import com.example.application.services.crypto.InstrumentsFacadeService;
-import com.example.application.utils.common.MathUtils;
-import com.example.application.utils.common.number.AmountFormatter;
-import com.example.application.utils.common.number.CurrencyFormatter;
+import com.example.application.utils.common.formatters.number.AmountFormatter;
+import com.example.application.utils.common.formatters.number.CurrencyFormatter;
+import com.example.application.utils.common.lang.MathUtils;
 import com.example.application.views.components.custom.fields.AmountField;
 import com.example.application.views.components.custom.fields.AssetComboBox;
 import com.example.application.views.components.custom.fields.CurrencyField;

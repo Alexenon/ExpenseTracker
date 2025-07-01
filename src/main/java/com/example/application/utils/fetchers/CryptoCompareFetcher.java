@@ -4,7 +4,7 @@ import com.example.application.utils.fetchers.api_responses.ApiResponse;
 import com.example.application.utils.fetchers.api_responses.AssetMetaDataApiResp;
 import com.example.application.utils.fetchers.api_responses.Coin;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.lang.Nullable;
 
@@ -28,7 +28,7 @@ import java.util.Map;
  *
  *
  * */
-@Log4j2
+@Slf4j
 public class CryptoCompareFetcher {
 
     private static final String COIN_LIST_URL = "https://min-api.cryptocompare.com/data/all/coinlist";

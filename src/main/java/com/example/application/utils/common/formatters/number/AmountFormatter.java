@@ -1,7 +1,7 @@
-package com.example.application.utils.common.number;
+package com.example.application.utils.common.formatters.number;
 
 import com.example.application.entities.crypto.Asset;
-import com.example.application.utils.common.StringUtils;
+import com.example.application.utils.common.lang.StringUtils;
 
 import java.text.NumberFormat;
 import java.util.Locale;

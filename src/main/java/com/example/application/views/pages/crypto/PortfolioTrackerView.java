@@ -4,7 +4,7 @@ import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.CryptoTransaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
-import com.example.application.utils.common.number.CurrencyFormatter;
+import com.example.application.utils.common.formatters.CommonFormatters;
 import com.example.application.views.components.AssetsGrid;
 import com.example.application.views.components.TransactionsGrid;
 import com.example.application.views.components.core.Container;
@@ -47,12 +47,7 @@ import java.util.stream.Collectors;
 @JsModule("./themes/light_theme/components/javascript/fillPieChart.js")
 @JavaScript("https://fastly.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js")
 public class PortfolioTrackerView extends DefaultPage {
-
-    // TODO: Export all these formaters into a class CommonFormatters
-    //  where it would be all general formatters, like SHORT_CURRENCY_FORMATTER, LONG_CURRENCY_FORMATTER, ...
-    // TODO: Same for data formatters and datePicker formatter
-    private final static CurrencyFormatter currencyFormatter = CurrencyFormatter.withDefaults();
-
+    
     @Autowired
     private InstrumentsFacadeService instrumentsFacadeService;
     @Autowired
@@ -95,7 +90,7 @@ public class PortfolioTrackerView extends DefaultPage {
         Section section = new Section();
         section.addClassName("asset-details-header");
 
-        NumericValueParagraph worth = new NumericValueParagraph(portfolioPerformanceTracker.getPortfolioWorth(), currencyFormatter);
+        NumericValueParagraph worth = new NumericValueParagraph(portfolioPerformanceTracker.getPortfolioWorth(), CommonFormatters.CURRENCY);
         double percentage = portfolioPerformanceTracker.getPortfolioProfitPercentage();
         double profit = portfolioPerformanceTracker.getPortfolioTotalProfit();
         PricePercentageWrapper profitWrapper = new PricePercentageWrapper(profit, percentage);
@@ -160,17 +155,17 @@ public class PortfolioTrackerView extends DefaultPage {
 
         double totalProfit = portfolioPerformanceTracker.getPortfolioTotalProfit();
         String nrOfAssets = String.valueOf(instrumentsFacadeService.getAssetsWithNonZeroAmount().size());
-        String realized = currencyFormatter.format(portfolioPerformanceTracker.getPortfolioRealizedProfit());
-        String unrealized = currencyFormatter.format(portfolioPerformanceTracker.getPortfolioUnrealizedProfit());
+        String realized = CommonFormatters.CURRENCY.format(portfolioPerformanceTracker.getPortfolioRealizedProfit());
+        String unrealized = CommonFormatters.CURRENCY.format(portfolioPerformanceTracker.getPortfolioUnrealizedProfit());
         String avgTimeHolding = String.format("%.1f days", portfolioPerformanceTracker.getPortfolioAverageHoldingDays());
 
-        Div totalWorth = new PortfolioStatsDisplay("Total Worth", currencyFormatter.format(portfolioPerformanceTracker.getPortfolioWorth()),
+        Div totalWorth = new PortfolioStatsDisplay("Total Worth", CommonFormatters.CURRENCY.format(portfolioPerformanceTracker.getPortfolioWorth()),
                 "Total value of all your holdings based on the latest price");
-        Div totalCost = new PortfolioStatsDisplay("Total Cost", currencyFormatter.format(portfolioPerformanceTracker.getPortfolioCost()),
+        Div totalCost = new PortfolioStatsDisplay("Total Cost", CommonFormatters.CURRENCY.format(portfolioPerformanceTracker.getPortfolioCost()),
                 "Total amount of dollars invested to buy all the assets");
         Div numberOfAssets = new PortfolioStatsDisplay("No. of Assets", nrOfAssets,
                 "Current number of assets that are in your portfolio");
-        Div profitStats = new PortfolioStatsDisplay("Total Profit", new NumericValueParagraph(totalProfit, currencyFormatter, true),
+        Div profitStats = new PortfolioStatsDisplay("Total Profit", new NumericValueParagraph(totalProfit, CommonFormatters.CURRENCY, true),
                 "Represents the realized profit + unrealized profit");
         Div realizedProfit = new PortfolioStatsDisplay("Realized Profit", realized,
                 "Profit or Loss from all your sold holdings");

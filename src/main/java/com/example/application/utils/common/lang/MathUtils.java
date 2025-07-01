@@ -1,4 +1,4 @@
-package com.example.application.utils.common;
+package com.example.application.utils.common.lang;
 
 import java.math.BigInteger;
 import java.util.List;

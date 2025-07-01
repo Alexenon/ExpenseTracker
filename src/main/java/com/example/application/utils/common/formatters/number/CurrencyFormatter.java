@@ -1,4 +1,4 @@
-package com.example.application.utils.common.number;
+package com.example.application.utils.common.formatters.number;
 
 import java.text.NumberFormat;
 import java.util.Locale;

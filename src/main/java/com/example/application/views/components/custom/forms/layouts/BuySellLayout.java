@@ -1,6 +1,6 @@
 package com.example.application.views.components.custom.forms.layouts;
 
-import com.example.application.utils.common.MathUtils;
+import com.example.application.utils.common.lang.MathUtils;
 import com.example.application.views.components.custom.fields.AmountField;
 import com.example.application.views.components.custom.fields.CurrencyField;
 import com.vaadin.flow.component.html.Div;
