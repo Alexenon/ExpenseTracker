@@ -12,9 +12,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-@SuppressWarnings("LoggingSimilarMessage")
 @Slf4j
 @Component
+@SuppressWarnings("LoggingSimilarMessage")
 public class InstrumentsProvider {
 
     private Map<String, AssetMetadata> metadataPerAsset;
@@ -26,6 +26,7 @@ public class InstrumentsProvider {
     // TODO: Compare with  ->  parallelStream()
     @NotNull
     private Map<String, AssetMetadata> fetchMetadata() {
+        log.info("Starting retrieving asset data from external API");
         Map<String, AssetMetadata> metadataMap = new HashMap<>();
         Arrays.stream(SymbolIndentifier.values())
                 .map(Enum::name)
@@ -33,6 +34,7 @@ public class InstrumentsProvider {
                     AssetMetaDataApiResp response = CryptoCompareFetcher.getCoinMetaData(symbolName);
                     // TODO: Re-try on first failure
                     if (response == null) {
+                        log.warn("Missing response");
                         return;
                     }
 
@@ -45,7 +47,7 @@ public class InstrumentsProvider {
                     }
                 });
 
-        log.info("Loaded meta data for {} instruments", metadataMap.size());
+        log.info("Finished retrieving asset data from external API for {} assets", metadataMap.size());
         return metadataMap;
     }
 

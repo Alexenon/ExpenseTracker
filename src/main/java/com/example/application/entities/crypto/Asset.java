@@ -29,28 +29,25 @@ public class Asset {
     private String fullName;
 
     @Column(nullable = false)
-    private double marketPrice = MISSING_DOUBLE_VALUE;
+    private double marketPrice;
 
     @Column(nullable = false)
-    private double changePercentage = MISSING_DOUBLE_VALUE;
-
-    @Column(nullable = false, length = 3000)
-    private String description = "";
+    private double changePercentage;
 
     @Column(nullable = false, length = 1000)
     private String summaryDescription = "";
 
     @Column(nullable = false)
-    private BigInteger totalMarketCap = MISSING_BIG_INTEGER_VALUE;
+    private BigInteger totalMarketCap;
 
     @Column(nullable = false)
-    private BigInteger totalSupply = MISSING_BIG_INTEGER_VALUE;
+    private BigInteger totalSupply;
 
     @Column(nullable = false)
-    private BigInteger circulationSupply = MISSING_BIG_INTEGER_VALUE;
+    private BigInteger circulationSupply;
 
     @Column(nullable = false)
-    private double todayVolume = Double.NaN;
+    private double todayVolume;
 
     @Column(nullable = false)
     private String imageUrl = "";

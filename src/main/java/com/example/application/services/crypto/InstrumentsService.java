@@ -168,7 +168,7 @@ public class InstrumentsService {
     }
 
     //<editor-fold desc="METADATA">
-    @Nullable
+    @NotNull
     public AssetMetadata getAssetMetadata(@NotNull String symbol) {
         Objects.requireNonNull(symbol, "symbol");
         return instrumentsProvider.getMetadata().get(symbol);
@@ -188,7 +188,7 @@ public class InstrumentsService {
 
     private void updateAssetData(SymbolIndentifier indentifier, @Nullable AssetMetadata assetMetadata) {
         if (assetMetadata == null) {
-            log.info("Received an empty asset metadata, skipping updating database");
+            log.info("Asset metadata for {} asset is null, skipping updating database", indentifier.name());
             return;
         }
 
@@ -196,7 +196,6 @@ public class InstrumentsService {
         asset.setSymbol(indentifier.name());
         asset.setFullName(indentifier.getFullName());
         Optional.ofNullable(assetMetadata.getPriceUsd()).ifPresent(asset::setMarketPrice);
-        Optional.ofNullable(assetMetadata.getAssetDescription()).ifPresent(asset::setDescription);
         Optional.ofNullable(assetMetadata.getAssetDescriptionSummary()).ifPresent(asset::setSummaryDescription);
         Optional.ofNullable(assetMetadata.getSpotMoving24HourQuoteVolumeUsd()).ifPresent(asset::setTodayVolume);
         Optional.ofNullable(assetMetadata.getSpotMoving24HourChangePercentageUsd()).ifPresent(asset::setChangePercentage);

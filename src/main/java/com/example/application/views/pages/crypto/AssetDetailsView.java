@@ -44,7 +44,6 @@ import java.math.BigInteger;
 import java.util.Objects;
 
 /*
-    TODO: Add @Slf4j annotation with logs
     FIXME: When page is loaded, it scroll to the PriceWatchlistComponent
 */
 
