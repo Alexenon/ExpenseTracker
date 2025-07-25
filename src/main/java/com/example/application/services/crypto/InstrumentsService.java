@@ -5,9 +5,6 @@ import com.example.application.data.models.InstrumentsProvider;
 import com.example.application.entities.User;
 import com.example.application.entities.crypto.*;
 import com.example.application.repositories.crypto.AssetRepository;
-import com.example.application.repositories.crypto.WalletBalanceRepository;
-import com.example.application.utils.common.formatters.number.AmountFormatter;
-import com.example.application.utils.exceptions.InvalidBalanceAmount;
 import com.example.application.utils.fetchers.api_responses.AssetMetadata;
 import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +26,7 @@ public class InstrumentsService {
     private final AssetRepository assetRepository;
     private final AssetWatcherService assetWatcherService;
     private final CryptoTransactionService transactionService;
-    private final WalletBalanceRepository walletBalanceRepository;
+    private final WalletBalanceService walletBalanceService;
 
     @Autowired
     public InstrumentsService(InstrumentsProvider instrumentsProvider,
@@ -37,14 +34,14 @@ public class InstrumentsService {
                               AssetRepository assetRepository,
                               CryptoTransactionService transactionService,
                               AssetWatcherService assetWatcherService,
-                              WalletBalanceRepository walletBalanceRepository
-    ) {
+                              WalletBalanceService walletBalanceService)
+    {
         this.instrumentsProvider = instrumentsProvider;
         this.walletService = walletService;
         this.assetRepository = assetRepository;
         this.transactionService = transactionService;
         this.assetWatcherService = assetWatcherService;
-        this.walletBalanceRepository = walletBalanceRepository;
+        this.walletBalanceService = walletBalanceService;
     }
 
     /*
@@ -128,43 +125,11 @@ public class InstrumentsService {
      * */
 
     public WalletBalance getWalletBalancesByWalletAndAsset(Wallet wallet, Asset asset) {
-        return walletBalanceRepository.findByWalletAndAsset(wallet, asset).orElseThrow();
+        return walletBalanceService.getByWalletAndAsset(wallet, asset);
     }
 
     public List<WalletBalance> getWalletBalancesByWallet(Wallet wallet) {
-        return walletBalanceRepository.findByWallet(wallet);
-    }
-
-    /**
-     * Updates wallet balance with an amount that should be added or removed using a positive/negative tokens amount
-     * <p> Example: + 200 ARB
-     */
-    public WalletBalance fillWalletBalance(Wallet wallet, Asset asset, double tokensAmountToBeAdded) {
-        Objects.requireNonNull(asset);
-        WalletBalance walletBalance = getWalletBalancesByWalletAndAsset(wallet, asset);
-        double balanceAfterSupply = calculateBalanceAfterSupply(walletBalance, tokensAmountToBeAdded);
-
-        AmountFormatter amountFormatter = AmountFormatter.withDefaults();
-        System.out.printf("Fill %s with %s. Left amount: %s\n", wallet,
-                amountFormatter.format(tokensAmountToBeAdded, asset),
-                amountFormatter.format(balanceAfterSupply, asset));
-
-        if (balanceAfterSupply < 0) {
-            throw new InvalidBalanceAmount("The balance amount cannot be negative.");
-        }
-
-        walletBalance.setAmount(balanceAfterSupply);
-        walletBalanceRepository.save(walletBalance);
-        return walletBalance;
-    }
-
-    public double calculateBalanceAfterSupply(WalletBalance walletBalance, double tokensAmountToBeAdded) {
-        return walletBalance.getAmount() + tokensAmountToBeAdded;
-    }
-
-    // TODO: FIND A WAY TO EXTRACT THIS FROM DATABASE WITHOUT EXCEPTION
-    public List<WalletBalance> getWalletBalancesByWalletWithNonZeroAmount(Wallet wallet) {
-        return walletBalanceRepository.findByWalletWithNonZeroAmount(wallet.getId());
+        return walletBalanceService.getByWallet(wallet);
     }
 
     //<editor-fold desc="METADATA">

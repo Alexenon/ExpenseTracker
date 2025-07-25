@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
 @JsModule("./themes/light_theme/components/javascript/fillPieChart.js")
 @JavaScript("https://fastly.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js")
 public class PortfolioTrackerView extends DefaultPage {
-    
+
     @Autowired
     private InstrumentsFacadeService instrumentsFacadeService;
     @Autowired
@@ -158,23 +158,24 @@ public class PortfolioTrackerView extends DefaultPage {
         String realized = CommonFormatters.CURRENCY.format(portfolioPerformanceTracker.getPortfolioRealizedProfit());
         String unrealized = CommonFormatters.CURRENCY.format(portfolioPerformanceTracker.getPortfolioUnrealizedProfit());
         String avgTimeHolding = String.format("%.1f days", portfolioPerformanceTracker.getPortfolioAverageHoldingDays());
+        String ratio = portfolioPerformanceTracker.getPortfolioBuySellRatio();
 
-        Div totalWorth = new PortfolioStatsDisplay("Total Worth", CommonFormatters.CURRENCY.format(portfolioPerformanceTracker.getPortfolioWorth()),
+        Div totalWorth = new PortfolioStatsDisplay("Total Worth",
+                CommonFormatters.CURRENCY.format(portfolioPerformanceTracker.getPortfolioWorth()),
                 "Total value of all your holdings based on the latest price");
-        Div totalCost = new PortfolioStatsDisplay("Total Cost", CommonFormatters.CURRENCY.format(portfolioPerformanceTracker.getPortfolioCost()),
+        Div totalCost = new PortfolioStatsDisplay("Total Cost",
+                CommonFormatters.CURRENCY.format(portfolioPerformanceTracker.getPortfolioCost()),
                 "Total amount of dollars invested to buy all the assets");
         Div numberOfAssets = new PortfolioStatsDisplay("No. of Assets", nrOfAssets,
                 "Current number of assets that are in your portfolio");
-        Div profitStats = new PortfolioStatsDisplay("Total Profit", new NumericValueParagraph(totalProfit, CommonFormatters.CURRENCY, true),
+        Div profitStats = new PortfolioStatsDisplay("Total Profit",
+                new NumericValueParagraph(totalProfit, CommonFormatters.CURRENCY, true),
                 "Represents the realized profit + unrealized profit");
         Div realizedProfit = new PortfolioStatsDisplay("Realized Profit", realized,
                 "Profit or Loss from all your sold holdings");
         Div unrealizedProfit = new PortfolioStatsDisplay("Unrealized Profit", unrealized,
                 "Potential profit or loss if you were to sell all assets now");
-        String ratio = portfolioPerformanceTracker.getPortfolioBuySellRatio();
-        String[] ratioParts = ratio.split(":");
-        Div buySellRatio = new PortfolioStatsDisplay("Buy/Sell % Ratio", ratio,
-                String.format("%s%% of transactions are buys, %s%% are sells, in dollar equivalent", ratioParts[0].trim(), ratioParts[1]));
+        Div buySellRatio = new PortfolioStatsDisplay("Buy/Sell % Ratio", ratio, rationHint(ratio));
         Div avgHoldingTime = new PortfolioStatsDisplay("Avg Holding Time", avgTimeHolding,
                 "Average holding time for all assets, from the first bought");
 
@@ -257,6 +258,13 @@ public class PortfolioTrackerView extends DefaultPage {
         container.add(assetImage, performanceDetails);
         container.addClickListener(e -> UI.getCurrent().navigate(AssetDetailsView.class, asset.getSymbol()));
         return container;
+    }
+
+    private String rationHint(String ratio) {
+        String[] ratioParts = ratio.split(":");
+        return ratio.equals("N/A")
+                ? "Ratio between BUY and SELL transactions, in dollar equivalent"
+                : String.format("%s%% of transactions are buys, %s%% are sells, in dollar equivalent", ratioParts[0].trim(), ratioParts[1]);
     }
 
 }

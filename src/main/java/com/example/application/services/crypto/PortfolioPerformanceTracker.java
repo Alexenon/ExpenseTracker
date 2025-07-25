@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 
 import static com.example.application.utils.investment.ProfitUtils.ONE_HUNDRED_PERCENT;
 
@@ -32,33 +33,45 @@ public class PortfolioPerformanceTracker {
         this.instrumentsFacadeService = instrumentsFacadeService;
     }
 
+    //region ASSET STATS
+    public double getAssetTotalWorth(Asset asset) {
+        return Optional.ofNullable(asset)
+                .map(a -> instrumentsFacadeService.getAmountOfTokens(a) * a.getMarketPrice())
+                .orElse(Double.NaN);
+    }
+
     public double getAverageBuyPrice(Asset asset) {
-        return asset == null ? 0 : ProfitCalculator.getAverageBuyPrice(instrumentsFacadeService.getTransactionsByAsset(asset));
+		return Optional.ofNullable(asset)
+                .map(a -> instrumentsFacadeService.getWalletBalanceByAsset(a).getAvgBuyPrice())
+                .orElse(Double.NaN);
     }
 
     public double getAverageSellPrice(Asset asset) {
-        return asset == null ? 0 : ProfitCalculator.getAverageSellPrice(instrumentsFacadeService.getTransactionsByAsset(asset));
-    }
-
-    //region ASSET STATS
-    public double getAssetTotalWorth(Asset asset) {
-        return instrumentsFacadeService.getAmountOfTokens(asset) * asset.getMarketPrice();
+        return Optional.ofNullable(asset)
+                .map(a -> instrumentsFacadeService.getWalletBalanceByAsset(a).getAvgSellPrice())
+                .orElse(Double.NaN);
     }
 
     public double getAssetRemainingTokensCost(Asset asset) {
-        return ProfitCalculator.getRemainingTokensCost(instrumentsFacadeService.getTransactionsByAsset(asset));
+        return Optional.ofNullable(asset)
+                .map(a -> instrumentsFacadeService.getWalletBalanceByAsset(a).getCost())
+                .orElse(Double.NaN);
+    }
+
+    public double getAssetRealizedProfit(Asset asset) {
+        return Optional.ofNullable(asset)
+                .map(a -> instrumentsFacadeService.getWalletBalanceByAsset(a).getTotalRealized())
+                .orElse(Double.NaN);
     }
 
     public double getAssetTotalCost(Asset asset) {
-        return ProfitCalculator.calculateTotalCostForBuyTransactions(instrumentsFacadeService.getTransactionsByAsset(asset));
+        return Optional.ofNullable(asset)
+                .map(a -> ProfitCalculator.totalCostForBuyTransactions(instrumentsFacadeService.getTransactionsByAsset(a)))
+                .orElse(Double.NaN);
     }
 
     public double getAssetTotalProfit(Asset asset) {
         return getAssetRealizedProfit(asset) + getAssetUnrealizedProfit(asset);
-    }
-
-    public double getAssetRealizedProfit(Asset asset) {
-        return ProfitCalculator.getRealizedNetProfit(instrumentsFacadeService.getTransactionsByAsset(asset));
     }
 
     public double getAssetUnrealizedProfit(Asset asset) {
@@ -73,8 +86,11 @@ public class PortfolioPerformanceTracker {
         return ProfitCalculator.getBuySellRatio(instrumentsFacadeService.getTransactionsByAsset(asset));
     }
 
+	// TODO:
+	//  - HERE IS NOT IMPLEMENTED
+	//  - Add last holding details + average holding days
     public double getAssetAverageHoldingDays(Asset asset) {
-        return ProfitCalculator.getAverageHoldingDays(instrumentsFacadeService.getTransactionsByAsset(asset));
+		return instrumentsFacadeService.getWalletBalanceByAsset(asset).getHoldingDays();
     }
 
     /**

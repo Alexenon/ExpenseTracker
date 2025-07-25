@@ -11,6 +11,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.router.BeforeEnterEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static com.example.application.utils.investment.EarnCalculator.*;
@@ -29,6 +30,10 @@ public final class StakingProfitTab extends BaseCalculatorTab {
     public StakingProfitTab(InstrumentsFacadeService instrumentsFacadeService) {
         super("Staking calculator", instrumentsFacadeService);
         this.assetSymbolField = new AssetComboBox(instrumentsFacadeService);
+    }
+
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
         buildForm();
     }
 

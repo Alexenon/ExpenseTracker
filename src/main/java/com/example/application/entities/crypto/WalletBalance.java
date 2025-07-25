@@ -2,16 +2,20 @@ package com.example.application.entities.crypto;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Data
+@Builder
 @Entity(name = "wallet_balances")
 @NoArgsConstructor
 @AllArgsConstructor
 public class WalletBalance {
+
+    // TODO: Should be renamed as AssetBallance
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,11 +47,11 @@ public class WalletBalance {
     @Column(name = "cost", nullable = false)
     private double cost = 0.0;
 
-//    @Column(name = "total_invested", precision = 19, scale = 4, nullable = false)
-//    private double totalInvested = 0.0;
+    @Column(name = "realized", nullable = false)
+    private double totalRealized = 0.0;
 
-//    @Column(name = "total_realized", precision = 19, scale = 4, nullable = false)
-//    private double totalRealized = 0.0;
+	@Column(name = "holding_days", nullable = false)
+	private double holdingDays = 0.0;
 
     @Column(name = "last_time_updated", nullable = false)
     private LocalDateTime lastTimeUpdated = LocalDateTime.now();

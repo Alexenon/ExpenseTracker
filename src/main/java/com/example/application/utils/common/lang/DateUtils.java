@@ -1,6 +1,7 @@
-package com.example.application.utils;
+package com.example.application.utils.common.lang;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 
 public class DateUtils {
@@ -21,5 +22,9 @@ public class DateUtils {
         LocalDate firstDayOfNextMonth = date.with(TemporalAdjusters.firstDayOfNextMonth());
         return lastDayOfMonth(firstDayOfNextMonth);
     }
+
+	public static long daysBetween(LocalDate buyDate, LocalDate sellDate) {
+		return ChronoUnit.DAYS.between(buyDate, sellDate);
+	}
 
 }

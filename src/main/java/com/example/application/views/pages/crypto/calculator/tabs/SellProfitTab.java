@@ -21,6 +21,7 @@ import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.router.BeforeEnterEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -63,6 +64,10 @@ public class SellProfitTab extends BaseCalculatorTab {
         super("Sell profit calculator", instrumentsFacadeService);
         this.portfolioPerformanceTracker = portfolioPerformanceTracker;
         this.assetSymbolField = new AssetComboBox(instrumentsFacadeService);
+    }
+
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
         buildForm();
     }
 

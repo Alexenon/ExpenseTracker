@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /*
@@ -65,7 +66,10 @@ public class InstrumentsFacadeService {
     }
 
     public double getAmountOfTokens(Asset asset) {
-        return asset == null ? 0 : getWalletBalanceByAsset(asset).getAmount();
+        return Optional.ofNullable(asset)
+                .map(this::getWalletBalanceByAsset)
+                .map(WalletBalance::getAmount)
+                .orElse(Double.NaN);
     }
 
     public List<Asset> getAssetsWithNonZeroAmount() {
@@ -151,10 +155,6 @@ public class InstrumentsFacadeService {
 
     public WalletBalance getWalletBalanceByAsset(Asset asset) {
         return instrumentsService.getWalletBalancesByWalletAndAsset(getAuthenticatedUserWallet(), asset);
-    }
-
-    public WalletBalance fillWalletBalance(Asset asset, double amountToBeAdded) {
-        return instrumentsService.fillWalletBalance(getAuthenticatedUserWallet(), asset, amountToBeAdded);
     }
     //</editor-fold>
 

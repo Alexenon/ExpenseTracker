@@ -6,80 +6,99 @@ import com.example.application.entities.crypto.Wallet;
 import com.example.application.entities.crypto.WalletBalance;
 import com.example.application.repositories.crypto.WalletBalanceRepository;
 import com.example.application.utils.common.lang.MathUtils;
+import com.example.application.utils.common.lang.NumberUtils;
 import com.example.application.utils.exceptions.InvalidBalanceAmount;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static com.example.application.utils.investment.ProfitCalculator.calculateNewAvgPrice;
+
 @Service
 public class WalletBalanceService {
 
-    @Autowired
-    private WalletBalanceRepository repository;
+	@Autowired
+	private WalletBalanceRepository repository;
 
-    public WalletBalance getWalletBalancesByWalletAndAsset(Wallet wallet, Asset asset) {
-        return repository.findByWalletAndAsset(wallet, asset).orElseThrow();
-    }
+	@Transactional(readOnly = true)
+	public WalletBalance getWalletBalancesByWalletAndAsset(Wallet wallet, Asset asset) {
+		return repository.findByWalletAndAsset(wallet, asset).orElseThrow();
+	}
 
-    // TODO: FIND A WAY TO EXTRACT THIS FROM DATABASE WITHOUT EXCEPTION
-    public List<WalletBalance> getWalletBalancesByWalletWithNonZeroAmount(Wallet wallet) {
-        return repository.findByWalletWithNonZeroAmount(wallet.getId());
-    }
+	// TODO: FIND A WAY TO EXTRACT THIS FROM DATABASE WITHOUT ANY EXCEPTIONS
+	@Transactional(readOnly = true)
+	public List<WalletBalance> getWalletBalancesByWalletWithNonZeroAmount(Wallet wallet) {
+		return repository.findByWalletWithNonZeroAmount(wallet.getId());
+	}
 
-    @NotNull
-    public WalletBalance updateWalletBalance(@NotNull Wallet wallet, @NotNull CryptoTransaction transaction) {
-        Asset asset = transaction.getAsset();
-        WalletBalance walletBalance = getWalletBalancesByWalletAndAsset(wallet, asset);
+	@Transactional(readOnly = true)
+	public List<WalletBalance> getByWallet(Wallet wallet) {
+		return repository.findByWallet(wallet);
+	}
 
-        updateAvgBuySellPrice(walletBalance, transaction);
-        walletBalance.setAmount(calculateBalanceAfterSupply(walletBalance, transaction));
-        walletBalance.setCost(calculateTotalCost(transaction, walletBalance));
-        walletBalance.setLastTimeUpdated(LocalDateTime.now());
+	@Transactional(readOnly = true)
+	public WalletBalance getByWalletAndAsset(Wallet wallet, Asset asset) {
+		return repository.findByWalletAndAsset(wallet, asset)
+				.orElseThrow(() -> new IllegalStateException("Wallet balance not found for %s asset".formatted(asset.getSymbol())));
+	}
 
-        repository.save(walletBalance);
-        return walletBalance;
-    }
+	@Transactional
+	public WalletBalance save(WalletBalance walletBalance) {
+		return repository.save(walletBalance);
+	}
 
-    private static double calculateTotalCost(CryptoTransaction transaction, WalletBalance walletBalance) {
-        return walletBalance.getCost() + MathUtils.withSign(transaction.getOrderTotalCost(), transaction.isBuyTransaction());
-    }
+	@Transactional
+	public WalletBalance updateWalletBalance(CryptoTransaction transaction) {
+		WalletBalance walletBalance = getWalletBalancesByWalletAndAsset(transaction.getWallet(), transaction.getAsset());
 
-    public double calculateBalanceAfterSupply(WalletBalance walletBalance, CryptoTransaction transaction) {
-        double quantityToAdd = MathUtils.withSign(transaction.getOrderQuantity(), transaction.isBuyTransaction());
-        double tokensAmountAfterSupply = walletBalance.getAmount() + quantityToAdd;
+		updateAvgBuySellPrice(walletBalance, transaction);
+		walletBalance.setAmount(calculateAmountAfterSupply(walletBalance, transaction));
+		walletBalance.setCost(calculateTotalCost(transaction, walletBalance));
+		walletBalance.setLastTimeUpdated(LocalDateTime.now());
 
-        if (tokensAmountAfterSupply < 0)
-            throw new InvalidBalanceAmount("The amount of tokens cannot be negative.");
+		repository.save(walletBalance);
+		return walletBalance;
+	}
 
-        if (tokensAmountAfterSupply >= Double.MAX_VALUE)
-            throw new InvalidBalanceAmount("The amount of tokens is too high.");
+	private static double calculateTotalCost(CryptoTransaction transaction, WalletBalance walletBalance) {
+		double newCost = MathUtils.withSign(transaction.getOrderTotalCost(), transaction.isBuyTransaction());
+		return NumberUtils.checkDouble(walletBalance.getCost() + newCost);
+	}
 
-        return tokensAmountAfterSupply;
-    }
+	public double calculateAmountAfterSupply(WalletBalance walletBalance, CryptoTransaction transaction) {
+		double transactionAmount = NumberUtils.checkDouble(transaction.getOrderQuantity());
 
-    public static void updateAvgBuySellPrice(@NotNull WalletBalance walletBalance, @NotNull CryptoTransaction transaction) {
-        double marketPrice = transaction.getMarketPrice();
-        double previousAmount = walletBalance.getAmount();
-        double orderQuantity = transaction.getOrderQuantity();
+		if (transactionAmount <= 0)
+			throw new InvalidBalanceAmount("Invalid transaction amount");
 
-        if (transaction.isBuyTransaction()) {
-            walletBalance.setAvgBuyPrice(
-                    calculateNewAvgPrice(walletBalance.getAvgBuyPrice(), previousAmount, orderQuantity, marketPrice)
-            );
-        } else {
-            walletBalance.setAvgSellPrice(
-                    calculateNewAvgPrice(walletBalance.getAvgSellPrice(), previousAmount, orderQuantity, marketPrice)
-            );
-        }
-    }
+		double quantityToAdd = MathUtils.withSign(transactionAmount, transaction.isBuyTransaction());
+		double tokensAmountAfterSupply = walletBalance.getAmount() + quantityToAdd;
 
-    public static double calculateNewAvgPrice(double prevAvg, double prevAmount, double newAmount, double newPrice) {
-        double totalValue = (prevAmount * prevAvg) + (newAmount * newPrice);
-        double totalAmount = prevAmount + newAmount;
-        return MathUtils.safeZeroDivision(totalValue, totalAmount);
-    }
+		if (tokensAmountAfterSupply < 0)
+			throw new InvalidBalanceAmount("The amount of tokens cannot be negative.");
+
+		return NumberUtils.checkDouble(tokensAmountAfterSupply);
+	}
+
+	public static void updateAvgBuySellPrice(@NotNull WalletBalance walletBalance, @NotNull CryptoTransaction transaction) {
+		double marketPrice = transaction.getMarketPrice();
+		double previousAmount = walletBalance.getAmount();
+		double orderQuantity = transaction.getOrderQuantity();
+
+		if (transaction.isBuyTransaction()) {
+			walletBalance.setAvgBuyPrice(
+					calculateNewAvgPrice(walletBalance.getAvgBuyPrice(), previousAmount, orderQuantity, marketPrice)
+			);
+		} else {
+			walletBalance.setAvgSellPrice(
+					calculateNewAvgPrice(walletBalance.getAvgSellPrice(), previousAmount, orderQuantity, marketPrice)
+			);
+		}
+	}
+
 
 }

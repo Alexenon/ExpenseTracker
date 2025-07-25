@@ -173,16 +173,6 @@ public class EditTransactionDialog extends Dialog implements HasNotifications {
                 .bind(CryptoTransaction::getDate, CryptoTransaction::setDate);
     }
 
-    // TODO: Rename maybe this, and move to the service facade class
-    // TODO: Dont forget to restore USD, when the feature will be added
-    private void restoreBalanceIfAssetChanged() {
-        System.out.printf("Check %s %s\n", initialTransaction.getAsset().getSymbol(), binder.getBean().getAsset().getSymbol());
-        double amount = initialTransaction.getOrderQuantity();
-        double amountToRestore = initialTransaction.isSellTransaction() ? amount : -amount;
-        System.out.printf("Reverting %f %s\n", amountToRestore, initialTransaction.getAsset().getSymbol());
-        instrumentsFacadeService.fillWalletBalance(initialTransaction.getAsset(), amountToRestore);
-    }
-
     public void addSaveListener(Consumer<?> listener) {
         saveButton.addClickListener(e -> handleTransactionSave(listener));
     }
@@ -211,11 +201,14 @@ public class EditTransactionDialog extends Dialog implements HasNotifications {
     }
 
     private void saveTransaction(Consumer<?> listener) {
-        instrumentsFacadeService.saveTransaction(binder.getBean());
-        restoreBalanceIfAssetChanged();
-        showSuccessfulNotification("The transaction was saved succesfully");
-        this.close();
-        listener.accept(null);
+        try {
+            instrumentsFacadeService.saveTransaction(binder.getBean());
+            showSuccessfulNotification("The transaction was saved succesfully");
+            this.close();
+            listener.accept(null);
+        } catch (Exception e) {
+            showErrorNotification(e.getLocalizedMessage());
+        }
     }
 
     public CryptoTransaction getTransaction() {

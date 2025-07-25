@@ -16,8 +16,9 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.component.tabs.Tab;
+import com.vaadin.flow.router.BeforeEnterObserver;
 
-public abstract class BaseCalculatorTab extends Tab {
+public abstract class BaseCalculatorTab extends Tab implements BeforeEnterObserver {
 
     protected final InstrumentsFacadeService instrumentsFacadeService;
 
