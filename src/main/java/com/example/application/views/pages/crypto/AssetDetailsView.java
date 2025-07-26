@@ -22,6 +22,7 @@ import com.example.application.views.components.custom.fields.PricePercentageWra
 import com.example.application.views.components.custom.fields.stats.PortfolioStatsDisplay;
 import com.example.application.views.layouts.MainLayout;
 import com.example.application.views.pages.DefaultPage;
+import com.example.application.views.pages.others.RebuildablePage;
 import com.vaadin.flow.component.ScrollOptions;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.*;
@@ -31,10 +32,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.data.value.ValueChangeMode;
-import com.vaadin.flow.router.BeforeEvent;
-import com.vaadin.flow.router.HasUrlParameter;
-import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.*;
 import com.vaadin.flow.theme.lumo.LumoIcon;
 import jakarta.annotation.security.PermitAll;
 import lombok.extern.slf4j.Slf4j;
@@ -51,9 +49,9 @@ import java.util.Objects;
 @PermitAll
 @PageTitle("Asset Details")
 @Route(value = "asset", layout = MainLayout.class)
-public class AssetDetailsView extends DefaultPage implements HasUrlParameter<String> {
-
+public class AssetDetailsView extends DefaultPage implements HasUrlParameter<String>, RebuildablePage, BeforeEnterObserver {
     private static final CurrencyFormatter currencyFormatter = CurrencyFormatter.withDefaults();
+
     private static final PercentageFormatter percentageFormatter = PercentageFormatter.withDefaults();
 
     @Autowired
@@ -71,14 +69,20 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
     }
 
     @Override
-    protected void initializePage() {
+    public void beforeEnter(BeforeEnterEvent event) {
+        initializePage();
+        buildPage();
+    }
+
+    @Override
+    public void initializePage() {
         setClassName("coin-details-content");
         addTransactionDialog.setAsset(asset);
         scrollTopPage();
     }
 
     @Override
-    protected void buildPage() {
+    public void buildPage() {
         add(
                 headerDetailsSection(),
                 holdingsSection(),
@@ -114,21 +118,22 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
         priceWrapper.addClassName("price-wrapper");
 
         Div coinInfoContainer = new Div(rank, coinNameContainer, priceWrapper);
-// SWITCH
-//        Button markAsFavorite = new Button(getStarIcon(asset.isMarkedAsFavorite()));
-//        markAsFavorite.addClassName("rounded-button");
-//        markAsFavorite.addClickListener(e -> {
-//            boolean isFavorite = asset.isMarkedAsFavorite();
-//            asset.setMarkedAsFavorite(!isFavorite);
-//            markAsFavorite.setIcon(getStarIcon(!isFavorite));
-//        });
+        Button markAsFavorite = new Button(getStarIcon(isAssetMarkedAsFavorite()));
+        markAsFavorite.addClassName("rounded-button");
+        markAsFavorite.addClickListener(e -> {
+            boolean isFavorite = isAssetMarkedAsFavorite();
+            instrumentsFacadeService.markAssetAsFavorite(asset, !isFavorite);
+            markAsFavorite.setIcon(getStarIcon(!isFavorite));
+        });
 
         section.addClassName("asset-details-header");
-        section.add(coinInfoContainer
-// SWITCH                , markAsFavorite
-        );
+        section.add(coinInfoContainer, markAsFavorite);
 
         return section;
+    }
+
+    private boolean isAssetMarkedAsFavorite() {
+        return instrumentsFacadeService.getWalletBalanceByAsset(asset).isMarkedAsFavorite();
     }
 
     private Section notesAndConvertorSection() {
@@ -145,14 +150,16 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
         TextArea notesArea = new TextArea();
         notesArea.setClassName("note-area");
         notesArea.setPlaceholder("Add your thoughts about coin here.");
-// SWITCH       notesArea.setValue(asset.getComment());
+        String comment = Objects.requireNonNullElse(instrumentsFacadeService.getWalletBalanceByAsset(asset).getComment(), "");
+        notesArea.setValue(comment);
         Button saveBtn = new Button("Save");
-        saveBtn.addClickListener(e -> {
-            boolean saved = instrumentsFacadeService.saveAssetNote(asset, notesArea.getValue());
-            if (saved)
+        saveBtn.addClickListener(l -> {
+            try {
+                instrumentsFacadeService.updateAssetComment(asset, notesArea.getValue());
                 showSuccessfulNotification("Succesfully saved asset note");
-            else
-                showErrorNotification("Something went wrong");
+            } catch (Exception e) {
+                showErrorNotification("Something went wrong: " + e.getLocalizedMessage());
+            }
         });
 
         Container sectionBody = Container.builder()
@@ -392,6 +399,5 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
                 .addComponent(new ProgressBar(0, 100, assetDiversityPercentage))
                 .build();
     }
-
 
 }

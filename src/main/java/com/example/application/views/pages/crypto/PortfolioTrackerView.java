@@ -14,12 +14,15 @@ import com.example.application.views.components.custom.fields.PricePercentageWra
 import com.example.application.views.components.custom.fields.stats.PortfolioStatsDisplay;
 import com.example.application.views.layouts.MainLayout;
 import com.example.application.views.pages.DefaultPage;
+import com.example.application.views.pages.others.RebuildablePage;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.*;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoIcon;
@@ -46,7 +49,7 @@ import java.util.stream.Collectors;
 @Route(value = "portfolio", layout = MainLayout.class)
 @JsModule("./themes/light_theme/components/javascript/fillPieChart.js")
 @JavaScript("https://fastly.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js")
-public class PortfolioTrackerView extends DefaultPage {
+public class PortfolioTrackerView extends DefaultPage implements RebuildablePage, BeforeEnterObserver {
 
     @Autowired
     private InstrumentsFacadeService instrumentsFacadeService;
@@ -58,23 +61,18 @@ public class PortfolioTrackerView extends DefaultPage {
     private final Div assetsDiversityChart = new Div();
 
     @Override
-    protected void initializePage() {
-        getStyle().set("margin", "100px 30px 30px 30px");
-    }
-
-    protected void initializeGrids() {
-        assetsGrid = new AssetsGrid(instrumentsFacadeService, portfolioPerformanceTracker);
-        assetsGrid.setGridFullSize(true);
-        assetsGrid.setItems(instrumentsFacadeService.getAssetsWithNonZeroAmount());
-
-        transactionsGrid = new TransactionsGrid(instrumentsFacadeService);
-        transactionsGrid.setItems(instrumentsFacadeService.getAllTransactions());
-        transactionsGrid.setPageSize(10);
-        transactionsGrid.addUpdateItemListener(l -> rebuildPage());
+    public void beforeEnter(BeforeEnterEvent event) {
+        initializePage();
+        buildPage();
     }
 
     @Override
-    protected void buildPage() {
+    public void initializePage() {
+        getStyle().set("margin", "100px 30px 30px 30px");
+    }
+
+    @Override
+    public void buildPage() {
         initializeGrids();
         add(
                 headerSection(),
@@ -84,6 +82,17 @@ public class PortfolioTrackerView extends DefaultPage {
                 gridSection("Transactions", transactionsGrid)
         );
         initializeChart();
+        assetsGrid.setItems(instrumentsFacadeService.getAssetsWithNonZeroAmount());
+        transactionsGrid.setItems(instrumentsFacadeService.getAllTransactions());
+    }
+
+    protected void initializeGrids() {
+        assetsGrid = new AssetsGrid(instrumentsFacadeService, portfolioPerformanceTracker);
+        assetsGrid.setGridFullSize(true);
+
+        transactionsGrid = new TransactionsGrid(instrumentsFacadeService);
+        transactionsGrid.setPageSize(10);
+        transactionsGrid.addUpdateItemListener(l -> rebuildPage());
     }
 
     private Section headerSection() {
@@ -266,5 +275,6 @@ public class PortfolioTrackerView extends DefaultPage {
                 ? "Ratio between BUY and SELL transactions, in dollar equivalent"
                 : String.format("%s%% of transactions are buys, %s%% are sells, in dollar equivalent", ratioParts[0].trim(), ratioParts[1]);
     }
+
 
 }

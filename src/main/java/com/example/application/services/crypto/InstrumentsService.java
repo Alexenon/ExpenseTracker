@@ -52,8 +52,10 @@ public class InstrumentsService {
         return assetRepository.findAll();
     }
 
+    @NotNull
     public Asset getAssetBySymbol(String symbolName) {
-        return assetRepository.findBySymbol(symbolName.toUpperCase());
+        return Optional.ofNullable(assetRepository.findBySymbol(symbolName.toUpperCase()))
+                .orElseThrow(() -> new NullPointerException("There is no such asset as %s".formatted(symbolName)));
     }
 
     public Asset getAssetBySymbol(SymbolIndentifier symbol) {
@@ -124,6 +126,11 @@ public class InstrumentsService {
      * WALLET BALANCES
      * */
 
+    public WalletBalance saveWalletBalance(WalletBalance walletBalance) {
+        return walletBalanceService.save(walletBalance);
+    }
+
+    @NotNull
     public WalletBalance getWalletBalancesByWalletAndAsset(Wallet wallet, Asset asset) {
         return walletBalanceService.getByWalletAndAsset(wallet, asset);
     }
@@ -170,7 +177,7 @@ public class InstrumentsService {
         Optional.ofNullable(assetMetadata.getLogoUrl()).ifPresent(asset::setImageUrl);
         assetRepository.save(asset);
     }
-    //</editor-fold>
+//</editor-fold>
 
 
 }

@@ -5,6 +5,7 @@ import com.example.application.data.models.InstrumentsProvider;
 import com.example.application.entities.crypto.*;
 import com.example.application.services.SecurityService;
 import com.example.application.services.UserService;
+import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,7 +25,6 @@ import java.util.stream.Collectors;
  * Service that provides information just for authenticated user and guest user
  * and hides other information that user is not supposed to have
  */
-@SuppressWarnings("CallToPrintStackTrace")
 @Slf4j
 @Service
 public class InstrumentsFacadeService {
@@ -36,7 +36,8 @@ public class InstrumentsFacadeService {
     public InstrumentsFacadeService(UserService userService,
                                     SecurityService securityService,
                                     InstrumentsService instrumentsService,
-                                    InstrumentsProvider instrumentsProvider) {
+                                    InstrumentsProvider instrumentsProvider)
+    {
         this.securityService = securityService;
         this.instrumentsService = instrumentsService;
     }
@@ -46,19 +47,21 @@ public class InstrumentsFacadeService {
         return instrumentsService.getAllAssets();
     }
 
+    @NotNull
     public Asset getAssetBySymbol(String symbolName) {
         return instrumentsService.getAssetBySymbol(symbolName);
     }
 
-    public boolean saveAssetNote(Asset asset, String note) {
-        try {
-            log.info("Saving note for asset {}, note: '{}'", asset, note);
-// SWITCH            asset.setComment(note);
-            return instrumentsService.saveAsset(asset) != null;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+    public WalletBalance updateAssetComment(Asset asset, String comment) {
+        WalletBalance walletBalanceByAsset = getWalletBalanceByAsset(asset);
+        walletBalanceByAsset.setComment(comment);
+        return instrumentsService.saveWalletBalance(walletBalanceByAsset);
+    }
+
+    public WalletBalance markAssetAsFavorite(Asset asset, boolean isFavorite) {
+        WalletBalance walletBalanceByAsset = getWalletBalanceByAsset(asset);
+        walletBalanceByAsset.setMarkedAsFavorite(isFavorite);
+        return instrumentsService.saveWalletBalance(walletBalanceByAsset);
     }
 
     public Asset getAssetBySymbol(SymbolIndentifier symbol) {
@@ -153,6 +156,7 @@ public class InstrumentsFacadeService {
         return instrumentsService.getWalletBalancesByWallet(getAuthenticatedUserWallet());
     }
 
+    @NotNull
     public WalletBalance getWalletBalanceByAsset(Asset asset) {
         return instrumentsService.getWalletBalancesByWalletAndAsset(getAuthenticatedUserWallet(), asset);
     }
