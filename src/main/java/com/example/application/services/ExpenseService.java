@@ -8,7 +8,9 @@ import com.example.application.entities.User;
 import com.example.application.repositories.ExpenseRepository;
 import com.example.application.utils.ExpenseConvertor;
 import com.example.application.utils.common.lang.DateUtils;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,34 +37,44 @@ public class ExpenseService {
     @Autowired
     private ExpenseConvertor expenseConvertor;
 
+    @NotNull
     public List<ExpenseDTO> getAllExpenses() {
         return repository.getAll();
     }
 
-    public List<ExpenseDTO> getAllExpensesByUser(String userEmailOrUsername) {
+    @NotNull
+    public List<ExpenseDTO> getAllExpensesByUser(@NotNull String userEmailOrUsername) {
+        Objects.requireNonNull(userEmailOrUsername, "user email or username");
         return repository.getAll(userEmailOrUsername);
     }
 
-    public List<ExpenseDTO> getAllExpensesByUser(User user) {
+    @NotNull
+    public List<ExpenseDTO> getAllExpensesByUser(@NotNull User user) {
+        Objects.requireNonNull(user, "user");
         return getAllExpensesByUser(user.getUsername());
     }
 
+    @NotNull
     public List<ExpenseDTO> getAllExpensesByUser() {
         return getAllExpensesByUser(securityService.getAuthenticatedUser());
     }
 
-    public Expense saveExpense(Expense expense) {
+    public Expense saveExpense(@NotNull Expense expense) {
+        Objects.requireNonNull(expense);
         replaceExpireDateForOneTimeExpenses(expense);
         System.out.println("Saving " + expense);
 
         return repository.save(expense);
     }
 
-    public void saveExpenses(List<Expense> expenseList) {
-        expenseList.forEach(this::saveExpense);
+    public void saveExpenses(@NotNull List<Expense> expenseList) {
+        Objects.requireNonNull(expenseList, "expensesList")
+                .forEach(this::saveExpense);
     }
 
-    public void updateExpense(Expense expense) {
+    @Nullable
+    public Expense updateExpense(@NotNull Expense expense) {
+        Objects.requireNonNull(expense, "expense");
         Expense expenseToUpdate = repository.findById(expense.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Expense not found"));
 
@@ -76,7 +88,7 @@ public class ExpenseService {
 
         replaceExpireDateForOneTimeExpenses(expense);
 
-        repository.save(expenseToUpdate);
+        return repository.save(expenseToUpdate);
     }
 
     /**
@@ -103,16 +115,31 @@ public class ExpenseService {
         repository.deleteAll();
     }
 
+    @NotNull
     public List<ExpenseDTO> getExpensesByCategory(String categoryName) {
         return repository.findByCategory(categoryName);
     }
 
+    @NotNull
     public List<ExpenseDTO> getExpensesByMonth(int month) {
         return repository.findExpensesPerMonth(month);
     }
 
+    @NotNull
     public List<ExpenseDTO> getExpensesByYear(int year) {
         return repository.findExpensesPerYear(year);
+    }
+
+    @NotNull
+    @Transactional
+    public List<MonthlyExpensesProjection> getMonthlyExpensesByUser() {
+        return getMonthlyExpensesByUser(securityService.getAuthenticatedUser(), LocalDate.now());
+    }
+
+    @NotNull
+    @Transactional
+    public List<MonthlyExpensesProjection> getMonthlyExpensesByUser(@NotNull LocalDate date) {
+        return getMonthlyExpensesByUser(securityService.getAuthenticatedUser(), date);
     }
 
     /**
@@ -123,9 +150,11 @@ public class ExpenseService {
      *                  <li>NEXT MONTH -> into another date with its first day of month
      *              </ul>
      */
+    @NotNull
     @Transactional
-    public List<MonthlyExpensesProjection> getMonthlyExpensesByUser(String username, LocalDate date) {
-        date = Objects.requireNonNullElse(date, LocalDate.now());
+    public List<MonthlyExpensesProjection> getMonthlyExpensesByUser(@NotNull User user, @NotNull LocalDate date) {
+        Objects.requireNonNull(user, "user");
+        Objects.requireNonNull(date, "date");
 
         if (!DateUtils.isInSameMonthAndYear(date, LocalDate.now())) {
             date = date.isBefore(LocalDate.now())
@@ -133,17 +162,7 @@ public class ExpenseService {
                     : DateUtils.firstDayOfMonth(date);
         }
 
-        return repository.findMonthlyExpenses(username, date);
-    }
-
-    @Transactional
-    public List<MonthlyExpensesProjection> getMonthlyExpensesByUser(User user, LocalDate date) {
-        return getMonthlyExpensesByUser(user.getUsername(), date);
-    }
-
-    @Transactional
-    public List<MonthlyExpensesProjection> getMonthlyExpensesByUser(LocalDate date) {
-        return getMonthlyExpensesByUser(securityService.getAuthenticatedUser(), date);
+        return repository.findMonthlyExpenses(user.getUsername(), date);
     }
 
     public Expense convertToExpense(ExpenseRequest expenseRequest) {

@@ -1,4 +1,4 @@
-package com.example.application.views.pages.others;
+package com.example.application.views.pages;
 
 import com.vaadin.flow.component.HasComponents;
 

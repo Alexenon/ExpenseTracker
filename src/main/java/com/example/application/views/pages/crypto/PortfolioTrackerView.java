@@ -6,6 +6,8 @@ import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.utils.common.formatters.CommonFormatters;
 import com.example.application.views.components.AssetsGrid;
+import com.example.application.views.components.PriceChangeHandler;
+import com.example.application.views.components.PriceChangeblePage;
 import com.example.application.views.components.TransactionsGrid;
 import com.example.application.views.components.core.Container;
 import com.example.application.views.components.custom.dialogs.transactions.AddTransactionDialog;
@@ -14,22 +16,20 @@ import com.example.application.views.components.custom.fields.PricePercentageWra
 import com.example.application.views.components.custom.fields.stats.PortfolioStatsDisplay;
 import com.example.application.views.layouts.MainLayout;
 import com.example.application.views.pages.DefaultPage;
-import com.example.application.views.pages.others.RebuildablePage;
+import com.example.application.views.pages.RebuildablePage;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.*;
-import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
-import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.*;
 import com.vaadin.flow.theme.lumo.LumoIcon;
 import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 import jakarta.annotation.security.PermitAll;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
@@ -44,26 +44,47 @@ import java.util.stream.Collectors;
         [!] Fix chart categories to not display 0 values
  * */
 
+@Log4j2
 @PermitAll
 @PageTitle("Portfolio Tracker")
 @Route(value = "portfolio", layout = MainLayout.class)
 @JsModule("./themes/light_theme/components/javascript/fillPieChart.js")
 @JavaScript("https://fastly.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js")
-public class PortfolioTrackerView extends DefaultPage implements RebuildablePage, BeforeEnterObserver {
+public class PortfolioTrackerView extends DefaultPage implements RebuildablePage, BeforeEnterObserver, BeforeLeaveObserver, PriceChangeblePage {
 
-    @Autowired
-    private InstrumentsFacadeService instrumentsFacadeService;
-    @Autowired
-    private PortfolioPerformanceTracker portfolioPerformanceTracker;
+    private final PriceChangeHandler priceChangeHandler;
+    private final InstrumentsFacadeService instrumentsFacadeService;
+    private final PortfolioPerformanceTracker portfolioPerformanceTracker;
 
     private AssetsGrid assetsGrid;
     private TransactionsGrid transactionsGrid;
-    private final Div assetsDiversityChart = new Div();
+    private final UI ui;
+    private final Div assetsChart = new Div();
+
+    @Autowired
+    public PortfolioTrackerView(InstrumentsFacadeService instrumentsFacadeService,
+                                PortfolioPerformanceTracker portfolioPerformanceTracker,
+                                PriceChangeHandler priceChangeHandler)
+    {
+        this.instrumentsFacadeService = instrumentsFacadeService;
+        this.portfolioPerformanceTracker = portfolioPerformanceTracker;
+        this.priceChangeHandler = priceChangeHandler;
+        this.ui = UI.getCurrent();
+        System.out.println("New instance created");
+        initializePage();
+    }
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        initializePage();
+        log.info("Entered PortfolioTrackerView page");
         buildPage();
+        priceChangeHandler.addObserver(ui, this);
+    }
+
+    @Override
+    public void beforeLeave(BeforeLeaveEvent event) {
+        log.info("Left PortfolioTrackerView page");
+        priceChangeHandler.removeObserver(ui);
     }
 
     @Override
@@ -84,6 +105,21 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
         initializeChart();
         assetsGrid.setItems(instrumentsFacadeService.getAssetsWithNonZeroAmount());
         transactionsGrid.setItems(instrumentsFacadeService.getAllTransactions());
+    }
+
+    @Override
+    public void updatePage() {
+        rebuildPage();
+    }
+
+    @Override
+    public void rebuildPage() {
+        log.info("Starting rebuilding PortfolioTrackerView page");
+        ui.access(() -> {
+            this.removeAll();
+            this.buildPage();
+        });
+        log.info("Finished rebuilding PortfolioTrackerView page");
     }
 
     protected void initializeGrids() {
@@ -122,7 +158,7 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
     }
 
     private void initializeChart() {
-        assetsDiversityChart.setId("assets-diverstity-chart");
+        assetsChart.setId("assets-diverstity-chart");
 
         Map<String, Double> assetsDiversity = instrumentsFacadeService.getAssetsWithNonZeroAmount()
                 .stream()
@@ -135,12 +171,10 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
             jsonObject.put("name", assetName);
             jsonObject.put("value", diversityPercentage);
             jsonOptionData.set(index.get(), jsonObject);
-
-            System.out.println(jsonObject);
-
             index.addAndGet(1);
         });
 
+        log.info("Created assets pie chart with {} elements", index.intValue());
         UI.getCurrent().getPage().executeJs("fillAssetsDiversityChart($0);", jsonOptionData.toJson());
     }
 
@@ -197,7 +231,7 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
         );
         statisticSectionDetails.add(title, body);
 
-        sectionWrapper.add(statisticSectionDetails, assetsDiversityChart);
+        sectionWrapper.add(statisticSectionDetails, assetsChart);
         return sectionWrapper;
     }
 
@@ -275,6 +309,5 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
                 ? "Ratio between BUY and SELL transactions, in dollar equivalent"
                 : String.format("%s%% of transactions are buys, %s%% are sells, in dollar equivalent", ratioParts[0].trim(), ratioParts[1]);
     }
-
 
 }

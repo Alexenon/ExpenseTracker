@@ -2,6 +2,7 @@ package com.example.application.configs;
 
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.page.AppShellConfigurator;
+import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.server.AppShellSettings;
 import com.vaadin.flow.theme.Theme;
 import org.springframework.context.annotation.Bean;
@@ -9,9 +10,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+@Push
 @Configuration
 @Theme(value = "light_theme")
-public class GeneralConfig implements AppShellConfigurator {
+public class MainConfig implements AppShellConfigurator {
 
     @Override
     public void configurePage(AppShellSettings settings) {

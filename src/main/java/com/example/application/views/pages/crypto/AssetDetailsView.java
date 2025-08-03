@@ -22,7 +22,7 @@ import com.example.application.views.components.custom.fields.PricePercentageWra
 import com.example.application.views.components.custom.fields.stats.PortfolioStatsDisplay;
 import com.example.application.views.layouts.MainLayout;
 import com.example.application.views.pages.DefaultPage;
-import com.example.application.views.pages.others.RebuildablePage;
+import com.example.application.views.pages.RebuildablePage;
 import com.vaadin.flow.component.ScrollOptions;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.*;
@@ -72,13 +72,13 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
     public void beforeEnter(BeforeEnterEvent event) {
         initializePage();
         buildPage();
+        scrollTopPage();
     }
 
     @Override
     public void initializePage() {
         setClassName("coin-details-content");
         addTransactionDialog.setAsset(asset);
-        scrollTopPage();
     }
 
     @Override

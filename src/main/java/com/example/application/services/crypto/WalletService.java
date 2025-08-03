@@ -6,20 +6,21 @@ import com.example.application.entities.crypto.WalletBalance;
 import com.example.application.repositories.crypto.AssetRepository;
 import com.example.application.repositories.crypto.WalletBalanceRepository;
 import com.example.application.repositories.crypto.WalletRepository;
+import jakarta.validation.constraints.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Objects;
 
 @Service
 public class WalletService {
 
-    private final AssetRepository assetRepository;
-    private final WalletRepository walletRepository;
-    private final WalletBalanceRepository walletBalanceRepository;
-
-    public WalletService(AssetRepository assetRepository, WalletRepository walletRepository, WalletBalanceRepository walletBalanceRepository) {
-        this.assetRepository = assetRepository;
-        this.walletRepository = walletRepository;
-        this.walletBalanceRepository = walletBalanceRepository;
-    }
+    @Autowired
+    private AssetRepository assetRepository;
+    @Autowired
+    private WalletRepository walletRepository;
+    @Autowired
+    private WalletBalanceRepository walletBalanceRepository;
 
     public Wallet saveWallet(Wallet wallet) {
         Wallet savedWallet = walletRepository.save(wallet);
@@ -35,8 +36,10 @@ public class WalletService {
         return savedWallet;
     }
 
-    public Wallet getWalletByUser(User user) {
-        return walletRepository.findByUser(user);
+    @NotNull
+    public Wallet getWalletByUser(@NotNull User user) {
+        Objects.requireNonNull(user, "user");
+        return Objects.requireNonNull(walletRepository.findByUser(user));
     }
 
 }
