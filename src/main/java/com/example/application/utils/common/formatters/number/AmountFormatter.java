@@ -12,8 +12,9 @@ public class AmountFormatter extends DecimalFormatter {
         return new AmountFormatter();
     }
 
+    private final NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.US);
+
     public AmountFormatter() {
-        NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.US);
         numberFormat.setGroupingUsed(true);
         numberFormat.setMinimumFractionDigits(0);
     }
@@ -43,12 +44,12 @@ public class AmountFormatter extends DecimalFormatter {
         return StringUtils.stripTrailingZeroes(numberFormat.format(value));
     }
 
-    public String format(Double d, String symbol) {
-        return String.format("%s %s", format(d), symbol);
+    public String format(double d, Asset asset) {
+        return format(d, asset.getSymbol());
     }
 
-    public String format(Double d, Asset asset) {
-        return format(d, asset.getSymbol());
+    public String format(double d, String symbol) {
+        return String.format("%s %s", format(d), symbol);
     }
 
 }

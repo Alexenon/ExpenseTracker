@@ -14,12 +14,12 @@ import java.util.concurrent.TimeUnit;
 public class AssetUpdateScheduler {
 
     @Autowired
-    private PriceChangeHandler priceChangeHandler;
-
-    @Autowired
     private InstrumentsService instrumentsService;
 
-    @Scheduled(fixedDelay = 1, timeUnit = TimeUnit.MINUTES)
+    @Autowired
+    private PriceChangeHandler priceChangeHandler;
+
+    @Scheduled(fixedDelay = 3, timeUnit = TimeUnit.MINUTES)
     public void updateAssets() {
         log.info("------------------- [Task] Starting updating asset data -------------------");
         instrumentsService.updateAssetData();
