@@ -19,11 +19,12 @@ public class AssetUpdateScheduler {
     @Autowired
     private InstrumentsService instrumentsService;
 
-    @Scheduled(fixedDelay = 5, timeUnit = TimeUnit.MINUTES)
+    @Scheduled(fixedDelay = 1, timeUnit = TimeUnit.MINUTES)
     public void updateAssets() {
-        log.info("------------------- [Task] Updating asset data -------------------");
+        log.info("------------------- [Task] Starting updating asset data -------------------");
         instrumentsService.updateAssetData();
         priceChangeHandler.updatePagePrices();
+        log.info("------------------- [Task] Finished updating asset data -------------------");
     }
 
 }

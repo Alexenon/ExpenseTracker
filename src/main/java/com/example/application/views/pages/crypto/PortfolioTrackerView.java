@@ -29,7 +29,7 @@ import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 import jakarta.annotation.security.PermitAll;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
@@ -39,12 +39,15 @@ import java.util.stream.Collectors;
 
 /*
     TODO:
-        [!] Total Trading Volume
-        [!] Add chart options -> byCost, byWorth
-        [!] Fix chart categories to not display 0 values
+        => Info
+            [!] Total Trading Volume
+            [!] Gainers vs Loosers (How many assets are now in profit VS aren't)
+        => Chart
+            [!] Add chart options -> byCost, byWorth
+            [!] Fix chart categories to not display 0 values
  * */
 
-@Log4j2
+@Slf4j
 @PermitAll
 @PageTitle("Portfolio Tracker")
 @Route(value = "portfolio", layout = MainLayout.class)
@@ -70,20 +73,17 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
         this.portfolioPerformanceTracker = portfolioPerformanceTracker;
         this.priceChangeHandler = priceChangeHandler;
         this.ui = UI.getCurrent();
-        System.out.println("New instance created");
         initializePage();
     }
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        log.info("Entered PortfolioTrackerView page");
         buildPage();
         priceChangeHandler.addObserver(ui, this);
     }
 
     @Override
     public void beforeLeave(BeforeLeaveEvent event) {
-        log.info("Left PortfolioTrackerView page");
         priceChangeHandler.removeObserver(ui);
     }
 
@@ -114,12 +114,10 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
 
     @Override
     public void rebuildPage() {
-        log.info("Starting rebuilding PortfolioTrackerView page");
         ui.access(() -> {
             this.removeAll();
             this.buildPage();
         });
-        log.info("Finished rebuilding PortfolioTrackerView page");
     }
 
     protected void initializeGrids() {
@@ -136,8 +134,8 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
         section.addClassName("asset-details-header");
 
         NumericValueParagraph worth = new NumericValueParagraph(portfolioPerformanceTracker.getPortfolioWorth(), CommonFormatters.CURRENCY);
-        double percentage = portfolioPerformanceTracker.getPortfolioProfitPercentage();
         double profit = portfolioPerformanceTracker.getPortfolioTotalProfit();
+        double percentage = portfolioPerformanceTracker.getPortfolioProfitPercentage();
         PricePercentageWrapper profitWrapper = new PricePercentageWrapper(profit, percentage);
 
         Container portfolioWorthWrapper = new Container("price-wrapper", worth, profitWrapper);
@@ -218,7 +216,7 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
                 "Profit or Loss from all your sold holdings");
         Div unrealizedProfit = new PortfolioStatsDisplay("Unrealized Profit", unrealized,
                 "Potential profit or loss if you were to sell all assets now");
-        Div buySellRatio = new PortfolioStatsDisplay("Buy/Sell % Ratio", ratio, rationHint(ratio));
+        Div buySellRatio = new PortfolioStatsDisplay("Buy/Sell % Ratio", ratio, ratioHint(ratio));
         Div avgHoldingTime = new PortfolioStatsDisplay("Avg Holding Time", avgTimeHolding,
                 "Average holding time for all assets, from the first bought");
 
@@ -303,7 +301,7 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
         return container;
     }
 
-    private String rationHint(String ratio) {
+    private String ratioHint(String ratio) {
         String[] ratioParts = ratio.split(":");
         return ratio.equals("N/A")
                 ? "Ratio between BUY and SELL transactions, in dollar equivalent"

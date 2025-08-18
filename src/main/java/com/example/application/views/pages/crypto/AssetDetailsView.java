@@ -4,12 +4,13 @@ import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.AssetWatcher;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
+import com.example.application.utils.common.formatters.CommonFormatters;
 import com.example.application.utils.common.formatters.number.AmountFormatter;
 import com.example.application.utils.common.formatters.number.CompactFormatter;
-import com.example.application.utils.common.formatters.number.CurrencyFormatter;
-import com.example.application.utils.common.formatters.number.PercentageFormatter;
 import com.example.application.utils.common.lang.MathUtils;
 import com.example.application.utils.common.lang.StringUtils;
+import com.example.application.views.components.PriceChangeHandler;
+import com.example.application.views.components.PriceChangeblePage;
 import com.example.application.views.components.PriceWatchlistComponent;
 import com.example.application.views.components.TransactionsGrid;
 import com.example.application.views.components.core.ComponentBuilder;
@@ -24,6 +25,7 @@ import com.example.application.views.layouts.MainLayout;
 import com.example.application.views.pages.DefaultPage;
 import com.example.application.views.pages.RebuildablePage;
 import com.vaadin.flow.component.ScrollOptions;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
@@ -49,40 +51,55 @@ import java.util.Objects;
 @PermitAll
 @PageTitle("Asset Details")
 @Route(value = "asset", layout = MainLayout.class)
-public class AssetDetailsView extends DefaultPage implements HasUrlParameter<String>, RebuildablePage, BeforeEnterObserver {
-    private static final CurrencyFormatter currencyFormatter = CurrencyFormatter.withDefaults();
+public class AssetDetailsView extends DefaultPage implements HasUrlParameter<String>, RebuildablePage, BeforeEnterObserver, BeforeLeaveObserver, PriceChangeblePage {
 
-    private static final PercentageFormatter percentageFormatter = PercentageFormatter.withDefaults();
+    private final PriceChangeHandler priceChangeHandler;
+    private final InstrumentsFacadeService instrumentsFacadeService;
+    private final PortfolioPerformanceTracker portfolioPerformanceTracker;
+    private final AddTransactionDialog addTransactionDialog;
 
-    @Autowired
-    private InstrumentsFacadeService instrumentsFacadeService;
-    @Autowired
-    private PortfolioPerformanceTracker portfolioPerformanceTracker;
-
+    private final UI ui;
+    private String assetSymbol;
     private Asset asset;
-    private AddTransactionDialog addTransactionDialog;
+
+    @Autowired
+    public AssetDetailsView(InstrumentsFacadeService instrumentsFacadeService,
+                            PortfolioPerformanceTracker portfolioPerformanceTracker,
+                            PriceChangeHandler priceChangeHandler)
+    {
+        this.instrumentsFacadeService = instrumentsFacadeService;
+        this.portfolioPerformanceTracker = portfolioPerformanceTracker;
+        this.priceChangeHandler = priceChangeHandler;
+        this.addTransactionDialog = new AddTransactionDialog(instrumentsFacadeService);
+        this.ui = UI.getCurrent();
+    }
 
     @Override
-    public void setParameter(BeforeEvent beforeEvent, String symbol) {
-        this.asset = Objects.requireNonNull(instrumentsFacadeService.getAssetBySymbol(symbol), "Asset");
-        this.addTransactionDialog = new AddTransactionDialog(instrumentsFacadeService);
+    public void setParameter(BeforeEvent beforeEvent, String assetSymbol) {
+        this.assetSymbol = assetSymbol;
+        initializePage();
     }
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        initializePage();
         buildPage();
-        scrollTopPage();
+        priceChangeHandler.addObserver(ui, this);
+    }
+
+    @Override
+    public void beforeLeave(BeforeLeaveEvent event) {
+        priceChangeHandler.removeObserver(ui);
     }
 
     @Override
     public void initializePage() {
         setClassName("coin-details-content");
-        addTransactionDialog.setAsset(asset);
     }
 
     @Override
     public void buildPage() {
+        asset = instrumentsFacadeService.getAssetBySymbol(assetSymbol);
+        addTransactionDialog.setAsset(asset);
         add(
                 headerDetailsSection(),
                 holdingsSection(),
@@ -92,6 +109,20 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
                 aboutSection(),
                 transactionHistorySection()
         );
+        scrollTopPage();
+    }
+
+    @Override
+    public void updatePage() {
+        rebuildPage();
+    }
+
+    @Override
+    public void rebuildPage() {
+        ui.access(() -> {
+            removeAll();
+            buildPage();
+        });
     }
 
     private Section headerDetailsSection() {
@@ -252,8 +283,8 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
         double profitLossPercentage = portfolioPerformanceTracker.getAssetNetProfitPercentage(asset);
         int assetDiversityPercentage = portfolioPerformanceTracker.getAssetDiversityPercentage(asset);
 
-        NumericValueParagraph costValue = new NumericValueParagraph(assetCost, currencyFormatter);
-        NumericValueParagraph worthValue = new NumericValueParagraph(assetWorth, currencyFormatter);
+        NumericValueParagraph costValue = new NumericValueParagraph(assetCost, CommonFormatters.CURRENCY);
+        NumericValueParagraph worthValue = new NumericValueParagraph(assetWorth, CommonFormatters.CURRENCY);
         PricePercentageWrapper profitLossContainer = new PricePercentageWrapper(assetProfitLoss, profitLossPercentage);
         profitLossContainer.setPercentageBadgeBackground(false);
 
@@ -269,8 +300,8 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
                 new PortfolioStatsDisplay("Total Worth", worthValue),
                 new PortfolioStatsDisplay("Total Cost", costValue),
                 new PortfolioStatsDisplay("Total Profit/Loss", profitLossContainer),
-                new PortfolioStatsDisplay("Realized Profit", new NumericValueParagraph(assetRealized, currencyFormatter)),
-                new PortfolioStatsDisplay("Unrealized Profit", new NumericValueParagraph(assetUnrealized, currencyFormatter)),
+                new PortfolioStatsDisplay("Realized Profit", new NumericValueParagraph(assetRealized, CommonFormatters.CURRENCY)),
+                new PortfolioStatsDisplay("Unrealized Profit", new NumericValueParagraph(assetUnrealized, CommonFormatters.CURRENCY)),
                 new PortfolioStatsDisplay("Portfolio Diversity", getAssetDiversityContainer(assetDiversityPercentage)),
                 new PortfolioStatsDisplay("Buy/Sell Ratio", ratio,
                         String.format("%s%% of transactions are buys, %s%% are sells, in dollar equivalent", ratioParts[0].trim(), ratioParts[1])),
@@ -392,9 +423,9 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
     private Container getAssetDiversityContainer(int assetDiversityPercentage) {
         return Container.builder("portfolio-diversity")
                 .addComponent(() -> {
-                    NumericValueParagraph valueParagraph = new NumericValueParagraph(assetDiversityPercentage, percentageFormatter);
-                    valueParagraph.getStyle().setColor("blue");
-                    return valueParagraph;
+                    NumericValueParagraph p = new NumericValueParagraph(assetDiversityPercentage, CommonFormatters.PERCENTAGE);
+                    p.getStyle().setColor("blue");
+                    return p;
                 })
                 .addComponent(new ProgressBar(0, 100, assetDiversityPercentage))
                 .build();

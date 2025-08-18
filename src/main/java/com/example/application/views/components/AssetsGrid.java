@@ -40,16 +40,21 @@ import java.util.Locale;
 import java.util.function.ToDoubleFunction;
 
 /*
-    TODO:
-     - [!!] Optimize -> REMOVE certain columns from ColumnSelector instead of HIDING
-     - [?] grid.setMultiSort(true, MultiSortPriority.APPEND);
-     - [!] Closest Buy ->  $34,000.00 ❗
-            - URGENT -> vaadin:exclamation vaadin:warning
-     - [?] Dont allow to remove the asset name from column toggle component
-            - cursor: not-allowed;
+    TODO: Here
+        => Columns:
+            [!] Closest Buy ->  $34,000.00 (URGENT icon ❗ -> vaadin:exclamation vaadin:warning)
+            [!] Price percentage avgBuy vs currentPrice in %
+                - Ideally it should be currentPrice VS any other price in percentage, just to see it
+        = Others:
+            [?] Dont allow to remove the asset name from column toggle component
+                - cursor: not-allowed;
+            [?] grid.setMultiSort(true, MultiSortPriority.APPEND);
+
+     Optimize:
+        [!!] REMOVE certain columns from ColumnSelector instead of HIDING
     _______________________________________________________________________________________________________________________________________
     | Name | Price  | 24h Changes | Amount | Avg buy | Avg sell | All-time low | All-time high | Total Worth | Invested | Realized  |
-    | BTC  | $64000 | 2%          | 0.0034 | $60000  |    -     | $10          | $73000        | $230        | $200     | $30 / 10% |
+    | BTC  | $64000 | 2%          | 0.0034 | $60000  |    -     | $10          | $73000        | $230        | $200     |     -     |
     _______________________________________________________________________________________________________________________________________
 */
 public class AssetsGrid extends Div {
