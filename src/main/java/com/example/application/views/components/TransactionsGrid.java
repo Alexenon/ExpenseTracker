@@ -1,6 +1,5 @@
 package com.example.application.views.components;
 
-
 /*
     TODO:
      - [!] Add Edit/Delete btn, directly in the grid, and in the display itself
@@ -14,9 +13,9 @@ package com.example.application.views.components;
 import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.CryptoTransaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
-import com.example.application.utils.common.number.AmountFormatter;
-import com.example.application.utils.common.number.CurrencyFormatter;
-import com.example.application.utils.common.number.PercentageFormatter;
+import com.example.application.utils.common.formatters.number.AmountFormatter;
+import com.example.application.utils.common.formatters.number.CurrencyFormatter;
+import com.example.application.utils.common.formatters.number.PercentageFormatter;
 import com.example.application.utils.investment.ProfitUtils;
 import com.example.application.views.components.core.Container;
 import com.example.application.views.components.custom.dialogs.transactions.TransactionDetailsDialog;
@@ -80,13 +79,19 @@ public class TransactionsGrid extends Div {
     private void initializeFilteringBySearch() {
         nameSearchField.addClassName("asset-search-field");
         nameSearchField.setPlaceholder("Search");
-        nameSearchField.setPrefixComponent(new Icon(VaadinIcon.SEARCH));
+        nameSearchField.setPrefixComponent(seachIcon());
         nameSearchField.setAllowCustomValue(false);
         nameSearchField.addValueChangeListener(e -> applyFilter());
 
         typeSearchField.setItems(CryptoTransaction.TransactionType.values());
         typeSearchField.setClearButtonVisible(true);
         typeSearchField.addValueChangeListener(e -> applyFilter());
+    }
+
+    private static Icon seachIcon() {
+        Icon icon = new Icon(VaadinIcon.SEARCH);
+        icon.addClassName("search-icon");
+        return icon;
     }
 
     private void applyFilter() {
@@ -133,12 +138,12 @@ public class TransactionsGrid extends Div {
                                                  "</div>")
                 .withProperty("className", this::getProfitLossClassName)
                 .withProperty("profit", transaction -> {
-                    double currentPrice = instrumentsFacadeService.getAssetMarketPrice(transaction.getAsset());
+                    double currentPrice = transaction.getAsset().getMarketPrice();
                     double profit = ProfitUtils.netProfit(transaction, currentPrice);
                     return CurrencyFormatter.withDefaults().format(profit);
                 })
                 .withProperty("profitPercentage", transaction -> {
-                    double currentPrice = instrumentsFacadeService.getAssetMarketPrice(transaction.getAsset());
+                    double currentPrice = transaction.getAsset().getMarketPrice();
                     double percentage = ProfitUtils.growthPercentage(transaction.getMarketPrice(), currentPrice);
                     return PercentageFormatter.withDefaults().format(percentage);
                 });
@@ -149,7 +154,7 @@ public class TransactionsGrid extends Div {
     }
 
     private String getProfitLossClassName(CryptoTransaction transaction) {
-        double currentPrice = instrumentsFacadeService.getAssetMarketPrice(transaction.getAsset());
+        double currentPrice = transaction.getAsset().getMarketPrice();
         double profit = ProfitUtils.netProfit(transaction, currentPrice);
 
         if (profit == 0)

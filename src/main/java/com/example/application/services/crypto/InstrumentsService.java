@@ -1,40 +1,47 @@
 package com.example.application.services.crypto;
 
-import com.example.application.data.enums.Symbols;
+import com.example.application.data.enums.SymbolIndentifier;
+import com.example.application.data.models.InstrumentsProvider;
 import com.example.application.entities.User;
 import com.example.application.entities.crypto.*;
 import com.example.application.repositories.crypto.AssetRepository;
-import com.example.application.repositories.crypto.WalletBalanceRepository;
-import com.example.application.utils.common.number.AmountFormatter;
-import com.example.application.utils.exceptions.InvalidBalanceAmount;
+import com.example.application.utils.fetchers.api_responses.AssetMetadata;
+import jakarta.validation.constraints.NotNull;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
+@Slf4j
 public class InstrumentsService {
 
+    private final InstrumentsProvider instrumentsProvider;
     private final WalletService walletService;
     private final AssetRepository assetRepository;
     private final AssetWatcherService assetWatcherService;
     private final CryptoTransactionService transactionService;
-    private final WalletBalanceRepository walletBalanceRepository;
+    private final WalletBalanceService walletBalanceService;
 
     @Autowired
-    public InstrumentsService(WalletService walletService,
+    public InstrumentsService(InstrumentsProvider instrumentsProvider,
+                              WalletService walletService,
                               AssetRepository assetRepository,
                               CryptoTransactionService transactionService,
                               AssetWatcherService assetWatcherService,
-                              WalletBalanceRepository walletBalanceRepository
-    ) {
+                              WalletBalanceService walletBalanceService)
+    {
+        this.instrumentsProvider = instrumentsProvider;
         this.walletService = walletService;
         this.assetRepository = assetRepository;
         this.transactionService = transactionService;
         this.assetWatcherService = assetWatcherService;
-        this.walletBalanceRepository = walletBalanceRepository;
+        this.walletBalanceService = walletBalanceService;
     }
 
     /*
@@ -45,11 +52,13 @@ public class InstrumentsService {
         return assetRepository.findAll();
     }
 
+    @NotNull
     public Asset getAssetBySymbol(String symbolName) {
-        return assetRepository.findBySymbol(symbolName.toUpperCase());
+        return Optional.ofNullable(assetRepository.findBySymbol(symbolName.toUpperCase()))
+                .orElseThrow(() -> new NullPointerException("There is no such asset as %s".formatted(symbolName)));
     }
 
-    public Asset getAssetBySymbol(Symbols symbol) {
+    public Asset getAssetBySymbol(SymbolIndentifier symbol) {
         return assetRepository.findBySymbol(symbol.name());
     }
 
@@ -117,59 +126,58 @@ public class InstrumentsService {
      * WALLET BALANCES
      * */
 
+    public WalletBalance saveWalletBalance(WalletBalance walletBalance) {
+        return walletBalanceService.save(walletBalance);
+    }
+
+    @NotNull
     public WalletBalance getWalletBalancesByWalletAndAsset(Wallet wallet, Asset asset) {
-        return walletBalanceRepository.findByWalletAndAsset(wallet, asset).orElseThrow();
+        return walletBalanceService.getByWalletAndAsset(wallet, asset);
     }
 
     public List<WalletBalance> getWalletBalancesByWallet(Wallet wallet) {
-        return walletBalanceRepository.findByWallet(wallet);
+        return walletBalanceService.getByWallet(wallet);
     }
 
-    /**
-     * Updates wallet balance with an amount that should be added or removed using a positive/negative tokens amount
-     * <p> Example: + 200 ARB
-     */
-    public WalletBalance fillWalletBalance(Wallet wallet, Asset asset, double tokensAmountToBeAdded) {
-        Objects.requireNonNull(asset);
-        WalletBalance walletBalance = getWalletBalancesByWalletAndAsset(wallet, asset);
-        double balanceAfterSupply = getWalletBalanceAfterSupply(walletBalance, tokensAmountToBeAdded);
+    //<editor-fold desc="METADATA">
+    @NotNull
+    public AssetMetadata getAssetMetadata(@NotNull String symbol) {
+        Objects.requireNonNull(symbol, "symbol");
+        return instrumentsProvider.getMetadata().get(symbol);
+    }
 
-        AmountFormatter amountFormatter = AmountFormatter.withDefaults();
+    public void updateAssetData() {
+        Map<String, AssetMetadata> metadataMap = instrumentsProvider.getUpdatedMetadata();
 
-        System.out.printf("Fill %s with %s. Left amount: %s\n", wallet,
-                amountFormatter.format(tokensAmountToBeAdded, asset),
-                amountFormatter.format(balanceAfterSupply, asset));
-
-        if (balanceAfterSupply < 0) {
-            throw new InvalidBalanceAmount("The balance amount cannot be negative.");
+        if (metadataMap == null || metadataMap.isEmpty()) {
+            log.info("Metadata is empty. Skipping updating the database");
+            return;
         }
 
-        walletBalance.setAmount(balanceAfterSupply);
-        walletBalanceRepository.save(walletBalance);
-        return walletBalance;
+        metadataMap.forEach((key, value) -> updateAssetData(SymbolIndentifier.valueOf(key), value));
+        log.info("Updated database with {} assets", metadataMap.size());
     }
 
-    public double getWalletBalanceAfterSupply(WalletBalance walletBalance, double tokensAmountToBeAdded) {
-        return walletBalance.getAmount() + tokensAmountToBeAdded;
+    private void updateAssetData(SymbolIndentifier indentifier, @Nullable AssetMetadata assetMetadata) {
+        if (assetMetadata == null) {
+            log.info("Asset metadata for {} asset is null, skipping updating database", indentifier.name());
+            return;
+        }
+
+        Asset asset = Optional.ofNullable(assetRepository.findBySymbol(indentifier.name())).orElse(new Asset());
+        asset.setSymbol(indentifier.name());
+        asset.setFullName(indentifier.getFullName());
+        Optional.ofNullable(assetMetadata.getPriceUsd()).ifPresent(asset::setMarketPrice);
+        Optional.ofNullable(assetMetadata.getAssetDescriptionSummary()).ifPresent(asset::setSummaryDescription);
+        Optional.ofNullable(assetMetadata.getSpotMoving24HourQuoteVolumeUsd()).ifPresent(asset::setTodayVolume);
+        Optional.ofNullable(assetMetadata.getSpotMoving24HourChangePercentageUsd()).ifPresent(asset::setChangePercentage);
+        Optional.ofNullable(assetMetadata.getSupplyCirculating()).ifPresent(asset::setCirculationSupply);
+        Optional.ofNullable(assetMetadata.getSupplyTotal()).ifPresent(asset::setTotalSupply);
+        Optional.ofNullable(assetMetadata.getTotalMktCapUsd()).ifPresent(asset::setTotalMarketCap);
+        Optional.ofNullable(assetMetadata.getLogoUrl()).ifPresent(asset::setImageUrl);
+        assetRepository.save(asset);
     }
+//</editor-fold>
 
-    // TODO: FIND A WAY TO EXTRACT THIS FROM DATABASE WITHOUT EXCEPTION
-    public List<WalletBalance> getWalletBalancesByWalletWithNonZeroAmount(Wallet wallet) {
-        return walletBalanceRepository.findByWalletWithNonZeroAmount(wallet.getId());
-    }
-
-    /*
-     * OTHERS
-     * */
-
-    public void saveSymbolsInBatch() {
-        Arrays.stream(Symbols.values()).forEach(asset -> {
-            if (assetRepository.findBySymbol(asset.name()) == null) {
-                assetRepository.save(new Asset(asset.name(), asset.getFullName()));
-            }
-        });
-
-        System.out.println("Filled database with " + Symbols.values().length + " assets");
-    }
 
 }

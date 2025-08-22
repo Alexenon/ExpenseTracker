@@ -1,6 +1,6 @@
 package com.example.application.views.components.custom.fields;
 
-import com.example.application.utils.common.StringUtils;
+import com.example.application.utils.common.lang.StringUtils;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Paragraph;
 

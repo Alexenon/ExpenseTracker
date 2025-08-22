@@ -20,6 +20,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.theme.lumo.LumoIcon;
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,245 +30,245 @@ import java.util.ArrayList;
 import java.util.List;
 
 /*
+	TODO: Add dropdown stats component
+
+	TODO: Add buySellRatio with details:
+			- 30 : 70
+			- 4 buys ($340) : 9 sold ($1120)
+			The TradingVolume + BuySellRatio can be merged into one stat
+
+	TODO: Add Trading Volume with details:
+			-  BUY "3496 ARB = $220", avg buy ...
+			-  SELL "3496 ARB = $220", avg sell ...
+			-  TOTAL VOLUME: "3496 ARB = $220"
+			(maybe without decimal points for trading $ amount)
+
+	TODO: Add AvgBuy/Sell details
+			- 20 ARB / $220.00      (display average buy amount and average buy price)
+* */
+
+/*
     | Type  | Symbol | Price | Amount tokens / currency | Total |
     | Buy   | SOL    | $110  | 0.23 SOL ~ $120          | $200  |
     | Sell  | SOL    | $130  | 0.23 SOL ~ $120          | $200  |
     | Buy   | SOL    | $130  | 0.23 SOL ~ $120          | $200  |
     | Sell  | SOL    | $130  | 0.23 SOL ~ $120          | $200  |
 * */
-
-/*
-    TODO: Add dropdown stats component
-
-    TODO: Add buySellRatio with details:
-        - 30 : 70
-        - 4 buys ($340) : 9 sold ($1120)
-
-    TODO: Add Trading Volume with details:
-        -  BUY "3496 ARB = $220", avg buy ...
-        -  SELL "3496 ARB = $220", avg sell ...
-        -  TOTAL VOLUME: "3496 ARB = $220"
-        (maybe without decimal points for trading $ amount)
-
-
-
-    TODO: Add AvgBuy/Sell details
-        - 20 ARB / $220.00      (display average buy amount and average buy price)
-
-    The TradingVolume + BuySellRatio can be merged into one stat
-* */
-
 @Slf4j
 public class ProfitEmulatorTab extends BaseCalculatorTab {
 
-    private final InstrumentsFacadeService instrumentsFacadeService;
-    private final PortfolioPerformanceTracker portfolioPerformanceTracker;
+	private final InstrumentsFacadeService instrumentsFacadeService;
+	private final PortfolioPerformanceTracker portfolioPerformanceTracker;
 
-    private final AssetComboBox assetSymbolField;
-    private final List<TransactionalLayout> transactionalLayouts = new ArrayList<>();
-    private final Button addNewLayoutBtn = new Button("Add Transaction", LumoIcon.PLUS.create());
-    private final Container layoutsContainer = new Container("layout-container");
-    private final Container metadataDetailsContainer = new Container("profit-meta-data");
+	private final AssetComboBox assetSymbolField;
+	private final List<TransactionalLayout> transactionalLayouts = new ArrayList<>();
+	private final Button addNewLayoutBtn = new Button("Add Transaction", LumoIcon.PLUS.create());
+	private final Container layoutsContainer = new Container("layout-container");
+	private final Container metadataDetailsContainer = new Container("profit-meta-data");
 
-    public ProfitEmulatorTab(InstrumentsFacadeService instrumentsFacadeService,
-                             PortfolioPerformanceTracker portfolioPerformanceTracker) {
-        super("Buy & Sell Emulator", instrumentsFacadeService);
-        this.instrumentsFacadeService = instrumentsFacadeService;
-        this.portfolioPerformanceTracker = portfolioPerformanceTracker;
-        this.assetSymbolField = new AssetComboBox(instrumentsFacadeService);
-        buildTab();
-    }
+	public ProfitEmulatorTab(InstrumentsFacadeService instrumentsFacadeService,
+							 PortfolioPerformanceTracker portfolioPerformanceTracker)
+	{
+		super("Buy & Sell Emulator", instrumentsFacadeService);
+		this.instrumentsFacadeService = instrumentsFacadeService;
+		this.portfolioPerformanceTracker = portfolioPerformanceTracker;
+		this.assetSymbolField = new AssetComboBox(instrumentsFacadeService);
+	}
 
-    private void buildTab() {
-        assetSymbolField.addValueChangeListener(field -> {
-            if (field.getHasValue().isEmpty()) {
-                return;
-            }
+	@Override
+	public void beforeEnter(BeforeEnterEvent event) {
+		buildTab();
+	}
 
-            Asset selectedAsset = field.getValue();
-            transactionalLayouts.forEach(layout -> layout.setValue(selectedAsset));
-            updateVisibilityForMetaData(selectedAsset);
-        });
+	private void buildTab() {
+		assetSymbolField.addValueChangeListener(field -> {
+			if (field.getHasValue().isEmpty()) {
+				return;
+			}
 
-        add(metadataDetailsContainer);
+			Asset selectedAsset = field.getValue();
+			transactionalLayouts.forEach(layout -> layout.setValue(selectedAsset));
+			updateVisibilityForMetaData(selectedAsset);
+		});
 
-        assetSymbolField.getElement().getStyle()
-                .set("width", "350px")
-                .set("align-self", "center");
-    }
+		add(metadataDetailsContainer);
 
-    @Override
-    protected Div createInputFieldsContainer() {
-        addNewLayoutBtn.setIconAfterText(false);
-        addNewLayoutBtn.addClickListener(e -> createNewLayout());
-        addNewLayoutBtn.addClassName("add-entity-btn");
+		assetSymbolField.getElement().getStyle()
+				.set("width", "350px")
+				.set("align-self", "center");
+	}
 
-        TransactionalLayout defaultLayout = new TransactionalLayout(instrumentsFacadeService, portfolioPerformanceTracker);
-        defaultLayout.addClassName("buy-sell-layout");
-        transactionalLayouts.add(defaultLayout);
-        layoutsContainer.add(defaultLayout);
+	@Override
+	protected Div createInputFieldsContainer() {
+		addNewLayoutBtn.setIconAfterText(false);
+		addNewLayoutBtn.addClickListener(e -> createNewLayout());
+		addNewLayoutBtn.addClassName("add-entity-btn");
 
-        return new Div(assetSymbolField, layoutsContainer, addNewLayoutBtn);
-    }
+		TransactionalLayout defaultLayout = new TransactionalLayout(instrumentsFacadeService, portfolioPerformanceTracker);
+		defaultLayout.addClassName("buy-sell-layout");
+		transactionalLayouts.add(defaultLayout);
+		layoutsContainer.add(defaultLayout);
 
-    @Override
-    protected Button createDisplayResultsBtn() {
-        Button button = new Button("Calculate", e -> {
-            String symbol = assetSymbolField.getSymbol();
-            List<CryptoTransaction> transactions = getListOfTransactions();
+		return new Div(assetSymbolField, layoutsContainer, addNewLayoutBtn);
+	}
 
-            double price = instrumentsFacadeService.getAssetMarketPrice(assetSymbolField.getSelectedAsset());
-            double avgBuy = ProfitCalculator.getAverageBuyPrice(transactions);
-            double avgSell = ProfitCalculator.getAverageSellPrice(transactions);
-            double amountOfRemainingTokens = ProfitCalculator.getAmountOfRemainingTokens(transactions);
-            double realizedProfit = ProfitCalculator.getRealizedNetProfit(transactions);  // TODO: HERE IS SOMETHING STRANGE
-            double unrealizedProfit = amountOfRemainingTokens * assetSymbolField.getMarketPrice();
-            double totalProfit = realizedProfit + unrealizedProfit;
+	@Override
+	protected Button createDisplayResultsBtn() {
+		Button button = new Button("Calculate", e -> {
+			String symbol = assetSymbolField.getSymbol();
+			List<CryptoTransaction> transactions = getListOfTransactions();
 
-            double totalCost = ProfitCalculator.calculateTotalCostForBuyTransactions(transactions);
-            double worthRemainingTokens = amountOfRemainingTokens * price;
-            double netProfit = worthRemainingTokens - totalProfit;
+			double price = assetSymbolField.getSelectedAsset().getMarketPrice();
+			double avgBuy = ProfitCalculator.getAverageBuyPrice(transactions);
+			double avgSell = ProfitCalculator.getAverageSellPrice(transactions);
+			double amountOfRemainingTokens = ProfitCalculator.getAmountOfRemainingTokens(transactions);
+			double realizedProfit = ProfitCalculator.getRealizedProfit(transactions);  // TODO: HERE IS SOMETHING STRANGE
+			double unrealizedProfit = amountOfRemainingTokens * assetSymbolField.getMarketPrice();
+			double totalProfit = realizedProfit + unrealizedProfit;
 
-            String buyVolumeInfo = currencyFormatter.format(ProfitCalculator.calculateTotalCostForBuyTransactions(transactions));
-            String sellVolumeInfo = currencyFormatter.format(ProfitCalculator.calculateTotalCostForSellTransactions(transactions));
-            String remainingCostInfo = currencyFormatter.format(ProfitCalculator.getRemainingTokensCost(transactions));
+			double totalCost = ProfitCalculator.totalCostForBuyTransactions(transactions);
+			double worthRemainingTokens = amountOfRemainingTokens * price;
+			double netProfit = worthRemainingTokens - totalProfit;
 
-            // COLOR:
-            //  - Total Profit (green)
-            //  - Total Cost (green)
-            //  - Amount Tokens left (blue)
-            //  - Worth remaining tokens (green)
+			String buyVolumeInfo = currencyFormatter.format(ProfitCalculator.totalCostForBuyTransactions(transactions));
+			String sellVolumeInfo = currencyFormatter.format(ProfitCalculator.totalCostForSellTransactions(transactions));
+			String remainingCostInfo = currencyFormatter.format(ProfitCalculator.getRemainingTokensCost(transactions));
 
-            NumericValueParagraph costParagraph = new NumericValueParagraph(totalCost, currencyFormatter, true);
-            NumericValueParagraph profitParagraph = new NumericValueParagraph(totalProfit, currencyFormatter, true);
+			// COLOR:
+			//  - Total Profit (green)
+			//  - Total Cost (green)
+			//  - Amount Tokens left (blue)
+			//  - Worth remaining tokens (green)
 
-            Container tokensLeftContainer = Container.builder("centered-row")
-                    .addComponent(() -> new ComponentBuilder<>(Paragraph.class)
-                            .addClass("asset-amount")
-                            .setStyle("margin-right", "2px")
-                            .setText(amountFormatter.format(amountOfRemainingTokens)).build()
-                    )
-                    .addComponent(new Span(symbol))
-                    .build();
-            ProfitStatsDisplay tokensLeft = new ProfitStatsDisplay("Amount of tokens left:", tokensLeftContainer);
+			NumericValueParagraph costParagraph = new NumericValueParagraph(totalCost, currencyFormatter, true);
+			NumericValueParagraph profitParagraph = new NumericValueParagraph(totalProfit, currencyFormatter, true);
+
+			Container tokensLeftContainer = Container.builder("centered-row")
+					.addComponent(() -> new ComponentBuilder<>(Paragraph.class)
+							.addClass("asset-amount")
+							.setStyle("margin-right", "2px")
+							.setText(amountFormatter.format(amountOfRemainingTokens)).build()
+					)
+					.addComponent(new Span(symbol))
+					.build();
+			ProfitStatsDisplay tokensLeft = new ProfitStatsDisplay("Amount of tokens left:", tokensLeftContainer);
 
 
-            resultsContainer.removeAll();
-            resultsContainer.add(
-                    new ProfitStatsDisplay("Avg Buy:", avgBuy, currencyFormatter),
-                    new ProfitStatsDisplay("Avg Sell:", avgSell, currencyFormatter),
-                    new ProfitStatsDisplay("Avg Growth Rate", percentageFormatter.format(ProfitUtils.growthPercentage(avgBuy, avgSell))),
+			resultsContainer.removeAll();
+			resultsContainer.add(
+					new ProfitStatsDisplay("Avg Buy:", avgBuy, currencyFormatter),
+					new ProfitStatsDisplay("Avg Sell:", avgSell, currencyFormatter),
+					new ProfitStatsDisplay("Avg Growth Rate", percentageFormatter.format(ProfitUtils.growthPercentage(avgBuy, avgSell))),
 
-                    new Hr(),
-                    new ProfitStatsDisplay("Total Cost", totalCost, currencyFormatter, true),
+					new Hr(),
+					new ProfitStatsDisplay("Total Cost", totalCost, currencyFormatter, true),
 
-                    new Hr(),
-                    tokensLeft,
-                    new ProfitStatsDisplay("Worth of remaining tokens:", worthRemainingTokens, currencyFormatter),
-                    new ProfitStatsDisplay("Cost for remaining tokens:", remainingCostInfo),
+					new Hr(),
+					tokensLeft,
+					new ProfitStatsDisplay("Worth of remaining tokens:", worthRemainingTokens, currencyFormatter),
+					new ProfitStatsDisplay("Cost for remaining tokens:", remainingCostInfo),
 
-                    new Hr(),
-                    new ProfitStatsDisplay("Realized Profit", realizedProfit, currencyFormatter),
-                    new ProfitStatsDisplay("Unrealized Profit", unrealizedProfit, currencyFormatter),
-                    new ProfitStatsDisplay("Total Profit", totalProfit, currencyFormatter, true),
+					new Hr(),
+					new ProfitStatsDisplay("Realized Profit", realizedProfit, currencyFormatter),
+					new ProfitStatsDisplay("Unrealized Profit", unrealizedProfit, currencyFormatter),
+					new ProfitStatsDisplay("Total Profit", totalProfit, currencyFormatter, true),
 //                    new ProfitStatsDisplay("Net Profit", currencyFormatter.format(netProfit)), // FIXME: DOESN'T DISPLAY RIGHT VALUES
 
-                    new Hr(),
-                    new ProfitStatsDisplay("Buy Trading Volume", buyVolumeInfo),
-                    new ProfitStatsDisplay("Sell Trading Volume", sellVolumeInfo)
-            );
+					new Hr(),
+					new ProfitStatsDisplay("Buy Trading Volume", buyVolumeInfo),
+					new ProfitStatsDisplay("Sell Trading Volume", sellVolumeInfo)
+			);
 
-            metadataDetailsContainer.removeAll();
-            metadataDetailsContainer.add(getTable(assetSymbolField.getSelectedAsset(), avgBuy, avgSell));
-        });
-        button.addClassName("add-entity-btn");
-        return button;
-    }
+			metadataDetailsContainer.removeAll();
+			metadataDetailsContainer.add(getTable(assetSymbolField.getSelectedAsset(), avgBuy, avgSell));
+		});
+		button.addClassName("add-entity-btn");
+		return button;
+	}
 
-    private void updateVisibilityForMetaData(Asset asset) {
-        metadataDetailsContainer.setVisible(asset != null);
-    }
+	private void updateVisibilityForMetaData(Asset asset) {
+		metadataDetailsContainer.setVisible(asset != null);
+	}
 
-    private Div statsItem(String labelText, double value) {
-        return new Div(new Paragraph(labelText), new Paragraph(String.valueOf(value)));
-    }
+	private Div statsItem(String labelText, double value) {
+		return new Div(new Paragraph(labelText), new Paragraph(String.valueOf(value)));
+	}
 
-    private void createNewLayout() {
-        TransactionalLayout newLayout = new TransactionalLayout(instrumentsFacadeService, portfolioPerformanceTracker);
-        newLayout.addClassName("buy-sell-layout");
+	private void createNewLayout() {
+		TransactionalLayout newLayout = new TransactionalLayout(instrumentsFacadeService, portfolioPerformanceTracker);
+		newLayout.addClassName("buy-sell-layout");
 
-        MonoIcon deleteBtn = PictogramIcon.TRASH_CAN_OUTLINE.create();
-        deleteBtn.addClickListener(e -> {
-            transactionalLayouts.remove(newLayout);
-            newLayout.removeFromParent();
-        });
+		MonoIcon deleteBtn = PictogramIcon.TRASH_CAN_OUTLINE.create();
+		deleteBtn.addClickListener(e -> {
+			transactionalLayouts.remove(newLayout);
+			newLayout.removeFromParent();
+		});
 
-        newLayout.add(deleteBtn);
-        transactionalLayouts.add(newLayout);
-        layoutsContainer.add(newLayout);
-    }
+		newLayout.add(deleteBtn);
+		transactionalLayouts.add(newLayout);
+		layoutsContainer.add(newLayout);
+	}
 
-    private List<CryptoTransaction> getListOfTransactions() {
-        return transactionalLayouts.stream()
-                .map(layout -> {
-                    Asset selectedAsset = assetSymbolField.getSelectedAsset();
-                    double marketPrice = layout.getMarketPriceField().doubleValue();
-                    double orderTotalCost = layout.getTotalCostField().doubleValue();
-                    CryptoTransaction.TransactionType type = layout.getTypeField().getValue();
+	private List<CryptoTransaction> getListOfTransactions() {
+		return transactionalLayouts.stream()
+				.map(layout -> {
+					Asset selectedAsset = assetSymbolField.getSelectedAsset();
+					double marketPrice = layout.getMarketPriceField().doubleValue();
+					double orderTotalCost = layout.getTotalCostField().doubleValue();
+					CryptoTransaction.TransactionType type = layout.getTypeField().getValue();
 
-                    return new CryptoTransaction(selectedAsset, marketPrice, orderTotalCost, type);
-                }).toList();
-    }
+					return new CryptoTransaction(selectedAsset, marketPrice, orderTotalCost, type);
+				}).toList();
+	}
 
-    // TODO: Update this
-    private Html getTable(Asset asset, double averageBuyPrice, double averageSellPrice) {
-        double currentPrice = instrumentsFacadeService.getAssetMarketPrice(asset);
+	// TODO: Update this
+	private Html getTable(Asset asset, double averageBuyPrice, double averageSellPrice) {
+		double currentPrice = asset.getMarketPrice();
 
-        BigInteger totalMarketSupply = instrumentsFacadeService.getAssetSupplyTotal(asset);
-        double currentFDV = ProfitUtils.fdv(totalMarketSupply, currentPrice);
-        double avgBuyFDV = ProfitUtils.fdv(totalMarketSupply, averageBuyPrice);
-        double avgSellFDV = ProfitUtils.fdv(totalMarketSupply, averageSellPrice);
+		BigInteger totalMarketSupply = asset.getTotalSupply();
+		double currentFDV = ProfitUtils.fdv(totalMarketSupply, currentPrice);
+		double avgBuyFDV = ProfitUtils.fdv(totalMarketSupply, averageBuyPrice);
+		double avgSellFDV = ProfitUtils.fdv(totalMarketSupply, averageSellPrice);
 
-        BigInteger circulationSupply = instrumentsFacadeService.getAssetSupplyCirculating(asset);
-        double currentMarketCap = ProfitUtils.marketCap(circulationSupply, currentPrice);
-        double avgBuyMarketCap = ProfitUtils.marketCap(circulationSupply, averageBuyPrice);
-        double avgSellMarketCap = ProfitUtils.marketCap(circulationSupply, averageSellPrice);
+		BigInteger circulationSupply = asset.getCirculationSupply();
+		double currentMarketCap = ProfitUtils.marketCap(circulationSupply, currentPrice);
+		double avgBuyMarketCap = ProfitUtils.marketCap(circulationSupply, averageBuyPrice);
+		double avgSellMarketCap = ProfitUtils.marketCap(circulationSupply, averageSellPrice);
 
-        return new Html(MessageFormat.format("""
-                        <table class="inside-border">
-                          <tr>
-                            <td></td>
-                            <td>Current</td>
-                            <td>Avg Buy</td>
-                            <td>Avg Sell</td>
-                          </tr>
-                          <tr>
-                            <td>Price</td>
-                            <td>{0}</td>
-                            <td>{1}</td>
-                            <td>{2}</td>
-                          </tr>
-                          <tr>
-                            <td>Market Cap</td>
-                            <td>{3}</td>
-                            <td>{4}</td>
-                            <td>{5}</td>
-                          </tr>
-                          <tr>
-                            <td>FDV</td>
-                            <td>{6}</td>
-                            <td>{7}</td>
-                            <td>{8}</td>
-                          </tr>
-                        </table>
-                        """,
-                currencyFormatter.format(currentPrice), currencyFormatter.format(averageBuyPrice), currencyFormatter.format(averageSellPrice),
-                compactFormatter.format(currentMarketCap), compactFormatter.format(avgBuyMarketCap), compactFormatter.format(avgSellMarketCap),
-                compactFormatter.format(currentFDV), compactFormatter.format(avgBuyFDV), compactFormatter.format(avgSellFDV))
-        );
-    }
+		return new Html(MessageFormat.format("""
+						<table class="inside-border">
+						  <tr>
+						    <td></td>
+						    <td>Current</td>
+						    <td>Avg Buy</td>
+						    <td>Avg Sell</td>
+						  </tr>
+						  <tr>
+						    <td>Price</td>
+						    <td>{0}</td>
+						    <td>{1}</td>
+						    <td>{2}</td>
+						  </tr>
+						  <tr>
+						    <td>Market Cap</td>
+						    <td>{3}</td>
+						    <td>{4}</td>
+						    <td>{5}</td>
+						  </tr>
+						  <tr>
+						    <td>FDV</td>
+						    <td>{6}</td>
+						    <td>{7}</td>
+						    <td>{8}</td>
+						  </tr>
+						</table>
+						""",
+				currencyFormatter.format(currentPrice), currencyFormatter.format(averageBuyPrice), currencyFormatter.format(averageSellPrice),
+				compactFormatter.format(currentMarketCap), compactFormatter.format(avgBuyMarketCap), compactFormatter.format(avgSellMarketCap),
+				compactFormatter.format(currentFDV), compactFormatter.format(avgBuyFDV), compactFormatter.format(avgSellFDV))
+		);
+	}
 
 }
-
 
 

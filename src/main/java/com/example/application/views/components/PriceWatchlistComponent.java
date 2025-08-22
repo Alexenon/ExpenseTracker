@@ -3,7 +3,7 @@ package com.example.application.views.components;
 import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.AssetWatcher;
 import com.example.application.services.crypto.InstrumentsFacadeService;
-import com.example.application.utils.common.StringUtils;
+import com.example.application.utils.common.lang.StringUtils;
 import com.example.application.views.components.core.Container;
 import com.example.application.views.components.custom.fields.CurrencyField;
 import com.example.application.views.components.utils.HasNotifications;

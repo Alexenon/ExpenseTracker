@@ -22,11 +22,14 @@ public class Wallet {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(nullable = false)
-    private LocalDateTime dateCreated = LocalDateTime.now();
+    @Column(name = "last_time_updated", nullable = false)
+    private LocalDateTime lastTimeUpdated = LocalDateTime.now();
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     @Override
     public String toString() {
-        return "Wallet{id=%d, user='%s', dateCreated=%s}".formatted(id, user.getUsername(), dateCreated);
+        return "Wallet{id=%d, user='%s', dateCreated=%s}".formatted(id, user.getUsername(), createdAt);
     }
 }

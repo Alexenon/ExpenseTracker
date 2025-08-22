@@ -41,13 +41,14 @@ public class AssetComboBox extends ComboBox<Asset> {
     }
 
     protected LitRenderer<Asset> assetSymbolRenderer() {
-        return LitRenderer.<Asset>of(
-                        "<div class='coin-overview-name-container'>" +
-                                "  <img class='rounded coin-overview-image' src='${item.imgUrl}' alt='${item.fullName}'/>" +
-                                "  <span>${item.symbol}</span>" +
-                                "  <p>${item.fullName}</p>" +
-                                "</div>")
-                .withProperty("imgUrl", instrumentsFacadeService::getAssetImgUrl)
+        String templateExpression = """
+                <div class='coin-overview-name-container'>
+                  <img class='rounded coin-overview-image' src='${item.imgUrl}' alt='${item.fullName}'/>
+                  <span>${item.symbol}</span>
+                  <p>${item.fullName}</p>
+                </div>""";
+        return LitRenderer.<Asset>of(templateExpression)
+                .withProperty("imgUrl", Asset::getImageUrl)
                 .withProperty("symbol", Asset::getSymbol)
                 .withProperty("fullName", Asset::getFullName);
     }
@@ -61,7 +62,7 @@ public class AssetComboBox extends ComboBox<Asset> {
     }
 
     public double getMarketPrice() {
-        return extract(instrumentsFacadeService::getAssetMarketPrice, 0.0);
+        return extract(Asset::getMarketPrice, 0.0);
     }
 
     public double getAmountTokens() {

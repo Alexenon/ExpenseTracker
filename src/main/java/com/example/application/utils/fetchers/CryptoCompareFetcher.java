@@ -4,7 +4,9 @@ import com.example.application.utils.fetchers.api_responses.ApiResponse;
 import com.example.application.utils.fetchers.api_responses.AssetMetaDataApiResp;
 import com.example.application.utils.fetchers.api_responses.Coin;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.springframework.lang.Nullable;
 
 import java.io.IOException;
 import java.net.URI;
@@ -26,6 +28,7 @@ import java.util.Map;
  *
  *
  * */
+@Slf4j
 public class CryptoCompareFetcher {
 
     private static final String COIN_LIST_URL = "https://min-api.cryptocompare.com/data/all/coinlist";
@@ -35,7 +38,6 @@ public class CryptoCompareFetcher {
 
     public static void main(String[] args) {
 //        System.out.println(getCoinMetaData("BTC"));
-
 
 
         getCoinList().stream()
@@ -79,6 +81,7 @@ public class CryptoCompareFetcher {
     /**
      * <a href="https://developers.cryptocompare.com/documentation/data-api/asset_v1_metadata">Documentation</a>
      */
+    @Nullable
     public static AssetMetaDataApiResp getCoinMetaData(String symbol) {
         try {
             String url = METADATA_URL + "?asset="
@@ -95,7 +98,8 @@ public class CryptoCompareFetcher {
             String jsonResponse = httpClient.send(request, HttpResponse.BodyHandlers.ofString()).body();
             return objectMapper.readValue(jsonResponse, AssetMetaDataApiResp.class);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            log.error("Failed to fetch info for asset: {}. Error: {}", symbol, ExceptionUtils.getStackTrace(e));
+            return null;
         }
     }
 

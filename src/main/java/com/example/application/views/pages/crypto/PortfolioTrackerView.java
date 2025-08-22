@@ -4,82 +4,96 @@ import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.CryptoTransaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
-import com.example.application.utils.common.number.CurrencyFormatter;
-import com.example.application.views.components.AssetsGrid;
+import com.example.application.utils.common.formatters.CommonFormatters;
+import com.example.application.views.components.PriceChangeHandler;
+import com.example.application.views.components.PriceChangeblePage;
 import com.example.application.views.components.TransactionsGrid;
 import com.example.application.views.components.core.Container;
 import com.example.application.views.components.custom.dialogs.transactions.AddTransactionDialog;
 import com.example.application.views.components.custom.display.NumericValueParagraph;
 import com.example.application.views.components.custom.fields.PricePercentageWrapper;
 import com.example.application.views.components.custom.fields.stats.PortfolioStatsDisplay;
+import com.example.application.views.components.portfolio.AssetsChart;
+import com.example.application.views.components.portfolio.AssetsGrid;
 import com.example.application.views.layouts.MainLayout;
 import com.example.application.views.pages.DefaultPage;
+import com.example.application.views.pages.RebuildablePage;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.*;
-import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.*;
 import com.vaadin.flow.theme.lumo.LumoIcon;
-import elemental.json.Json;
-import elemental.json.JsonArray;
-import elemental.json.JsonObject;
 import jakarta.annotation.security.PermitAll;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /*
     TODO:
-        [!] Total Trading Volume
-        [!] Add chart options -> byCost, byWorth
-        [!] Fix chart categories to not display 0 values
+        => Info
+            [!] Total Trading Volume
+            [!] Gainers vs Loosers (How many assets are now in profit VS aren't)
+        => Chart
+            [!] Add chart options -> byCost, byWorth
+            [!] Fix chart categories to not display 0 values
  * */
 
+@Slf4j
 @PermitAll
 @PageTitle("Portfolio Tracker")
 @Route(value = "portfolio", layout = MainLayout.class)
 @JsModule("./themes/light_theme/components/javascript/fillPieChart.js")
 @JavaScript("https://fastly.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js")
-public class PortfolioTrackerView extends DefaultPage {
+public class PortfolioTrackerView extends DefaultPage implements RebuildablePage, BeforeEnterObserver, BeforeLeaveObserver, PriceChangeblePage {
 
-    // TODO: Export all these formaters into a class CommonFormatters
-    //  where it would be all general formatters, like SHORT_CURRENCY_FORMATTER, LONG_CURRENCY_FORMATTER, ...
-    // TODO: Same for data formatters and datePicker formatter
-    private final static CurrencyFormatter currencyFormatter = CurrencyFormatter.withDefaults();
+    private final PriceChangeHandler priceChangeHandler;
+    private final InstrumentsFacadeService instrumentsFacadeService;
+    private final PortfolioPerformanceTracker portfolioPerformanceTracker;
+    private final AssetsGrid assetsGrid;
+    private final AssetsChart assetsChart;
+    private final TransactionsGrid transactionsGrid;
+
+    private final UI ui;
 
     @Autowired
-    private InstrumentsFacadeService instrumentsFacadeService;
-    @Autowired
-    private PortfolioPerformanceTracker portfolioPerformanceTracker;
-
-    private AssetsGrid assetsGrid;
-    private TransactionsGrid transactionsGrid;
-    private final Div assetsDiversityChart = new Div();
+    public PortfolioTrackerView(InstrumentsFacadeService instrumentsFacadeService,
+                                PortfolioPerformanceTracker portfolioPerformanceTracker,
+                                PriceChangeHandler priceChangeHandler)
+    {
+        this.instrumentsFacadeService = instrumentsFacadeService;
+        this.portfolioPerformanceTracker = portfolioPerformanceTracker;
+        this.priceChangeHandler = priceChangeHandler;
+        this.assetsGrid = new AssetsGrid(instrumentsFacadeService, portfolioPerformanceTracker);
+        this.assetsChart = new AssetsChart(instrumentsFacadeService, portfolioPerformanceTracker);
+        this.transactionsGrid = new TransactionsGrid(instrumentsFacadeService);
+        this.ui = UI.getCurrent();
+        initializePage();
+    }
 
     @Override
-    protected void initializePage() {
+    public void beforeEnter(BeforeEnterEvent event) {
+        buildPage();
+        priceChangeHandler.addObserver(ui, this);
+    }
+
+    @Override
+    public void beforeLeave(BeforeLeaveEvent event) {
+        priceChangeHandler.removeObserver(ui);
+    }
+
+    @Override
+    public void initializePage() {
         getStyle().set("margin", "100px 30px 30px 30px");
     }
 
-    protected void initializeGrids() {
-        assetsGrid = new AssetsGrid(instrumentsFacadeService, portfolioPerformanceTracker);
-        assetsGrid.setGridFullSize(true);
-        assetsGrid.setItems(instrumentsFacadeService.getAssetsWithNonZeroAmount());
-
-        transactionsGrid = new TransactionsGrid(instrumentsFacadeService);
-        transactionsGrid.setItems(instrumentsFacadeService.getAllTransactions());
-        transactionsGrid.setPageSize(10);
-        transactionsGrid.addUpdateItemListener(l -> rebuildPage());
-    }
-
     @Override
-    protected void buildPage() {
+    public void buildPage() {
         initializeGrids();
         add(
                 headerSection(),
@@ -88,16 +102,37 @@ public class PortfolioTrackerView extends DefaultPage {
                 gridSection("Assets", assetsGrid),
                 gridSection("Transactions", transactionsGrid)
         );
-        initializeChart();
+        assetsGrid.setItems(instrumentsFacadeService.getAssetsWithNonZeroAmount());
+        transactionsGrid.setItems(instrumentsFacadeService.getAllTransactions());
+    }
+
+    @Override
+    public void updatePage() {
+        rebuildPage();
+    }
+
+    @Override
+    public void rebuildPage() {
+        ui.access(() -> {
+            this.removeAll();
+            this.buildPage();
+        });
+    }
+
+    protected void initializeGrids() {
+        assetsGrid.setGridFullSize(true);
+
+        transactionsGrid.setPageSize(10);
+        transactionsGrid.addUpdateItemListener(l -> rebuildPage());
     }
 
     private Section headerSection() {
         Section section = new Section();
         section.addClassName("asset-details-header");
 
-        NumericValueParagraph worth = new NumericValueParagraph(portfolioPerformanceTracker.getPortfolioWorth(), currencyFormatter);
-        double percentage = portfolioPerformanceTracker.getPortfolioProfitPercentage();
+        NumericValueParagraph worth = new NumericValueParagraph(portfolioPerformanceTracker.getPortfolioWorth(), CommonFormatters.CURRENCY);
         double profit = portfolioPerformanceTracker.getPortfolioTotalProfit();
+        double percentage = portfolioPerformanceTracker.getPortfolioProfitPercentage();
         PricePercentageWrapper profitWrapper = new PricePercentageWrapper(profit, percentage);
 
         Container portfolioWorthWrapper = new Container("price-wrapper", worth, profitWrapper);
@@ -115,29 +150,6 @@ public class PortfolioTrackerView extends DefaultPage {
         section.add(addTransactionBtn);
 
         return section;
-    }
-
-    private void initializeChart() {
-        assetsDiversityChart.setId("assets-diverstity-chart");
-
-        Map<String, Double> assetsDiversity = instrumentsFacadeService.getAssetsWithNonZeroAmount()
-                .stream()
-                .collect(Collectors.toMap(Asset::getSymbol, portfolioPerformanceTracker::getAssetRemainingTokensCost, (a, b) -> b));
-
-        JsonArray jsonOptionData = Json.createArray();
-        AtomicInteger index = new AtomicInteger(0);
-        assetsDiversity.forEach((assetName, diversityPercentage) -> {
-            JsonObject jsonObject = Json.createObject();
-            jsonObject.put("name", assetName);
-            jsonObject.put("value", diversityPercentage);
-            jsonOptionData.set(index.get(), jsonObject);
-
-            System.out.println(jsonObject);
-
-            index.addAndGet(1);
-        });
-
-        UI.getCurrent().getPage().executeJs("fillAssetsDiversityChart($0);", jsonOptionData.toJson());
     }
 
     private Section gridSection(String titleName, Component grid) {
@@ -160,26 +172,27 @@ public class PortfolioTrackerView extends DefaultPage {
 
         double totalProfit = portfolioPerformanceTracker.getPortfolioTotalProfit();
         String nrOfAssets = String.valueOf(instrumentsFacadeService.getAssetsWithNonZeroAmount().size());
-        String realized = currencyFormatter.format(portfolioPerformanceTracker.getPortfolioRealizedProfit());
-        String unrealized = currencyFormatter.format(portfolioPerformanceTracker.getPortfolioUnrealizedProfit());
+        String realized = CommonFormatters.CURRENCY.format(portfolioPerformanceTracker.getPortfolioRealizedProfit());
+        String unrealized = CommonFormatters.CURRENCY.format(portfolioPerformanceTracker.getPortfolioUnrealizedProfit());
         String avgTimeHolding = String.format("%.1f days", portfolioPerformanceTracker.getPortfolioAverageHoldingDays());
+        String ratio = portfolioPerformanceTracker.getPortfolioBuySellRatio();
 
-        Div totalWorth = new PortfolioStatsDisplay("Total Worth", currencyFormatter.format(portfolioPerformanceTracker.getPortfolioWorth()),
+        Div totalWorth = new PortfolioStatsDisplay("Total Worth",
+                CommonFormatters.CURRENCY.format(portfolioPerformanceTracker.getPortfolioWorth()),
                 "Total value of all your holdings based on the latest price");
-        Div totalCost = new PortfolioStatsDisplay("Total Cost", currencyFormatter.format(portfolioPerformanceTracker.getPortfolioCost()),
+        Div totalCost = new PortfolioStatsDisplay("Total Cost",
+                CommonFormatters.CURRENCY.format(portfolioPerformanceTracker.getPortfolioCost()),
                 "Total amount of dollars invested to buy all the assets");
         Div numberOfAssets = new PortfolioStatsDisplay("No. of Assets", nrOfAssets,
                 "Current number of assets that are in your portfolio");
-        Div profitStats = new PortfolioStatsDisplay("Total Profit", new NumericValueParagraph(totalProfit, currencyFormatter, true),
+        Div profitStats = new PortfolioStatsDisplay("Total Profit",
+                new NumericValueParagraph(totalProfit, CommonFormatters.CURRENCY, true),
                 "Represents the realized profit + unrealized profit");
         Div realizedProfit = new PortfolioStatsDisplay("Realized Profit", realized,
                 "Profit or Loss from all your sold holdings");
         Div unrealizedProfit = new PortfolioStatsDisplay("Unrealized Profit", unrealized,
                 "Potential profit or loss if you were to sell all assets now");
-        String ratio = portfolioPerformanceTracker.getPortfolioBuySellRatio();
-        String[] ratioParts = ratio.split(":");
-        Div buySellRatio = new PortfolioStatsDisplay("Buy/Sell % Ratio", ratio,
-                String.format("%s%% of transactions are buys, %s%% are sells, in dollar equivalent", ratioParts[0].trim(), ratioParts[1]));
+        Div buySellRatio = new PortfolioStatsDisplay("Buy/Sell % Ratio", ratio, ratioHint(ratio));
         Div avgHoldingTime = new PortfolioStatsDisplay("Avg Holding Time", avgTimeHolding,
                 "Average holding time for all assets, from the first bought");
 
@@ -192,22 +205,22 @@ public class PortfolioTrackerView extends DefaultPage {
         );
         statisticSectionDetails.add(title, body);
 
-        sectionWrapper.add(statisticSectionDetails, assetsDiversityChart);
+        sectionWrapper.add(statisticSectionDetails, assetsChart);
         return sectionWrapper;
     }
 
     private Section performanceSection() {
-        Map<Asset, Double> assetsProfits = getMostProfitableAssetsByProfit();
-        if (assetsProfits.isEmpty()) {
+        Map<Asset, Double> mostProfitableAssets = getMostProfitableAssetsByProfit();
+
+        if (mostProfitableAssets.isEmpty())
             return new Section();
-        }
 
         Section section = new Section();
         H3 title = new H3("Performance");
         title.setClassName("section-title");
 
-        Asset mostProfitableAsset = Collections.max(assetsProfits.entrySet(), Map.Entry.comparingByValue()).getKey();
-        Asset leastProfitableAsset = Collections.min(assetsProfits.entrySet(), Map.Entry.comparingByValue()).getKey();
+        Asset mostProfitableAsset = Collections.max(mostProfitableAssets.entrySet(), Map.Entry.comparingByValue()).getKey();
+        Asset leastProfitableAsset = Collections.min(mostProfitableAssets.entrySet(), Map.Entry.comparingByValue()).getKey();
 
         // The Assets that are most traded, by NUMBER of trades
         Map<Asset, Long> assetsNrTransactions = instrumentsFacadeService.getAllTransactions()
@@ -246,7 +259,7 @@ public class PortfolioTrackerView extends DefaultPage {
         Paragraph assetSymbol = new Paragraph(asset.getSymbol());
         assetSymbol.addClassName("performance-symbol");
 
-        Image assetImage = new Image(instrumentsFacadeService.getAssetImgUrl(asset), asset.getSymbol());
+        Image assetImage = new Image(asset.getImageUrl(), asset.getSymbol());
         assetImage.addClassNames("coin-overview-image", "performance-asset-image");
 
         double profit = portfolioPerformanceTracker.getAssetTotalProfit(asset);
@@ -262,6 +275,13 @@ public class PortfolioTrackerView extends DefaultPage {
         container.add(assetImage, performanceDetails);
         container.addClickListener(e -> UI.getCurrent().navigate(AssetDetailsView.class, asset.getSymbol()));
         return container;
+    }
+
+    private String ratioHint(String ratio) {
+        String[] ratioParts = ratio.split(":");
+        return ratio.equals("N/A")
+                ? "Ratio between BUY and SELL transactions, in dollar equivalent"
+                : String.format("%s%% of transactions are buys, %s%% are sells, in dollar equivalent", ratioParts[0].trim(), ratioParts[1]);
     }
 
 }

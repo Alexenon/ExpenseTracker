@@ -1,7 +1,7 @@
 package com.example.application.utils.investment;
 
 
-import com.example.application.utils.common.number.*;
+import com.example.application.utils.common.formatters.number.*;
 
 import java.util.List;
 

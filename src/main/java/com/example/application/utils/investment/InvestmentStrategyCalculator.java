@@ -1,6 +1,6 @@
 package com.example.application.utils.investment;
 
-import com.example.application.utils.common.MathUtils;
+import com.example.application.utils.common.lang.MathUtils;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

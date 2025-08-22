@@ -1,6 +1,6 @@
 package com.example.application.views.components.custom.fields;
 
-import com.example.application.utils.common.StringUtils;
+import com.example.application.utils.common.lang.StringUtils;
 
 public class AmountField extends AbstractNumberTextField {
 

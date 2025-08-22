@@ -4,7 +4,7 @@ import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.CryptoTransaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
-import com.example.application.utils.common.MathUtils;
+import com.example.application.utils.common.lang.MathUtils;
 import com.example.application.views.components.custom.fields.AmountField;
 import com.example.application.views.components.custom.fields.CurrencyField;
 import com.vaadin.flow.component.html.Div;
@@ -56,7 +56,7 @@ public class TransactionalLayout extends Div {
 
         totalCostField.setValueChangeMode(ValueChangeMode.EAGER);
         totalCostField.addKeyUpListener(e -> {
-            double amountTokens = MathUtils.safeZeroDivision(totalCostField.doubleValue(), marketPriceField.doubleValue());
+            double amountTokens = MathUtils.safeDivision(totalCostField.doubleValue(), marketPriceField.doubleValue());
             amountField.setValue(amountTokens);
         });
     }
@@ -79,7 +79,7 @@ public class TransactionalLayout extends Div {
     //  - But add another field with average buy, current amount
     private double getAvgPriceByType(Asset asset) {
         if(instrumentsFacadeService.getTransactionsByAsset(asset).isEmpty())
-            return instrumentsFacadeService.getAssetMarketPrice(asset);
+            return asset.getMarketPrice();
 
         return typeField.getValue().equals(CryptoTransaction.TransactionType.BUY)
                 ? portfolioPerformanceTracker.getAverageBuyPrice(asset)

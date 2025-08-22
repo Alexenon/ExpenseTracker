@@ -1,6 +1,6 @@
 package com.example.application.views.components.custom.forms.layouts;
 
-import com.example.application.utils.common.MathUtils;
+import com.example.application.utils.common.lang.MathUtils;
 import com.example.application.views.components.custom.fields.AmountField;
 import com.example.application.views.components.custom.fields.CurrencyField;
 import com.vaadin.flow.component.html.Div;
@@ -38,7 +38,7 @@ public class BuySellLayout extends Div {
 
         totalCostField.setValueChangeMode(ValueChangeMode.EAGER);
         totalCostField.addKeyUpListener(e -> {
-            double amountValue = MathUtils.safeZeroDivision(totalCostField.doubleValue(), buyPriceField.doubleValue());
+            double amountValue = MathUtils.safeDivision(totalCostField.doubleValue(), buyPriceField.doubleValue());
             amountField.setValue(amountValue);
         });
     }

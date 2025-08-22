@@ -1,10 +1,10 @@
 package com.example.application.views.pages.crypto.calculator.tabs;
 
 import com.example.application.services.crypto.InstrumentsFacadeService;
-import com.example.application.utils.common.number.AmountFormatter;
-import com.example.application.utils.common.number.CompactFormatter;
-import com.example.application.utils.common.number.CurrencyFormatter;
-import com.example.application.utils.common.number.PercentageFormatter;
+import com.example.application.utils.common.formatters.number.AmountFormatter;
+import com.example.application.utils.common.formatters.number.CompactFormatter;
+import com.example.application.utils.common.formatters.number.CurrencyFormatter;
+import com.example.application.utils.common.formatters.number.PercentageFormatter;
 import com.example.application.views.components.core.Container;
 import com.example.application.views.components.custom.icons.MonoIcon;
 import com.example.application.views.components.custom.icons.PictogramIcon;
@@ -16,8 +16,9 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.component.tabs.Tab;
+import com.vaadin.flow.router.BeforeEnterObserver;
 
-public abstract class BaseCalculatorTab extends Tab {
+public abstract class BaseCalculatorTab extends Tab implements BeforeEnterObserver {
 
     protected final InstrumentsFacadeService instrumentsFacadeService;
 

@@ -2,7 +2,7 @@ package com.example.application.views.components.custom.forms.layouts;
 
 import com.example.application.entities.crypto.Asset;
 import com.example.application.services.crypto.InstrumentsFacadeService;
-import com.example.application.utils.common.MathUtils;
+import com.example.application.utils.common.lang.MathUtils;
 import com.example.application.views.components.custom.fields.AmountField;
 import com.example.application.views.components.custom.fields.AssetComboBox;
 import com.example.application.views.components.custom.fields.CurrencyField;
@@ -80,7 +80,7 @@ public class AssetPricingLayout extends Div implements BeforeEnterObserver {
 
         totalCostField.setValueChangeMode(ValueChangeMode.EAGER);
         totalCostField.addKeyUpListener(e -> {
-            double amountValue = MathUtils.safeZeroDivision(totalCostField.doubleValue(), buyPriceField.doubleValue());
+            double amountValue = MathUtils.safeDivision(totalCostField.doubleValue(), buyPriceField.doubleValue());
             amountField.setValue(amountValue);
         });
     }
@@ -94,7 +94,7 @@ public class AssetPricingLayout extends Div implements BeforeEnterObserver {
         if (selectedAsset == null) {
             return 0;
         } else {
-            return instrumentsFacadeService.getAssetMarketPrice(selectedAsset);
+            return selectedAsset.getMarketPrice();
         }
     }
 

@@ -5,22 +5,22 @@ import com.example.application.entities.crypto.CryptoTransaction;
 import com.example.application.entities.crypto.Wallet;
 import com.example.application.entities.crypto.WalletBalance;
 import com.example.application.repositories.crypto.CryptoTransactionRepository;
-import com.example.application.repositories.crypto.WalletBalanceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class CryptoTransactionService {
 
-    private final WalletBalanceRepository walletBalanceRepository;
+    private final WalletBalanceService walletBalanceService;
     private final CryptoTransactionRepository transactionRepository;
 
     @Autowired
-    public CryptoTransactionService(WalletBalanceRepository walletBalanceRepository,
-                                    CryptoTransactionRepository transactionRepository) {
-        this.walletBalanceRepository = walletBalanceRepository;
+    public CryptoTransactionService(CryptoTransactionRepository transactionRepository, WalletBalanceService walletBalanceService) {
+        this.walletBalanceService = walletBalanceService;
         this.transactionRepository = transactionRepository;
     }
 
@@ -36,38 +36,26 @@ public class CryptoTransactionService {
         return transactionRepository.findByWalletAndAssetAndType(wallet, asset, type);
     }
 
+    @Transactional
     public CryptoTransaction saveTransaction(CryptoTransaction transaction) {
-        if (transaction.getOrderQuantity() == 0) {
-            transaction.setOrderQuantity(transaction.getOrderTotalCost() / transaction.getMarketPrice());
-        }
-
+        Objects.requireNonNull(transaction, "transaction");
+        updateTransactionAmount(transaction);
+        walletBalanceService.updateWalletBalance(transaction);
         CryptoTransaction savedTransaction = transactionRepository.save(transaction);
         System.out.printf("Saved Transaction -> %s\n", savedTransaction);
-
-        WalletBalance walletBalance = findWalletBalanceByTransaction(transaction);
-        processTransaction(walletBalance, savedTransaction);
-
         return savedTransaction;
     }
 
-    private void processTransaction(WalletBalance walletBalance, CryptoTransaction transaction) {
-        double processAmount = transaction.isBuyTransaction()
+    // Sets order quantity in case it's missing in the transaction itself -> TODO: SHOULD BE NOT ALLOWED IDEALLY
+    private static void updateTransactionAmount(CryptoTransaction transaction) {
+        double orderQuantity = transaction.getOrderQuantity() > 0
                 ? transaction.getOrderQuantity()
-                : -transaction.getOrderQuantity();
-
-        double newBalance = walletBalance.getAmount() + processAmount;
-
-        if (newBalance < 0)
-            throw new IllegalArgumentException("Insufficient balance to fill the transaction.");
-
-        walletBalance.setAmount(newBalance);
-        walletBalanceRepository.save(walletBalance);
+                : transaction.getOrderTotalCost() / transaction.getMarketPrice();
+        transaction.setOrderQuantity(orderQuantity);
     }
 
     public WalletBalance findWalletBalanceByTransaction(CryptoTransaction transaction) {
-        return walletBalanceRepository
-                .findByWalletAndAsset(transaction.getWallet(), transaction.getAsset())
-                .orElseThrow(() -> new IllegalStateException("Wallet balance not found"));
+        return walletBalanceService.getByWalletAndAsset(transaction.getWallet(), transaction.getAsset());
     }
 
     public void deleteTransaction(CryptoTransaction transaction) {

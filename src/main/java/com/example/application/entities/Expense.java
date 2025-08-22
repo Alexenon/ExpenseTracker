@@ -1,6 +1,6 @@
 package com.example.application.entities;
 
-import com.example.application.utils.common.formatters.Formatters;
+import com.example.application.utils.common.formatters.CommonFormatters;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -66,8 +66,8 @@ public class Expense {
                 .add("name='" + name + "'")
                 .add("amount=" + amount)
                 .add("description='" + description + "'")
-                .add("startDate=" + (startDate == null ? "N/A" : Formatters.DATE.format(startDate)))
-                .add("expireDate=" + (expireDate == null ? "N/A" : Formatters.DATE.format(expireDate)))
+                .add("startDate=" + (startDate == null ? "N/A" : CommonFormatters.DATE.format(startDate)))
+                .add("expireDate=" + (expireDate == null ? "N/A" : CommonFormatters.DATE.format(expireDate)))
                 .add("timestamp=" + timestamp)
                 .add("category=" + category)
                 .add("user=" + user)

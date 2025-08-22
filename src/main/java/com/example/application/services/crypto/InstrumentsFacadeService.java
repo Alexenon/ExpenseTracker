@@ -1,19 +1,18 @@
 package com.example.application.services.crypto;
 
-import com.example.application.data.enums.Symbols;
+import com.example.application.data.enums.SymbolIndentifier;
 import com.example.application.data.models.InstrumentsProvider;
 import com.example.application.entities.crypto.*;
 import com.example.application.services.SecurityService;
 import com.example.application.services.UserService;
-import com.example.application.utils.fetchers.api_responses.AssetMetadata;
+import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigInteger;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /*
@@ -26,23 +25,21 @@ import java.util.stream.Collectors;
  * Service that provides information just for authenticated user and guest user
  * and hides other information that user is not supposed to have
  */
-@SuppressWarnings("CallToPrintStackTrace")
 @Slf4j
 @Service
 public class InstrumentsFacadeService {
 
     private final SecurityService securityService;
     private final InstrumentsService instrumentsService;
-    private final InstrumentsProvider instrumentsProvider;
 
     @Autowired
     public InstrumentsFacadeService(UserService userService,
                                     SecurityService securityService,
                                     InstrumentsService instrumentsService,
-                                    InstrumentsProvider instrumentsProvider) {
+                                    InstrumentsProvider instrumentsProvider)
+    {
         this.securityService = securityService;
         this.instrumentsService = instrumentsService;
-        this.instrumentsProvider = instrumentsProvider;
     }
 
     //<editor-fold desc="ASSET">
@@ -50,27 +47,32 @@ public class InstrumentsFacadeService {
         return instrumentsService.getAllAssets();
     }
 
+    @NotNull
     public Asset getAssetBySymbol(String symbolName) {
         return instrumentsService.getAssetBySymbol(symbolName);
     }
 
-    public boolean saveAssetNote(Asset asset, String note) {
-        try {
-            log.info("Saving note for asset {}, note: '{}'", asset, note);
-            asset.setComment(note);
-            return instrumentsService.saveAsset(asset) != null;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+    public WalletBalance updateAssetComment(Asset asset, String comment) {
+        WalletBalance walletBalanceByAsset = getWalletBalanceByAsset(asset);
+        walletBalanceByAsset.setComment(comment);
+        return instrumentsService.saveWalletBalance(walletBalanceByAsset);
     }
 
-    public Asset getAssetBySymbol(Symbols symbol) {
+    public WalletBalance markAssetAsFavorite(Asset asset, boolean isFavorite) {
+        WalletBalance walletBalanceByAsset = getWalletBalanceByAsset(asset);
+        walletBalanceByAsset.setMarkedAsFavorite(isFavorite);
+        return instrumentsService.saveWalletBalance(walletBalanceByAsset);
+    }
+
+    public Asset getAssetBySymbol(SymbolIndentifier symbol) {
         return instrumentsService.getAssetBySymbol(symbol.name());
     }
 
     public double getAmountOfTokens(Asset asset) {
-        return asset == null ? 0 : getWalletBalanceByAsset(asset).getAmount();
+        return Optional.ofNullable(asset)
+                .map(this::getWalletBalanceByAsset)
+                .map(WalletBalance::getAmount)
+                .orElse(Double.NaN);
     }
 
     public List<Asset> getAssetsWithNonZeroAmount() {
@@ -154,61 +156,18 @@ public class InstrumentsFacadeService {
         return instrumentsService.getWalletBalancesByWallet(getAuthenticatedUserWallet());
     }
 
+    @NotNull
     public WalletBalance getWalletBalanceByAsset(Asset asset) {
         return instrumentsService.getWalletBalancesByWalletAndAsset(getAuthenticatedUserWallet(), asset);
     }
-
-    public WalletBalance fillWalletBalance(Asset asset, double amountToBeAdded) {
-        return instrumentsService.fillWalletBalance(getAuthenticatedUserWallet(), asset, amountToBeAdded);
-    }
-    //</editor-fold>
-
-    //<editor-fold desc="METADATA">
-    public AssetMetadata getAssetMetadata(Asset asset) {
-        return Objects.requireNonNull(instrumentsProvider.getMetadata().get(asset.getSymbol()),
-                "Couldn't retrieve asset metadata for: " + asset);
-    }
-
-    public double getAssetMarketPrice(Asset asset) {
-        return asset == null ? 0 : getAssetMetadata(asset).getPriceUsd();
-    }
-
-    public String getAssetDescriptionSummary(Asset asset) {
-        return getAssetMetadata(asset).getAssetDescriptionSummary();
-    }
-
-    public double getAssetTotalMarketCap(Asset asset) {
-        return getAssetMetadata(asset).getTotalMktCapUsd();
-    }
-
-    public BigInteger getAssetSupplyTotal(Asset asset) {
-        return getAssetMetadata(asset).getSupplyTotal();
-    }
-
-    public BigInteger getAssetSupplyCirculating(Asset asset) {
-        return getAssetMetadata(asset).getSupplyCirculating();
-    }
-
-    public double getAsset24HourChangePercentage(Asset asset) {
-        return getAssetMetadata(asset).getSpotMoving24HourChangePercentageUsd();
-    }
-
-    public double getAsset24HourVolume(Asset asset) {
-        return getAssetMetadata(asset).getSpotMoving24HourQuoteVolumeUsd();
-    }
-
-    public String getAssetImgUrl(Asset asset) {
-        return getAssetMetadata(asset).getLogoUrl();
-    }
-
-    public void updateAssetMetadata() {
-        instrumentsProvider.getUpdatedMetadata();
-    }
-
     //</editor-fold>
 
     private Wallet getAuthenticatedUserWallet() {
         return instrumentsService.getWalletByUser(securityService.getAuthenticatedUser());
+    }
+
+    public void updateAssetData() {
+        instrumentsService.updateAssetData();
     }
 
 }

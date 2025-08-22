@@ -4,6 +4,7 @@ import com.example.application.entities.User;
 import com.example.application.utils.exceptions.UnauthenticatedUserException;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.server.VaadinServletRequest;
+import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -43,13 +45,15 @@ public class SecurityService {
                 : Optional.empty();
     }
 
+    @NotNull
     public User getAuthenticatedUser() {
         String username = getAuthenticatedUserDetails()
                 .orElseThrow(() -> new UnauthenticatedUserException("Current user is not authenticated. " +
                                                                     "Please log in to access this resource."))
                 .getUsername();
 
-        return userService.findByUsername(username);
+        // TODO: Add a separate error page, that should redirect to register page
+        return Objects.requireNonNull(userService.findByUsername(username), "There is no such user in the database");
     }
 
     public void logout() {

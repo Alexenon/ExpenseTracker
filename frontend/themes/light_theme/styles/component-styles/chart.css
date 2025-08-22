@@ -30,3 +30,12 @@
 .tooltip-currency {
     margin-right: 5px;
 }
+
+
+/*
+	Asset Chart
+*/
+
+.assets-chart-container {
+	position: relative;
+}

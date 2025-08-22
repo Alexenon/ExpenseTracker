@@ -5,13 +5,18 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity(name = "assets")
 public class Asset {
+
+    public static final double MISSING_DOUBLE_VALUE = Double.NaN;
+    public static final BigInteger MISSING_BIG_INTEGER_VALUE = BigInteger.valueOf(-1);
+    public static final BigDecimal MISSING_BIG_DECIMAL_VALUE = BigDecimal.valueOf(-1);
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,29 +28,38 @@ public class Asset {
     @Column(nullable = false)
     private String fullName;
 
-    @Column(name = "comment")
-    private String comment;
+    @Column(nullable = false)
+    private double marketPrice;
 
     @Column(nullable = false)
-    private boolean markedAsFavorite;
+    private double changePercentage;
+
+    @Column(nullable = false, length = 1000)
+    private String summaryDescription = "";
 
     @Column(nullable = false)
-    private LocalDateTime lastTimeUpdated = LocalDateTime.now();
+    private BigInteger totalMarketCap;
 
-    public Asset(String symbol, String fullName) {
-        this(0, symbol, fullName, "", false, LocalDateTime.now());
-    }
+    @Column(nullable = false)
+    private BigInteger totalSupply;
+
+    @Column(nullable = false)
+    private BigInteger circulationSupply;
+
+    @Column(nullable = false)
+    private double todayVolume;
+
+    @Column(nullable = false)
+    private String imageUrl = "";
+
+//    public Asset(String symbol, String fullName) {
+//        this(0, symbol, fullName, -1, -1, "", "",
+//                MISSING_BIG_INTEGER_VALUE, MISSING_BIG_INTEGER_VALUE, MISSING_BIG_INTEGER_VALUE, MISSING_BIG_DECIMAL_VALUE, "");
+//    }
 
     @Override
     public String toString() {
-        return "Asset{" +
-                "id=" + id +
-                ", symbol='" + symbol + '\'' +
-                ", fullName='" + fullName + '\'' +
-                ", comment='" + comment + '\'' +
-                ", markedAsFavorite=" + markedAsFavorite +
-                ", lastTimeUpdated=" + lastTimeUpdated +
-                '}';
+        return "Asset{id=%d, symbol='%s', fullName='%s'}".formatted(id, symbol, fullName);
     }
 }
 

@@ -1,6 +1,6 @@
 package com.example.application.views.components.custom.fields.stats;
 
-import com.example.application.utils.common.number.DecimalFormatter;
+import com.example.application.utils.common.formatters.number.DecimalFormatter;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Paragraph;
 

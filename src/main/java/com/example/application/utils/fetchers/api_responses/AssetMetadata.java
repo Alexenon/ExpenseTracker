@@ -12,13 +12,13 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AssetMetadata {
     @JsonProperty("ID")
-    private int id;
+    private Integer id;
 
     @JsonProperty("TYPE")
     private String type;
 
     @JsonProperty("ID_LEGACY")
-    private int legacyId;
+    private Integer legacyId;
 
     @JsonProperty("ID_PARENT_ASSET")
     private Integer parentAssetId;
@@ -42,10 +42,10 @@ public class AssetMetadata {
     private String assetIssuerName;
 
     @JsonProperty("CREATED_ON")
-    private int createdOn;
+    private Long createdOn;
 
     @JsonProperty("UPDATED_ON")
-    private int updatedOn;
+    private Long updatedOn;
 
     @JsonProperty("PUBLIC_NOTICE")
     private Object publicNotice;
@@ -57,7 +57,7 @@ public class AssetMetadata {
     private String logoUrl;
 
     @JsonProperty("LAUNCH_DATE")
-    private int launchDate;
+    private Integer launchDate;
 
     @JsonProperty("PREVIOUS_ASSET_SYMBOLS")
     private Object previousAssetSymbols;
@@ -69,7 +69,7 @@ public class AssetMetadata {
     private String assetDescriptionSnippet;
 
     @JsonProperty("ASSET_DECIMAL_POINTS")
-    private int assetDecimalPoints;
+    private Integer assetDecimalPoints;
 
     @JsonProperty("SUPPORTED_PLATFORMS")
     private List<Object> supportedPlatforms;
@@ -102,7 +102,7 @@ public class AssetMetadata {
     private BigInteger supplyStaked;
 
     @JsonProperty("LAST_BLOCK_MINT")
-    private double lastBlockMint;
+    private Double lastBlockMint;
 
     @JsonProperty("LAST_BLOCK_BURN")
     private Object lastBlockBurn;
@@ -144,7 +144,7 @@ public class AssetMetadata {
     private Object lastBlockTransactionFeeTotal;
 
     @JsonProperty("LAST_BLOCK_TRANSACTION_COUNT")
-    private int lastBlockTransactionCount;
+    private Integer lastBlockTransactionCount;
 
     @JsonProperty("LAST_BLOCK_HASHES_PER_SECOND")
     private BigInteger lastBlockHashesPerSecond;
@@ -189,40 +189,40 @@ public class AssetMetadata {
     private List<Object> hashingAlgorithmTypes;
 
     @JsonProperty("PRICE_USD")
-    private double priceUsd;
+    private Double priceUsd;
 
     @JsonProperty("PRICE_USD_SOURCE")
     private String priceUsdSource;
 
     @JsonProperty("PRICE_USD_LAST_UPDATE_TS")
-    private long priceUsdLastUpdateTs;
+    private Long priceUsdLastUpdateTs;
 
     @JsonProperty("MKT_CAP_PENALTY")
-    private int mktCapPenalty;
+    private Integer mktCapPenalty;
 
     @JsonProperty("CIRCULATING_MKT_CAP_USD")
-    private double circulatingMktCapUsd;
+    private BigInteger circulatingMktCapUsd;
 
     @JsonProperty("TOTAL_MKT_CAP_USD")
-    private double totalMktCapUsd;
+    private BigInteger totalMktCapUsd;
 
     @JsonProperty("SPOT_MOVING_24_HOUR_QUOTE_VOLUME_TOP_TIER_DIRECT_USD")
-    private double spotMoving24HourQuoteVolumeTopTierDirectUsd;
+    private Double spotMoving24HourQuoteVolumeTopTierDirectUsd;
 
     @JsonProperty("SPOT_MOVING_24_HOUR_QUOTE_VOLUME_DIRECT_USD")
-    private double spotMoving24HourQuoteVolumeDirectUsd;
+    private Double spotMoving24HourQuoteVolumeDirectUsd;
 
     @JsonProperty("SPOT_MOVING_24_HOUR_QUOTE_VOLUME_TOP_TIER_USD")
-    private double spotMoving24HourQuoteVolumeTopTierUsd;
+    private Double spotMoving24HourQuoteVolumeTopTierUsd;
 
     @JsonProperty("SPOT_MOVING_24_HOUR_QUOTE_VOLUME_USD")
-    private double spotMoving24HourQuoteVolumeUsd;
+    private Double spotMoving24HourQuoteVolumeUsd;
 
     @JsonProperty("SPOT_MOVING_24_HOUR_CHANGE_USD")
-    private double spotMoving24HourChangeUsd;
+    private Double spotMoving24HourChangeUsd;
 
     @JsonProperty("SPOT_MOVING_24_HOUR_CHANGE_PERCENTAGE_USD")
-    private double spotMoving24HourChangePercentageUsd;
+    private Double spotMoving24HourChangePercentageUsd;
 
     @JsonProperty("TOPLIST_BASE_RANK")
     private Object toplistBaseRank;

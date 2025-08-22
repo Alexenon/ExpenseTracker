@@ -1,0 +1,87 @@
+package com.example.application.views.components.portfolio;
+
+import com.example.application.entities.crypto.Asset;
+import com.example.application.services.crypto.InstrumentsFacadeService;
+import com.example.application.services.crypto.PortfolioPerformanceTracker;
+import com.example.application.utils.common.lang.MathUtils;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.select.Select;
+import elemental.json.Json;
+import elemental.json.JsonArray;
+import elemental.json.JsonObject;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+@Slf4j
+public class AssetsChart extends Div {
+
+    private final InstrumentsFacadeService instrumentsFacadeService;
+    private final PortfolioPerformanceTracker portfolioPerformanceTracker;
+    private final Select<ChartOptions> options = new Select<>();
+
+    @Autowired
+    public AssetsChart(InstrumentsFacadeService instrumentsFacadeService,
+                       PortfolioPerformanceTracker portfolioPerformanceTracker)
+    {
+        this.instrumentsFacadeService = instrumentsFacadeService;
+        this.portfolioPerformanceTracker = portfolioPerformanceTracker;
+        initialize();
+    }
+
+    private void initialize() {
+        addClassName("assets-chart-container");
+        options.setLabel("Group by");
+        options.setItems(ChartOptions.values());
+        options.setValue(ChartOptions.WORTH);
+        options.addValueChangeListener(e -> updateChartItems());
+        add(
+                options,
+                createChart()
+        );
+        updateChartItems();
+    }
+
+    private Div createChart() {
+        Div chart = new Div();
+        chart.setId("assets-diverstity-chart");
+        return chart;
+    }
+
+    public void updateChartItems() {
+        JsonArray jsonOptionData = Json.createArray();
+        AtomicInteger index = new AtomicInteger(0);
+        getChartItems().forEach((assetName, diversityPercentage) -> {
+            JsonObject jsonObject = Json.createObject();
+            jsonObject.put("name", assetName);
+            jsonObject.put("value", MathUtils.twoDecimal(diversityPercentage));
+            jsonOptionData.set(index.get(), jsonObject);
+            index.addAndGet(1);
+        });
+
+        UI.getCurrent().getPage().executeJs("fillAssetsDiversityChart($0);", jsonOptionData.toJson());
+        log.info("Created assets pie chart with {} elements", index.intValue());
+    }
+
+    private Map<String, Double> getChartItems() {
+        Function<Asset, Double> mapper = switch (options.getValue()) {
+            case WORTH -> portfolioPerformanceTracker::getAssetWorth;
+            case INVESTED -> portfolioPerformanceTracker::getAssetCost;
+        };
+
+        return instrumentsFacadeService.getAssetsWithNonZeroAmount()
+                .stream()
+                .collect(Collectors.toMap(Asset::getSymbol, mapper, (a, b) -> b));
+    }
+
+    private enum ChartOptions {
+        WORTH,
+        INVESTED
+    }
+
+}

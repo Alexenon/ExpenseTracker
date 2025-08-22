@@ -1,9 +1,9 @@
 package com.example.application.views.pages.crypto.calculator.tabs;
 
 import com.example.application.services.crypto.InstrumentsFacadeService;
-import com.example.application.utils.common.MathUtils;
-import com.example.application.utils.common.number.AmountFormatter;
-import com.example.application.utils.common.number.CurrencyFormatter;
+import com.example.application.utils.common.formatters.number.AmountFormatter;
+import com.example.application.utils.common.formatters.number.CurrencyFormatter;
+import com.example.application.utils.common.lang.MathUtils;
 import com.example.application.views.components.custom.fields.AmountField;
 import com.example.application.views.components.custom.fields.AssetComboBox;
 import com.example.application.views.components.custom.fields.CurrencyField;
@@ -11,6 +11,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.router.BeforeEnterEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static com.example.application.utils.investment.EarnCalculator.*;
@@ -29,6 +30,10 @@ public final class StakingProfitTab extends BaseCalculatorTab {
     public StakingProfitTab(InstrumentsFacadeService instrumentsFacadeService) {
         super("Staking calculator", instrumentsFacadeService);
         this.assetSymbolField = new AssetComboBox(instrumentsFacadeService);
+    }
+
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
         buildForm();
     }
 
@@ -55,7 +60,7 @@ public final class StakingProfitTab extends BaseCalculatorTab {
 
         worthField.setValueChangeMode(ValueChangeMode.EAGER);
         worthField.addKeyUpListener(e -> {
-            double amountOfTokens = MathUtils.safeZeroDivision(worthField.doubleValue(), assetSymbolField.getMarketPrice());
+            double amountOfTokens = MathUtils.safeDivision(worthField.doubleValue(), assetSymbolField.getMarketPrice());
             amountField.setValue(amountOfTokens);
         });
     }

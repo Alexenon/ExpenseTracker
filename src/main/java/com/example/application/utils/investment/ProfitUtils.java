@@ -1,7 +1,7 @@
 package com.example.application.utils.investment;
 
 import com.example.application.entities.crypto.CryptoTransaction;
-import com.example.application.utils.common.MathUtils;
+import com.example.application.utils.common.lang.MathUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -12,7 +12,7 @@ public class ProfitUtils {
     public static final int ONE_HUNDRED_PERCENT = 100;
 
     public static double coinsBought(double buyPrice, double investedAmount) {
-        return MathUtils.safeZeroDivision(investedAmount, buyPrice);
+        return MathUtils.safeDivision(investedAmount, buyPrice);
     }
 
     public static double worth(double buyPrice, double investedAmount) {
@@ -31,14 +31,14 @@ public class ProfitUtils {
      * @return percentage profit relative to the investment amount (monetary perspective)
      */
     public static double profitPercentage(double buyPrice, double sellPrice, double investedAmount) {
-        return MathUtils.safeZeroDivision(netProfit(buyPrice, sellPrice, investedAmount), investedAmount) * ONE_HUNDRED_PERCENT;
+        return MathUtils.safeDivision(netProfit(buyPrice, sellPrice, investedAmount), investedAmount) * ONE_HUNDRED_PERCENT;
     }
 
     /**
      * @return percentage increase or decrease in the price of the asset (token price perspective)
      */
     public static double growthPercentage(double buyPrice, double sellPrice) {
-        return MathUtils.safeZeroDivision(sellPrice - buyPrice, buyPrice) * ONE_HUNDRED_PERCENT;
+        return MathUtils.safeDivision(sellPrice - buyPrice, buyPrice) * ONE_HUNDRED_PERCENT;
     }
 
     public static double buyPricePerUnit(double totalBuyPrice, double amountTokens) {
@@ -69,14 +69,14 @@ public class ProfitUtils {
      * Calculates how much the price has recovered after a drop.
      */
     public static double recoveryPercentage(double currentPrice, double lowestPrice) {
-        return MathUtils.safeZeroDivision(currentPrice - lowestPrice, lowestPrice) * ONE_HUNDRED_PERCENT;
+        return MathUtils.safeDivision(currentPrice - lowestPrice, lowestPrice) * ONE_HUNDRED_PERCENT;
     }
 
     /**
      * Indicates how much % the price needs to increase to recover the initial investment (if at a loss).
      */
     public static double breakEvenPercentage(double buyPrice, double currentPrice) {
-        return MathUtils.safeZeroDivision(buyPrice - currentPrice, buyPrice) * ONE_HUNDRED_PERCENT;
+        return MathUtils.safeDivision(buyPrice - currentPrice, buyPrice) * ONE_HUNDRED_PERCENT;
     }
 
     /**
@@ -98,7 +98,7 @@ public class ProfitUtils {
                 }
 
                 // Calculate proportional cost of sold tokens
-                double averageCostPerUnit = MathUtils.safeZeroDivision(totalCost, remainingQuantity);
+                double averageCostPerUnit = MathUtils.safeDivision(totalCost, remainingQuantity);
                 double costOfSoldTokens = averageCostPerUnit * sellQuantity;
                 realizedProfit += transaction.getOrderTotalCost() - costOfSoldTokens;
 
