@@ -252,7 +252,7 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
         usdAmountField.addKeyUpListener(e -> {
             double amount = usdAmountField.doubleValue();
             double price = asset.getMarketPrice();
-            tokenAmountField.setValue(MathUtils.safeZeroDivision(amount, price));
+            tokenAmountField.setValue(MathUtils.safeDivision(amount, price));
         });
 
         Section section = new Section(title, sectionBody);
@@ -276,7 +276,7 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
                 .build();
 
         double assetCost = portfolioPerformanceTracker.getAssetRemainingTokensCost(asset);
-        double assetWorth = portfolioPerformanceTracker.getAssetTotalWorth(asset);
+        double assetWorth = portfolioPerformanceTracker.getAssetWorth(asset);
         double assetProfitLoss = portfolioPerformanceTracker.getAssetTotalProfit(asset);
         double assetRealized = portfolioPerformanceTracker.getAssetRealizedProfit(asset);
         double assetUnrealized = portfolioPerformanceTracker.getAssetUnrealizedProfit(asset);

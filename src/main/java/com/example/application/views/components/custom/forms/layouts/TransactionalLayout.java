@@ -56,7 +56,7 @@ public class TransactionalLayout extends Div {
 
         totalCostField.setValueChangeMode(ValueChangeMode.EAGER);
         totalCostField.addKeyUpListener(e -> {
-            double amountTokens = MathUtils.safeZeroDivision(totalCostField.doubleValue(), marketPriceField.doubleValue());
+            double amountTokens = MathUtils.safeDivision(totalCostField.doubleValue(), marketPriceField.doubleValue());
             amountField.setValue(amountTokens);
         });
     }

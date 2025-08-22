@@ -1,4 +1,4 @@
-package com.example.application.views.components;
+package com.example.application.views.components.portfolio;
 
 import com.example.application.entities.crypto.Asset;
 import com.example.application.services.crypto.InstrumentsFacadeService;
@@ -459,7 +459,7 @@ public class AssetsGrid extends Div {
                             .realizedProfit(portfolioPerformanceTracker.getAssetRealizedProfit(asset))
                             .unrealizedProfit(portfolioPerformanceTracker.getAssetUnrealizedProfit(asset))
                             .totalCost(portfolioPerformanceTracker.getAssetRemainingTokensCost(asset))
-                            .totalWorth(portfolioPerformanceTracker.getAssetTotalWorth(asset))
+                            .totalWorth(portfolioPerformanceTracker.getAssetWorth(asset))
                             .diversityPercentage(portfolioPerformanceTracker.getAssetDiversityPercentage(asset))
                             .build();
                 })

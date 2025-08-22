@@ -60,7 +60,7 @@ public final class StakingProfitTab extends BaseCalculatorTab {
 
         worthField.setValueChangeMode(ValueChangeMode.EAGER);
         worthField.addKeyUpListener(e -> {
-            double amountOfTokens = MathUtils.safeZeroDivision(worthField.doubleValue(), assetSymbolField.getMarketPrice());
+            double amountOfTokens = MathUtils.safeDivision(worthField.doubleValue(), assetSymbolField.getMarketPrice());
             amountField.setValue(amountOfTokens);
         });
     }

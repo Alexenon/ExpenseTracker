@@ -38,7 +38,7 @@ public class BuySellLayout extends Div {
 
         totalCostField.setValueChangeMode(ValueChangeMode.EAGER);
         totalCostField.addKeyUpListener(e -> {
-            double amountValue = MathUtils.safeZeroDivision(totalCostField.doubleValue(), buyPriceField.doubleValue());
+            double amountValue = MathUtils.safeDivision(totalCostField.doubleValue(), buyPriceField.doubleValue());
             amountField.setValue(amountValue);
         });
     }

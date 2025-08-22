@@ -110,6 +110,11 @@ mono-icon {
     background-size:cover;
 }*/
 
+vaadin-grid::part(selected-row-cell) {
+	background: white;
+	box-shadow: none;
+}
+
 vaadin-text-area::part(input-field),
 vaadin-number-field::part(input-field) {
 /*    background: white;
@@ -189,7 +194,9 @@ vaadin-select::part(input-field),
 vaadin-combo-box::part(input-field),
 vaadin-text-field::part(input-field),
 vaadin-date-picker::part(input-field),
-vaadin-number-field::part(input-field) {
+vaadin-number-field::part(input-field),
+vaadin-multi-select-combo-box::part(input-field)
+{
     height: 2.5rem;
 }
 
@@ -198,7 +205,7 @@ vaadin-text-area::part(input-field),
 vaadin-combo-box::part(input-field),
 vaadin-text-field::part(input-field),
 vaadin-date-picker::part(input-field),
-vaadin-number-field::part(input-field) {
+vaadin-multi-select-combo-box::part(input-field) {
     width: 100%;
     border-radius: .75rem;
     border-width: 1px;

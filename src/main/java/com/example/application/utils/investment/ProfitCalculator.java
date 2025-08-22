@@ -20,7 +20,7 @@ public class ProfitCalculator {
 	public static double calculateNewAvgPrice(double prevAvg, double prevAmount, double newAmount, double buyPrice) {
 		double totalValue = (prevAmount * prevAvg) + (newAmount * buyPrice);
 		double totalAmount = NumberUtils.checkDouble(prevAmount + newAmount);
-		return MathUtils.safeZeroDivision(totalValue, totalAmount);
+		return MathUtils.safeDivision(totalValue, totalAmount);
 	}
 
 	/**
@@ -84,7 +84,7 @@ public class ProfitCalculator {
 				}
 
 				// Calculate proportional cost of sold tokens
-				double averageCostPerUnit = MathUtils.safeZeroDivision(totalCost, remainingQuantity);
+				double averageCostPerUnit = MathUtils.safeDivision(totalCost, remainingQuantity);
 				double costOfSoldTokens = averageCostPerUnit * sellQuantity;
 				realizedProfit += transaction.getOrderTotalCost() - costOfSoldTokens;
 
@@ -187,7 +187,7 @@ public class ProfitCalculator {
     }
 
     public static double calculateAveragePrice(double totalCost, double totalQuantity) {
-        return MathUtils.safeZeroDivision(totalCost, totalQuantity);
+        return MathUtils.safeDivision(totalCost, totalQuantity);
     }
 
     private static long getHoldingTimeInDays(CryptoTransaction buyTransaction, CryptoTransaction sellTransaction) {

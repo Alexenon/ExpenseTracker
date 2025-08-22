@@ -1,6 +1,8 @@
 package com.example.application.utils.common.lang;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
@@ -32,7 +34,7 @@ public class MathUtils {
         return indexOfDecimal <= 0 ? 0 : number.length() - indexOfDecimal - 1;
     }
 
-    public static double safeZeroDivision(double dividend, double divisor) {
+    public static double safeDivision(double dividend, double divisor) {
         return Double.compare(divisor, 0.0) == 0 ? 0 : dividend / divisor;
     }
 
@@ -87,6 +89,16 @@ public class MathUtils {
         }
 
         return closestPrice;
+    }
+
+    public static double twoDecimal(double value) {
+        return scale(value, 2);
+    }
+
+    public static double scale(double value, int scale) {
+        return new BigDecimal(value)
+                .setScale(scale, RoundingMode.HALF_UP)
+                .doubleValue();
     }
 
 }

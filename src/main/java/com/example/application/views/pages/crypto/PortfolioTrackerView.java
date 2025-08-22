@@ -5,7 +5,6 @@ import com.example.application.entities.crypto.CryptoTransaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.utils.common.formatters.CommonFormatters;
-import com.example.application.views.components.AssetsGrid;
 import com.example.application.views.components.PriceChangeHandler;
 import com.example.application.views.components.PriceChangeblePage;
 import com.example.application.views.components.TransactionsGrid;
@@ -14,6 +13,8 @@ import com.example.application.views.components.custom.dialogs.transactions.AddT
 import com.example.application.views.components.custom.display.NumericValueParagraph;
 import com.example.application.views.components.custom.fields.PricePercentageWrapper;
 import com.example.application.views.components.custom.fields.stats.PortfolioStatsDisplay;
+import com.example.application.views.components.portfolio.AssetsChart;
+import com.example.application.views.components.portfolio.AssetsGrid;
 import com.example.application.views.layouts.MainLayout;
 import com.example.application.views.pages.DefaultPage;
 import com.example.application.views.pages.RebuildablePage;
@@ -25,16 +26,12 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.theme.lumo.LumoIcon;
-import elemental.json.Json;
-import elemental.json.JsonArray;
-import elemental.json.JsonObject;
 import jakarta.annotation.security.PermitAll;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /*
@@ -58,11 +55,11 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
     private final PriceChangeHandler priceChangeHandler;
     private final InstrumentsFacadeService instrumentsFacadeService;
     private final PortfolioPerformanceTracker portfolioPerformanceTracker;
+    private final AssetsGrid assetsGrid;
+    private final AssetsChart assetsChart;
+    private final TransactionsGrid transactionsGrid;
 
-    private AssetsGrid assetsGrid;
-    private TransactionsGrid transactionsGrid;
     private final UI ui;
-    private final Div assetsChart = new Div();
 
     @Autowired
     public PortfolioTrackerView(InstrumentsFacadeService instrumentsFacadeService,
@@ -72,6 +69,9 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
         this.instrumentsFacadeService = instrumentsFacadeService;
         this.portfolioPerformanceTracker = portfolioPerformanceTracker;
         this.priceChangeHandler = priceChangeHandler;
+        this.assetsGrid = new AssetsGrid(instrumentsFacadeService, portfolioPerformanceTracker);
+        this.assetsChart = new AssetsChart(instrumentsFacadeService, portfolioPerformanceTracker);
+        this.transactionsGrid = new TransactionsGrid(instrumentsFacadeService);
         this.ui = UI.getCurrent();
         initializePage();
     }
@@ -102,7 +102,6 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
                 gridSection("Assets", assetsGrid),
                 gridSection("Transactions", transactionsGrid)
         );
-        initializeChart();
         assetsGrid.setItems(instrumentsFacadeService.getAssetsWithNonZeroAmount());
         transactionsGrid.setItems(instrumentsFacadeService.getAllTransactions());
     }
@@ -121,10 +120,8 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
     }
 
     protected void initializeGrids() {
-        assetsGrid = new AssetsGrid(instrumentsFacadeService, portfolioPerformanceTracker);
         assetsGrid.setGridFullSize(true);
 
-        transactionsGrid = new TransactionsGrid(instrumentsFacadeService);
         transactionsGrid.setPageSize(10);
         transactionsGrid.addUpdateItemListener(l -> rebuildPage());
     }
@@ -153,27 +150,6 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
         section.add(addTransactionBtn);
 
         return section;
-    }
-
-    private void initializeChart() {
-        assetsChart.setId("assets-diverstity-chart");
-
-        Map<String, Double> assetsDiversity = instrumentsFacadeService.getAssetsWithNonZeroAmount()
-                .stream()
-                .collect(Collectors.toMap(Asset::getSymbol, portfolioPerformanceTracker::getAssetRemainingTokensCost, (a, b) -> b));
-
-        JsonArray jsonOptionData = Json.createArray();
-        AtomicInteger index = new AtomicInteger(0);
-        assetsDiversity.forEach((assetName, diversityPercentage) -> {
-            JsonObject jsonObject = Json.createObject();
-            jsonObject.put("name", assetName);
-            jsonObject.put("value", diversityPercentage);
-            jsonOptionData.set(index.get(), jsonObject);
-            index.addAndGet(1);
-        });
-
-        log.info("Created assets pie chart with {} elements", index.intValue());
-        UI.getCurrent().getPage().executeJs("fillAssetsDiversityChart($0);", jsonOptionData.toJson());
     }
 
     private Section gridSection(String titleName, Component grid) {
@@ -234,17 +210,17 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
     }
 
     private Section performanceSection() {
-        Map<Asset, Double> assetsProfits = getMostProfitableAssetsByProfit();
-        if (assetsProfits.isEmpty()) {
+        Map<Asset, Double> mostProfitableAssets = getMostProfitableAssetsByProfit();
+
+        if (mostProfitableAssets.isEmpty())
             return new Section();
-        }
 
         Section section = new Section();
         H3 title = new H3("Performance");
         title.setClassName("section-title");
 
-        Asset mostProfitableAsset = Collections.max(assetsProfits.entrySet(), Map.Entry.comparingByValue()).getKey();
-        Asset leastProfitableAsset = Collections.min(assetsProfits.entrySet(), Map.Entry.comparingByValue()).getKey();
+        Asset mostProfitableAsset = Collections.max(mostProfitableAssets.entrySet(), Map.Entry.comparingByValue()).getKey();
+        Asset leastProfitableAsset = Collections.min(mostProfitableAssets.entrySet(), Map.Entry.comparingByValue()).getKey();
 
         // The Assets that are most traded, by NUMBER of trades
         Map<Asset, Long> assetsNrTransactions = instrumentsFacadeService.getAllTransactions()

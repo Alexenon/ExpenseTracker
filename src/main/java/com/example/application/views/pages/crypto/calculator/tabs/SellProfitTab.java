@@ -111,7 +111,7 @@ public class SellProfitTab extends BaseCalculatorTab {
 
         totalCostField.setValueChangeMode(ValueChangeMode.EAGER);
         totalCostField.addKeyUpListener(e -> {
-            double amountValue = MathUtils.safeZeroDivision(totalCostField.doubleValue(), buyPriceField.doubleValue());
+            double amountValue = MathUtils.safeDivision(totalCostField.doubleValue(), buyPriceField.doubleValue());
             amountField.setValue(amountValue);
         });
     }
@@ -137,7 +137,7 @@ public class SellProfitTab extends BaseCalculatorTab {
             PercentageFormatter percentageFormatter = new PercentageFormatter();
             percentageFormatter.setMaximumFractionDigits(0);
 
-            double netProfitPerUnit = MathUtils.safeZeroDivision(profit, amountTokens);
+            double netProfitPerUnit = MathUtils.safeDivision(profit, amountTokens);
             NumericValueParagraph worthParagraph = new NumericValueParagraph(totalWorth, currencyFormatter, true);
             PricePercentageWrapper netProfitWrapper = new PricePercentageWrapper(profit, profitPercentage);
             netProfitWrapper.setPercentageFormatter(percentageFormatter);
@@ -173,13 +173,13 @@ public class SellProfitTab extends BaseCalculatorTab {
     }
 
     private String zeroQuantitySellProfit(double invested, double sellPrice) {
-        double amountTokens = MathUtils.safeZeroDivision(invested, sellPrice);
+        double amountTokens = MathUtils.safeDivision(invested, sellPrice);
         return "%s %s".formatted(amountFormatter.format(amountTokens), assetSymbolField.getSymbol());
     }
 
     private Paragraph getTokensProfitWrapper() {
         String selectedSymbol = assetSymbolField.getSymbol();
-        double tokensToSellToBeInZero = MathUtils.safeZeroDivision(totalCostField.doubleValue(), sellPriceField.doubleValue());
+        double tokensToSellToBeInZero = MathUtils.safeDivision(totalCostField.doubleValue(), sellPriceField.doubleValue());
         double profitTokens = amountField.doubleValue() - tokensToSellToBeInZero;
         double profitTokensValue = profitTokens * buyPriceField.doubleValue();
         return new Paragraph(String.format("%s %s ≈ $%.2f", amountFormatter.format(profitTokens), selectedSymbol, profitTokensValue));

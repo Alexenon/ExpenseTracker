@@ -1,6 +1,5 @@
 package com.example.application.views.components;
 
-
 /*
     TODO:
      - [!] Add Edit/Delete btn, directly in the grid, and in the display itself
@@ -80,13 +79,19 @@ public class TransactionsGrid extends Div {
     private void initializeFilteringBySearch() {
         nameSearchField.addClassName("asset-search-field");
         nameSearchField.setPlaceholder("Search");
-        nameSearchField.setPrefixComponent(new Icon(VaadinIcon.SEARCH));
+        nameSearchField.setPrefixComponent(seachIcon());
         nameSearchField.setAllowCustomValue(false);
         nameSearchField.addValueChangeListener(e -> applyFilter());
 
         typeSearchField.setItems(CryptoTransaction.TransactionType.values());
         typeSearchField.setClearButtonVisible(true);
         typeSearchField.addValueChangeListener(e -> applyFilter());
+    }
+
+    private static Icon seachIcon() {
+        Icon icon = new Icon(VaadinIcon.SEARCH);
+        icon.addClassName("search-icon");
+        return icon;
     }
 
     private void applyFilter() {
