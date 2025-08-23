@@ -2,11 +2,12 @@ package com.example.application.services;
 
 import com.example.application.data.requests.RegisterUserRequest;
 import com.example.application.entities.User;
-import com.example.application.entities.crypto.Wallet;
 import com.example.application.repositories.UserRepository;
 import com.example.application.services.crypto.WalletService;
-import com.example.application.utils.exceptions.UserExistException;
+import com.example.application.utils.exceptions.auth.UsernameTakenException;
 import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -15,46 +16,45 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
 public class UserService implements UserDetailsService {
 
-    private final UserRepository userRepository;
-    private final WalletService walletService;
-    private final PasswordEncoder passwordEncoder;
+    @Autowired
+    private UserRepository userRepository;
 
-    public UserService(UserRepository userRepository,
-                       WalletService walletService,
-                       PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.walletService = walletService;
-        this.passwordEncoder = passwordEncoder;
+    @Autowired
+    private WalletService walletService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @NotNull
+    public Optional<User> findByUsername(@NotNull String username) {
+        return userRepository.findByUsernameIgnoreCase(Objects.requireNonNull(username, "username"));
     }
 
-    public User findByUsername(String username) {
-        return userRepository.findByUsernameIgnoreCase(username)
-                .orElseThrow(() -> new UserExistException("There is already a user with this username"));
+    @NotNull
+    public Optional<User> findByEmail(@NotNull String email) {
+        return userRepository.findByEmailIgnoreCase(Objects.requireNonNull(email, "email"));
     }
 
-    public User findByEmail(String email) {
-        return userRepository.findByEmailIgnoreCase(email)
-                .orElseThrow(() -> new UserExistException("There is already a user with this email"));
-    }
-
-    public Optional<User> findByUsernameOrEmailIgnoreCase(String usernameOrEmail) {
+    @NotNull
+    public Optional<User> findByUsernameOrEmail(@NotNull String usernameOrEmail) {
+        Objects.requireNonNull(usernameOrEmail, "usernameOrEmail");
         Optional<User> userByUsername = userRepository.findByUsernameIgnoreCase(usernameOrEmail);
-        if (userByUsername.isPresent()) {
-            return userByUsername;
-        } else {
-            return userRepository.findByEmailIgnoreCase(usernameOrEmail);
-        }
+        return userByUsername.isPresent()
+                ? userByUsername
+                : userRepository.findByEmailIgnoreCase(usernameOrEmail);
     }
 
+    @NotNull
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String usernameOrEmail) throws UsernameNotFoundException {
-        User user = findByUsernameOrEmailIgnoreCase(usernameOrEmail)
+        User user = findByUsernameOrEmail(usernameOrEmail)
                 .orElseThrow(() -> new UsernameNotFoundException(usernameOrEmail + " not found."));
 
         return new org.springframework.security.core.userdetails.User(
@@ -65,9 +65,8 @@ public class UserService implements UserDetailsService {
     }
 
     public User createNewUser(RegisterUserRequest request) {
-        if (!request.getPassword().equals(request.getConfirmPassword())) {
-            throw new IllegalArgumentException("Passwords do not match");
-        }
+        if (!request.getPassword().equals(request.getConfirmPassword()))
+            throw new IllegalArgumentException("User register passwords does not match");
 
         User user = new User();
         user.setUsername(request.getUsername());
@@ -80,31 +79,26 @@ public class UserService implements UserDetailsService {
 
     @Transactional
     public User createNewUser(User user) {
-        if (checkIfUsernameExists(user.getUsername())) {
-            throw new UserExistException("There is already a user with this username");
-        }
-        if (checkIfEmailExists(user.getEmail())) {
-            throw new UserExistException("There is already a user with this email");
-        }
+        if (isUsernameTaken(user.getUsername()))
+            throw new UsernameTakenException("There is already a user with this username");
+
+        if (isEmailTaken(user.getEmail()))
+            throw new UsernameTakenException("There is already a user with this email");
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setRoles(Collections.singleton(User.Role.USER_ROLE));
         user.setEmail(user.getEmail().trim().toLowerCase());
         User savedUser = userRepository.save(user);
-
-        // Create and attach a new wallet to this user
-        Wallet wallet = new Wallet();
-        wallet.setUser(savedUser);
-        walletService.saveWallet(wallet);
+        walletService.createWallet(user);
 
         return savedUser;
     }
 
-    public boolean checkIfUsernameExists(String username) {
+    public boolean isUsernameTaken(String username) {
         return userRepository.findByUsernameIgnoreCase(username).isPresent();
     }
 
-    public boolean checkIfEmailExists(String email) {
+    public boolean isEmailTaken(String email) {
         return userRepository.findByEmailIgnoreCase(email).isPresent();
     }
 

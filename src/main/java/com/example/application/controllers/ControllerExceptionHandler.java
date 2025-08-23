@@ -1,6 +1,6 @@
 package com.example.application.controllers;
 
-import com.example.application.utils.exceptions.UserExistException;
+import com.example.application.utils.exceptions.auth.UsernameTakenException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -27,7 +27,7 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
 //            UsernameNotFoundException.class,
 //            BadCredentialsException.class
 //    })
-    @ExceptionHandler(UserExistException.class)
+    @ExceptionHandler(UsernameTakenException.class)
     public ResponseEntity<Object> handleExceptionsBadRequest(MethodArgumentNotValidException e, WebRequest request) {
         return new ResponseEntity<>(getBody(request, e, HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
     }

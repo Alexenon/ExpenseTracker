@@ -1,14 +1,14 @@
 package com.example.application.services;
 
 import com.example.application.entities.User;
-import com.example.application.utils.exceptions.UnauthenticatedUserException;
+import com.example.application.utils.exceptions.auth.UnauthenticatedUserException;
+import com.example.application.utils.exceptions.auth.UserNotFoundException;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.server.VaadinServletRequest;
 import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,7 +16,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Service;
 
-import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -38,7 +37,7 @@ public class SecurityService {
 
         // TODO: Add a separate error page, that should redirect to login page / home page
         if (authentication == null)
-            throw new AuthenticationServiceException("Coudn't manage to receive authentication. Please re-login");
+            throw new UnauthenticatedUserException("Coudn't manage to receive authentication. Please re-login");
 
         return authentication.getPrincipal() instanceof UserDetails userDetails
                 ? Optional.of(userDetails)
@@ -48,12 +47,15 @@ public class SecurityService {
     @NotNull
     public User getAuthenticatedUser() {
         String username = getAuthenticatedUserDetails()
-                .orElseThrow(() -> new UnauthenticatedUserException("Current user is not authenticated. " +
-                                                                    "Please log in to access this resource."))
+                .orElseThrow(() -> new UnauthenticatedUserException("Unauthorized exception. Please log in."))
                 .getUsername();
 
-        // TODO: Add a separate error page, that should redirect to register page
-        return Objects.requireNonNull(userService.findByUsername(username), "There is no such user in the database");
+        return userService.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("There is no such user with username = %s".formatted(username)));
+    }
+
+    public boolean isCurrentUserAuthenticated() {
+        return getAuthenticatedUserDetails().isPresent();
     }
 
     public void logout() {

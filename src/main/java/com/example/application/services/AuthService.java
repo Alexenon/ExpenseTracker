@@ -55,7 +55,7 @@ public class AuthService {
 
     public ResponseEntity<?> authenticate(String usernameOrEmail, String password) {
         User providedUser = userService
-                .findByUsernameOrEmailIgnoreCase(usernameOrEmail)
+                .findByUsernameOrEmail(usernameOrEmail)
                 .orElse(null);
 
         if (providedUser == null) {
