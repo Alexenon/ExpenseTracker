@@ -1,5 +1,6 @@
 package com.example.application.views.components.custom.dialogs.transactions;
 
+import com.example.application.entities.common.TransactionType;
 import com.example.application.entities.crypto.CryptoTransaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.views.components.core.Container;
@@ -35,7 +36,7 @@ public class EditTransactionDialog extends Dialog implements HasNotifications {
     private final Binder<CryptoTransaction> binder = new Binder<>(CryptoTransaction.class);
 
     private final AssetComboBox assetSymbolField;
-    private final Select<CryptoTransaction.TransactionType> typeField = new Select<>();
+    private final Select<TransactionType> typeField = new Select<>();
     private final AmountField amountField = new AmountField("Amount");
     private final CurrencyField marketPriceField = new CurrencyField("Price");
     private final CurrencyField totalCostField = new CurrencyField("Total");
@@ -122,7 +123,7 @@ public class EditTransactionDialog extends Dialog implements HasNotifications {
     private void initializeFields() {
         assetSymbolField.addValueChangeListener(l -> marketPriceField.setValue(assetSymbolField.getMarketPrice()));
         typeField.setLabel("Transaction Type");
-        typeField.setItems(CryptoTransaction.TransactionType.values());
+        typeField.setItems(TransactionType.values());
     }
 
     private void initializeFieldsValues() {

@@ -10,6 +10,7 @@ package com.example.application.views.components;
     _______________________________________________________________________________________________________________________________________
 */
 
+import com.example.application.entities.common.TransactionType;
 import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.CryptoTransaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
@@ -42,7 +43,7 @@ public class TransactionsGrid extends Div {
     private final InstrumentsFacadeService instrumentsFacadeService;
 
     private final AssetComboBox nameSearchField;
-    private final MultiSelectComboBox<CryptoTransaction.TransactionType> typeSearchField = new MultiSelectComboBox<>("Transaction Type");
+    private final MultiSelectComboBox<TransactionType> typeSearchField = new MultiSelectComboBox<>("Transaction Type");
     private final Grid<CryptoTransaction> grid = new Grid<>();
     private final GridListDataView<CryptoTransaction> gridDataView = grid.setItems();
 
@@ -83,7 +84,7 @@ public class TransactionsGrid extends Div {
         nameSearchField.setAllowCustomValue(false);
         nameSearchField.addValueChangeListener(e -> applyFilter());
 
-        typeSearchField.setItems(CryptoTransaction.TransactionType.values());
+        typeSearchField.setItems(TransactionType.values());
         typeSearchField.setClearButtonVisible(true);
         typeSearchField.addValueChangeListener(e -> applyFilter());
     }
@@ -96,7 +97,7 @@ public class TransactionsGrid extends Div {
 
     private void applyFilter() {
         Asset selectedAsset = nameSearchField.getValue();
-        Set<CryptoTransaction.TransactionType> selectedTypes = typeSearchField.getSelectedItems();
+        Set<TransactionType> selectedTypes = typeSearchField.getSelectedItems();
 
         gridDataView.setFilter(transaction -> {
             boolean nameFilter = selectedAsset == null || transaction.getAsset().equals(selectedAsset);

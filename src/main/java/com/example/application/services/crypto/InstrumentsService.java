@@ -3,6 +3,7 @@ package com.example.application.services.crypto;
 import com.example.application.data.enums.SymbolIndentifier;
 import com.example.application.data.models.InstrumentsProvider;
 import com.example.application.entities.User;
+import com.example.application.entities.common.TransactionType;
 import com.example.application.entities.crypto.*;
 import com.example.application.repositories.crypto.AssetRepository;
 import com.example.application.utils.fetchers.api_responses.AssetMetadata;
@@ -110,7 +111,7 @@ public class InstrumentsService {
         return transactionService.findBy(wallet, asset);
     }
 
-    public List<CryptoTransaction> getTransactionsBy(Wallet wallet, Asset asset, CryptoTransaction.TransactionType type) {
+    public List<CryptoTransaction> getTransactionsBy(Wallet wallet, Asset asset, TransactionType type) {
         return transactionService.findBy(wallet, asset, type);
     }
 

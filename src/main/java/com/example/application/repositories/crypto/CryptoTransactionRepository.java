@@ -1,5 +1,6 @@
 package com.example.application.repositories.crypto;
 
+import com.example.application.entities.common.TransactionType;
 import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.CryptoTransaction;
 import com.example.application.entities.crypto.Wallet;
@@ -15,6 +16,6 @@ public interface CryptoTransactionRepository extends JpaRepository<CryptoTransac
 
     List<CryptoTransaction> findByWalletAndAsset(Wallet wallet, Asset asset);
 
-    List<CryptoTransaction> findByWalletAndAssetAndType(Wallet wallet, Asset asset, CryptoTransaction.TransactionType type);
+    List<CryptoTransaction> findByWalletAndAssetAndType(Wallet wallet, Asset asset, TransactionType type);
 
 }

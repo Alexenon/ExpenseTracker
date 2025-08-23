@@ -1,5 +1,6 @@
 package com.example.application.services.crypto;
 
+import com.example.application.entities.common.TransactionType;
 import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.CryptoTransaction;
 import com.example.application.entities.crypto.Wallet;
@@ -32,7 +33,7 @@ public class CryptoTransactionService {
         return transactionRepository.findByWalletAndAsset(wallet, asset);
     }
 
-    public List<CryptoTransaction> findBy(Wallet wallet, Asset asset, CryptoTransaction.TransactionType type) {
+    public List<CryptoTransaction> findBy(Wallet wallet, Asset asset, TransactionType type) {
         return transactionRepository.findByWalletAndAssetAndType(wallet, asset, type);
     }
 

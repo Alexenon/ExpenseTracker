@@ -1,5 +1,6 @@
 package com.example.application.entities.crypto;
 
+import com.example.application.entities.common.TransactionType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import lombok.Data;
@@ -59,7 +60,8 @@ public class CryptoTransaction {
     }
 
     public CryptoTransaction(Asset asset, double marketPrice, double orderTotalCost,
-                             TransactionType type, String notes, LocalDate date) {
+                             TransactionType type, String notes, LocalDate date)
+    {
         this.asset = asset;
         this.marketPrice = marketPrice;
         this.orderTotalCost = orderTotalCost;
@@ -82,16 +84,11 @@ public class CryptoTransaction {
     }
 
     public boolean isBuyTransaction() {
-        return this.type == TransactionType.BUY;
+        return type.isBuyTransaction();
     }
 
     public boolean isSellTransaction() {
-        return this.type == TransactionType.SELL;
-    }
-
-    public enum TransactionType {
-        BUY,
-        SELL
+        return type.isSellTransaction();
     }
 
     @Override
