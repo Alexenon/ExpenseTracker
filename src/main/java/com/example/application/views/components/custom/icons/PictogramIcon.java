@@ -26,10 +26,12 @@ public enum PictogramIcon {
     CASH_PLUS,
     SHIELD_LOCK,
     BRIEFCASE_EDIT,
-    // Apps
+
+    // Third party applications,
     GITHUB,
     FACEBOOK,
-    TWITTER;
+    TWITTER,
+    ;
 
     public MonoIcon create() {
         return new MonoIcon(this);

@@ -6,6 +6,7 @@ import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.utils.common.formatters.CommonFormatters;
 import com.example.application.views.components.core.Container;
 import com.example.application.views.components.custom.display.PercentageBadge;
+import com.example.application.views.components.utils.common.GridUtils;
 import com.example.application.views.pages.crypto.AssetDetailsView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
@@ -26,15 +27,12 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
-import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.theme.lumo.LumoIcon;
 import lombok.Builder;
 import lombok.Data;
 
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.function.ToDoubleFunction;
 
 /*
@@ -128,7 +126,7 @@ public class AssetsGrid extends Div {
                 .setFrozen(true)
                 .setComparator(AssetGridItem::getSymbol);
 
-        grid.addColumn(columnPriceRenderer())
+        grid.addColumn(columnColoredPriceRenderer())
                 .setHeader("Price")
                 .setTextAlign(ColumnTextAlign.END)
                 .setAutoWidth(true)
@@ -142,24 +140,24 @@ public class AssetsGrid extends Div {
                 .setSortable(true)
                 .setComparator(AssetGridItem::getPriceChangesPercentage24h);
 
-        grid.addColumn(columnPriceRenderer(AssetGridItem::getAvgBuy))
+        grid.addColumn(GridUtils.columnPriceRenderer(AssetGridItem::getAvgBuy))
                 .setHeader("Avg Buy")
                 .setAutoWidth(true)
                 .setTextAlign(ColumnTextAlign.CENTER);
 
-        grid.addColumn(columnPriceRenderer(AssetGridItem::getAvgSell))
+        grid.addColumn(GridUtils.columnPriceRenderer(AssetGridItem::getAvgSell))
                 .setHeader("Avg Sell")
                 .setAutoWidth(true)
                 .setTextAlign(ColumnTextAlign.CENTER);
 
-        grid.addColumn(columnAmountRenderer(AssetGridItem::getTokenAmount))
+        grid.addColumn(GridUtils.columnAmountRenderer(AssetGridItem::getTokenAmount))
                 .setHeader("Amount")
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setAutoWidth(true)
                 .setSortable(true)
                 .setComparator(AssetGridItem::getTokenAmount);
 
-        totalWorthCol = grid.addColumn(columnPriceRenderer(AssetGridItem::getTotalWorth))
+        totalWorthCol = grid.addColumn(GridUtils.columnPriceRenderer(AssetGridItem::getTotalWorth))
                 .setHeader("Total Worth")
                 .setTextAlign(ColumnTextAlign.END)
                 .setAutoWidth(true)
@@ -167,7 +165,7 @@ public class AssetsGrid extends Div {
                 .setComparator(AssetGridItem::getTotalWorth)
                 .setTooltipGenerator(a -> "Total value of your %s holdings based on the latest price.".formatted(a.getSymbol()));
 
-        totalCostCol = grid.addColumn(columnPriceRenderer(AssetGridItem::getTotalCost))
+        totalCostCol = grid.addColumn(GridUtils.columnPriceRenderer(AssetGridItem::getTotalCost))
                 .setHeader("Total Cost")
                 .setTextAlign(ColumnTextAlign.END)
                 .setAutoWidth(true)
@@ -175,7 +173,7 @@ public class AssetsGrid extends Div {
                 .setComparator(AssetGridItem::getTotalCost)
                 .setTooltipGenerator(a -> "Total cost of your %s holdings(How much you have invested)".formatted(a.getSymbol()));
 
-        grid.addColumn(columnPercentageRenderer(AssetGridItem::getDiversityPercentage))
+        grid.addColumn(GridUtils.columnPercentageRenderer(AssetGridItem::getDiversityPercentage))
                 .setHeader("Diversity")
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setAutoWidth(true)
@@ -183,7 +181,7 @@ public class AssetsGrid extends Div {
                 .setComparator(AssetGridItem::getDiversityPercentage)
                 .setTooltipGenerator(a -> "The percentage contribution of %s to your portfolio's total value.".formatted(a.getSymbol()));
 
-        realizedCol = grid.addColumn(columnPriceRenderer(AssetGridItem::getRealizedProfit))
+        realizedCol = grid.addColumn(GridUtils.columnPriceRenderer(AssetGridItem::getRealizedProfit))
                 .setHeader("Realized")
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setAutoWidth(true)
@@ -191,7 +189,7 @@ public class AssetsGrid extends Div {
                 .setComparator(AssetGridItem::getRealizedProfit)
                 .setTooltipGenerator(a -> "Profit or loss from your sold %s holdings.".formatted(a.getSymbol()));
 
-        unrealizedCol = grid.addColumn(columnPriceRenderer(AssetGridItem::getUnrealizedProfit))
+        unrealizedCol = grid.addColumn(GridUtils.columnPriceRenderer(AssetGridItem::getUnrealizedProfit))
                 .setHeader("Unrealized")
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setAutoWidth(true)
@@ -199,7 +197,7 @@ public class AssetsGrid extends Div {
                 .setComparator(AssetGridItem::getUnrealizedProfit)
                 .setTooltipGenerator(a -> "Potential profit or loss if you were to sell %s now.".formatted(a.getSymbol()));
 
-        grid.addColumn(columnPriceRenderer(AssetGridItem::getUnrealizedProfit))
+        grid.addColumn(GridUtils.columnPriceRenderer(AssetGridItem::getUnrealizedProfit))
                 .setHeader("Profit")
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setAutoWidth(true)
@@ -207,25 +205,25 @@ public class AssetsGrid extends Div {
                 .setComparator(AssetGridItem::getUnrealizedProfit)
                 .setTooltipGenerator(a -> "Potential profit or loss if you were to sell %s now.".formatted(a.getSymbol()));
 
-        grid.addColumn(columnPriceRenderer(AssetGridItem::getClosestBuy))
+        grid.addColumn(GridUtils.columnPriceRenderer(AssetGridItem::getClosestBuy))
                 .setHeader("Closest Buy")
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setAutoWidth(true)
                 .setTooltipGenerator(a -> "The closest %s buy price that was added in the watcher".formatted(a.getSymbol()));
 
-        grid.addColumn(columnPriceRenderer(AssetGridItem::getClosestSell))
+        grid.addColumn(GridUtils.columnPriceRenderer(AssetGridItem::getClosestSell))
                 .setHeader("Closest Sell")
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setAutoWidth(true)
                 .setTooltipGenerator(a -> "The closest %s sell price that was added in the watcher".formatted(a.getSymbol()));
 
-        grid.addColumn(columnPercentageRenderer(AssetGridItem::getAvgBuyCompareWithCurrentPrice))
+        grid.addColumn(GridUtils.columnPercentageRenderer(AssetGridItem::getAvgBuyCompareWithCurrentPrice))
                 .setHeader("Avg Buy vs Current Price")
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setAutoWidth(true)
                 .setTooltipGenerator(a -> "Shows how the average buy price of %s compares to the current price".formatted(a.getSymbol()));
 
-        grid.addColumn(columnPercentageRenderer(AssetGridItem::getAvgSellCompareWithCurrentPrice))
+        grid.addColumn(GridUtils.columnPercentageRenderer(AssetGridItem::getAvgSellCompareWithCurrentPrice))
                 .setHeader("Avg Sell vs Current Price")
                 .setTextAlign(ColumnTextAlign.CENTER)
                 .setAutoWidth(true)
@@ -301,45 +299,9 @@ public class AssetsGrid extends Div {
                 .withProperty("symbol", AssetGridItem::getSymbol);
     }
 
-    private LitRenderer<AssetGridItem> columnPriceRenderer() {
+    private LitRenderer<AssetGridItem> columnColoredPriceRenderer() {
         return LitRenderer.<AssetGridItem>of("<p class='asset-price'>${item.price}</p>")
                 .withProperty("price", asset -> CommonFormatters.CURRENCY.format(asset.getPrice()));
-    }
-
-    private LitRenderer<AssetGridItem> columnPriceRenderer(ValueProvider<AssetGridItem, Number> priceProvider) {
-        return LitRenderer.<AssetGridItem>of("<p>${item.price}</p>")
-                .withProperty("price", asset -> {
-                    Number price = priceProvider.apply(asset);
-                    NumberFormat nf = NumberFormat.getCurrencyInstance(Locale.US);
-                    double value = price.doubleValue();
-
-                    return Double.isNaN(value) || value <= 0
-                            ? MISSING_DATA_SIGN
-                            : nf.format(price);
-                });
-    }
-
-    private LitRenderer<AssetGridItem> columnPercentageRenderer(ValueProvider<AssetGridItem, Double> percentageProvider) {
-        return LitRenderer.<AssetGridItem>of("<p>${item.percentage}</p>")
-                .withProperty("percentage", asset -> {
-                    Double percentageValue = percentageProvider.apply(asset);
-
-                    return Double.isNaN(percentageValue)
-                            ? MISSING_DATA_SIGN
-                            : CommonFormatters.PERCENTAGE.format(percentageValue);
-                });
-    }
-
-    private LitRenderer<AssetGridItem> columnAmountRenderer(ValueProvider<AssetGridItem, Double> amountProvider) {
-        return LitRenderer.<AssetGridItem>of("<p>${item.amount}</p>")
-                .withProperty("amount", asset -> {
-                            double amountOfTokens = asset.getTokenAmount();
-
-                            return Double.isNaN(amountOfTokens) || amountOfTokens <= 0
-                                    ? MISSING_DATA_SIGN
-                                    : CommonFormatters.AMOUNT.format(amountOfTokens) + " " + asset.getSymbol();
-                        }
-                );
     }
 
     private LitRenderer<AssetGridItem> totalProfitRenderer() {
@@ -384,7 +346,7 @@ public class AssetsGrid extends Div {
     }
 
     private Button threeDotsBtn() {
-        return new Button();
+        return new Button(); // TODO: HERE SHOULD BE IMPLEMENTED SOMETHING
     }
 
     private Div hiddenRowsContainer() {

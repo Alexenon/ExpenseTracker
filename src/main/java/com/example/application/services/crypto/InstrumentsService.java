@@ -126,17 +126,17 @@ public class InstrumentsService {
     /*
      * WALLET BALANCES
      * */
-
-    public WalletBalance saveWalletBalance(WalletBalance walletBalance) {
+    public WalletBalance saveWalletBalance(@NotNull WalletBalance walletBalance) {
         return walletBalanceService.save(walletBalance);
     }
 
     @NotNull
-    public WalletBalance getWalletBalancesByWalletAndAsset(Wallet wallet, Asset asset) {
+    public WalletBalance getWalletBalancesByWalletAndAsset(@NotNull Wallet wallet, @NotNull Asset asset) {
         return walletBalanceService.getByWalletAndAsset(wallet, asset);
     }
 
-    public List<WalletBalance> getWalletBalancesByWallet(Wallet wallet) {
+    @NotNull
+    public List<WalletBalance> getWalletBalancesByWallet(@NotNull Wallet wallet) {
         return walletBalanceService.getByWallet(wallet);
     }
 
@@ -156,7 +156,7 @@ public class InstrumentsService {
         }
 
         metadataMap.forEach((key, value) -> updateAssetData(SymbolIndentifier.valueOf(key), value));
-        log.info("Updated database with {} assets", metadataMap.size());
+        log.info("Updated database for {} assets", metadataMap.size());
     }
 
     private void updateAssetData(SymbolIndentifier indentifier, @Nullable AssetMetadata assetMetadata) {
