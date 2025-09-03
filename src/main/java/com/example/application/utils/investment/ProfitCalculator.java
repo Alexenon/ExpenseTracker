@@ -191,7 +191,7 @@ public class ProfitCalculator {
     }
 
     private static long getHoldingTimeInDays(CryptoTransaction buyTransaction, CryptoTransaction sellTransaction) {
-        return DateUtils.daysBetween(buyTransaction.getDate(), sellTransaction.getDate());
+        return DateUtils.daysBetween(buyTransaction.getDateTime(), sellTransaction.getDateTime());
     }
 
 	//endregion

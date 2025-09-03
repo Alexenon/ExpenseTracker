@@ -14,7 +14,7 @@ import com.example.application.views.components.utils.convertors.FlexiblePriceCo
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.select.Select;
@@ -24,7 +24,7 @@ import com.vaadin.flow.data.validator.DoubleRangeValidator;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.function.Consumer;
 
 // TODO:
@@ -41,7 +41,7 @@ public class AddTransactionDialog extends Dialog implements HasNotifications {
     private final AmountField amountField = new AmountField("Amount");
     private final CurrencyField marketPriceField = new CurrencyField("Price");
     private final CurrencyField totalCostField = new CurrencyField("Total");
-    private final DatePicker datePicker = new DatePicker("Date");
+    private final DateTimePicker datePicker = new DateTimePicker("Date & Time");
     private final TextArea notesField = new TextArea("Notes");
 
     private final Button saveButton = new Button("Save");
@@ -137,7 +137,7 @@ public class AddTransactionDialog extends Dialog implements HasNotifications {
         amountField.setValue("");
         marketPriceField.setValue(assetSymbolField.getMarketPrice());
         totalCostField.setValue(0);
-        datePicker.setValue(LocalDate.now());
+        datePicker.setValue(LocalDateTime.now());
     }
 
     private void initializeBinder() {
@@ -176,7 +176,7 @@ public class AddTransactionDialog extends Dialog implements HasNotifications {
                 .bind(CryptoTransaction::getNotes, CryptoTransaction::setNotes);
 
         binder.forField(datePicker)
-                .bind(CryptoTransaction::getDate, CryptoTransaction::setDate);
+                .bind(CryptoTransaction::getDateTime, CryptoTransaction::setDateTime);
     }
 
     public void addSaveBtnClickListener(Consumer<?> listener) {

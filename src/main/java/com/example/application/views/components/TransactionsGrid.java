@@ -69,7 +69,7 @@ public class TransactionsGrid extends Div {
         grid.addColumn(quantityColumnRenderer()).setHeader("Quantity");
         grid.addColumn(priceColumnRenderer()).setHeader("Price");
         grid.addColumn(priceColumnRenderer(CryptoTransaction::getOrderTotalCost)).setHeader("Total");
-        grid.addColumn(CryptoTransaction::getDate).setHeader("Date");
+        grid.addColumn(CryptoTransaction::getDateTime).setHeader("Date");
         grid.addColumn(profitLossColumnRenderer()).setHeader("Profit/Loss").setFrozenToEnd(true);
         grid.getColumns().forEach(column -> {
             column.setSortable(true);

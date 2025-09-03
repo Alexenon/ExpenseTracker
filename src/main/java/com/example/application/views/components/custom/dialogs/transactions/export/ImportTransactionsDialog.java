@@ -37,6 +37,10 @@ import java.util.Objects;
 
 
 /*
+    TODO LONG TERM:
+        [?] Add option to replace existing transactions
+        [?] What if I add same transaction twice, it should at least warn user
+
     Helper displays info while file is beeing added
         https://vaadin.com/directory/component/upload-helper-add-on
 
@@ -52,9 +56,6 @@ public class ImportTransactionsDialog extends Dialog implements HasNotifications
 
     private static final int MAX_NUMBER_OF_FILES = 1;
     private static final int MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
-
-    // TODO:
-    //  [?] Add option to replace existing transactions
 
     private final FileBuffer buffer = new FileBuffer();
     private final Upload upload = new Upload(buffer);
@@ -132,7 +133,7 @@ public class ImportTransactionsDialog extends Dialog implements HasNotifications
         grid.setColumnReorderingAllowed(true);
 
         grid.addColumn(new LocalDateTimeRenderer<>(TransactionModel::getDateTime, CommonFormatters.DATE_FRIENDLY_FORMAT))
-                .setHeader("Date Time")
+                .setHeader("Date & Time")
                 .setAutoWidth(true);
 
         grid.addColumn(TransactionModel::getSymbol)

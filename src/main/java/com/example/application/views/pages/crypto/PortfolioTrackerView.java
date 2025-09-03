@@ -91,11 +91,11 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
     @Override
     public void initializePage() {
         getStyle().set("margin", "100px 30px 30px 30px");
+        initializeGrids();
     }
 
     @Override
     public void buildPage() {
-        initializeGrids();
         add(
                 headerSection(),
                 statisticsSection(),
@@ -103,8 +103,7 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
                 gridSection("Assets", assetsGrid),
                 gridSection("Transactions", transactionsGrid)
         );
-        assetsGrid.setItems(instrumentsFacadeService.getAssetsWithNonZeroAmount());
-        transactionsGrid.setItems(instrumentsFacadeService.getAllTransactions());
+        updateGridItems();
     }
 
     @Override
@@ -120,11 +119,16 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
         });
     }
 
-    protected void initializeGrids() {
+    private void initializeGrids() {
         assetsGrid.setGridFullSize(true);
 
         transactionsGrid.setPageSize(10);
         transactionsGrid.addUpdateItemListener(l -> rebuildPage());
+    }
+
+    private void updateGridItems() {
+        assetsGrid.setItems(instrumentsFacadeService.getAssetsWithNonZeroAmount());
+        transactionsGrid.setItems(instrumentsFacadeService.getAllTransactions());
     }
 
     private Section headerSection() {
