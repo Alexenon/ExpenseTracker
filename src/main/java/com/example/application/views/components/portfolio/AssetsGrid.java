@@ -68,7 +68,7 @@ public class AssetsGrid extends Div {
     private final Grid<AssetGridItem> grid = new Grid<>();
     private final Span hiddenRowsCounterField = new Span();
     private GridListDataView<AssetGridItem> dataView;
-    private List<Asset> gridAssets = new ArrayList<>();
+    private List<Asset> assets = new ArrayList<>();
 
     private Grid.Column<AssetGridItem> changes24hCol;
     private Grid.Column<AssetGridItem> totalWorthCol;
@@ -82,7 +82,7 @@ public class AssetsGrid extends Div {
         this.instrumentsFacadeService = instrumentsFacadeService;
         this.portfolioPerformanceTracker = portfolioPerformanceTracker;
 
-        setItems(gridAssets);
+        setItems(assets);
 
         initializeGrid();
         initializeFilteringBySearch();
@@ -323,7 +323,7 @@ public class AssetsGrid extends Div {
         syncButton.addClickListener(event -> {
             animateSyncButtonIcon();
             instrumentsFacadeService.updateAssetData();
-            setItems(gridAssets);
+            setItems(assets);
             grid.removeAllColumns();
             renderColumns();
             resetFilterValues();
@@ -358,7 +358,7 @@ public class AssetsGrid extends Div {
     }
 
     private void updateHiddenRowsCounter() {
-        int numberOfHiddenRows = gridAssets.size() - dataView.getItemCount();
+        int numberOfHiddenRows = assets.size() - dataView.getItemCount();
         setHiddenRowCount(numberOfHiddenRows);
     }
 
@@ -387,7 +387,7 @@ public class AssetsGrid extends Div {
     }
 
     public void setItems(List<Asset> assets) {
-        gridAssets = assets;
+        this.assets = assets;
         dataView = grid.setItems(getConvertedGridItems());
     }
 
@@ -398,7 +398,7 @@ public class AssetsGrid extends Div {
     }
 
     private List<AssetGridItem> getConvertedGridItems() {
-        return gridAssets.stream()
+        return assets.stream()
                 .map(asset -> {
                     double currentPrice = asset.getMarketPrice();
                     double avgBuy = portfolioPerformanceTracker.getAverageBuyPrice(asset);

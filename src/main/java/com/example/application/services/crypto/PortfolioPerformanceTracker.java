@@ -15,6 +15,7 @@ import static com.example.application.utils.investment.ProfitUtils.ONE_HUNDRED_P
     TODO: [LONG TERM] -> Implement next methods
        - % in Market, how much tokens had been sold and how much are still holding
        - Cumulative Profit Loss
+       - Display long term information, like how many assets were bought/sold, totalProfit realized ever...
 * */
 
 @Service

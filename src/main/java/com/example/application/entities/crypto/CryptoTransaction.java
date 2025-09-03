@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 /*
-* TODO LONGTERM:
+* TODO [LONG TERM]:
 *   - Add SpotPairs - BTC/USDT, BTC/USDC, ...
 *   - TRANSFER - Add asset amount from external sources
     - CONVERT  - Switch from one asset to another

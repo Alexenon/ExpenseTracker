@@ -37,7 +37,7 @@ import java.util.Objects;
 
 
 /*
-    TODO LONG TERM:
+    TODO [LONG TERM]:
         [?] Add option to replace existing transactions
         [?] What if I add same transaction twice, it should at least warn user
 

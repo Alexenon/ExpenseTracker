@@ -116,6 +116,7 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
         ui.access(() -> {
             this.removeAll();
             this.buildPage();
+            assetsChart.updateChartItems();
         });
     }
 
@@ -161,7 +162,6 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
             dialog.open();
 //            dialog.addSaveBtnClickListener(l -> rebuildPage());
         });
-
 
 
         section.add(addTransactionBtn, importBtn);
