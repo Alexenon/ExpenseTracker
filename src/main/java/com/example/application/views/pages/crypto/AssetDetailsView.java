@@ -98,7 +98,9 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
 
     @Override
     public void buildPage() {
-        asset = instrumentsFacadeService.getAssetBySymbol(assetSymbol);
+        asset = instrumentsFacadeService.getAssetBySymbol(assetSymbol)
+                .orElseThrow(() -> new NullPointerException("There is no such asset as %s".formatted(asset.getSymbol())));
+
         addTransactionDialog.setAsset(asset);
         add(
                 headerDetailsSection(),

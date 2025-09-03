@@ -54,13 +54,10 @@ public class InstrumentsService {
     }
 
     @NotNull
-    public Asset getAssetBySymbol(String symbolName) {
-        return Optional.ofNullable(assetRepository.findBySymbol(symbolName.toUpperCase()))
-                .orElseThrow(() -> new NullPointerException("There is no such asset as %s".formatted(symbolName)));
-    }
-
-    public Asset getAssetBySymbol(SymbolIndentifier symbol) {
-        return assetRepository.findBySymbol(symbol.name());
+    public Optional<Asset> getAssetBySymbol(@Nullable String symbolName) {
+        return symbolName == null || symbolName.isBlank()
+                ? Optional.empty()
+                : assetRepository.findBySymbol(symbolName.toUpperCase());
     }
 
     public Asset saveAsset(Asset asset) {
@@ -165,7 +162,7 @@ public class InstrumentsService {
             return;
         }
 
-        Asset asset = Optional.ofNullable(assetRepository.findBySymbol(indentifier.name())).orElse(new Asset());
+        Asset asset = assetRepository.findBySymbol(indentifier.name()).orElse(new Asset());
         asset.setSymbol(indentifier.name());
         asset.setFullName(indentifier.getFullName());
         Optional.ofNullable(assetMetadata.getPriceUsd()).ifPresent(asset::setMarketPrice);

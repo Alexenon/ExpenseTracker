@@ -132,7 +132,7 @@ public class AddTransactionDialog extends Dialog implements HasNotifications {
         typeField.setItems(TransactionType.values());
 
         // Initialize with values
-        assetSymbolField.setValue(null);
+        assetSymbolField.setValue("");
         typeField.setValue(TransactionType.BUY);
         amountField.setValue("");
         marketPriceField.setValue(assetSymbolField.getMarketPrice());

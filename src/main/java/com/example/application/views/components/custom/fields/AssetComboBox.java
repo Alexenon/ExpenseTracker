@@ -28,6 +28,12 @@ public class AssetComboBox extends ComboBox<Asset> {
         setRenderer(assetSymbolRenderer());
     }
 
+    public void setValue(String symbol) {
+        Asset asset = instrumentsFacadeService.getAssetBySymbol(symbol)
+                .orElse(null);
+        setValue(asset);
+    }
+
     private void setItemsWithFilter() {
         ComboBox.ItemFilter<Asset> defaultFilter = (asset, filterString) -> {
             String lowercaseInput = filterString.toLowerCase();

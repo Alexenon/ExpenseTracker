@@ -53,7 +53,7 @@ public class CryptoTransaction {
     private String notes;
 
     @Column(nullable = false)
-    private LocalDate date;
+    private LocalDate date;    // TODO URGENT: SWITCH THIS TO DATETIME
 
     public CryptoTransaction(Asset asset, double marketPrice, double orderTotalCost, TransactionType type) {
         this(asset, marketPrice, orderTotalCost, type, null, LocalDate.now());

@@ -10,7 +10,6 @@ public enum PictogramIcon {
     LOGIN,
     LOGOUT,
     ACCOUNT,
-    INFORMATION_OUTLINE,
     TRASH_CAN_OUTLINE,
     ARROW_RIGHT_THIN,
     TABLET_CELLPHONE,
@@ -27,6 +26,12 @@ public enum PictogramIcon {
     SHIELD_LOCK,
     BRIEFCASE_EDIT,
 
+    // Very common
+    DELETE,
+    DELETE_OUTLINE,
+    SQUARE_EDIT_OUTLINE,
+    INFORMATION_OUTLINE,
+
     // Third party applications,
     GITHUB,
     FACEBOOK,
@@ -37,5 +42,8 @@ public enum PictogramIcon {
         return new MonoIcon(this);
     }
 
+    public MonoIcon create(String className) {
+        return new MonoIcon(this, className);
+    }
 
 }

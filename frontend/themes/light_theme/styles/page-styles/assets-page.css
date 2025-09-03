@@ -93,6 +93,10 @@ vaadin-grid-cell-content > vaadin-button {
 	background: white;
 }
 
+mono-icon.grid-action-btn {
+	font-size: 27px;
+}
+
 /*
     Grid Footer
 */
@@ -187,4 +191,20 @@ div.assets-grid-footer {
 	display: flex;
 	flex-direction: column;
 	align-items: flex-end;
+}
+
+
+/**
+* Import functionality
+*/
+
+.import-dialog-header {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	margin-bottom: 20px;
+}
+
+.uploader {
+	font-size: 1.2rem;
 }
