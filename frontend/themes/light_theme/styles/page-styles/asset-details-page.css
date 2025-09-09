@@ -436,3 +436,8 @@ vaadin-number-field {
     background: #c0ced3;
 }
 
+.export-dialog-body {
+    display: flex;
+    gap: 20px;
+    flex-direction: column;
+}

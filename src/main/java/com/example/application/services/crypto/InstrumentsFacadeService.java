@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -96,6 +97,14 @@ public class InstrumentsFacadeService {
 
     public List<CryptoTransaction> getTransactionsByAsset(Asset asset) {
         return instrumentsService.getTransactionsBy(getAuthenticatedUserWallet(), asset);
+    }
+
+    public List<CryptoTransaction> getTransactions(LocalDate from) {
+        return getTransactions(from, LocalDate.now());
+    }
+
+    public List<CryptoTransaction> getTransactions(LocalDate from, LocalDate to) {
+        return instrumentsService.getTransactionsBy(getAuthenticatedUserWallet(), from, to);
     }
 
     public CryptoTransaction saveTransaction(CryptoTransaction transaction) {

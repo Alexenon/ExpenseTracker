@@ -30,7 +30,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
-
 /*
     TODO [LONG TERM]:
         [?] Add option to replace existing transactions
@@ -118,9 +117,19 @@ public class ImportTransactionsDialog extends Dialog implements HasNotifications
         upload.getElement().addEventListener("file-remove", (DomEventListener) arg -> {
             grid.setItems(new ArrayList<>());
             grid.setVisible(false);
+            errorField.setVisible(false);
+        });
+
+        upload.addFailedListener(e -> {
+            errorField.setVisible(true);
+            errorField.setText("Unable to process file, cause: " + e.getReason().getLocalizedMessage());
         });
 
         upload.addFileRejectedListener(e -> errorField.setText("Too many files added, or the file size is bigger than 10MB"));
+
+
+        errorField.setVisible(false);
+        errorField.getElement().getStyle().set("color", "red");
     }
 
     private void initializeGrid() {
@@ -179,6 +188,7 @@ public class ImportTransactionsDialog extends Dialog implements HasNotifications
             grid.setItems(transactions);
             grid.setVisible(true);
         } catch (Exception e) {
+            errorField.setVisible(true);
             errorField.setText(e.getLocalizedMessage());
             throw new RuntimeException(e);
         }

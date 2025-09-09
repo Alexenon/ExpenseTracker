@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -110,6 +111,10 @@ public class InstrumentsService {
 
     public List<CryptoTransaction> getTransactionsBy(Wallet wallet, Asset asset, TransactionType type) {
         return transactionService.findBy(wallet, asset, type);
+    }
+
+    public List<CryptoTransaction> getTransactionsBy(Wallet wallet, LocalDate from, LocalDate to) {
+        return transactionService.findBy(wallet, from, to);
     }
 
     /*

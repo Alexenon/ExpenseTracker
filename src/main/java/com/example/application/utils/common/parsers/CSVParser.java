@@ -7,9 +7,8 @@ import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.vaadin.flow.server.StreamResource;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Writer;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
@@ -30,7 +29,7 @@ public class CSVParser implements Parser<TransactionModel> {
 
     /**
      * @throws RuntimeException when an issue encountered
-     * */
+     */
     @Override
     public List<TransactionModel> parseImport(InputStream stream) {
         try {
@@ -48,32 +47,17 @@ public class CSVParser implements Parser<TransactionModel> {
 
     /**
      * @throws RuntimeException when an issue encountered
-     * */
+     */
     @Override
-    @SuppressWarnings("resource")
-    public StreamResource parseExport(List<TransactionModel> list) {
-        Path filePath = createCSVFile(list);
-        return new StreamResource(filePath.getFileName().toString(), () -> {
+    public StreamResource parseExport(List<TransactionModel> transactions) {
+        return new StreamResource("transactions.csv", () -> {
             try {
-                InputStream input = Files.newInputStream(filePath);
-
-                return new InputStream() {
-                    @Override
-                    public int read() throws IOException {
-                        return input.read();
-                    }
-
-                    @Override
-                    public void close() throws IOException {
-                        try {
-                            input.close();
-                        } finally {
-                            Files.deleteIfExists(filePath);
-                        }
-                    }
-                };
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                Writer writer = new OutputStreamWriter(out, StandardCharsets.UTF_8);
+                MAPPER.writer(SCHEMA).writeValue(writer, transactions);
+                return new ByteArrayInputStream(out.toByteArray());
             } catch (IOException e) {
-                throw new RuntimeException("Unable to process temporary file for download", e);
+                throw new UncheckedIOException("Failed to export CSV", e);
             }
         });
     }
