@@ -4,14 +4,11 @@ import com.example.application.data.dtos.migration.TransactionModel;
 import com.example.application.entities.common.TransactionType;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.utils.common.formatters.CommonFormatters;
+import com.example.application.utils.common.parsers.CSVParser;
 import com.example.application.views.components.core.Container;
 import com.example.application.views.components.custom.icons.PictogramIcon;
 import com.example.application.views.components.utils.HasNotifications;
 import com.example.application.views.components.utils.common.GridUtils;
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvParser;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -28,8 +25,6 @@ import com.vaadin.flow.dom.DomEventListener;
 import com.vaadin.flow.theme.lumo.LumoIcon;
 import org.springframework.context.annotation.Lazy;
 
-import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -57,6 +52,7 @@ public class ImportTransactionsDialog extends Dialog implements HasNotifications
     private static final int MAX_NUMBER_OF_FILES = 1;
     private static final int MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 
+    private final CSVParser csvParser = new CSVParser();
     private final FileBuffer buffer = new FileBuffer();
     private final Upload upload = new Upload(buffer);
 
@@ -93,7 +89,7 @@ public class ImportTransactionsDialog extends Dialog implements HasNotifications
     private Div createDialogHeader() {
         Span hint = new Span();
         hint.getElement().setProperty("innerHTML", "Maximum <b>1</b> file allowed with max size: <b>10 MB</b>.<br>" +
-                                                   "Accepted files: <b>CSV</b> (.csv), <b>Excel</b> (.xls, .xlsx)");
+                                                   "File type: <b>CSV</b> (.csv)");
         return new Container("import-dialog-header", hint);
     }
 
@@ -109,7 +105,7 @@ public class ImportTransactionsDialog extends Dialog implements HasNotifications
         upload.setDropAllowed(true);
         upload.setMaxFileSize(MAX_FILE_SIZE);
         upload.setMaxFiles(MAX_NUMBER_OF_FILES);
-        upload.setAcceptedFileTypes(".csv", ".xls", ".xlsx");
+        upload.setAcceptedFileTypes(".csv");
         upload.addSucceededListener(e -> {
             displayGrid();
             saveButton.setVisible(true);
@@ -178,33 +174,14 @@ public class ImportTransactionsDialog extends Dialog implements HasNotifications
 
     private void displayGrid() {
         try {
-            transactions = new ArrayList<>(parsedTransactions());
+            // Transactions should be a modifiable list, since it alows client to remove and edit items
+            transactions = new ArrayList<>(csvParser.parseImport(buffer.getInputStream()));
             grid.setItems(transactions);
             grid.setVisible(true);
-        } catch (IOException e) {
+        } catch (Exception e) {
             errorField.setText(e.getLocalizedMessage());
             throw new RuntimeException(e);
         }
-    }
-
-    private List<TransactionModel> parsedTransactions() throws IOException {
-        CsvMapper mapper = CsvMapper.builder()
-                .addModule(new JavaTimeModule())
-                .enable(CsvParser.Feature.SKIP_EMPTY_LINES)
-                .enable(CsvParser.Feature.EMPTY_STRING_AS_NULL)
-                .enable(CsvParser.Feature.FAIL_ON_MISSING_HEADER_COLUMNS)
-                .defaultDateFormat(new SimpleDateFormat("M.d.yyyy HH:mm:ss"))
-                .build();
-
-        CsvSchema schema = CsvSchema.emptySchema().withHeader();
-
-        return mapper.readerFor(TransactionModel.class)
-                .with(schema)
-                .<TransactionModel>readValues(buffer.getInputStream())
-                .readAll()
-                .stream()
-                .filter(TransactionModel::isValid)
-                .toList();
     }
 
     private static ComponentRenderer<Span, TransactionModel> typeComponentRenderer() {

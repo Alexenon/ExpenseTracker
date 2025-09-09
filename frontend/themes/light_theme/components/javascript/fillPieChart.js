@@ -103,6 +103,7 @@ window.fillExpensesChart = function fillExpensesChart(jsonDataString) {
 https://tinyurl.com/pie-chart-1
 https://tinyurl.com/pie-chart-2
 https://tinyurl.com/pie-chart-3
+https://tinyurl.com/pie-chart-4
 
 */
 window.fillAssetsDiversityChart = function fillAssetsDiversityChart(jsonDataString) {

@@ -53,9 +53,13 @@ public class TestView extends AbstractPage implements PriceChangeblePage, Before
     }
 
     public void buildPage() {
+//        Path pathToFile = Path.of("C:\\Users\\asus\\Desktop", "Orders.csv");
+//        DownloadButton downloadButton = new DownloadButton(pathToFile);
+
         add(
                 new HorizontalLayout(title, counter),
                 new HorizontalLayout(text, lastTimeUpdated)
+//                ,new HorizontalLayout(downloadButton)
         );
     }
 

@@ -10,6 +10,7 @@ import com.example.application.views.components.PriceChangeblePage;
 import com.example.application.views.components.TransactionsGrid;
 import com.example.application.views.components.core.Container;
 import com.example.application.views.components.custom.dialogs.transactions.AddTransactionDialog;
+import com.example.application.views.components.custom.dialogs.transactions.export.ExportTransactionDialog;
 import com.example.application.views.components.custom.dialogs.transactions.export.ImportTransactionsDialog;
 import com.example.application.views.components.custom.display.NumericValueParagraph;
 import com.example.application.views.components.custom.fields.PricePercentageWrapper;
@@ -163,8 +164,15 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
 //            dialog.addSaveBtnClickListener(l -> rebuildPage());
         });
 
+        Button exportBtn = new Button("Export", LumoIcon.DOWNLOAD.create());
+        exportBtn.addClassName("add-entity-btn");
+        exportBtn.setIconAfterText(false);
+        exportBtn.addClickListener(e -> {
+            ExportTransactionDialog dialog = new ExportTransactionDialog(instrumentsFacadeService);
+            dialog.open();
+        });
 
-        section.add(addTransactionBtn, importBtn);
+        section.add(addTransactionBtn, importBtn, exportBtn);
 
         return section;
     }

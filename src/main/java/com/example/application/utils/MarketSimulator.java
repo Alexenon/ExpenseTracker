@@ -26,7 +26,9 @@ public class MarketSimulator {
         results.add(price);
         for (int i = 0; i < size; i++) {
             double direction = random.nextBoolean() ? 1 : -1;
-            double stepSize = random.nextDouble(minPercentageStep, maxPercentageStep);
+            double stepSize = minPercentageStep == maxPercentageStep
+                    ? maxPercentageStep
+                    : random.nextDouble(minPercentageStep, maxPercentageStep);
             double step = percentageOf(stepSize, price);
             price += step * direction;
             results.add(price);
@@ -70,8 +72,8 @@ public class MarketSimulator {
         }
 
         public MarketSimulator build() {
-            if (minPercentageStep >= maxPercentageStep) {
-                throw new IllegalArgumentException("minPercentageStep must be less than maxPercentageStep");
+            if (minPercentageStep > maxPercentageStep) {
+                throw new IllegalArgumentException("minPercentageStep must be less or equal to maxPercentageStep");
             }
 
             return new MarketSimulator(this);
@@ -81,9 +83,9 @@ public class MarketSimulator {
 
     public static void main(String[] args) {
         MarketSimulator simulator = new MarketSimulator.Builder()
-                .minPercentageStep(0.5)
-                .maxPercentageStep(2)
-                .size(200)
+                .minPercentageStep(1)
+                .maxPercentageStep(1)
+                .size(100_000)
                 .build();
 
         List<Double> prices = simulator.generate(3400.59);
