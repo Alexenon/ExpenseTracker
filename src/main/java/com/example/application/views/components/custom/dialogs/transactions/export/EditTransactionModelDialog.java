@@ -1,8 +1,7 @@
-package com.example.application.views.components.custom.dialogs.transactions;
+package com.example.application.views.components.custom.dialogs.transactions.export;
 
+import com.example.application.data.dtos.migration.TransactionModel;
 import com.example.application.entities.common.TransactionType;
-import com.example.application.entities.crypto.Asset;
-import com.example.application.entities.crypto.CryptoTransaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.views.components.core.Container;
 import com.example.application.views.components.custom.fields.AmountField;
@@ -21,27 +20,21 @@ import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.validator.DoubleRangeValidator;
-import com.vaadin.flow.data.value.ValueChangeMode;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.time.LocalDateTime;
 import java.util.function.Consumer;
 
-// TODO:
-//  - boolean subtractFromGivenAsset
-//  - Add slider for percentage buy/transfer
-public class AddTransactionDialog extends Dialog implements HasNotifications {
+public class EditTransactionModelDialog extends Dialog implements HasNotifications {
 
-    private final CryptoTransaction transaction;
+    private final TransactionModel transaction;
     private final InstrumentsFacadeService instrumentsFacadeService;
-    private final Binder<CryptoTransaction> binder = new Binder<>(CryptoTransaction.class);
+    private final Binder<TransactionModel> binder = new Binder<>(TransactionModel.class);
 
     private final AssetComboBox assetSymbolField;
     private final Select<TransactionType> typeField = new Select<>();
     private final AmountField amountField = new AmountField("Amount");
     private final CurrencyField marketPriceField = new CurrencyField("Price");
-    private final CurrencyField totalCostField = new CurrencyField("Total");
-    private final DateTimePicker datePicker = new DateTimePicker("Date & Time");
+    private final DateTimePicker dateTimePicker = new DateTimePicker("Date");
     private final TextArea notesField = new TextArea("Notes");
 
     private final Button saveButton = new Button("Save");
@@ -49,27 +42,27 @@ public class AddTransactionDialog extends Dialog implements HasNotifications {
     private final Span symbolSuffix = new Span();
 
     @Autowired
-    public AddTransactionDialog(InstrumentsFacadeService instrumentsFacadeService) {
+    public EditTransactionModelDialog(TransactionModel transaction, InstrumentsFacadeService instrumentsFacadeService) {
+        this.transaction = transaction;
         this.instrumentsFacadeService = instrumentsFacadeService;
         this.assetSymbolField = new AssetComboBox(instrumentsFacadeService);
-        this.transaction = new CryptoTransaction();
 
         buildForm();
     }
 
     private void buildForm() {
         setHeaderTitle("Transaction");
-        initializeBinder();
         initializeFields();
+        initializeFieldsValues();
+        initializeBinder();
 
         Container formBody = Container.builder("transaction-modal")
                 .addComponent(assetSymbolField)
                 .addComponent(typeField)
                 .addComponent(amountField)
                 .addComponent(marketPriceField)
-                .addComponent(totalCostField)
                 .addComponent(notesField)
-                .addComponent(datePicker)
+                .addComponent(dateTimePicker)
                 .build();
         add(formBody);
 
@@ -80,64 +73,31 @@ public class AddTransactionDialog extends Dialog implements HasNotifications {
         });
 
         amountField.setSuffixComponent(symbolSuffix);
-        amountField.setValueChangeMode(ValueChangeMode.EAGER);
-        amountField.addKeyUpListener(e -> {
-            double totalPrice = amountField.doubleValue() * marketPriceField.doubleValue();
-            totalCostField.setValue(totalPrice);
-            binder.validate();
-        });
-
-        marketPriceField.setValueChangeMode(ValueChangeMode.EAGER);
-        marketPriceField.addKeyUpListener(e -> {
-            double totalPrice = amountField.doubleValue() * marketPriceField.doubleValue();
-            totalCostField.setValue(totalPrice);
-            binder.validate();
-        });
-
-        totalCostField.setValueChangeMode(ValueChangeMode.EAGER);
-        totalCostField.addKeyUpListener(e -> {
-            double amount = 0;
-            if (marketPriceField.doubleValue() != 0) {
-                String textPrice = totalCostField.getValue().replaceAll(",", "");
-                double totalPrice = Double.parseDouble(textPrice.isEmpty() ? "0" : textPrice);
-                amount = totalPrice / marketPriceField.doubleValue();
-            }
-
-            amountField.setValue(amount);
-            binder.validate();
-        });
 
         saveButton.addClickShortcut(Key.ENTER);
         saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
-        saveButton.addClickListener(e -> {
-            if (binder.validate().isOk()) {
-                instrumentsFacadeService.saveTransaction(binder.getBean());
-                showSuccessfulNotification("The transaction was saved succesfully");
-                this.close();
-            } else {
-                showErrorNotification("Error! Please fill the fields with as required");
-            }
-        });
 
         cancelButton.addClickShortcut(Key.ESCAPE);
-        cancelButton.addClickListener(e -> this.close());
+        cancelButton.addClickListener(e -> {
+            initializeFieldsValues();
+            this.close();
+        });
 
         getFooter().add(saveButton, cancelButton);
     }
 
     private void initializeFields() {
         assetSymbolField.addValueChangeListener(l -> marketPriceField.setValue(assetSymbolField.getMarketPrice()));
-
         typeField.setLabel("Transaction Type");
         typeField.setItems(TransactionType.values());
+    }
 
-        // Initialize with values
-        assetSymbolField.setValue("");
-        typeField.setValue(TransactionType.BUY);
-        amountField.setValue("");
-        marketPriceField.setValue(assetSymbolField.getMarketPrice());
-        totalCostField.setValue(0);
-        datePicker.setValue(LocalDateTime.now());
+    private void initializeFieldsValues() {
+        assetSymbolField.setValue(transaction.getSymbol());
+        typeField.setValue(transaction.getType());
+        amountField.setValue(transaction.getAmount());
+        marketPriceField.setValue(transaction.getPrice());
+        dateTimePicker.setValue(transaction.getDateTime());
     }
 
     private void initializeBinder() {
@@ -145,46 +105,62 @@ public class AddTransactionDialog extends Dialog implements HasNotifications {
 
         binder.forField(assetSymbolField)
                 .asRequired("Please fill this field")
-                .bind(CryptoTransaction::getAsset, CryptoTransaction::setAsset);
+                .withConverter(
+                        asset -> asset == null ? null : asset.getSymbol(),
+                        symbol -> symbol == null ? null : instrumentsFacadeService.getAssetBySymbol(symbol).orElseThrow(),
+                        "Invalid asset symbol"
+                )
+                .bind(TransactionModel::getSymbol, TransactionModel::setSymbol);
 
         binder.forField(typeField)
                 .asRequired("Please fill this field")
-                .bind(CryptoTransaction::getType, CryptoTransaction::setType);
+                .bind(TransactionModel::getType, TransactionModel::setType);
 
         binder.forField(amountField)
                 .asRequired("Please fill this field")
                 .withConverter(new FlexibleAmountConvertor())
                 .withValidator(new DoubleRangeValidator("Invalid decimal value", (double) 0, Double.MAX_VALUE))
                 .withValidator(amount -> amount > 0, "Amount should be bigger than 0")
-                .bind(CryptoTransaction::getOrderQuantity, CryptoTransaction::setOrderQuantity);
+                .bind(TransactionModel::getAmount, TransactionModel::setAmount);
 
         binder.forField(marketPriceField)
                 .asRequired("Please fill this field")
                 .withConverter(new FlexiblePriceConvertor())
                 .withValidator(new DoubleRangeValidator("Invalid decimal value", (double) 0, Double.MAX_VALUE))
-                .withValidator(price -> price > 0, "Market price should be bigger than 0")
-                .bind(CryptoTransaction::getMarketPrice, CryptoTransaction::setMarketPrice);
-
-        binder.forField(totalCostField)
-                .asRequired("Please fill this field")
-                .withConverter(new FlexiblePriceConvertor())
-                .withValidator(new DoubleRangeValidator("Invalid decimal value", (double) 0, Double.MAX_VALUE))
-                .withValidator(price -> price >= 1, "Total price should be at least one dollar")
-                .bind(CryptoTransaction::getOrderTotalCost, CryptoTransaction::setOrderTotalCost);
+                .withValidator(amount -> amount > 0, "Market price should be bigger than 0")
+                .bind(TransactionModel::getPrice, TransactionModel::setPrice);
 
         binder.forField(notesField)
-                .bind(CryptoTransaction::getNotes, CryptoTransaction::setNotes);
+                .bind(TransactionModel::getNote, TransactionModel::setNote);
 
-        binder.forField(datePicker)
-                .bind(CryptoTransaction::getDateTime, CryptoTransaction::setDateTime);
+        binder.forField(dateTimePicker)
+                .bind(TransactionModel::getDateTime, TransactionModel::setDateTime);
     }
 
-    public void addSaveBtnClickListener(Consumer<?> listener) {
-        saveButton.addClickListener(e -> listener.accept(null));
+    public void addSaveListener(Consumer<?> listener) {
+        saveButton.addClickListener(e -> handleTransactionSave(listener));
     }
 
-    public void setAsset(Asset asset) {
-        assetSymbolField.setValue(asset);
+    private void handleTransactionSave(Consumer<?> listener) {
+        if (binder.validate().isOk()) {
+            saveTransaction(listener);
+        } else {
+            showErrorNotification("Error! Please fill the fields correctly");
+        }
+    }
+
+    private void saveTransaction(Consumer<?> listener) {
+        try {
+            showSuccessfulNotification("The transaction was updated succesfully");
+            this.close();
+            listener.accept(null);
+        } catch (Exception e) {
+            showErrorNotification(e.getLocalizedMessage());
+        }
+    }
+
+    public TransactionModel getTransaction() {
+        return binder.getBean();
     }
 
 }

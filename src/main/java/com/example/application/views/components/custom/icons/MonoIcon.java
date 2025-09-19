@@ -19,6 +19,10 @@ import java.util.Objects;
 public class MonoIcon extends AbstractIcon<MonoIcon> implements HasComponents {
 
     public MonoIcon(PictogramIcon icon) {
+        this(icon, null);
+    }
+
+    public MonoIcon(PictogramIcon icon, String className) {
         Svg svg = new Svg();
         svg.addClassName("iconify");
         svg.addClassName("mdi-flip-v");
@@ -27,6 +31,7 @@ public class MonoIcon extends AbstractIcon<MonoIcon> implements HasComponents {
         svg.getElement().setAttribute("data-icon", iconName);
 
         add(svg);
+        setClassName(className);
     }
 
     @Override

@@ -7,7 +7,7 @@ import com.example.application.entities.crypto.WalletBalance;
 import com.example.application.repositories.crypto.WalletBalanceRepository;
 import com.example.application.utils.common.lang.MathUtils;
 import com.example.application.utils.common.lang.NumberUtils;
-import com.example.application.utils.exceptions.InvalidBalanceAmount;
+import com.example.application.utils.exceptions.InvalidBalanceAmountException;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -55,7 +55,7 @@ public class WalletBalanceService {
 
         double amount = walletBalance.getAmount();
         if (amount < 0)
-            throw new InvalidBalanceAmount("Invalid balance amount: %f".formatted(amount));
+            throw new InvalidBalanceAmountException("Invalid balance amount: %f".formatted(amount));
 
         return repository.save(walletBalance);
     }
@@ -82,7 +82,7 @@ public class WalletBalanceService {
         double transactionAmount = NumberUtils.checkDouble(transaction.getOrderQuantity());
 
         if (transactionAmount <= 0)
-            throw new InvalidBalanceAmount("Invalid transaction amount");
+            throw new InvalidBalanceAmountException("Invalid transaction amount");
 
         double quantityToAdd = MathUtils.withSign(transactionAmount, transaction.isBuyTransaction());
         double tokensAmountAfterSupply = walletBalance.getAmount() + quantityToAdd;

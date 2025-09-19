@@ -10,6 +10,8 @@ import com.example.application.views.components.PriceChangeblePage;
 import com.example.application.views.components.TransactionsGrid;
 import com.example.application.views.components.core.Container;
 import com.example.application.views.components.custom.dialogs.transactions.AddTransactionDialog;
+import com.example.application.views.components.custom.dialogs.transactions.export.ExportTransactionDialog;
+import com.example.application.views.components.custom.dialogs.transactions.export.ImportTransactionsDialog;
 import com.example.application.views.components.custom.display.NumericValueParagraph;
 import com.example.application.views.components.custom.fields.PricePercentageWrapper;
 import com.example.application.views.components.custom.fields.stats.PortfolioStatsDisplay;
@@ -90,11 +92,11 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
     @Override
     public void initializePage() {
         getStyle().set("margin", "100px 30px 30px 30px");
+        initializeGrids();
     }
 
     @Override
     public void buildPage() {
-        initializeGrids();
         add(
                 headerSection(),
                 statisticsSection(),
@@ -102,8 +104,7 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
                 gridSection("Assets", assetsGrid),
                 gridSection("Transactions", transactionsGrid)
         );
-        assetsGrid.setItems(instrumentsFacadeService.getAssetsWithNonZeroAmount());
-        transactionsGrid.setItems(instrumentsFacadeService.getAllTransactions());
+        updateGridItems();
     }
 
     @Override
@@ -116,14 +117,20 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
         ui.access(() -> {
             this.removeAll();
             this.buildPage();
+            assetsChart.updateChartItems();
         });
     }
 
-    protected void initializeGrids() {
+    private void initializeGrids() {
         assetsGrid.setGridFullSize(true);
 
         transactionsGrid.setPageSize(10);
         transactionsGrid.addUpdateItemListener(l -> rebuildPage());
+    }
+
+    private void updateGridItems() {
+        assetsGrid.setItems(instrumentsFacadeService.getAssetsWithNonZeroAmount());
+        transactionsGrid.setItems(instrumentsFacadeService.getAllTransactions());
     }
 
     private Section headerSection() {
@@ -147,7 +154,25 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
             dialog.open();
             dialog.addSaveBtnClickListener(l -> rebuildPage());
         });
-        section.add(addTransactionBtn);
+
+        Button importBtn = new Button("Import", LumoIcon.UPLOAD.create());
+        importBtn.addClassName("add-entity-btn");
+        importBtn.setIconAfterText(false);
+        importBtn.addClickListener(e -> {
+            ImportTransactionsDialog dialog = new ImportTransactionsDialog(instrumentsFacadeService);
+            dialog.open();
+//            dialog.addSaveBtnClickListener(l -> rebuildPage());
+        });
+
+        Button exportBtn = new Button("Export", LumoIcon.DOWNLOAD.create());
+        exportBtn.addClassName("add-entity-btn");
+        exportBtn.setIconAfterText(false);
+        exportBtn.addClickListener(e -> {
+            ExportTransactionDialog dialog = new ExportTransactionDialog(instrumentsFacadeService);
+            dialog.open();
+        });
+
+        section.add(addTransactionBtn, importBtn, exportBtn);
 
         return section;
     }

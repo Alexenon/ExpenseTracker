@@ -1,6 +1,7 @@
 package com.example.application.utils.common.lang;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 
@@ -26,5 +27,9 @@ public class DateUtils {
 	public static long daysBetween(LocalDate buyDate, LocalDate sellDate) {
 		return ChronoUnit.DAYS.between(buyDate, sellDate);
 	}
+
+    public static long daysBetween(LocalDateTime buyDate, LocalDateTime sellDate) {
+        return ChronoUnit.DAYS.between(buyDate, sellDate);
+    }
 
 }

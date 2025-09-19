@@ -1,5 +1,6 @@
 package com.example.application.views.pages.crypto.calculator.tabs;
 
+import com.example.application.entities.common.TransactionType;
 import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.CryptoTransaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
@@ -215,7 +216,7 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
 					Asset selectedAsset = assetSymbolField.getSelectedAsset();
 					double marketPrice = layout.getMarketPriceField().doubleValue();
 					double orderTotalCost = layout.getTotalCostField().doubleValue();
-					CryptoTransaction.TransactionType type = layout.getTypeField().getValue();
+					TransactionType type = layout.getTypeField().getValue();
 
 					return new CryptoTransaction(selectedAsset, marketPrice, orderTotalCost, type);
 				}).toList();

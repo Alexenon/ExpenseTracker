@@ -37,7 +37,7 @@ public class MainLayout extends AppLayout {
     }
 
     private void buildNavigationBar() {
-        boolean isLoggedIn = securityService.getAuthenticatedUserDetails().isPresent();
+        boolean isLoggedIn = securityService.isCurrentUserAuthenticated();
 
         if (isLoggedIn) {
             loginIcon.removeFromParent();

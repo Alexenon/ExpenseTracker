@@ -1,15 +1,18 @@
 package com.example.application.entities.crypto;
 
+import com.example.application.entities.common.TransactionType;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 /*
-* TODO:
+* TODO [LONG TERM]:
 *   - Add SpotPairs - BTC/USDT, BTC/USDC, ...
 *   - TRANSFER - Add asset amount from external sources
     - CONVERT  - Switch from one asset to another
@@ -24,14 +27,17 @@ public class CryptoTransaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    @NotNull
     @ManyToOne
     @JoinColumn(name = "wallet_id", nullable = false)
     private Wallet wallet;
 
+    @NotNull
     @ManyToOne
     @JoinColumn(name = "asset_id", nullable = false)
     private Asset asset;
 
+    @NotNull
     @Column(name = "market_price", nullable = false)
     @DecimalMin(value = "0.0", inclusive = false, message = "Market price must be greater than 0")
     private double marketPrice;
@@ -44,29 +50,33 @@ public class CryptoTransaction {
     @DecimalMin(value = "0.0", inclusive = false, message = "Order quantity must be greater than 0")
     private double orderQuantity;
 
+    @NotNull
     @Column(name = "type", nullable = false)
     @Enumerated(EnumType.STRING)
     private TransactionType type;
 
+    @Nullable
     @Column(name = "notes", length = 250)
     private String notes;
 
+    @NotNull
     @Column(nullable = false)
-    private LocalDate date;
+    private LocalDateTime dateTime;
 
     public CryptoTransaction(Asset asset, double marketPrice, double orderTotalCost, TransactionType type) {
-        this(asset, marketPrice, orderTotalCost, type, null, LocalDate.now());
+        this(asset, marketPrice, orderTotalCost, type, null, LocalDateTime.now());
     }
 
     public CryptoTransaction(Asset asset, double marketPrice, double orderTotalCost,
-                             TransactionType type, String notes, LocalDate date) {
+                             TransactionType type, String notes, LocalDateTime dateTime)
+    {
         this.asset = asset;
         this.marketPrice = marketPrice;
         this.orderTotalCost = orderTotalCost;
         this.orderQuantity = orderTotalCost / marketPrice;
         this.type = type;
         this.notes = Objects.requireNonNullElse(notes, "");
-        this.date = date;
+        this.dateTime = dateTime;
     }
 
     public CryptoTransaction(CryptoTransaction transaction) {
@@ -78,20 +88,15 @@ public class CryptoTransaction {
         this.orderQuantity = transaction.orderQuantity;
         this.type = transaction.type;
         this.notes = transaction.notes;
-        this.date = transaction.date;
+        this.dateTime = transaction.dateTime;
     }
 
     public boolean isBuyTransaction() {
-        return this.type == TransactionType.BUY;
+        return type.isBuyTransaction();
     }
 
     public boolean isSellTransaction() {
-        return this.type == TransactionType.SELL;
-    }
-
-    public enum TransactionType {
-        BUY,
-        SELL
+        return type.isSellTransaction();
     }
 
     @Override
@@ -104,7 +109,7 @@ public class CryptoTransaction {
                ", orderQuantity=" + orderQuantity +
                ", type=" + type +
                ", notes='" + notes + '\'' +
-               ", date=" + date +
+               ", dateTime=" + dateTime +
                '}';
     }
 }

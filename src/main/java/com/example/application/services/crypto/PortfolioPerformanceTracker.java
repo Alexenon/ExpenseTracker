@@ -1,15 +1,12 @@
 package com.example.application.services.crypto;
 
 import com.example.application.entities.crypto.Asset;
-import com.example.application.entities.crypto.CryptoTransaction;
 import com.example.application.entities.crypto.WalletBalance;
 import com.example.application.utils.common.lang.MathUtils;
 import com.example.application.utils.investment.ProfitCalculator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 import static com.example.application.utils.investment.ProfitUtils.ONE_HUNDRED_PERCENT;
@@ -18,6 +15,7 @@ import static com.example.application.utils.investment.ProfitUtils.ONE_HUNDRED_P
     TODO: [LONG TERM] -> Implement next methods
        - % in Market, how much tokens had been sold and how much are still holding
        - Cumulative Profit Loss
+       - Display long term information, like how many assets were bought/sold, totalProfit realized ever...
 * */
 
 @Service
@@ -105,14 +103,6 @@ public class PortfolioPerformanceTracker {
     //endregion
 
     //region PORTFOLIO STATS
-    private long getHoldingTimeInDays(CryptoTransaction buyTransaction, CryptoTransaction sellTransaction) {
-        return getHoldingTimeInDays(buyTransaction.getDate(), sellTransaction.getDate());
-    }
-
-    private long getHoldingTimeInDays(LocalDate buyDate, LocalDate sellDate) {
-        return ChronoUnit.DAYS.between(buyDate, sellDate);
-    }
-
     /**
      * How much was invested in all holding assets at this moment
      */

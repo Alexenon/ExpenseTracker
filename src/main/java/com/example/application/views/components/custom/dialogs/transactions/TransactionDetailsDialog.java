@@ -18,7 +18,7 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.theme.lumo.LumoIcon;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
@@ -59,7 +59,7 @@ public class TransactionDetailsDialog extends Dialog {
         add(
                 detailsTransaction(),
                 detailsProfitLoss(),
-                createInfoItem("Date", formatDate(transaction.getDate())),
+                createInfoItem("Date & Time", formatDate(transaction.getDateTime())),
                 createInfoItem("Notes", transaction.getNotes())
         );
     }
@@ -139,7 +139,7 @@ public class TransactionDetailsDialog extends Dialog {
     }
 
     // TODO: Add separate class -> DateFormatter
-    private String formatDate(LocalDate date) {
+    private String formatDate(LocalDateTime date) {
         DateTimeFormatter formatter = new DateTimeFormatterBuilder()
                 .appendText(ChronoField.MONTH_OF_YEAR)
                 .appendLiteral(" ")

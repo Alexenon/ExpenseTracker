@@ -3,6 +3,7 @@ package com.example.application.services.crypto;
 import com.example.application.data.enums.SymbolIndentifier;
 import com.example.application.data.models.InstrumentsProvider;
 import com.example.application.entities.User;
+import com.example.application.entities.common.TransactionType;
 import com.example.application.entities.crypto.*;
 import com.example.application.repositories.crypto.AssetRepository;
 import com.example.application.utils.fetchers.api_responses.AssetMetadata;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -53,13 +55,10 @@ public class InstrumentsService {
     }
 
     @NotNull
-    public Asset getAssetBySymbol(String symbolName) {
-        return Optional.ofNullable(assetRepository.findBySymbol(symbolName.toUpperCase()))
-                .orElseThrow(() -> new NullPointerException("There is no such asset as %s".formatted(symbolName)));
-    }
-
-    public Asset getAssetBySymbol(SymbolIndentifier symbol) {
-        return assetRepository.findBySymbol(symbol.name());
+    public Optional<Asset> getAssetBySymbol(@Nullable String symbolName) {
+        return symbolName == null || symbolName.isBlank()
+                ? Optional.empty()
+                : assetRepository.findBySymbol(symbolName.toUpperCase());
     }
 
     public Asset saveAsset(Asset asset) {
@@ -110,8 +109,12 @@ public class InstrumentsService {
         return transactionService.findBy(wallet, asset);
     }
 
-    public List<CryptoTransaction> getTransactionsBy(Wallet wallet, Asset asset, CryptoTransaction.TransactionType type) {
+    public List<CryptoTransaction> getTransactionsBy(Wallet wallet, Asset asset, TransactionType type) {
         return transactionService.findBy(wallet, asset, type);
+    }
+
+    public List<CryptoTransaction> getTransactionsBy(Wallet wallet, LocalDate from, LocalDate to) {
+        return transactionService.findBy(wallet, from, to);
     }
 
     /*
@@ -125,17 +128,17 @@ public class InstrumentsService {
     /*
      * WALLET BALANCES
      * */
-
-    public WalletBalance saveWalletBalance(WalletBalance walletBalance) {
+    public WalletBalance saveWalletBalance(@NotNull WalletBalance walletBalance) {
         return walletBalanceService.save(walletBalance);
     }
 
     @NotNull
-    public WalletBalance getWalletBalancesByWalletAndAsset(Wallet wallet, Asset asset) {
+    public WalletBalance getWalletBalancesByWalletAndAsset(@NotNull Wallet wallet, @NotNull Asset asset) {
         return walletBalanceService.getByWalletAndAsset(wallet, asset);
     }
 
-    public List<WalletBalance> getWalletBalancesByWallet(Wallet wallet) {
+    @NotNull
+    public List<WalletBalance> getWalletBalancesByWallet(@NotNull Wallet wallet) {
         return walletBalanceService.getByWallet(wallet);
     }
 
@@ -155,7 +158,7 @@ public class InstrumentsService {
         }
 
         metadataMap.forEach((key, value) -> updateAssetData(SymbolIndentifier.valueOf(key), value));
-        log.info("Updated database with {} assets", metadataMap.size());
+        log.info("Updated database for {} assets", metadataMap.size());
     }
 
     private void updateAssetData(SymbolIndentifier indentifier, @Nullable AssetMetadata assetMetadata) {
@@ -164,7 +167,7 @@ public class InstrumentsService {
             return;
         }
 
-        Asset asset = Optional.ofNullable(assetRepository.findBySymbol(indentifier.name())).orElse(new Asset());
+        Asset asset = assetRepository.findBySymbol(indentifier.name()).orElse(new Asset());
         asset.setSymbol(indentifier.name());
         asset.setFullName(indentifier.getFullName());
         Optional.ofNullable(assetMetadata.getPriceUsd()).ifPresent(asset::setMarketPrice);

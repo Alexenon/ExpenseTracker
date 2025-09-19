@@ -1,4 +1,14 @@
-/* TODO: '@import' component doesn't work inside pages css files  */
+/*
+	Resolution: 1920 * 1080
+
+	Usages:
+		'rem' → if you want it to scale with user’s font size (accessibility).
+    	'vw' → if you want it to scale proportionally with screen/window width.
+    	'px' → if you always want it fixed.
+
+	TODO:
+		- '@import' component doesn't work inside pages css files
+*/
 
 @import 'styles/component-styles/header.css';
 @import 'styles/component-styles/chart.css';
@@ -205,6 +215,8 @@ vaadin-text-area::part(input-field),
 vaadin-combo-box::part(input-field),
 vaadin-text-field::part(input-field),
 vaadin-date-picker::part(input-field),
+vaadin-time-picker::part(input-field),
+vaadin-date-time-picker::part(input-field),
 vaadin-multi-select-combo-box::part(input-field) {
     width: 100%;
     border-radius: .75rem;
@@ -221,6 +233,9 @@ vaadin-multi-select-combo-box::part(input-field) {
     caret-color: var(--BlueLightColor);
 }
 
+vaadin-date-time-picker > vaadin-date-picker {
+	margin-right: 10px;
+}
 
 
 /*

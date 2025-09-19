@@ -10,9 +10,11 @@ package com.example.application.views.components;
     _______________________________________________________________________________________________________________________________________
 */
 
+import com.example.application.entities.common.TransactionType;
 import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.CryptoTransaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
+import com.example.application.utils.common.formatters.CommonFormatters;
 import com.example.application.utils.common.formatters.number.AmountFormatter;
 import com.example.application.utils.common.formatters.number.CurrencyFormatter;
 import com.example.application.utils.common.formatters.number.PercentageFormatter;
@@ -27,6 +29,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.data.renderer.LitRenderer;
+import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 import com.vaadin.flow.data.renderer.NumberRenderer;
 import com.vaadin.flow.function.ValueProvider;
 
@@ -42,7 +45,7 @@ public class TransactionsGrid extends Div {
     private final InstrumentsFacadeService instrumentsFacadeService;
 
     private final AssetComboBox nameSearchField;
-    private final MultiSelectComboBox<CryptoTransaction.TransactionType> typeSearchField = new MultiSelectComboBox<>("Transaction Type");
+    private final MultiSelectComboBox<TransactionType> typeSearchField = new MultiSelectComboBox<>("Transaction Type");
     private final Grid<CryptoTransaction> grid = new Grid<>();
     private final GridListDataView<CryptoTransaction> gridDataView = grid.setItems();
 
@@ -68,7 +71,7 @@ public class TransactionsGrid extends Div {
         grid.addColumn(quantityColumnRenderer()).setHeader("Quantity");
         grid.addColumn(priceColumnRenderer()).setHeader("Price");
         grid.addColumn(priceColumnRenderer(CryptoTransaction::getOrderTotalCost)).setHeader("Total");
-        grid.addColumn(CryptoTransaction::getDate).setHeader("Date");
+        grid.addColumn(new LocalDateTimeRenderer<>(CryptoTransaction::getDateTime, CommonFormatters.DATE_FRIENDLY_FORMAT)).setHeader("Date");
         grid.addColumn(profitLossColumnRenderer()).setHeader("Profit/Loss").setFrozenToEnd(true);
         grid.getColumns().forEach(column -> {
             column.setSortable(true);
@@ -83,7 +86,7 @@ public class TransactionsGrid extends Div {
         nameSearchField.setAllowCustomValue(false);
         nameSearchField.addValueChangeListener(e -> applyFilter());
 
-        typeSearchField.setItems(CryptoTransaction.TransactionType.values());
+        typeSearchField.setItems(TransactionType.values());
         typeSearchField.setClearButtonVisible(true);
         typeSearchField.addValueChangeListener(e -> applyFilter());
     }
@@ -96,7 +99,7 @@ public class TransactionsGrid extends Div {
 
     private void applyFilter() {
         Asset selectedAsset = nameSearchField.getValue();
-        Set<CryptoTransaction.TransactionType> selectedTypes = typeSearchField.getSelectedItems();
+        Set<TransactionType> selectedTypes = typeSearchField.getSelectedItems();
 
         gridDataView.setFilter(transaction -> {
             boolean nameFilter = selectedAsset == null || transaction.getAsset().equals(selectedAsset);

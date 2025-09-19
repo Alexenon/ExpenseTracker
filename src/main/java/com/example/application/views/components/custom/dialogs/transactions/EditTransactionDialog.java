@@ -1,5 +1,6 @@
 package com.example.application.views.components.custom.dialogs.transactions;
 
+import com.example.application.entities.common.TransactionType;
 import com.example.application.entities.crypto.CryptoTransaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.views.components.core.Container;
@@ -13,7 +14,7 @@ import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
-import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.select.Select;
@@ -26,7 +27,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-// TODO: Show current/remaining amount for an asset
+// TODO:
+//  Show current/remaining amount for an asset
+//  Display current price, just in case
+
 public class EditTransactionDialog extends Dialog implements HasNotifications {
 
     private final CryptoTransaction transaction;
@@ -35,11 +39,11 @@ public class EditTransactionDialog extends Dialog implements HasNotifications {
     private final Binder<CryptoTransaction> binder = new Binder<>(CryptoTransaction.class);
 
     private final AssetComboBox assetSymbolField;
-    private final Select<CryptoTransaction.TransactionType> typeField = new Select<>();
+    private final Select<TransactionType> typeField = new Select<>();
     private final AmountField amountField = new AmountField("Amount");
     private final CurrencyField marketPriceField = new CurrencyField("Price");
     private final CurrencyField totalCostField = new CurrencyField("Total");
-    private final DatePicker datePicker = new DatePicker("Date");
+    private final DateTimePicker datePicker = new DateTimePicker("Date & Time");
     private final TextArea notesField = new TextArea("Notes");
 
     private final Button saveButton = new Button("Save");
@@ -122,7 +126,7 @@ public class EditTransactionDialog extends Dialog implements HasNotifications {
     private void initializeFields() {
         assetSymbolField.addValueChangeListener(l -> marketPriceField.setValue(assetSymbolField.getMarketPrice()));
         typeField.setLabel("Transaction Type");
-        typeField.setItems(CryptoTransaction.TransactionType.values());
+        typeField.setItems(TransactionType.values());
     }
 
     private void initializeFieldsValues() {
@@ -131,7 +135,7 @@ public class EditTransactionDialog extends Dialog implements HasNotifications {
         amountField.setValue(initialTransaction.getOrderQuantity());
         totalCostField.setValue(initialTransaction.getOrderTotalCost());
         marketPriceField.setValue(initialTransaction.getMarketPrice());
-        datePicker.setValue(initialTransaction.getDate());
+        datePicker.setValue(initialTransaction.getDateTime());
     }
 
     private void initializeBinder() {
@@ -170,7 +174,7 @@ public class EditTransactionDialog extends Dialog implements HasNotifications {
                 .bind(CryptoTransaction::getNotes, CryptoTransaction::setNotes);
 
         binder.forField(datePicker)
-                .bind(CryptoTransaction::getDate, CryptoTransaction::setDate);
+                .bind(CryptoTransaction::getDateTime, CryptoTransaction::setDateTime);
     }
 
     public void addSaveListener(Consumer<?> listener) {

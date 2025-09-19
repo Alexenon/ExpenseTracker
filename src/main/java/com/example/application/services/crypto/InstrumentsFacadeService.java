@@ -1,6 +1,5 @@
 package com.example.application.services.crypto;
 
-import com.example.application.data.enums.SymbolIndentifier;
 import com.example.application.data.models.InstrumentsProvider;
 import com.example.application.entities.crypto.*;
 import com.example.application.services.SecurityService;
@@ -8,8 +7,10 @@ import com.example.application.services.UserService;
 import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -47,8 +48,7 @@ public class InstrumentsFacadeService {
         return instrumentsService.getAllAssets();
     }
 
-    @NotNull
-    public Asset getAssetBySymbol(String symbolName) {
+    public Optional<Asset> getAssetBySymbol(@Nullable String symbolName) {
         return instrumentsService.getAssetBySymbol(symbolName);
     }
 
@@ -62,10 +62,6 @@ public class InstrumentsFacadeService {
         WalletBalance walletBalanceByAsset = getWalletBalanceByAsset(asset);
         walletBalanceByAsset.setMarkedAsFavorite(isFavorite);
         return instrumentsService.saveWalletBalance(walletBalanceByAsset);
-    }
-
-    public Asset getAssetBySymbol(SymbolIndentifier symbol) {
-        return instrumentsService.getAssetBySymbol(symbol.name());
     }
 
     public double getAmountOfTokens(Asset asset) {
@@ -101,6 +97,14 @@ public class InstrumentsFacadeService {
 
     public List<CryptoTransaction> getTransactionsByAsset(Asset asset) {
         return instrumentsService.getTransactionsBy(getAuthenticatedUserWallet(), asset);
+    }
+
+    public List<CryptoTransaction> getTransactions(LocalDate from) {
+        return getTransactions(from, LocalDate.now());
+    }
+
+    public List<CryptoTransaction> getTransactions(LocalDate from, LocalDate to) {
+        return instrumentsService.getTransactionsBy(getAuthenticatedUserWallet(), from, to);
     }
 
     public CryptoTransaction saveTransaction(CryptoTransaction transaction) {

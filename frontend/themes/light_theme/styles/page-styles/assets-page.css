@@ -1,7 +1,7 @@
 /*
     Header
 
-    TODO: RENAME THIS FILE
+    TODO: RENAME THIS FILE & ASSET DETAILS PAGE.css
 */
 
 
@@ -65,7 +65,7 @@
 }
 
 /*
-    TODO: This is from asset grid
+    TODO: This is for assets grid
         - Style the other columns as well
 */
 .asset-price,
@@ -91,6 +91,10 @@ vaadin-grid-cell-content > vaadin-icon,
 vaadin-grid-cell-content > vaadin-button {
 	width: 50px;
 	background: white;
+}
+
+mono-icon.grid-action-btn {
+	font-size: 27px;
 }
 
 /*
@@ -187,4 +191,20 @@ div.assets-grid-footer {
 	display: flex;
 	flex-direction: column;
 	align-items: flex-end;
+}
+
+
+/**
+* Import functionality
+*/
+
+.import-dialog-header {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	margin-bottom: 20px;
+}
+
+.uploader {
+	font-size: 1.2rem;
 }

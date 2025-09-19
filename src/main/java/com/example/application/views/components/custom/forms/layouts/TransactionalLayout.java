@@ -1,7 +1,7 @@
 package com.example.application.views.components.custom.forms.layouts;
 
+import com.example.application.entities.common.TransactionType;
 import com.example.application.entities.crypto.Asset;
-import com.example.application.entities.crypto.CryptoTransaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.utils.common.lang.MathUtils;
@@ -19,7 +19,7 @@ public class TransactionalLayout extends Div {
     private final AmountField amountField = new AmountField("Amount");
     private final CurrencyField marketPriceField = new CurrencyField("Market Price");
     private final CurrencyField totalCostField = new CurrencyField("Total");
-    private final Select<CryptoTransaction.TransactionType> typeField = new Select<>();
+    private final Select<TransactionType> typeField = new Select<>();
 
     public TransactionalLayout(InstrumentsFacadeService instrumentsFacadeService,
                                PortfolioPerformanceTracker portfolioPerformanceTracker) {
@@ -32,13 +32,13 @@ public class TransactionalLayout extends Div {
 
     private void initializeFields() {
         typeField.setLabel("Transaction Type");
-        typeField.setItems(CryptoTransaction.TransactionType.values());
+        typeField.setItems(TransactionType.values());
 
         add(amountField , marketPriceField, totalCostField, typeField);
     }
 
     private void initializeFieldsValues() {
-        typeField.setValue(CryptoTransaction.TransactionType.BUY);
+        typeField.setValue(TransactionType.BUY);
     }
 
     private void initializeFieldsListeners() {
@@ -81,12 +81,12 @@ public class TransactionalLayout extends Div {
         if(instrumentsFacadeService.getTransactionsByAsset(asset).isEmpty())
             return asset.getMarketPrice();
 
-        return typeField.getValue().equals(CryptoTransaction.TransactionType.BUY)
+        return typeField.getValue().equals(TransactionType.BUY)
                 ? portfolioPerformanceTracker.getAverageBuyPrice(asset)
                 : portfolioPerformanceTracker.getAverageSellPrice(asset);
     }
 
-    public Select<CryptoTransaction.TransactionType> getTypeField() {
+    public Select<TransactionType> getTypeField() {
         return typeField;
     }
 
