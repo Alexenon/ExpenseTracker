@@ -18,8 +18,8 @@ public class AssetWatcher {
     private long id;
 
     @ManyToOne
-    @JoinColumn(name = "wallet_id", nullable = false)
-    private Wallet wallet;
+    @JoinColumn(name = "portfolio_id", nullable = false)
+    private Portfolio portfolio;
 
     @ManyToOne
     @JoinColumn(name = "asset_id", nullable = false)

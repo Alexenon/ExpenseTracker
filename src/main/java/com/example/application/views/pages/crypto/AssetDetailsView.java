@@ -166,7 +166,7 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
     }
 
     private boolean isAssetMarkedAsFavorite() {
-        return instrumentsFacadeService.getWalletBalanceByAsset(asset).isMarkedAsFavorite();
+        return instrumentsFacadeService.getAssetBalanceByAsset(asset).isMarkedAsFavorite();
     }
 
     private Section notesAndConvertorSection() {
@@ -183,7 +183,7 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
         TextArea notesArea = new TextArea();
         notesArea.setClassName("note-area");
         notesArea.setPlaceholder("Add your thoughts about coin here.");
-        String comment = Objects.requireNonNullElse(instrumentsFacadeService.getWalletBalanceByAsset(asset).getComment(), "");
+        String comment = Objects.requireNonNullElse(instrumentsFacadeService.getAssetBalanceByAsset(asset).getComment(), "");
         notesArea.setValue(comment);
         Button saveBtn = new Button("Save");
         saveBtn.addClickListener(l -> {

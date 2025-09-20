@@ -10,20 +10,18 @@ import java.time.LocalDateTime;
 
 @Data
 @Builder
-@Entity(name = "wallet_balances")
+@Entity(name = "asset_balances")
 @NoArgsConstructor
 @AllArgsConstructor
-public class WalletBalance {
-
-    // TODO: Should be renamed as AssetBallance
+public class AssetBalance {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
     @ManyToOne
-    @JoinColumn(name = "wallet_id", nullable = false)
-    private Wallet wallet;
+    @JoinColumn(name = "portfolio_id", nullable = false)
+    private Portfolio portfolio;
 
     @ManyToOne
     @JoinColumn(name = "asset_id", nullable = false)

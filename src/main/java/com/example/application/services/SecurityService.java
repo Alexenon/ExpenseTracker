@@ -35,7 +35,6 @@ public class SecurityService {
         SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
 
-        // TODO: Add a separate error page, that should redirect to login page / home page
         if (authentication == null)
             throw new UnauthenticatedUserException("Coudn't manage to receive authentication. Please re-login");
 

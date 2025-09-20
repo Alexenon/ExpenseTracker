@@ -1,6 +1,7 @@
 package com.example.application.views.pages.crypto;
 
 import com.example.application.entities.crypto.Asset;
+import com.example.application.entities.crypto.AssetBalance;
 import com.example.application.entities.crypto.CryptoTransaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
@@ -33,6 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -129,7 +131,12 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
     }
 
     private void updateGridItems() {
-        assetsGrid.setItems(instrumentsFacadeService.getAssetsWithNonZeroAmount());
+        List<Asset> assets = instrumentsFacadeService.getAssetsWithNonZeroAmount()
+                .stream()
+                .map(AssetBalance::getAsset)
+                .toList();
+
+        assetsGrid.setItems(assets);
         transactionsGrid.setItems(instrumentsFacadeService.getAllTransactions());
     }
 
@@ -272,6 +279,7 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
     private Map<Asset, Double> getMostProfitableAssetsByProfit() {
         return instrumentsFacadeService.getAssetsWithNonZeroAmount()
                 .stream()
+                .map(AssetBalance::getAsset)
                 .collect(Collectors.toMap(asset -> asset, portfolioPerformanceTracker::getAssetTotalProfit, (a, b) -> b));
     }
 

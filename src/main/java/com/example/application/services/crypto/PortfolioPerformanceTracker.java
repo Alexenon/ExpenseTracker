@@ -1,7 +1,7 @@
 package com.example.application.services.crypto;
 
 import com.example.application.entities.crypto.Asset;
-import com.example.application.entities.crypto.WalletBalance;
+import com.example.application.entities.crypto.AssetBalance;
 import com.example.application.utils.common.lang.MathUtils;
 import com.example.application.utils.investment.ProfitCalculator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,31 +37,31 @@ public class PortfolioPerformanceTracker {
 
     public double getAverageBuyPrice(Asset asset) {
 		return Optional.ofNullable(asset)
-                .map(a -> instrumentsFacadeService.getWalletBalanceByAsset(a).getAvgBuyPrice())
+                .map(a -> instrumentsFacadeService.getAssetBalanceByAsset(a).getAvgBuyPrice())
                 .orElse(Double.NaN);
     }
 
     public double getAverageSellPrice(Asset asset) {
         return Optional.ofNullable(asset)
-                .map(a -> instrumentsFacadeService.getWalletBalanceByAsset(a).getAvgSellPrice())
+                .map(a -> instrumentsFacadeService.getAssetBalanceByAsset(a).getAvgSellPrice())
                 .orElse(Double.NaN);
     }
 
     public double getAssetRemainingTokensCost(Asset asset) {
         return Optional.ofNullable(asset)
-                .map(a -> instrumentsFacadeService.getWalletBalanceByAsset(a).getCost())
+                .map(a -> instrumentsFacadeService.getAssetBalanceByAsset(a).getCost())
                 .orElse(Double.NaN);
     }
 
     public double getAssetRealizedProfit(Asset asset) {
         return Optional.ofNullable(asset)
-                .map(a -> instrumentsFacadeService.getWalletBalanceByAsset(a).getTotalRealized())
+                .map(a -> instrumentsFacadeService.getAssetBalanceByAsset(a).getTotalRealized())
                 .orElse(Double.NaN);
     }
 
     public double getAssetCost(Asset asset) {
         return Optional.ofNullable(asset)
-                .map(a -> instrumentsFacadeService.getWalletBalanceByAsset(a).getCost())
+                .map(a -> instrumentsFacadeService.getAssetBalanceByAsset(a).getCost())
                 .orElse(Double.NaN);
     }
 
@@ -91,7 +91,7 @@ public class PortfolioPerformanceTracker {
 	//  - HERE IS NOT IMPLEMENTED
 	//  - Add last holding details + average holding days
     public double getAssetAverageHoldingDays(Asset asset) {
-		return instrumentsFacadeService.getWalletBalanceByAsset(asset).getHoldingDays();
+		return instrumentsFacadeService.getAssetBalanceByAsset(asset).getHoldingDays();
     }
 
     /**
@@ -107,9 +107,9 @@ public class PortfolioPerformanceTracker {
      * How much was invested in all holding assets at this moment
      */
     public double getPortfolioCost() {
-        return instrumentsFacadeService.getWalletBalances()
+        return instrumentsFacadeService.getAssetBalances()
                 .stream()
-                .mapToDouble(WalletBalance::getCost)
+                .mapToDouble(AssetBalance::getCost)
                 .sum();
     }
 
@@ -117,7 +117,7 @@ public class PortfolioPerformanceTracker {
      * How much is estimated the worth of all holding assets (Overall Unrealized profit)
      */
     public double getPortfolioWorth() {
-        return instrumentsFacadeService.getWalletBalances()
+        return instrumentsFacadeService.getAssetBalances()
                 .stream()
                 .mapToDouble(balance -> balance.getAmount() * balance.getAsset().getMarketPrice())
                 .sum();
@@ -128,9 +128,9 @@ public class PortfolioPerformanceTracker {
     }
 
     public double getPortfolioRealizedProfit() {
-        return instrumentsFacadeService.getWalletBalances()
+        return instrumentsFacadeService.getAssetBalances()
                 .stream()
-                .mapToDouble(WalletBalance::getTotalRealized)
+                .mapToDouble(AssetBalance::getTotalRealized)
                 .sum();
     }
 

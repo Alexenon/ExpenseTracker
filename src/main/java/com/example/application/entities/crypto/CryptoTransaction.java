@@ -29,8 +29,8 @@ public class CryptoTransaction {
 
     @NotNull
     @ManyToOne
-    @JoinColumn(name = "wallet_id", nullable = false)
-    private Wallet wallet;
+    @JoinColumn(name = "portfolio_id", nullable = false)
+    private Portfolio portfolio;
 
     @NotNull
     @ManyToOne
@@ -81,7 +81,7 @@ public class CryptoTransaction {
 
     public CryptoTransaction(CryptoTransaction transaction) {
         this.id = transaction.id;
-        this.wallet = transaction.wallet;
+        this.portfolio = transaction.portfolio;
         this.asset = transaction.asset;
         this.marketPrice = transaction.marketPrice;
         this.orderTotalCost = transaction.orderTotalCost;

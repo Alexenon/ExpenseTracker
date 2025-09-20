@@ -14,10 +14,9 @@ import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /*
-    TODO: Rename
+    REFACTOR: Rename
         - Assets -> AssetServiceFacade         UserAssetsService
         - Expenses -> ExpensesServiceFacade    UserExpensesService
 */
@@ -52,31 +51,27 @@ public class InstrumentsFacadeService {
         return instrumentsService.getAssetBySymbol(symbolName);
     }
 
-    public WalletBalance updateAssetComment(Asset asset, String comment) {
-        WalletBalance walletBalanceByAsset = getWalletBalanceByAsset(asset);
-        walletBalanceByAsset.setComment(comment);
-        return instrumentsService.saveWalletBalance(walletBalanceByAsset);
+    public AssetBalance updateAssetComment(Asset asset, String comment) {
+        AssetBalance assetBalanceByAsset = getAssetBalanceByAsset(asset);
+        assetBalanceByAsset.setComment(comment);
+        return instrumentsService.saveAssetBalance(assetBalanceByAsset);
     }
 
-    public WalletBalance markAssetAsFavorite(Asset asset, boolean isFavorite) {
-        WalletBalance walletBalanceByAsset = getWalletBalanceByAsset(asset);
-        walletBalanceByAsset.setMarkedAsFavorite(isFavorite);
-        return instrumentsService.saveWalletBalance(walletBalanceByAsset);
+    public AssetBalance markAssetAsFavorite(Asset asset, boolean isFavorite) {
+        AssetBalance assetBalanceByAsset = getAssetBalanceByAsset(asset);
+        assetBalanceByAsset.setMarkedAsFavorite(isFavorite);
+        return instrumentsService.saveAssetBalance(assetBalanceByAsset);
     }
 
     public double getAmountOfTokens(Asset asset) {
         return Optional.ofNullable(asset)
-                .map(this::getWalletBalanceByAsset)
-                .map(WalletBalance::getAmount)
+                .map(this::getAssetBalanceByAsset)
+                .map(AssetBalance::getAmount)
                 .orElse(Double.NaN);
     }
 
-    public List<Asset> getAssetsWithNonZeroAmount() {
-        return getWalletBalances()
-                .stream()
-                .filter(wb -> wb.getAmount() > 0)
-                .map(WalletBalance::getAsset)
-                .collect(Collectors.toList());
+    public List<AssetBalance> getAssetsWithNonZeroAmount() {
+        return instrumentsService.getAssetsWithNonZeroAmount(getAuthenticatedUserPortfolio());
     }
 
     public List<Asset> getAllAssetsEverBought() {
@@ -92,11 +87,11 @@ public class InstrumentsFacadeService {
 
     //<editor-fold desc="TRANSACTIONS">
     public List<CryptoTransaction> getAllTransactions() {
-        return instrumentsService.getTransactionsBy(getAuthenticatedUserWallet());
+        return instrumentsService.getTransactionsBy(getAuthenticatedUserPortfolio());
     }
 
     public List<CryptoTransaction> getTransactionsByAsset(Asset asset) {
-        return instrumentsService.getTransactionsBy(getAuthenticatedUserWallet(), asset);
+        return instrumentsService.getTransactionsBy(getAuthenticatedUserPortfolio(), asset);
     }
 
     public List<CryptoTransaction> getTransactions(LocalDate from) {
@@ -104,11 +99,11 @@ public class InstrumentsFacadeService {
     }
 
     public List<CryptoTransaction> getTransactions(LocalDate from, LocalDate to) {
-        return instrumentsService.getTransactionsBy(getAuthenticatedUserWallet(), from, to);
+        return instrumentsService.getTransactionsBy(getAuthenticatedUserPortfolio(), from, to);
     }
 
     public CryptoTransaction saveTransaction(CryptoTransaction transaction) {
-        transaction.setWallet(getAuthenticatedUserWallet());
+        transaction.setPortfolio(getAuthenticatedUserPortfolio());
         return instrumentsService.saveTransaction(transaction);
     }
 
@@ -119,7 +114,7 @@ public class InstrumentsFacadeService {
 
     //<editor-fold desc="ASSET WATCHERS">
     public AssetWatcher saveAssetWatcher(AssetWatcher assetWatcher) {
-        assetWatcher.setWallet(getAuthenticatedUserWallet());
+        assetWatcher.setPortfolio(getAuthenticatedUserPortfolio());
         return instrumentsService.saveAssetWatcher(assetWatcher);
     }
 
@@ -128,11 +123,11 @@ public class InstrumentsFacadeService {
     }
 
     public List<AssetWatcher> getAssetWatchersByAsset(Asset asset) {
-        return instrumentsService.getAssetWatchersByAsset(getAuthenticatedUserWallet(), asset);
+        return instrumentsService.getAssetWatchersByAsset(getAuthenticatedUserPortfolio(), asset);
     }
 
     public List<AssetWatcher> getAssetWatchersByAssetAndActionType(Asset asset, AssetWatcher.ActionType actionType) {
-        return instrumentsService.getAssetWatchersByAssetAndActionType(getAuthenticatedUserWallet(), asset, actionType);
+        return instrumentsService.getAssetWatchersByAssetAndActionType(getAuthenticatedUserPortfolio(), asset, actionType);
     }
 
     public double getClosestBuyWatcherPrice(Asset asset) {
@@ -155,19 +150,19 @@ public class InstrumentsFacadeService {
 
     //</editor-fold>
 
-    //<editor-fold desc="WALLET BALANCES">
-    public List<WalletBalance> getWalletBalances() {
-        return instrumentsService.getWalletBalancesByWallet(getAuthenticatedUserWallet());
+    //<editor-fold desc="PORTFOLIO BALANCES">
+    public List<AssetBalance> getAssetBalances() {
+        return instrumentsService.getAssetBalancesByPortfolio(getAuthenticatedUserPortfolio());
     }
 
     @NotNull
-    public WalletBalance getWalletBalanceByAsset(Asset asset) {
-        return instrumentsService.getWalletBalancesByWalletAndAsset(getAuthenticatedUserWallet(), asset);
+    public AssetBalance getAssetBalanceByAsset(Asset asset) {
+        return instrumentsService.getAssetBalancesByPortfolioAndAsset(getAuthenticatedUserPortfolio(), asset);
     }
     //</editor-fold>
 
-    private Wallet getAuthenticatedUserWallet() {
-        return instrumentsService.getWalletByUser(securityService.getAuthenticatedUser());
+    private Portfolio getAuthenticatedUserPortfolio() {
+        return instrumentsService.getPortfolioByUser(securityService.getAuthenticatedUser());
     }
 
     public void updateAssetData() {

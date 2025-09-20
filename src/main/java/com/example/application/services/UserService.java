@@ -3,7 +3,7 @@ package com.example.application.services;
 import com.example.application.data.requests.RegisterUserRequest;
 import com.example.application.entities.User;
 import com.example.application.repositories.UserRepository;
-import com.example.application.services.crypto.WalletService;
+import com.example.application.services.crypto.PortfolioService;
 import com.example.application.utils.exceptions.auth.UsernameTakenException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
@@ -26,7 +26,7 @@ public class UserService implements UserDetailsService {
     private UserRepository userRepository;
 
     @Autowired
-    private WalletService walletService;
+    private PortfolioService portfolioService;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -89,7 +89,7 @@ public class UserService implements UserDetailsService {
         user.setRoles(Collections.singleton(User.Role.USER_ROLE));
         user.setEmail(user.getEmail().trim().toLowerCase());
         User savedUser = userRepository.save(user);
-        walletService.createWallet(user);
+        portfolioService.createPortfolio(user);
 
         return savedUser;
     }

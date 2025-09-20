@@ -27,7 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-// TODO:
+// TODO: [URGENT]
 //  Show current/remaining amount for an asset
 //  Display current price, just in case
 

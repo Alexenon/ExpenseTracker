@@ -3,7 +3,7 @@ package com.example.application.repositories.crypto;
 import com.example.application.entities.common.TransactionType;
 import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.CryptoTransaction;
-import com.example.application.entities.crypto.Wallet;
+import com.example.application.entities.crypto.Portfolio;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,20 +15,20 @@ import java.util.List;
 @Repository
 public interface CryptoTransactionRepository extends JpaRepository<CryptoTransaction, Long> {
 
-    List<CryptoTransaction> findByWallet(Wallet wallet);
+    List<CryptoTransaction> findByPortfolio(Portfolio portfolio);
 
-    List<CryptoTransaction> findByWalletAndAsset(Wallet wallet, Asset asset);
+    List<CryptoTransaction> findByPortfolioAndAsset(Portfolio portfolio, Asset asset);
 
-    List<CryptoTransaction> findByWalletAndAssetAndType(Wallet wallet, Asset asset, TransactionType type);
+    List<CryptoTransaction> findByPortfolioAndAssetAndType(Portfolio portfolio, Asset asset, TransactionType type);
 
     @Query("""
                 SELECT t FROM crypto_transactions t
-                WHERE t.wallet = :wallet
+                WHERE t.portfolio = :portfolio
                   AND t.dateTime >= :fromDateTime
                   AND t.dateTime < :toDateTime
             """)
-    List<CryptoTransaction> findByWalletAndDateTimeBetween(
-            @Param("wallet") Wallet wallet,
+    List<CryptoTransaction> findByPortfolioAndDateTimeBetween(
+            @Param("portfolio") Portfolio portfolio,
             @Param("fromDateTime") LocalDateTime fromDateTime,
             @Param("toDateTime") LocalDateTime toDateTime
     );

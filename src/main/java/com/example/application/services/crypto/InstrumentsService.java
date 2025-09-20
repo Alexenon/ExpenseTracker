@@ -24,26 +24,26 @@ import java.util.Optional;
 public class InstrumentsService {
 
     private final InstrumentsProvider instrumentsProvider;
-    private final WalletService walletService;
+    private final PortfolioService portfolioService;
     private final AssetRepository assetRepository;
     private final AssetWatcherService assetWatcherService;
     private final CryptoTransactionService transactionService;
-    private final WalletBalanceService walletBalanceService;
+    private final AssetBalanceService assetBalanceService;
 
     @Autowired
     public InstrumentsService(InstrumentsProvider instrumentsProvider,
-                              WalletService walletService,
+                              PortfolioService portfolioService,
                               AssetRepository assetRepository,
                               CryptoTransactionService transactionService,
                               AssetWatcherService assetWatcherService,
-                              WalletBalanceService walletBalanceService)
+                              AssetBalanceService assetBalanceService)
     {
         this.instrumentsProvider = instrumentsProvider;
-        this.walletService = walletService;
+        this.portfolioService = portfolioService;
         this.assetRepository = assetRepository;
         this.transactionService = transactionService;
         this.assetWatcherService = assetWatcherService;
-        this.walletBalanceService = walletBalanceService;
+        this.assetBalanceService = assetBalanceService;
     }
 
     /*
@@ -81,12 +81,12 @@ public class InstrumentsService {
         return assetWatcherService.findBy(asset);
     }
 
-    public List<AssetWatcher> getAssetWatchersByAsset(Wallet wallet, Asset asset) {
-        return assetWatcherService.findBy(wallet, asset);
+    public List<AssetWatcher> getAssetWatchersByAsset(Portfolio portfolio, Asset asset) {
+        return assetWatcherService.findBy(portfolio, asset);
     }
 
-    public List<AssetWatcher> getAssetWatchersByAssetAndActionType(Wallet wallet, Asset asset, AssetWatcher.ActionType actionType) {
-        return assetWatcherService.findBy(wallet, asset, actionType);
+    public List<AssetWatcher> getAssetWatchersByAssetAndActionType(Portfolio portfolio, Asset asset, AssetWatcher.ActionType actionType) {
+        return assetWatcherService.findBy(portfolio, asset, actionType);
     }
 
     /*
@@ -101,45 +101,49 @@ public class InstrumentsService {
         transactionService.deleteTransaction(transaction);
     }
 
-    public List<CryptoTransaction> getTransactionsBy(Wallet wallet) {
-        return transactionService.findBy(wallet);
+    public List<CryptoTransaction> getTransactionsBy(Portfolio portfolio) {
+        return transactionService.findBy(portfolio);
     }
 
-    public List<CryptoTransaction> getTransactionsBy(Wallet wallet, Asset asset) {
-        return transactionService.findBy(wallet, asset);
+    public List<CryptoTransaction> getTransactionsBy(Portfolio portfolio, Asset asset) {
+        return transactionService.findBy(portfolio, asset);
     }
 
-    public List<CryptoTransaction> getTransactionsBy(Wallet wallet, Asset asset, TransactionType type) {
-        return transactionService.findBy(wallet, asset, type);
+    public List<CryptoTransaction> getTransactionsBy(Portfolio portfolio, Asset asset, TransactionType type) {
+        return transactionService.findBy(portfolio, asset, type);
     }
 
-    public List<CryptoTransaction> getTransactionsBy(Wallet wallet, LocalDate from, LocalDate to) {
-        return transactionService.findBy(wallet, from, to);
+    public List<CryptoTransaction> getTransactionsBy(Portfolio portfolio, LocalDate from, LocalDate to) {
+        return transactionService.findBy(portfolio, from, to);
     }
 
-    /*
-     * WALLETS
-     * */
-
-    public Wallet getWalletByUser(User user) {
-        return walletService.getWalletByUser(user);
+    public List<AssetBalance> getAssetsWithNonZeroAmount(@NotNull Portfolio portfolio) {
+        return assetBalanceService.getAssetBalancesByPortfolioWithNonZeroAmount(portfolio);
     }
 
     /*
-     * WALLET BALANCES
+     * PORTFOLIOS
      * */
-    public WalletBalance saveWalletBalance(@NotNull WalletBalance walletBalance) {
-        return walletBalanceService.save(walletBalance);
+
+    public Portfolio getPortfolioByUser(User user) {
+        return portfolioService.getPortfolioByUser(user);
+    }
+
+    /*
+     * PORTFOLIO BALANCES
+     * */
+    public AssetBalance saveAssetBalance(@NotNull AssetBalance assetBalance) {
+        return assetBalanceService.save(assetBalance);
     }
 
     @NotNull
-    public WalletBalance getWalletBalancesByWalletAndAsset(@NotNull Wallet wallet, @NotNull Asset asset) {
-        return walletBalanceService.getByWalletAndAsset(wallet, asset);
+    public AssetBalance getAssetBalancesByPortfolioAndAsset(@NotNull Portfolio portfolio, @NotNull Asset asset) {
+        return assetBalanceService.getByPortfolioAndAsset(portfolio, asset);
     }
 
     @NotNull
-    public List<WalletBalance> getWalletBalancesByWallet(@NotNull Wallet wallet) {
-        return walletBalanceService.getByWallet(wallet);
+    public List<AssetBalance> getAssetBalancesByPortfolio(@NotNull Portfolio portfolio) {
+        return assetBalanceService.getByPortfolio(portfolio);
     }
 
     //<editor-fold desc="METADATA">

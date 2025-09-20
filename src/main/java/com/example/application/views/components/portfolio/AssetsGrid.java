@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.function.ToDoubleFunction;
 
 /*
-    TODO: Here
+    TODO: [LONG TERM]
         => Columns:
             [!] Add Profit (TOTAL) of an asset, by price + percentage (One on top of another)
             [!] Closest Buy ->  $34,000.00 (URGENT icon ❗ -> vaadin:exclamation vaadin:warning)
@@ -404,7 +404,7 @@ public class AssetsGrid extends Div {
                     double avgBuy = portfolioPerformanceTracker.getAverageBuyPrice(asset);
                     double avgSell = portfolioPerformanceTracker.getAverageSellPrice(asset);
 
-                    // TODO: Add volume column for: today, this week, this month, this year, total
+                    // TODO: [LONG TERM] Add volume column for: today, this week, this month, this year, total
                     return AssetGridItem.builder()
                             .symbol(asset.getSymbol())
                             .name(asset.getFullName())

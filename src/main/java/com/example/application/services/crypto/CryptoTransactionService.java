@@ -3,7 +3,7 @@ package com.example.application.services.crypto;
 import com.example.application.entities.common.TransactionType;
 import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.CryptoTransaction;
-import com.example.application.entities.crypto.Wallet;
+import com.example.application.entities.crypto.Portfolio;
 import com.example.application.repositories.crypto.CryptoTransactionRepository;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,41 +19,41 @@ import java.util.Objects;
 @Service
 public class CryptoTransactionService {
 
-    private final WalletBalanceService walletBalanceService;
+    private final AssetBalanceService assetBalanceService;
     private final CryptoTransactionRepository transactionRepository;
 
     @Autowired
-    public CryptoTransactionService(CryptoTransactionRepository transactionRepository, WalletBalanceService walletBalanceService) {
-        this.walletBalanceService = walletBalanceService;
+    public CryptoTransactionService(CryptoTransactionRepository transactionRepository, AssetBalanceService assetBalanceService) {
+        this.assetBalanceService = assetBalanceService;
         this.transactionRepository = transactionRepository;
     }
 
-    public List<CryptoTransaction> findBy(Wallet wallet) {
-        return transactionRepository.findByWallet(wallet);
+    public List<CryptoTransaction> findBy(Portfolio portfolio) {
+        return transactionRepository.findByPortfolio(portfolio);
     }
 
-    public List<CryptoTransaction> findBy(Wallet wallet, Asset asset) {
-        return transactionRepository.findByWalletAndAsset(wallet, asset);
+    public List<CryptoTransaction> findBy(Portfolio portfolio, Asset asset) {
+        return transactionRepository.findByPortfolioAndAsset(portfolio, asset);
     }
 
-    public List<CryptoTransaction> findBy(Wallet wallet, Asset asset, TransactionType type) {
-        return transactionRepository.findByWalletAndAssetAndType(wallet, asset, type);
+    public List<CryptoTransaction> findBy(Portfolio portfolio, Asset asset, TransactionType type) {
+        return transactionRepository.findByPortfolioAndAssetAndType(portfolio, asset, type);
     }
 
-    public List<CryptoTransaction> findBy(@NotNull Wallet wallet, @NotNull LocalDate from, @NotNull LocalDate to) {
-        Objects.requireNonNull(wallet, "wallet");
+    public List<CryptoTransaction> findBy(@NotNull Portfolio portfolio, @NotNull LocalDate from, @NotNull LocalDate to) {
+        Objects.requireNonNull(portfolio, "portfolio");
         Objects.requireNonNull(from, "from");
         Objects.requireNonNull(to, "to");
         LocalDateTime fromDateTime = from.atStartOfDay();
         LocalDateTime toDateTime = to.plusDays(1).atStartOfDay();
-        return transactionRepository.findByWalletAndDateTimeBetween(wallet, fromDateTime, toDateTime);
+        return transactionRepository.findByPortfolioAndDateTimeBetween(portfolio, fromDateTime, toDateTime);
     }
 
     @Transactional
     public CryptoTransaction saveTransaction(@NotNull CryptoTransaction transaction) {
         Objects.requireNonNull(transaction, "transaction");
         updateTransactionAmount(transaction);
-        walletBalanceService.updateWalletBalance(transaction);
+        assetBalanceService.updateAssetBalance(transaction);
         CryptoTransaction savedTransaction = transactionRepository.save(transaction);
         System.out.printf("Saved Transaction -> %s\n", savedTransaction);
         return savedTransaction;

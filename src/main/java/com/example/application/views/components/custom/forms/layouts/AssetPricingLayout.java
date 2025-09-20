@@ -51,7 +51,7 @@ public class AssetPricingLayout extends Div implements BeforeEnterObserver {
         assetSymbolField.addValueChangeListener(l -> buyPriceField.setValue(getAssetMarketPrice(assetSymbolField)));
 
         amountField.setValue("");
-        // TODO: Add average buy price here
+        // TODO: [URGENT] Add average buy price here
         buyPriceField.setValue(getAssetMarketPrice(assetSymbolField));
         totalCostField.setValue(0);
         // TODO: Add current asset price

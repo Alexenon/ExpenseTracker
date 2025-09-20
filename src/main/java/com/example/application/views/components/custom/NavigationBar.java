@@ -15,7 +15,7 @@ import com.vaadin.flow.router.RouterLink;
 import java.util.List;
 
 /*
-    TODO: Add Contact Page
+    TODO: [LONG TERM] Add Contact Page
 * */
 
 @Tag(Tag.NAV)

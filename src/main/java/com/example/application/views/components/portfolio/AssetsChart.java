@@ -1,6 +1,7 @@
 package com.example.application.views.components.portfolio;
 
 import com.example.application.entities.crypto.Asset;
+import com.example.application.entities.crypto.AssetBalance;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.utils.common.lang.MathUtils;
@@ -76,6 +77,7 @@ public class AssetsChart extends Div {
 
         return instrumentsFacadeService.getAssetsWithNonZeroAmount()
                 .stream()
+                .map(AssetBalance::getAsset)
                 .collect(Collectors.toMap(Asset::getSymbol, mapper, (a, b) -> b));
     }
 

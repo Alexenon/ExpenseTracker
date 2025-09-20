@@ -27,7 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.time.LocalDateTime;
 import java.util.function.Consumer;
 
-// TODO:
+// TODO: [LONG TERM]
 //  - boolean subtractFromGivenAsset
 //  - Add slider for percentage buy/transfer
 public class AddTransactionDialog extends Dialog implements HasNotifications {

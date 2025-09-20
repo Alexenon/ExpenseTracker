@@ -11,8 +11,8 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity(name = "wallets")
-public class Wallet {
+@Entity(name = "portfolios")
+public class Portfolio {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,6 +30,6 @@ public class Wallet {
 
     @Override
     public String toString() {
-        return "Wallet{id=%d, user='%s', dateCreated=%s}".formatted(id, user.getUsername(), createdAt);
+        return "Portfolio{id=%d, user='%s', dateCreated=%s}".formatted(id, user.getUsername(), createdAt);
     }
 }
