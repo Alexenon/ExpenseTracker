@@ -3,6 +3,7 @@ package com.example.application.views.components.custom.dialogs.transactions;
 import com.example.application.entities.common.TransactionType;
 import com.example.application.entities.crypto.CryptoTransaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
+import com.example.application.utils.common.formatters.CommonFormatters;
 import com.example.application.views.components.core.Container;
 import com.example.application.views.components.custom.fields.AmountField;
 import com.example.application.views.components.custom.fields.AssetComboBox;
@@ -26,10 +27,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Objects;
 import java.util.function.Consumer;
-
-// TODO: [URGENT]
-//  Show current/remaining amount for an asset
-//  Display current price, just in case
 
 public class EditTransactionDialog extends Dialog implements HasNotifications {
 
@@ -61,9 +58,11 @@ public class EditTransactionDialog extends Dialog implements HasNotifications {
     }
 
     private void buildForm() {
-        setHeaderTitle("Transaction");
+        setHeaderTitle("Edit Transaction");
         initializeFields();
         initializeFieldsValues();
+        initializeFieldListeners();
+        updateFieldHelperTexts();
         initializeBinder();
 
         Container formBody = Container.builder("transaction-modal")
@@ -77,10 +76,29 @@ public class EditTransactionDialog extends Dialog implements HasNotifications {
                 .build();
         add(formBody);
 
+        getFooter().add(saveButton, cancelButton);
+    }
+
+    private void initializeFields() {
+        typeField.setLabel("Transaction Type");
+        typeField.setItems(TransactionType.values());
+    }
+
+    private void initializeFieldsValues() {
+        assetSymbolField.setValue(initialTransaction.getAsset());
+        typeField.setValue(initialTransaction.getType());
+        amountField.setValue(initialTransaction.getOrderQuantity());
+        totalCostField.setValue(initialTransaction.getOrderTotalCost());
+        marketPriceField.setValue(initialTransaction.getMarketPrice());
+        datePicker.setValue(initialTransaction.getDateTime());
+    }
+
+    private void initializeFieldListeners() {
         assetSymbolField.addValueChangeListener(l -> {
             binder.setValidatorsDisabled(false);
             marketPriceField.setValue(assetSymbolField.getMarketPrice());
             symbolSuffix.setText(assetSymbolField.getSymbol());
+            updateFieldHelperTexts();
         });
 
         amountField.setSuffixComponent(symbolSuffix);
@@ -119,23 +137,6 @@ public class EditTransactionDialog extends Dialog implements HasNotifications {
             initializeFieldsValues();
             this.close();
         });
-
-        getFooter().add(saveButton, cancelButton);
-    }
-
-    private void initializeFields() {
-        assetSymbolField.addValueChangeListener(l -> marketPriceField.setValue(assetSymbolField.getMarketPrice()));
-        typeField.setLabel("Transaction Type");
-        typeField.setItems(TransactionType.values());
-    }
-
-    private void initializeFieldsValues() {
-        assetSymbolField.setValue(initialTransaction.getAsset());
-        typeField.setValue(initialTransaction.getType());
-        amountField.setValue(initialTransaction.getOrderQuantity());
-        totalCostField.setValue(initialTransaction.getOrderTotalCost());
-        marketPriceField.setValue(initialTransaction.getMarketPrice());
-        datePicker.setValue(initialTransaction.getDateTime());
     }
 
     private void initializeBinder() {
@@ -217,6 +218,13 @@ public class EditTransactionDialog extends Dialog implements HasNotifications {
 
     public CryptoTransaction getTransaction() {
         return binder.getBean();
+    }
+
+    private void updateFieldHelperTexts() {
+        String formatedPrice = CommonFormatters.CURRENCY.format(assetSymbolField.getMarketPrice());
+        String formatedAmount = CommonFormatters.AMOUNT.format(assetSymbolField.getAmountTokens());
+        marketPriceField.setHelperText("Current price: %s".formatted(formatedPrice));
+        amountField.setHelperText("Currently you have %s %s".formatted(formatedAmount, assetSymbolField.getSymbol()));
     }
 
 }

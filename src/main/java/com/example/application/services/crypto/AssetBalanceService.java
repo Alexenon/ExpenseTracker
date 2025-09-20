@@ -12,6 +12,7 @@ import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -51,18 +52,12 @@ public class AssetBalanceService {
 
     @Transactional
     public AssetBalance save(@NotNull AssetBalance assetBalance) {
-        Objects.requireNonNull(assetBalance, "assetBalance");
-
-        double amount = assetBalance.getAmount();
-        if (amount < 0)
-            throw new InvalidBalanceAmountException("Invalid balance amount: %f".formatted(amount));
-
+        validateAssetBalance(assetBalance);
         return repository.save(assetBalance);
     }
 
     @Transactional
     public AssetBalance updateAssetBalance(@NotNull CryptoTransaction transaction) {
-        Objects.requireNonNull(transaction, "transaction");
         AssetBalance assetBalance = getByPortfolioAndAsset(transaction.getPortfolio(), transaction.getAsset());
 
         updateAvgBuySellPrice(assetBalance, transaction);
@@ -70,7 +65,7 @@ public class AssetBalanceService {
         assetBalance.setCost(calculateTotalCost(transaction, assetBalance));
         assetBalance.setLastTimeUpdated(LocalDateTime.now());
 
-        return repository.save(assetBalance);
+        return save(assetBalance);
     }
 
     private static double calculateTotalCost(CryptoTransaction transaction, AssetBalance assetBalance) {
@@ -106,5 +101,17 @@ public class AssetBalanceService {
         }
     }
 
+    private static void validateAssetBalance(AssetBalance assetBalance) {
+        Objects.requireNonNull(assetBalance, "assetBalance");
+        Objects.requireNonNull(assetBalance.getAsset(), "assetBalance asset");
+        Objects.requireNonNull(assetBalance.getPortfolio(), "assetBalance portfolio");
+        Objects.requireNonNull(assetBalance.getCreatedAt(), "assetBalance createdAt");
+        Objects.requireNonNull(assetBalance.getLastTimeUpdated(), "assetBalance lastTimeUpdated");
+
+        Assert.isTrue(assetBalance.getAmount() >= 0, "amount cannot be negative");
+        Assert.isTrue(assetBalance.getHoldingDays() >= 0, "holdingDays cannot be negative");
+        Assert.isTrue(assetBalance.getAvgBuyPrice() >= 0, "avgBuyPrice cannot be negative");
+        Assert.isTrue(assetBalance.getAvgSellPrice() >= 0, "avgSellPrice cannot be negative");
+    }
 
 }

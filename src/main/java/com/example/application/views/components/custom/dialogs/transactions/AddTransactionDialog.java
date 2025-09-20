@@ -4,6 +4,7 @@ import com.example.application.entities.common.TransactionType;
 import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.CryptoTransaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
+import com.example.application.utils.common.formatters.CommonFormatters;
 import com.example.application.views.components.core.Container;
 import com.example.application.views.components.custom.fields.AmountField;
 import com.example.application.views.components.custom.fields.AssetComboBox;
@@ -28,8 +29,8 @@ import java.time.LocalDateTime;
 import java.util.function.Consumer;
 
 // TODO: [LONG TERM]
-//  - boolean subtractFromGivenAsset
 //  - Add slider for percentage buy/transfer
+//  - Ideally should be revisted this form design, with a more complex solution -> sliders, % and $, deposit...
 public class AddTransactionDialog extends Dialog implements HasNotifications {
 
     private final CryptoTransaction transaction;
@@ -58,9 +59,11 @@ public class AddTransactionDialog extends Dialog implements HasNotifications {
     }
 
     private void buildForm() {
-        setHeaderTitle("Transaction");
-        initializeBinder();
+        setHeaderTitle("Add Transaction");
         initializeFields();
+        initializeFieldValues();
+        initializeFieldListeners();
+        initializeBinder();
 
         Container formBody = Container.builder("transaction-modal")
                 .addComponent(assetSymbolField)
@@ -73,10 +76,29 @@ public class AddTransactionDialog extends Dialog implements HasNotifications {
                 .build();
         add(formBody);
 
+
+        getFooter().add(saveButton, cancelButton);
+    }
+
+    private void initializeFields() {
+        typeField.setLabel("Transaction Type");
+        typeField.setItems(TransactionType.values());
+    }
+    private void initializeFieldValues() {
+        assetSymbolField.setValue("");
+        typeField.setValue(TransactionType.BUY);
+        amountField.setValue("");
+        marketPriceField.setValue(assetSymbolField.getMarketPrice());
+        totalCostField.setValue(0);
+        datePicker.setValue(LocalDateTime.now());
+    }
+
+    private void initializeFieldListeners() {
         assetSymbolField.addValueChangeListener(l -> {
             binder.setValidatorsDisabled(false);
             marketPriceField.setValue(assetSymbolField.getMarketPrice());
             symbolSuffix.setText(assetSymbolField.getSymbol());
+            updateFieldHelperTexts();
         });
 
         amountField.setSuffixComponent(symbolSuffix);
@@ -121,23 +143,6 @@ public class AddTransactionDialog extends Dialog implements HasNotifications {
 
         cancelButton.addClickShortcut(Key.ESCAPE);
         cancelButton.addClickListener(e -> this.close());
-
-        getFooter().add(saveButton, cancelButton);
-    }
-
-    private void initializeFields() {
-        assetSymbolField.addValueChangeListener(l -> marketPriceField.setValue(assetSymbolField.getMarketPrice()));
-
-        typeField.setLabel("Transaction Type");
-        typeField.setItems(TransactionType.values());
-
-        // Initialize with values
-        assetSymbolField.setValue("");
-        typeField.setValue(TransactionType.BUY);
-        amountField.setValue("");
-        marketPriceField.setValue(assetSymbolField.getMarketPrice());
-        totalCostField.setValue(0);
-        datePicker.setValue(LocalDateTime.now());
     }
 
     private void initializeBinder() {
@@ -185,6 +190,13 @@ public class AddTransactionDialog extends Dialog implements HasNotifications {
 
     public void setAsset(Asset asset) {
         assetSymbolField.setValue(asset);
+    }
+
+    private void updateFieldHelperTexts() {
+        String formatedPrice = CommonFormatters.CURRENCY.format(assetSymbolField.getMarketPrice());
+        String formatedAmount = CommonFormatters.AMOUNT.format(assetSymbolField.getAmountTokens());
+        marketPriceField.setHelperText("Current price: %s".formatted(formatedPrice));
+        amountField.setHelperText("Currently you have %s %s".formatted(formatedAmount, assetSymbolField.getSymbol()));
     }
 
 }
