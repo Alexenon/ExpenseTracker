@@ -42,7 +42,7 @@ public class InstrumentsProvider {
                     if (metadata != null) {
                         metadataMap.put(symbolName, metadata);
                     } else {
-                        // TODO: Here getError() is missing
+                        // TODO: getError() is missing
                         log.warn("Missing asset metadata, cause: {}", response.getError());
                     }
                 });

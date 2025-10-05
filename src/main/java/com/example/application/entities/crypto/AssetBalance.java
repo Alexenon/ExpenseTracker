@@ -2,14 +2,12 @@ package com.example.application.entities.crypto;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Data
-@Builder
 @Entity(name = "asset_balances")
 @NoArgsConstructor
 @AllArgsConstructor
@@ -26,12 +24,6 @@ public class AssetBalance {
     @ManyToOne
     @JoinColumn(name = "asset_id", nullable = false)
     private Asset asset;
-
-    @Column(name = "comment")
-    private String comment;
-
-    @Column(name = "marked_as_favorite", nullable = false)
-    private boolean markedAsFavorite = false;
 
     @Column(name = "amount", nullable = false)
     private double amount = 0.0;

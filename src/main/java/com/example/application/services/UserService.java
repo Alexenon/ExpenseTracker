@@ -2,12 +2,16 @@ package com.example.application.services;
 
 import com.example.application.data.requests.RegisterUserRequest;
 import com.example.application.entities.User;
+import com.example.application.entities.crypto.Portfolio;
 import com.example.application.repositories.UserRepository;
 import com.example.application.services.crypto.PortfolioService;
+import com.example.application.utils.common.lang.StringUtils;
 import com.example.application.utils.exceptions.InternalUnexpectedException;
 import com.example.application.utils.exceptions.auth.UsernameTakenException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -24,10 +29,10 @@ import java.util.Set;
 /*
     TODO:
      [?] Don't allow spaces in the username / email
-     []
 * */
 
 
+@Slf4j
 @Service
 public class UserService implements UserDetailsService {
 
@@ -85,31 +90,46 @@ public class UserService implements UserDetailsService {
         return createNewUser(user);
     }
 
-    @Transactional
     public User createNewUser(@NotNull User user) {
-        Assert.notNull(user, "User cannot be null");
+        User newUser = save(user);
+        attachDefaultPortfolio(newUser);
+        return newUser;
+    }
 
-        String username = user.getUsername();
-        Assert.isTrue(username != null && !username.isBlank(), "username is missing");
-        if (isUsernameTaken(username))
-            throw new UsernameTakenException("There is already a user with this username");
-
-        String email = user.getEmail();
-        Assert.isTrue(email != null && !email.isBlank(), "email is missing");
-        if (isEmailTaken(email))
-            throw new UsernameTakenException("There is already a user with this email");
-
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setEmail(email.trim().toLowerCase());
-        user.setRoles(Set.of(User.Role.USER_ROLE));
+    @NotNull
+    @Transactional
+    public User save(@NotNull User user) {
+        validate(user);
+        updateFields(user);
 
         try {
             User savedUser = userRepository.save(user);
-            portfolioService.createPortfolio(user);
+            log.info("Saved successfully {}", savedUser);
             return savedUser;
         } catch (Exception e) {
+            log.error("Failed to save user, cause: {}", e.getMessage());
+            ExceptionUtils.printRootCauseStackTrace(e);
             throw new InternalUnexpectedException(e);
         }
+    }
+
+    private void validate(User user) {
+        Objects.requireNonNull(user, "User cannot be null");
+        Assert.isTrue(StringUtils.isNotBlank(user.getUsername()), "username is missing");
+        Assert.isTrue(StringUtils.isNotBlank(user.getEmail()), "email is missing");
+        Assert.isTrue(StringUtils.isNotBlank(user.getPassword()), "password is missing");
+
+        if (isUsernameTaken(user.getUsername()))
+            throw new UsernameTakenException("There is already a user with this username");
+
+        if (isEmailTaken(user.getEmail()))
+            throw new UsernameTakenException("There is already a user with this email");
+    }
+
+    private void updateFields(User user) {
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setEmail(user.getEmail().trim().toLowerCase());
+        user.setRoles(Set.of(User.Role.USER_ROLE));
     }
 
     public boolean isUsernameTaken(String username) {
@@ -118,6 +138,17 @@ public class UserService implements UserDetailsService {
 
     public boolean isEmailTaken(String email) {
         return userRepository.findByEmailIgnoreCase(email).isPresent();
+    }
+
+    /**
+     * Creates and attach a new portfolio to the provided user.
+     */
+    private Portfolio attachDefaultPortfolio(@NotNull User user) {
+        Portfolio portfolio = new Portfolio();
+        portfolio.setName("Main");
+        portfolio.setUser(user);
+        portfolio.setLastTimeUpdated(LocalDateTime.now());
+        return portfolioService.save(portfolio);
     }
 
 }

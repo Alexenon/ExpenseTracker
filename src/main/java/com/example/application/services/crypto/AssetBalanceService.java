@@ -18,6 +18,7 @@ import org.springframework.util.Assert;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import static com.example.application.utils.investment.ProfitCalculator.calculateNewAvgPrice;
 
@@ -29,42 +30,33 @@ public class AssetBalanceService {
 
     // TODO: [URGENT] FIND A WAY TO EXTRACT THIS FROM DATABASE WITHOUT ANY EXCEPTIONS
     // TODO: DO WE NEED THIS READONLY ? MAKE SURE THAT EVERYTIME WE CALL IT ITS ALREADY SAFE
-    @NotNull
-    @Transactional(readOnly = true)
-    public List<AssetBalance> getAssetBalancesByPortfolioWithNonZeroAmount(@NotNull Portfolio portfolio) {
+    public List<AssetBalance> findHoldingsByPortfolio(@NotNull Portfolio portfolio) {
         Objects.requireNonNull(portfolio, "portfolio");
-        return repository.findByPortfolioWithNonZeroAmount(portfolio.getId());
+//        return repository.findByPortfolioWithNonZeroAmount(portfolio.getId());
+        return List.of();
     }
 
-    @NotNull
-    @Transactional(readOnly = true)
-    public List<AssetBalance> getByPortfolio(@NotNull Portfolio portfolio) {
+    public List<AssetBalance> findByPortfolio(@NotNull Portfolio portfolio) {
         return repository.findByPortfolio(Objects.requireNonNull(portfolio, "portfolio"));
     }
 
-    @NotNull
-    @Transactional(readOnly = true)
-    public AssetBalance getByPortfolioAndAsset(@NotNull Portfolio portfolio, @NotNull Asset asset) {
+    public Optional<AssetBalance> findByPortfolioAndAsset(@NotNull Portfolio portfolio, @NotNull Asset asset) {
         Objects.requireNonNull(portfolio, "portfolio");
         Objects.requireNonNull(asset, "asset");
-
-        return repository.findByPortfolioAndAsset(portfolio, asset)
-                .orElseThrow(() -> new IllegalStateException("Portfolio balance not found for %s asset".formatted(asset.getSymbol())));
+        return repository.findByPortfolioAndAsset(portfolio, asset);
     }
 
     @Transactional
-    public AssetBalance save(@NotNull AssetBalance assetBalance) {
-        try {
-            validateAssetBalance(assetBalance);
-            return repository.save(assetBalance);
-        } catch (Exception e) {
-            throw new InternalUnexpectedException(e);
-        }
+    public AssetBalance createNew(@NotNull Portfolio portfolio, @NotNull Asset asset) {
+        AssetBalance assetBalance = new AssetBalance();
+        assetBalance.setPortfolio(Objects.requireNonNull(portfolio, "portfolio"));
+        assetBalance.setAsset(Objects.requireNonNull(asset, "asset"));
+        return save(assetBalance);
     }
 
     @Transactional
-    public AssetBalance updateAssetBalance(@NotNull CryptoTransaction transaction) {
-        AssetBalance assetBalance = getByPortfolioAndAsset(transaction.getPortfolio(), transaction.getAsset());
+    public AssetBalance update(@NotNull AssetBalance assetBalance, @NotNull CryptoTransaction transaction) {
+        validate(assetBalance);
 
         updateAvgBuySellPrice(assetBalance, transaction);
         assetBalance.setAmount(calculateAmountAfterSupply(assetBalance, transaction));
@@ -72,6 +64,15 @@ public class AssetBalanceService {
         assetBalance.setLastTimeUpdated(LocalDateTime.now());
 
         return save(assetBalance);
+    }
+
+    @Transactional
+    private AssetBalance save(@NotNull AssetBalance assetBalance) {
+        try {
+            return repository.save(assetBalance);
+        } catch (Exception e) {
+            throw new InternalUnexpectedException(e);
+        }
     }
 
     private static double calculateTotalCost(CryptoTransaction transaction, AssetBalance assetBalance) {
@@ -107,7 +108,7 @@ public class AssetBalanceService {
         }
     }
 
-    private static void validateAssetBalance(AssetBalance assetBalance) {
+    private static void validate(AssetBalance assetBalance) {
         Objects.requireNonNull(assetBalance, "assetBalance");
         Objects.requireNonNull(assetBalance.getAsset(), "assetBalance asset");
         Objects.requireNonNull(assetBalance.getPortfolio(), "assetBalance portfolio");

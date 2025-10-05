@@ -1,17 +1,23 @@
 package com.example.application.services.crypto;
 
 import com.example.application.entities.User;
-import com.example.application.entities.crypto.AssetBalance;
 import com.example.application.entities.crypto.Portfolio;
 import com.example.application.repositories.crypto.AssetRepository;
 import com.example.application.repositories.crypto.PortfolioRepository;
+import com.example.application.utils.common.lang.StringUtils;
+import com.example.application.utils.exceptions.InternalUnexpectedException;
 import jakarta.validation.constraints.NotNull;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
+import java.util.List;
 import java.util.Objects;
 
+@Slf4j
 @Service
 public class PortfolioService {
 
@@ -24,37 +30,31 @@ public class PortfolioService {
 
     /**
      * Creates and attach a new portfolio to the provided user.
-     * */
+     */
     @NotNull
     @Transactional
-    public Portfolio createPortfolio(@NotNull User user) {
-        Objects.requireNonNull(user, "user");
-
-        Portfolio portfolio = new Portfolio();
-        portfolio.setUser(user);
-        Portfolio savedPortfolio = portfolioRepository.save(portfolio);
-
-        // TODO: [URGENT] !!!
-        //  Instead of creating bunch of columns in the database tables with zero values,
-        //  add only real saved transactions...
-        //
-        //  TODO: WRAP WITH TRY CATCH
-
-        // Creating new Portfolio Balance for each asset with value 0.0
-        assetRepository.findAll().forEach(asset -> {
-            AssetBalance assetBalance = new AssetBalance();
-            assetBalance.setPortfolio(savedPortfolio);
-            assetBalance.setAsset(asset);
-            assetBalanceService.save(assetBalance);
-        });
-
-        return savedPortfolio;
+    public Portfolio save(@NotNull Portfolio portfolio) {
+        validate(portfolio);
+        try {
+            Portfolio savedPortfolio = portfolioRepository.save(portfolio);
+            log.info("Saved successfully {}", savedPortfolio);
+            return savedPortfolio;
+        } catch (Exception e) {
+            log.error("Failed to save portfolio, cause: {}", e.getMessage());
+            ExceptionUtils.printRootCauseStackTrace(e);
+            throw new InternalUnexpectedException(e);
+        }
     }
 
-    @NotNull
-    public Portfolio getPortfolioByUser(@NotNull User user) {
-        Objects.requireNonNull(user, "user");
-        return portfolioRepository.findByUser(user).get(0); // TODO: [URGENT] !!! HERE
+    public List<Portfolio> findByUser(@NotNull User user) {
+        return portfolioRepository.findByUser(Objects.requireNonNull(user, "user"));
+    }
+
+    private void validate(Portfolio portfolio) {
+        Objects.requireNonNull(portfolio, "portfolio");
+        Assert.isTrue(StringUtils.isNotBlank(portfolio.getName()), "portfolio name is missing");
+        Assert.isTrue(portfolio.getUser() != null, "portfolio user is missing");
+        Assert.isTrue(portfolio.getCreatedAt() != null, "portfolio date creation is missing");
     }
 
 }

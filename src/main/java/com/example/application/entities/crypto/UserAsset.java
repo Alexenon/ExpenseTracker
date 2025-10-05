@@ -11,28 +11,28 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity(name = "portfolios")
-public class Portfolio {
+@Entity(name = "user_assets")
+public class UserAsset {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(name = "name", nullable = false)
-    private String name;
-
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @ManyToOne
+    @JoinColumn(name = "asset_id", nullable = false)
+    private Asset asset;
+
+    @Column(name = "comment")
+    String comment;
+
+    @Column(name = "marked_as_favorite")
+    boolean markedAsFavorite = false;
+
     @Column(name = "last_time_updated", nullable = false)
     private LocalDateTime lastTimeUpdated = LocalDateTime.now();
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private final LocalDateTime createdAt = LocalDateTime.now();
-
-    @Override
-    public String toString() {
-        return "Portfolio{id=%d, user='%s', dateCreated=%s}".formatted(id, user.getUsername(), createdAt);
-    }
 }

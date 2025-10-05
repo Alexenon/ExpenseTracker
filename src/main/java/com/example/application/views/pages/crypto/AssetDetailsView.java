@@ -155,7 +155,7 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
         markAsFavorite.addClassName("rounded-button");
         markAsFavorite.addClickListener(e -> {
             boolean isFavorite = isAssetMarkedAsFavorite();
-            instrumentsFacadeService.markAssetAsFavorite(asset, !isFavorite);
+            instrumentsFacadeService.updateMarkAssetAsFavorite(asset, !isFavorite);
             markAsFavorite.setIcon(getStarIcon(!isFavorite));
         });
 
@@ -166,7 +166,7 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
     }
 
     private boolean isAssetMarkedAsFavorite() {
-        return instrumentsFacadeService.getAssetBalanceByAsset(asset).isMarkedAsFavorite();
+        return instrumentsFacadeService.isAssetMarkedAsFavorite(asset);
     }
 
     private Section notesAndConvertorSection() {
@@ -183,7 +183,7 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
         TextArea notesArea = new TextArea();
         notesArea.setClassName("note-area");
         notesArea.setPlaceholder("Add your thoughts about coin here.");
-        String comment = Objects.requireNonNullElse(instrumentsFacadeService.getAssetBalanceByAsset(asset).getComment(), "");
+        String comment = Objects.requireNonNullElse(instrumentsFacadeService.getAssetComment(asset), "");
         notesArea.setValue(comment);
         Button saveBtn = new Button("Save");
         saveBtn.addClickListener(l -> {

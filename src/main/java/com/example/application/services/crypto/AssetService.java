@@ -53,8 +53,7 @@ public class AssetService {
             assetRepository.delete(asset);
             log.info("Deleted successfully {}", asset);
         } catch (Exception e) {
-            log.error("Failed to delete asset, cause: {}", e.getMessage());
-            ExceptionUtils.printRootCauseStackTrace(e);
+            log.error("Failed to delete {}, cause: {}", asset, e.getMessage());
             throw new InternalUnexpectedException(e);
         }
     }

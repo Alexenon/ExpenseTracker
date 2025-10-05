@@ -25,6 +25,7 @@ public class InstrumentsService {
     private final InstrumentsProvider instrumentsProvider;
     private final PortfolioService portfolioService;
     private final AssetService assetService;
+    private final UserAssetService userAssetService;
     private final AssetWatcherService assetWatcherService;
     private final CryptoTransactionService transactionService;
     private final AssetBalanceService assetBalanceService;
@@ -33,6 +34,7 @@ public class InstrumentsService {
     public InstrumentsService(InstrumentsProvider instrumentsProvider,
                               PortfolioService portfolioService,
                               AssetService assetService,
+                              UserAssetService userAssetService,
                               CryptoTransactionService transactionService,
                               AssetWatcherService assetWatcherService,
                               AssetBalanceService assetBalanceService)
@@ -40,6 +42,7 @@ public class InstrumentsService {
         this.instrumentsProvider = instrumentsProvider;
         this.portfolioService = portfolioService;
         this.assetService = assetService;
+        this.userAssetService = userAssetService;
         this.transactionService = transactionService;
         this.assetWatcherService = assetWatcherService;
         this.assetBalanceService = assetBalanceService;
@@ -59,6 +62,22 @@ public class InstrumentsService {
 
     public Asset saveAsset(Asset asset) {
         return assetService.save(asset);
+    }
+
+    public void updateAssetComment(User user, Asset asset, String comment) {
+        userAssetService.updateAssetComment(user, asset, comment);
+    }
+
+    public void updateMarkAssetAsFavorite(User user, Asset asset, boolean markedAsFavorite) {
+        userAssetService.updateMarkAssetAsFavorite(user, asset, markedAsFavorite);
+    }
+
+    public String getAssetComment(User user, Asset asset) {
+        return userAssetService.getAssetComment(user, asset);
+    }
+
+    public boolean isAssetMarkedAsFavorite(User user, Asset asset) {
+        return userAssetService.isAssetMarkedAsFavorite(user, asset);
     }
 
     /*
@@ -114,32 +133,40 @@ public class InstrumentsService {
     }
 
     public List<AssetBalance> getAssetsWithNonZeroAmount(@NotNull Portfolio portfolio) {
-        return assetBalanceService.getAssetBalancesByPortfolioWithNonZeroAmount(portfolio);
+        return assetBalanceService.findHoldingsByPortfolio(portfolio);
     }
+
+//    public List<AssetBalance> getAssetsWithNonZeroAmount(@NotNull List<Portfolio> portfolios) {
+//        return assetBalanceService.getAssetBalancesByPortfolioWithNonZeroAmount(portfolios);
+//    }
+
+    public List<AssetBalance> getBalancesForUser(@NotNull User user) {
+        Objects.requireNonNull(user, "user");
+
+        List<Portfolio> portfolios = user.getPortfolios();
+        return null; // TODO: HERE
+    }
+
 
     /*
      * PORTFOLIOS
      * */
 
-    public Portfolio getPortfolioByUser(User user) {
-        return portfolioService.getPortfolioByUser(user);
+    public List<Portfolio> getPortfoliosByUser(User user) {
+        return portfolioService.findByUser(user);
     }
 
     /*
      * PORTFOLIO BALANCES
      * */
-    public AssetBalance saveAssetBalance(@NotNull AssetBalance assetBalance) {
-        return assetBalanceService.save(assetBalance);
-    }
-
     @NotNull
-    public AssetBalance getAssetBalancesByPortfolioAndAsset(@NotNull Portfolio portfolio, @NotNull Asset asset) {
-        return assetBalanceService.getByPortfolioAndAsset(portfolio, asset);
+    public Optional<AssetBalance> getAssetBalancesByPortfolioAndAsset(@NotNull Portfolio portfolio, @NotNull Asset asset) {
+        return assetBalanceService.findByPortfolioAndAsset(portfolio, asset);
     }
 
     @NotNull
     public List<AssetBalance> getAssetBalancesByPortfolio(@NotNull Portfolio portfolio) {
-        return assetBalanceService.getByPortfolio(portfolio);
+        return assetBalanceService.findByPortfolio(portfolio);
     }
 
     //<editor-fold desc="METADATA">

@@ -71,7 +71,7 @@ public class AssetsChart extends Div {
     private Map<String, Double> getChartItems() {
         Function<Asset, Double> mapper = switch (options.getValue()) {
             case WORTH -> portfolioPerformanceTracker::getAssetWorth;
-            case INVESTED -> portfolioPerformanceTracker::getAssetCost;
+            case INVESTED -> portfolioPerformanceTracker::getAssetRemainingTokensCost;
         };
 
         return instrumentsFacadeService.getAssetsWithNonZeroAmount()

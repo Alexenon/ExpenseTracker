@@ -1,9 +1,11 @@
 package com.example.application.services.crypto;
 
 import com.example.application.data.models.InstrumentsProvider;
+import com.example.application.entities.User;
 import com.example.application.entities.crypto.*;
 import com.example.application.services.SecurityService;
 import com.example.application.services.UserService;
+import com.example.application.utils.exceptions.InternalUnexpectedException;
 import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,27 +53,36 @@ public class InstrumentsFacadeService {
         return instrumentsService.getAssetBySymbol(symbolName);
     }
 
-    public AssetBalance updateAssetComment(Asset asset, String comment) {
-        AssetBalance assetBalanceByAsset = getAssetBalanceByAsset(asset);
-        assetBalanceByAsset.setComment(comment);
-        return instrumentsService.saveAssetBalance(assetBalanceByAsset);
-    }
-
-    public AssetBalance markAssetAsFavorite(Asset asset, boolean isFavorite) {
-        AssetBalance assetBalanceByAsset = getAssetBalanceByAsset(asset);
-        assetBalanceByAsset.setMarkedAsFavorite(isFavorite);
-        return instrumentsService.saveAssetBalance(assetBalanceByAsset);
-    }
-
     public double getAmountOfTokens(Asset asset) {
         return Optional.ofNullable(asset)
-                .map(this::getAssetBalanceByAsset)
+                .flatMap(this::getAssetBalanceByAsset)
                 .map(AssetBalance::getAmount)
                 .orElse(Double.NaN);
     }
 
+    @Nullable
+    public String getAssetComment(Asset asset) {
+        return instrumentsService.getAssetComment(getAuthenticatedUser(), asset);
+    }
+
+    public boolean isAssetMarkedAsFavorite(Asset asset) {
+        return instrumentsService.isAssetMarkedAsFavorite(getAuthenticatedUser(), asset);
+    }
+
+    public void updateAssetComment(Asset asset, @Nullable String comment) {
+        instrumentsService.updateAssetComment(getAuthenticatedUser(), asset, comment);
+    }
+
+    public void updateMarkAssetAsFavorite(Asset asset, boolean markedAsFavorite) {
+        instrumentsService.updateMarkAssetAsFavorite(getAuthenticatedUser(), asset, markedAsFavorite);
+    }
+
     public List<AssetBalance> getAssetsWithNonZeroAmount() {
-        return instrumentsService.getAssetsWithNonZeroAmount(getAuthenticatedUserPortfolio());
+        return instrumentsService.getAssetsWithNonZeroAmount(getAuthenticatedUserMainPortfolio());
+    }
+
+    public List<AssetBalance> getAssetsWithNonZeroAmount(Portfolio portfolio) {
+        return instrumentsService.getAssetsWithNonZeroAmount(portfolio);
     }
 
     public List<Asset> getAllAssetsEverBought() {
@@ -87,11 +98,11 @@ public class InstrumentsFacadeService {
 
     //<editor-fold desc="TRANSACTIONS">
     public List<CryptoTransaction> getAllTransactions() {
-        return instrumentsService.getTransactionsBy(getAuthenticatedUserPortfolio());
+        return instrumentsService.getTransactionsBy(getAuthenticatedUserMainPortfolio());
     }
 
     public List<CryptoTransaction> getTransactionsByAsset(Asset asset) {
-        return instrumentsService.getTransactionsBy(getAuthenticatedUserPortfolio(), asset);
+        return instrumentsService.getTransactionsBy(getAuthenticatedUserMainPortfolio(), asset);
     }
 
     public List<CryptoTransaction> getTransactions(LocalDate from) {
@@ -99,11 +110,11 @@ public class InstrumentsFacadeService {
     }
 
     public List<CryptoTransaction> getTransactions(LocalDate from, LocalDate to) {
-        return instrumentsService.getTransactionsBy(getAuthenticatedUserPortfolio(), from, to);
+        return instrumentsService.getTransactionsBy(getAuthenticatedUserMainPortfolio(), from, to);
     }
 
     public CryptoTransaction saveTransaction(CryptoTransaction transaction) {
-        transaction.setPortfolio(getAuthenticatedUserPortfolio());
+        transaction.setPortfolio(getAuthenticatedUserMainPortfolio());
         return instrumentsService.saveTransaction(transaction);
     }
 
@@ -114,7 +125,7 @@ public class InstrumentsFacadeService {
 
     //<editor-fold desc="ASSET WATCHERS">
     public AssetWatcher saveAssetWatcher(AssetWatcher assetWatcher) {
-        assetWatcher.setPortfolio(getAuthenticatedUserPortfolio());
+        assetWatcher.setPortfolio(getAuthenticatedUserMainPortfolio());
         return instrumentsService.saveAssetWatcher(assetWatcher);
     }
 
@@ -123,11 +134,11 @@ public class InstrumentsFacadeService {
     }
 
     public List<AssetWatcher> getAssetWatchersByAsset(Asset asset) {
-        return instrumentsService.getAssetWatchersByAsset(getAuthenticatedUserPortfolio(), asset);
+        return instrumentsService.getAssetWatchersByAsset(getAuthenticatedUserMainPortfolio(), asset);
     }
 
     public List<AssetWatcher> getAssetWatchersByAssetAndActionType(Asset asset, AssetWatcher.ActionType actionType) {
-        return instrumentsService.getAssetWatchersByAssetAndActionType(getAuthenticatedUserPortfolio(), asset, actionType);
+        return instrumentsService.getAssetWatchersByAssetAndActionType(getAuthenticatedUserMainPortfolio(), asset, actionType);
     }
 
     public double getClosestBuyWatcherPrice(Asset asset) {
@@ -147,22 +158,38 @@ public class InstrumentsFacadeService {
                 .max(Comparator.naturalOrder())
                 .orElse(0.0);
     }
-
     //</editor-fold>
 
     //<editor-fold desc="PORTFOLIO BALANCES">
     public List<AssetBalance> getAssetBalances() {
-        return instrumentsService.getAssetBalancesByPortfolio(getAuthenticatedUserPortfolio());
+        return instrumentsService.getAssetBalancesByPortfolio(getAuthenticatedUserMainPortfolio());
     }
 
-    @NotNull
-    public AssetBalance getAssetBalanceByAsset(Asset asset) {
-        return instrumentsService.getAssetBalancesByPortfolioAndAsset(getAuthenticatedUserPortfolio(), asset);
+    public Optional<AssetBalance> getAssetBalanceByAsset(Asset asset) {
+        return instrumentsService.getAssetBalancesByPortfolioAndAsset(getAuthenticatedUserMainPortfolio(), asset);
+    }
+
+    public Optional<AssetBalance> getAssetBalanceByAsset(Portfolio portfolio, Asset asset) {
+        return instrumentsService.getAssetBalancesByPortfolioAndAsset(portfolio, asset);
     }
     //</editor-fold>
 
-    private Portfolio getAuthenticatedUserPortfolio() {
-        return instrumentsService.getPortfolioByUser(securityService.getAuthenticatedUser());
+    // TODO: [URGENT] -> FILTER BY MAIN PORTFOLIO
+    // TODO: REMOVE ME, SO YOU WILL NOT MISS NOTHING DURING PROPERLY DEVELOPING THIS IMPL
+    // THIS METHOD SHOULD BE IN THE VIEW ITSELF NOT HERE
+    @NotNull
+    public Portfolio getAuthenticatedUserMainPortfolio() {
+        User user = getAuthenticatedUser();
+        return instrumentsService.getPortfoliosByUser(user)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new InternalUnexpectedException("User '%s' doesn't have MAIN portfolio"
+                        .formatted(user.getUsername())));
+    }
+
+    @NotNull
+    public User getAuthenticatedUser() {
+        return securityService.getAuthenticatedUser();
     }
 
     public void updateAssetData() {

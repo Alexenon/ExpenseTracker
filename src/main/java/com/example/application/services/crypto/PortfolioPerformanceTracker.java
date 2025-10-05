@@ -36,32 +36,30 @@ public class PortfolioPerformanceTracker {
     }
 
     public double getAverageBuyPrice(Asset asset) {
-		return Optional.ofNullable(asset)
-                .map(a -> instrumentsFacadeService.getAssetBalanceByAsset(a).getAvgBuyPrice())
+        return Optional.ofNullable(asset)
+                .flatMap(instrumentsFacadeService::getAssetBalanceByAsset)
+                .map(AssetBalance::getAvgBuyPrice)
                 .orElse(Double.NaN);
     }
 
     public double getAverageSellPrice(Asset asset) {
         return Optional.ofNullable(asset)
-                .map(a -> instrumentsFacadeService.getAssetBalanceByAsset(a).getAvgSellPrice())
+                .flatMap(instrumentsFacadeService::getAssetBalanceByAsset)
+                .map(AssetBalance::getAvgSellPrice)
                 .orElse(Double.NaN);
     }
 
     public double getAssetRemainingTokensCost(Asset asset) {
         return Optional.ofNullable(asset)
-                .map(a -> instrumentsFacadeService.getAssetBalanceByAsset(a).getCost())
+                .flatMap(instrumentsFacadeService::getAssetBalanceByAsset)
+                .map(AssetBalance::getCost)
                 .orElse(Double.NaN);
     }
 
     public double getAssetRealizedProfit(Asset asset) {
         return Optional.ofNullable(asset)
-                .map(a -> instrumentsFacadeService.getAssetBalanceByAsset(a).getTotalRealized())
-                .orElse(Double.NaN);
-    }
-
-    public double getAssetCost(Asset asset) {
-        return Optional.ofNullable(asset)
-                .map(a -> instrumentsFacadeService.getAssetBalanceByAsset(a).getCost())
+                .flatMap(instrumentsFacadeService::getAssetBalanceByAsset)
+                .map(AssetBalance::getTotalRealized)
                 .orElse(Double.NaN);
     }
 
@@ -87,11 +85,12 @@ public class PortfolioPerformanceTracker {
         return ProfitCalculator.buySellRatio(instrumentsFacadeService.getTransactionsByAsset(asset));
     }
 
-	// TODO:
-	//  - HERE IS NOT IMPLEMENTED
-	//  - Add last holding details + average holding days
+    // TODO:
+    //  - HERE IS NOT IMPLEMENTED
+    //  - Add last holding details + average holding days
     public double getAssetAverageHoldingDays(Asset asset) {
-		return instrumentsFacadeService.getAssetBalanceByAsset(asset).getHoldingDays();
+        return instrumentsFacadeService.getAssetBalanceByAsset(asset).map(AssetBalance::getHoldingDays)
+                .orElse(Double.NaN);
     }
 
     /**
@@ -103,6 +102,7 @@ public class PortfolioPerformanceTracker {
     //endregion
 
     //region PORTFOLIO STATS
+
     /**
      * How much was invested in all holding assets at this moment
      */

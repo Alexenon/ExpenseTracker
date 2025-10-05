@@ -345,7 +345,7 @@ public class AssetsGrid extends Div {
     }
 
     private Button threeDotsBtn() {
-        return new Button(); // TODO: HERE SHOULD BE IMPLEMENTED SOMETHING
+        return new Button(); // TODO: SHOULD BE IMPLEMENTED SOMETHING
     }
 
     private Div hiddenRowsContainer() {

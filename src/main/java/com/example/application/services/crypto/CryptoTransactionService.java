@@ -2,6 +2,7 @@ package com.example.application.services.crypto;
 
 import com.example.application.entities.common.TransactionType;
 import com.example.application.entities.crypto.Asset;
+import com.example.application.entities.crypto.AssetBalance;
 import com.example.application.entities.crypto.CryptoTransaction;
 import com.example.application.entities.crypto.Portfolio;
 import com.example.application.repositories.crypto.CryptoTransactionRepository;
@@ -56,9 +57,11 @@ public class CryptoTransactionService {
     @NotNull
     @Transactional
     public CryptoTransaction save(@NotNull CryptoTransaction transaction) {
+        validate(transaction);
+
         try {
-            updateTransactionAmount(transaction);
-            assetBalanceService.updateAssetBalance(transaction);
+            updateTransactionQuantity(transaction);
+            updateAssetBalance(transaction);
             CryptoTransaction savedTransaction = transactionRepository.save(transaction);
             log.info("Saved successfully {}", savedTransaction);
             return savedTransaction;
@@ -76,8 +79,7 @@ public class CryptoTransactionService {
             transactionRepository.delete(transaction);
             log.info("Deleted successfully {}", transaction);
         } catch (Exception e) {
-            log.error("Failed to delete transaction, cause: {}", e.getMessage());
-            ExceptionUtils.printRootCauseStackTrace(e);
+            log.error("Failed to delete {}, cause: {}", transaction, e.getMessage());
             throw new InternalUnexpectedException(e);
         }
     }
@@ -85,17 +87,28 @@ public class CryptoTransactionService {
     /**
      * Sets order quantity in case it's missing in the transaction itself
      */
-    private static void updateTransactionAmount(@NotNull CryptoTransaction transaction) {
-        Assert.notNull(transaction, "Transaction is missing");
-        Assert.isTrue(transaction.getMarketPrice() > 0, "Price should be above 0");
-        Assert.isTrue(transaction.getOrderTotalCost() > 0, "Order cost should be above 0");
-        Assert.notNull(transaction.getDateTime(), "DateTime is missing");
-
+    private void updateTransactionQuantity(@NotNull CryptoTransaction transaction) {
         if (transaction.getOrderQuantity() > 0)
             return;
 
         double orderQuantity = transaction.getOrderTotalCost() / transaction.getMarketPrice();
         transaction.setOrderQuantity(orderQuantity);
+    }
+
+    private void updateAssetBalance(CryptoTransaction transaction) {
+        Asset asset = transaction.getAsset();
+        Portfolio portfolio = transaction.getPortfolio();
+        AssetBalance assetBalance = assetBalanceService.findByPortfolioAndAsset(portfolio, asset)
+                .orElse(assetBalanceService.createNew(portfolio, asset));
+        assetBalanceService.update(assetBalance, transaction);
+    }
+
+    private void validate(CryptoTransaction transaction) {
+        Objects.requireNonNull(transaction, "Transaction is missing");
+        Assert.notNull(transaction.getAsset(), "Asset is missing");
+        Assert.notNull(transaction.getDateTime(), "DateTime is missing");
+        Assert.isTrue(transaction.getMarketPrice() > 0, "Price should be above 0");
+        Assert.isTrue(transaction.getOrderTotalCost() > 0, "Order cost should be above 0");
     }
 
 }
