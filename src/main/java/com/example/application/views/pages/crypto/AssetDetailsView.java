@@ -111,7 +111,7 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
                 aboutSection(),
                 transactionHistorySection()
         );
-        scrollTopPage();
+        scrollTopOfThePage();
     }
 
     @Override

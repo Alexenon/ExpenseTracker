@@ -1,9 +1,11 @@
 package com.example.application.entities;
 
+import com.example.application.entities.crypto.Portfolio;
 import jakarta.persistence.*;
 import lombok.Data;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -23,6 +25,9 @@ public class User {
 
     @Column(name = "email", unique = true, nullable = false)
     private String email;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Portfolio> portfolios;
 
     @Column(name = "role", nullable = false)
     @Enumerated(EnumType.STRING)

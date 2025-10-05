@@ -3,7 +3,6 @@ package com.example.application.views.components.custom.forms;
 import com.example.application.views.components.core.Form;
 import com.example.application.views.components.core.buttons.NativeButton;
 import com.vaadin.flow.component.Tag;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
@@ -42,7 +41,7 @@ public class LoginForm extends Form {
                 passwordInput.setAttribute('autocomplete', 'current-password');
                 """;
 
-        UI.getCurrent().getPage().executeJs(script);
+        getUI().ifPresent(ui -> ui.getPage().executeJs(script));
     }
 
     public void setTitleVisible(boolean visible) {

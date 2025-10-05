@@ -35,23 +35,13 @@ public class ProfitCalculator {
 		return (currentSellPrice - avgBuyPrice) * tokensSoldNow;
 	}
 
-	private static class Order {
-		double quantity;
-		double cost;
-
-		Order(double quantity, double cost) {
-			this.quantity = quantity;
-			this.cost = cost;
-		}
-	}
-
-	public static double getAverageBuyPrice(List<CryptoTransaction> transactions) {
+	public static double averageBuyPrice(List<CryptoTransaction> transactions) {
 		double totalCost = totalCostForBuyTransactions(transactions);
 		double totalQuantity = totalQuantityForBuyTransactions(transactions);
 		return calculateAveragePrice(totalCost, totalQuantity);
 	}
 
-	public static double getAverageSellPrice(List<CryptoTransaction> transactions) {
+	public static double averageSellPrice(List<CryptoTransaction> transactions) {
 		double totalSellCost = totalCostForSellTransactions(transactions);
 		double totalQuantitySold = totalQuantityForSellTransactions(transactions);
 		return calculateAveragePrice(totalSellCost, totalQuantitySold);
@@ -63,12 +53,23 @@ public class ProfitCalculator {
 	 * -----------------------------------------------------------------
 	 * */
 
+    private static class Order {
+        double quantity;
+        double cost;
+
+        Order(double quantity, double cost) {
+            this.quantity = quantity;
+            this.cost = cost;
+        }
+    }
+
+    // FIXME: TODO: [URGENT] HERE IS SOMETHING STRANGE
 	/**
 	 * Calculates the total realized profit from provided transactions
 	 *
 	 * <p>If there are just BUYS transactions, then the value will be {@code 0}
 	 */
-	public static double getRealizedProfit(List<CryptoTransaction> transactions) {
+	public static double realizedProfit(List<CryptoTransaction> transactions) {
 		double totalCost = 0.0;
 		double remainingQuantity = 0.0;
 		double realizedProfit = 0.0;
@@ -101,7 +102,7 @@ public class ProfitCalculator {
 	 * Calculates the cost of remaining tokens, where if contains SELL transactions, then the cost value
 	 * is substracted confirming with transaction order cost
 	 */
-	public static double getRemainingTokensCost(List<CryptoTransaction> transactions) {
+	public static double remainingTokensCost(List<CryptoTransaction> transactions) {
 		Queue<Order> fifoQueue = new LinkedList<>();
 		double remainingCost = 0.0;
 
@@ -140,7 +141,7 @@ public class ProfitCalculator {
 		return remainingCost;
 	}
 
-	public static String getBuySellRatio(List<CryptoTransaction> transactions) {
+	public static String buySellRatio(List<CryptoTransaction> transactions) {
 		if (transactions == null || transactions.isEmpty())
 			return "N/A";
 
@@ -193,7 +194,6 @@ public class ProfitCalculator {
     private static long getHoldingTimeInDays(CryptoTransaction buyTransaction, CryptoTransaction sellTransaction) {
         return DateUtils.daysBetween(buyTransaction.getDateTime(), sellTransaction.getDateTime());
     }
-
 	//endregion
 
 }

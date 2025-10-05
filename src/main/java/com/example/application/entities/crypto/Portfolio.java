@@ -18,7 +18,10 @@ public class Portfolio {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @OneToOne
+    @Column(name = "name", nullable = false)
+    private String name;
+
+    @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 

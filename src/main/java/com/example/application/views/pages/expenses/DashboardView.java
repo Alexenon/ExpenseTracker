@@ -3,8 +3,7 @@ package com.example.application.views.pages.expenses;
 import com.example.application.data.dtos.projections.MonthlyExpensesProjection;
 import com.example.application.services.ExpenseService;
 import com.example.application.views.layouts.MainLayout;
-import com.example.application.views.pages.AbstractPage;
-import com.vaadin.flow.component.UI;
+import com.example.application.views.pages.DefaultPage;
 import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.grid.Grid;
@@ -34,7 +33,7 @@ import java.util.stream.Collectors;
 @Route(value = "dashboard", layout = MainLayout.class)
 @JsModule("./themes/light_theme/components/javascript/fillPieChart.js")
 @JavaScript("https://fastly.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js")
-public class DashboardView extends AbstractPage {
+public class DashboardView extends DefaultPage {
 
     private final ExpenseService expenseService;
 
@@ -80,7 +79,7 @@ public class DashboardView extends AbstractPage {
             index.addAndGet(1);
         });
 
-        UI.getCurrent().getPage().executeJs("fillExpensesChart($0);", jsonOptionData.toJson());
+        getUI().ifPresent(ui -> ui.getPage().executeJs("fillExpensesChart($0);", jsonOptionData.toJson()));
     }
 
     private void initializeGrid() {

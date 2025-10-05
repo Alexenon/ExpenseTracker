@@ -92,25 +92,45 @@ vaadin-tabs::part(tabs) {
     display: block;
 }
 
+.inside-border {
+  width: 100%;
+  max-width: 900px;
+  margin: auto;
+  border-collapse: collapse;
+  border-radius: 12px;
+  overflow: hidden;
+  background: white;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+.inside-border th,
 .inside-border td {
-    padding: 5px;
-    border: 2px solid black;
-    border-collapse: collapse;
+  padding: 14px 18px;
+  text-align: left;
 }
 
-.inside-border tr:first-child td {
-    border-top: none;
+.inside-border th {
+  background: #3b2063; /* purple header */
+  color: #fff;
+  font-weight: 600;
+  font-size: 15px;
 }
 
-.inside-border tr:last-child td {
-    border-bottom: none;
+.inside-border tr:nth-child(even) {
+  background: #f9f9f9; /* zebra striping */
 }
 
-.inside-border tr td:first-child {
-    border-left: none;
+.inside-border tr:hover {
+  background: #f1ecfb; /* hover effect */
 }
 
-.inside-border tr td:last-child {
-    border-right: none;
+.inside-border td {
+  font-size: 14px;
+  color: #333;
+  border-bottom: 1px solid #eee;
 }
 
+.inside-border td:first-child {
+  font-weight: 600;
+  color: #444;
+}

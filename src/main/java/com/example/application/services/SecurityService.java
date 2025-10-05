@@ -57,9 +57,9 @@ public class SecurityService {
         return getAuthenticatedUserDetails().isPresent();
     }
 
-    public void logout() {
+    public void logout(UI ui) {
         logger.info("User logged out");
-        UI.getCurrent().getPage().setLocation(LOGOUT_SUCCESS_URL);
+        Optional.ofNullable(ui).ifPresent(l -> l.getPage().setLocation(LOGOUT_SUCCESS_URL));
         SecurityContextLogoutHandler logoutHandler = new SecurityContextLogoutHandler();
         logoutHandler.logout(VaadinServletRequest.getCurrent().getHttpServletRequest(), null, null);
     }

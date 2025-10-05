@@ -5,7 +5,10 @@ import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.CryptoTransaction;
 import com.example.application.entities.crypto.Portfolio;
 import com.example.application.repositories.crypto.CryptoTransactionRepository;
+import com.example.application.utils.exceptions.InternalUnexpectedException;
 import jakarta.validation.constraints.NotNull;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +19,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
+@Slf4j
 @Service
 public class CryptoTransactionService {
 
@@ -28,15 +32,15 @@ public class CryptoTransactionService {
         this.transactionRepository = transactionRepository;
     }
 
-    public List<CryptoTransaction> findBy(Portfolio portfolio) {
+    public List<CryptoTransaction> findBy(@NotNull Portfolio portfolio) {
         return transactionRepository.findByPortfolio(portfolio);
     }
 
-    public List<CryptoTransaction> findBy(Portfolio portfolio, Asset asset) {
+    public List<CryptoTransaction> findBy(@NotNull Portfolio portfolio, @NotNull Asset asset) {
         return transactionRepository.findByPortfolioAndAsset(portfolio, asset);
     }
 
-    public List<CryptoTransaction> findBy(Portfolio portfolio, Asset asset, TransactionType type) {
+    public List<CryptoTransaction> findBy(@NotNull Portfolio portfolio, @NotNull Asset asset, @NotNull TransactionType type) {
         return transactionRepository.findByPortfolioAndAssetAndType(portfolio, asset, type);
     }
 
@@ -49,24 +53,40 @@ public class CryptoTransactionService {
         return transactionRepository.findByPortfolioAndDateTimeBetween(portfolio, fromDateTime, toDateTime);
     }
 
+    @NotNull
     @Transactional
-    public CryptoTransaction saveTransaction(@NotNull CryptoTransaction transaction) {
-        Objects.requireNonNull(transaction, "transaction");
-        updateTransactionAmount(transaction);
-        assetBalanceService.updateAssetBalance(transaction);
-        CryptoTransaction savedTransaction = transactionRepository.save(transaction);
-        System.out.printf("Saved Transaction -> %s\n", savedTransaction);
-        return savedTransaction;
+    public CryptoTransaction save(@NotNull CryptoTransaction transaction) {
+        try {
+            updateTransactionAmount(transaction);
+            assetBalanceService.updateAssetBalance(transaction);
+            CryptoTransaction savedTransaction = transactionRepository.save(transaction);
+            log.info("Saved successfully {}", savedTransaction);
+            return savedTransaction;
+        } catch (Exception e) {
+            log.error("Failed to save transaction, cause: {}", e.getMessage());
+            ExceptionUtils.printRootCauseStackTrace(e);
+            throw new InternalUnexpectedException(e);
+        }
     }
 
-    public void deleteTransaction(@NotNull CryptoTransaction transaction) {
-        transactionRepository.delete(Objects.requireNonNull(transaction, "transaction"));
+    @Transactional
+    public void delete(@NotNull CryptoTransaction transaction) {
+        Objects.requireNonNull(transaction, "transaction");
+        try {
+            transactionRepository.delete(transaction);
+            log.info("Deleted successfully {}", transaction);
+        } catch (Exception e) {
+            log.error("Failed to delete transaction, cause: {}", e.getMessage());
+            ExceptionUtils.printRootCauseStackTrace(e);
+            throw new InternalUnexpectedException(e);
+        }
     }
 
     /**
      * Sets order quantity in case it's missing in the transaction itself
      */
     private static void updateTransactionAmount(@NotNull CryptoTransaction transaction) {
+        Assert.notNull(transaction, "Transaction is missing");
         Assert.isTrue(transaction.getMarketPrice() > 0, "Price should be above 0");
         Assert.isTrue(transaction.getOrderTotalCost() > 0, "Order cost should be above 0");
         Assert.notNull(transaction.getDateTime(), "DateTime is missing");

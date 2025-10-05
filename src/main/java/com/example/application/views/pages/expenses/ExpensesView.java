@@ -9,7 +9,7 @@ import com.example.application.views.components.custom.dialogs.AddExpenseDialog;
 import com.example.application.views.components.custom.dialogs.EditExpenseDialog;
 import com.example.application.views.components.custom.icons.PictogramIcon;
 import com.example.application.views.layouts.MainLayout;
-import com.example.application.views.pages.AbstractPage;
+import com.example.application.views.pages.DefaultPage;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -30,7 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @PermitAll
 @PageTitle("Expenses")
 @Route(value = "expenses", layout = MainLayout.class)
-public class ExpensesView extends AbstractPage {
+public class ExpensesView extends DefaultPage {
 
     private static final Logger logger = LoggerFactory.getLogger(ExpensesView.class);
 

@@ -29,13 +29,17 @@ public class PortfolioService {
     @Transactional
     public Portfolio createPortfolio(@NotNull User user) {
         Objects.requireNonNull(user, "user");
+
         Portfolio portfolio = new Portfolio();
         portfolio.setUser(user);
         Portfolio savedPortfolio = portfolioRepository.save(portfolio);
 
-        // TODO: Instead of creating bunch of Database columns with zeroes values, it shouldn't be created,
-        //  only a transaction was added
+        // TODO: [URGENT] !!!
+        //  Instead of creating bunch of columns in the database tables with zero values,
+        //  add only real saved transactions...
         //
+        //  TODO: WRAP WITH TRY CATCH
+
         // Creating new Portfolio Balance for each asset with value 0.0
         assetRepository.findAll().forEach(asset -> {
             AssetBalance assetBalance = new AssetBalance();
@@ -50,7 +54,7 @@ public class PortfolioService {
     @NotNull
     public Portfolio getPortfolioByUser(@NotNull User user) {
         Objects.requireNonNull(user, "user");
-        return Objects.requireNonNull(portfolioRepository.findByUser(user), "Cannot find portfolio for %s".formatted(user));
+        return portfolioRepository.findByUser(user).get(0); // TODO: [URGENT] !!! HERE
     }
 
 }

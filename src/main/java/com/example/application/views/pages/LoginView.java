@@ -17,7 +17,7 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 @PageTitle("Login")
 @Route(value = "login")
 @CssImport("./themes/light_theme/styles/page-styles/auth-pages.css")
-public class LoginView extends AbstractPage implements BeforeEnterObserver {
+public class LoginView extends DefaultPage implements BeforeEnterObserver {
 
     private final LoginComponent loginComponent;
 

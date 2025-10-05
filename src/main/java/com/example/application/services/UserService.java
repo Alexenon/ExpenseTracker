@@ -4,6 +4,7 @@ import com.example.application.data.requests.RegisterUserRequest;
 import com.example.application.entities.User;
 import com.example.application.repositories.UserRepository;
 import com.example.application.services.crypto.PortfolioService;
+import com.example.application.utils.exceptions.InternalUnexpectedException;
 import com.example.application.utils.exceptions.auth.UsernameTakenException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
@@ -14,10 +15,18 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
-import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+
+/*
+    TODO:
+     [?] Don't allow spaces in the username / email
+     []
+* */
+
 
 @Service
 public class UserService implements UserDetailsService {
@@ -71,27 +80,36 @@ public class UserService implements UserDetailsService {
         User user = new User();
         user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setRoles(Collections.singleton(User.Role.USER_ROLE));
+        user.setPassword(request.getPassword());
 
         return createNewUser(user);
     }
 
     @Transactional
-    public User createNewUser(User user) {
-        if (isUsernameTaken(user.getUsername()))
+    public User createNewUser(@NotNull User user) {
+        Assert.notNull(user, "User cannot be null");
+
+        String username = user.getUsername();
+        Assert.isTrue(username != null && !username.isBlank(), "username is missing");
+        if (isUsernameTaken(username))
             throw new UsernameTakenException("There is already a user with this username");
 
-        if (isEmailTaken(user.getEmail()))
+        String email = user.getEmail();
+        Assert.isTrue(email != null && !email.isBlank(), "email is missing");
+        if (isEmailTaken(email))
             throw new UsernameTakenException("There is already a user with this email");
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setRoles(Collections.singleton(User.Role.USER_ROLE));
-        user.setEmail(user.getEmail().trim().toLowerCase());
-        User savedUser = userRepository.save(user);
-        portfolioService.createPortfolio(user);
+        user.setEmail(email.trim().toLowerCase());
+        user.setRoles(Set.of(User.Role.USER_ROLE));
 
-        return savedUser;
+        try {
+            User savedUser = userRepository.save(user);
+            portfolioService.createPortfolio(user);
+            return savedUser;
+        } catch (Exception e) {
+            throw new InternalUnexpectedException(e);
+        }
     }
 
     public boolean isUsernameTaken(String username) {
@@ -101,6 +119,5 @@ public class UserService implements UserDetailsService {
     public boolean isEmailTaken(String email) {
         return userRepository.findByEmailIgnoreCase(email).isPresent();
     }
-
 
 }

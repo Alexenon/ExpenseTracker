@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @AnonymousAllowed
 @PageTitle("Home")
 @Route(value = "", layout = MainLayout.class)
-public class HomeView extends AbstractPage implements HasScroll {
+public class HomeView extends DefaultPage implements HasScroll {
 
     @Autowired
     private InstrumentsFacadeService service;

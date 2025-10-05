@@ -84,7 +84,7 @@ public class PortfolioPerformanceTracker {
     }
 
     public String getAssetBuySellRatio(Asset asset) {
-        return ProfitCalculator.getBuySellRatio(instrumentsFacadeService.getTransactionsByAsset(asset));
+        return ProfitCalculator.buySellRatio(instrumentsFacadeService.getTransactionsByAsset(asset));
     }
 
 	// TODO:
@@ -150,7 +150,7 @@ public class PortfolioPerformanceTracker {
     }
 
     public String getPortfolioBuySellRatio() {
-        return ProfitCalculator.getBuySellRatio(instrumentsFacadeService.getAllTransactions());
+        return ProfitCalculator.buySellRatio(instrumentsFacadeService.getAllTransactions());
     }
 
     public double getPortfolioProfitPercentage() {

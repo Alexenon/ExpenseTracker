@@ -5,7 +5,6 @@ import com.example.application.entities.crypto.AssetBalance;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.utils.common.lang.MathUtils;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.select.Select;
 import elemental.json.Json;
@@ -65,7 +64,7 @@ public class AssetsChart extends Div {
             index.addAndGet(1);
         });
 
-        UI.getCurrent().getPage().executeJs("fillAssetsDiversityChart($0);", jsonOptionData.toJson());
+        getUI().ifPresent(ui -> ui.getPage().executeJs("fillAssetsDiversityChart($0);", jsonOptionData.toJson()));
         log.info("Created assets pie chart with {} elements", index.intValue());
     }
 

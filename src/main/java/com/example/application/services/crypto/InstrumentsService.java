@@ -5,7 +5,6 @@ import com.example.application.data.models.InstrumentsProvider;
 import com.example.application.entities.User;
 import com.example.application.entities.common.TransactionType;
 import com.example.application.entities.crypto.*;
-import com.example.application.repositories.crypto.AssetRepository;
 import com.example.application.utils.fetchers.api_responses.AssetMetadata;
 import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +24,7 @@ public class InstrumentsService {
 
     private final InstrumentsProvider instrumentsProvider;
     private final PortfolioService portfolioService;
-    private final AssetRepository assetRepository;
+    private final AssetService assetService;
     private final AssetWatcherService assetWatcherService;
     private final CryptoTransactionService transactionService;
     private final AssetBalanceService assetBalanceService;
@@ -33,14 +32,14 @@ public class InstrumentsService {
     @Autowired
     public InstrumentsService(InstrumentsProvider instrumentsProvider,
                               PortfolioService portfolioService,
-                              AssetRepository assetRepository,
+                              AssetService assetService,
                               CryptoTransactionService transactionService,
                               AssetWatcherService assetWatcherService,
                               AssetBalanceService assetBalanceService)
     {
         this.instrumentsProvider = instrumentsProvider;
         this.portfolioService = portfolioService;
-        this.assetRepository = assetRepository;
+        this.assetService = assetService;
         this.transactionService = transactionService;
         this.assetWatcherService = assetWatcherService;
         this.assetBalanceService = assetBalanceService;
@@ -51,18 +50,15 @@ public class InstrumentsService {
      * */
 
     public List<Asset> getAllAssets() {
-        return assetRepository.findAll();
+        return assetService.findAll();
     }
 
-    @NotNull
-    public Optional<Asset> getAssetBySymbol(@Nullable String symbolName) {
-        return symbolName == null || symbolName.isBlank()
-                ? Optional.empty()
-                : assetRepository.findBySymbol(symbolName.toUpperCase());
+    public Optional<Asset> getAssetBySymbol(String symbolName) {
+        return assetService.findBySymbol(symbolName);
     }
 
     public Asset saveAsset(Asset asset) {
-        return assetRepository.save(asset);
+        return assetService.save(asset);
     }
 
     /*
@@ -94,11 +90,11 @@ public class InstrumentsService {
      * */
 
     public CryptoTransaction saveTransaction(CryptoTransaction transaction) {
-        return transactionService.saveTransaction(transaction);
+        return transactionService.save(transaction);
     }
 
     public void deleteTransaction(CryptoTransaction transaction) {
-        transactionService.deleteTransaction(transaction);
+        transactionService.delete(transaction);
     }
 
     public List<CryptoTransaction> getTransactionsBy(Portfolio portfolio) {
@@ -171,7 +167,7 @@ public class InstrumentsService {
             return;
         }
 
-        Asset asset = assetRepository.findBySymbol(indentifier.name()).orElse(new Asset());
+        Asset asset = getAssetBySymbol(indentifier.name()).orElse(new Asset());
         asset.setSymbol(indentifier.name());
         asset.setFullName(indentifier.getFullName());
         Optional.ofNullable(assetMetadata.getPriceUsd()).ifPresent(asset::setMarketPrice);
@@ -182,7 +178,8 @@ public class InstrumentsService {
         Optional.ofNullable(assetMetadata.getSupplyTotal()).ifPresent(asset::setTotalSupply);
         Optional.ofNullable(assetMetadata.getTotalMktCapUsd()).ifPresent(asset::setTotalMarketCap);
         Optional.ofNullable(assetMetadata.getLogoUrl()).ifPresent(asset::setImageUrl);
-        assetRepository.save(asset);
+
+        saveAsset(asset);
     }
 //</editor-fold>
 

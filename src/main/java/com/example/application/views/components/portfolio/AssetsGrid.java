@@ -9,7 +9,6 @@ import com.example.application.views.components.custom.display.PercentageBadge;
 import com.example.application.views.components.utils.common.GridUtils;
 import com.example.application.views.pages.crypto.AssetDetailsView;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.contextmenu.MenuItem;
@@ -111,7 +110,7 @@ public class AssetsGrid extends Div {
         grid.setColumnReorderingAllowed(true);
         grid.addItemClickListener(row -> {
             System.out.println(row.getItem());
-            UI.getCurrent().navigate(AssetDetailsView.class, row.getItem().getSymbol().toUpperCase());
+            getUI().ifPresent(ui -> ui.navigate(AssetDetailsView.class, row.getItem().getSymbol().toUpperCase()));
         });
 
         setHiddenRowCount(0);

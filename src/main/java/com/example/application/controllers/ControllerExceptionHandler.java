@@ -19,7 +19,7 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(UsernameNotFoundException.class)
     public ResponseEntity<Object> handleMethodArgumentNotValid(UsernameNotFoundException e, WebRequest request) {
-        return new ResponseEntity<>(getBody(request, e, HttpStatus.NOT_FOUND), HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(body(request, e, HttpStatus.NOT_FOUND), HttpStatus.NOT_FOUND);
     }
 
 //    @ExceptionHandler({
@@ -29,10 +29,10 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
 //    })
     @ExceptionHandler(UsernameTakenException.class)
     public ResponseEntity<Object> handleExceptionsBadRequest(MethodArgumentNotValidException e, WebRequest request) {
-        return new ResponseEntity<>(getBody(request, e, HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(body(request, e, HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
     }
 
-    private Map<String, Object> getBody(WebRequest request, Exception exception, HttpStatus status) {
+    private Map<String, Object> body(WebRequest request, Exception exception, HttpStatus status) {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("timestamp", LocalDateTime.now());
         body.put("status", status.value());

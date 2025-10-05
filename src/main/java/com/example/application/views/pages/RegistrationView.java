@@ -20,9 +20,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 @PageTitle("Registration")
 @Route(value = "register")
 @CssImport("./themes/light_theme/styles/page-styles/auth-pages.css")
-public class RegistrationView extends AbstractPage implements HasNotifications {
+public class RegistrationView extends DefaultPage implements HasNotifications {
 
-    private static final Logger logger = LoggerFactory.getLogger(RegistrationView.class);
+    private static final Logger log = LoggerFactory.getLogger(RegistrationView.class);
 
     private final Binder<User> binder;
     private final RegisterForm registerForm;
@@ -39,7 +39,7 @@ public class RegistrationView extends AbstractPage implements HasNotifications {
     }
 
     public void initContent() {
-        logger.info("Accessed registration page");
+        log.info("Accessed registration page");
         setId("register-page");
 
         H2 title = new H2("Register");
@@ -56,16 +56,16 @@ public class RegistrationView extends AbstractPage implements HasNotifications {
     }
 
     private void addSubmitListener() {
-        registerForm.getSubmitBtn().addClickListener(e -> {
-            logger.info("Clicked");
+        registerForm.getSubmitBtn().addClickListener(l -> {
+            log.info("Clicked");
             if (binder.validate().isOk()) {
-                showSuccessfulNotification("User created successfully!");
                 User user = binder.getBean();
-                logger.info("User '{}' created successfully", user.getUsername());
                 userService.createNewUser(user);
+                log.info("User '{}' created successfully", user.getUsername());
+                showSuccessfulNotification("User created successfully!");
                 getUI().ifPresent(ui -> ui.navigate(LoginView.class));
             } else {
-                logger.warn("Submitted Registration Form with validation errors");
+                log.error("Submitted Registration Form with validation errors");
                 showErrorNotification("Submitted Registration Form with validation errors");
             }
         });

@@ -3,7 +3,7 @@ package com.example.application.views.pages.crypto.calculator;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.views.layouts.MainLayout;
-import com.example.application.views.pages.AbstractPage;
+import com.example.application.views.pages.DefaultPage;
 import com.example.application.views.pages.crypto.calculator.tabs.ProfitEmulatorTab;
 import com.example.application.views.pages.crypto.calculator.tabs.SellProfitTab;
 import com.example.application.views.pages.crypto.calculator.tabs.StakingProfitTab;
@@ -17,7 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @PermitAll
 @PageTitle("Calculator")
 @Route(value = "calculator", layout = MainLayout.class)
-public class AssetCalculatorView extends AbstractPage {
+public class AssetCalculatorView extends DefaultPage {
 
     private final InstrumentsFacadeService instrumentsFacadeService;
     private final PortfolioPerformanceTracker portfolioPerformanceTracker;

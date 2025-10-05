@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /*
- * TODO: Understand which one to use AssetPricingLayout or BuySellForm
+ * TODO: Understand which one to use AssetPricingLayout or BuySellLayout
  *   - if this one, then refactor -> remove last method "getAssetMarketPrice()"
  * */
 

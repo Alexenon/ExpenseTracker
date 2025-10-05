@@ -9,7 +9,7 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 @AnonymousAllowed
 @PageTitle("Policy")
 @Route(value = "policy", layout = MainLayout.class)
-public class PolicyView extends AbstractPage {
+public class PolicyView extends DefaultPage {
 
     public PolicyView() {
         add(body());

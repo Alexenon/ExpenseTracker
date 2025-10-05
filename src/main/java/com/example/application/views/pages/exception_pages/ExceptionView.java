@@ -1,7 +1,7 @@
 package com.example.application.views.pages.exception_pages;
 
 import com.example.application.views.components.custom.ErrorContainer;
-import com.example.application.views.pages.AbstractPage;
+import com.example.application.views.pages.DefaultPage;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.ErrorParameter;
 import com.vaadin.flow.router.HasErrorParameter;
@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 
 @AnonymousAllowed
-public abstract class ExceptionView<T extends Exception> extends AbstractPage implements HasErrorParameter<T> {
+public abstract class ExceptionView<T extends Exception> extends DefaultPage implements HasErrorParameter<T> {
 
     private static final Logger log = LoggerFactory.getLogger(ExceptionView.class);
 

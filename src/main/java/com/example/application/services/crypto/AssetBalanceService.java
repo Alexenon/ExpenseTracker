@@ -7,6 +7,7 @@ import com.example.application.entities.crypto.Portfolio;
 import com.example.application.repositories.crypto.AssetBalanceRepository;
 import com.example.application.utils.common.lang.MathUtils;
 import com.example.application.utils.common.lang.NumberUtils;
+import com.example.application.utils.exceptions.InternalUnexpectedException;
 import com.example.application.utils.exceptions.InvalidBalanceAmountException;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,7 @@ public class AssetBalanceService {
     private AssetBalanceRepository repository;
 
     // TODO: [URGENT] FIND A WAY TO EXTRACT THIS FROM DATABASE WITHOUT ANY EXCEPTIONS
+    // TODO: DO WE NEED THIS READONLY ? MAKE SURE THAT EVERYTIME WE CALL IT ITS ALREADY SAFE
     @NotNull
     @Transactional(readOnly = true)
     public List<AssetBalance> getAssetBalancesByPortfolioWithNonZeroAmount(@NotNull Portfolio portfolio) {
@@ -52,8 +54,12 @@ public class AssetBalanceService {
 
     @Transactional
     public AssetBalance save(@NotNull AssetBalance assetBalance) {
-        validateAssetBalance(assetBalance);
-        return repository.save(assetBalance);
+        try {
+            validateAssetBalance(assetBalance);
+            return repository.save(assetBalance);
+        } catch (Exception e) {
+            throw new InternalUnexpectedException(e);
+        }
     }
 
     @Transactional
