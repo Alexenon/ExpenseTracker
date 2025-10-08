@@ -5,6 +5,14 @@ public class NumberUtils {
     private NumberUtils() {
         // Constructor not needed
     }
+    
+    public static boolean isPriceInvalid(double price) {
+        return Double.isNaN(price) || Double.isInfinite(price) || price < 0;
+    }
+
+    public static boolean isAmountInvalid(double amount) {
+        return Double.isNaN(amount) || Double.isInfinite(amount) || amount < 0;
+    }
 
     public static double checkDouble(double value) {
         if (Double.isNaN(value))
@@ -12,9 +20,6 @@ public class NumberUtils {
 
         if (Double.isInfinite(value))
             throw new IllegalArgumentException("Invalid number: value is inifite");
-
-        if (value >= Double.MAX_VALUE || value <= Double.MIN_VALUE)
-            throw new IllegalArgumentException("Invalid number: value exceeds the allowed DOUBLE range");
 
         return value;
     }

@@ -42,7 +42,7 @@ public class AssetService {
             log.info("Saved successfully {}", asset);
             return saved;
         } catch (Exception e) {
-            log.error("Failed to save asset, cause: {}", e.getMessage());
+            log.error("Failed to save {}, cause: {}", asset, e.getMessage());
             ExceptionUtils.printRootCauseStackTrace(e);
             throw new InternalUnexpectedException(e);
         }

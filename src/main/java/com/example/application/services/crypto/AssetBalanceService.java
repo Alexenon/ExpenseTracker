@@ -29,7 +29,6 @@ public class AssetBalanceService {
     private AssetBalanceRepository repository;
 
     // TODO: [URGENT] FIND A WAY TO EXTRACT THIS FROM DATABASE WITHOUT ANY EXCEPTIONS
-    // TODO: DO WE NEED THIS READONLY ? MAKE SURE THAT EVERYTIME WE CALL IT ITS ALREADY SAFE
     public List<AssetBalance> findHoldingsByPortfolio(@NotNull Portfolio portfolio) {
         Objects.requireNonNull(portfolio, "portfolio");
 //        return repository.findByPortfolioWithNonZeroAmount(portfolio.getId());
@@ -49,8 +48,9 @@ public class AssetBalanceService {
     @Transactional
     public AssetBalance createNew(@NotNull Portfolio portfolio, @NotNull Asset asset) {
         AssetBalance assetBalance = new AssetBalance();
-        assetBalance.setPortfolio(Objects.requireNonNull(portfolio, "portfolio"));
-        assetBalance.setAsset(Objects.requireNonNull(asset, "asset"));
+        assetBalance.setPortfolio(portfolio);
+        assetBalance.setAsset(asset);
+        validate(assetBalance);
         return save(assetBalance);
     }
 
@@ -61,13 +61,13 @@ public class AssetBalanceService {
         updateAvgBuySellPrice(assetBalance, transaction);
         assetBalance.setAmount(calculateAmountAfterSupply(assetBalance, transaction));
         assetBalance.setCost(calculateTotalCost(transaction, assetBalance));
-        assetBalance.setLastTimeUpdated(LocalDateTime.now());
 
         return save(assetBalance);
     }
 
     @Transactional
     private AssetBalance save(@NotNull AssetBalance assetBalance) {
+        assetBalance.setLastTimeUpdated(LocalDateTime.now());
         try {
             return repository.save(assetBalance);
         } catch (Exception e) {
@@ -110,10 +110,10 @@ public class AssetBalanceService {
 
     private static void validate(AssetBalance assetBalance) {
         Objects.requireNonNull(assetBalance, "assetBalance");
-        Objects.requireNonNull(assetBalance.getAsset(), "assetBalance asset");
-        Objects.requireNonNull(assetBalance.getPortfolio(), "assetBalance portfolio");
-        Objects.requireNonNull(assetBalance.getCreatedAt(), "assetBalance createdAt");
-        Objects.requireNonNull(assetBalance.getLastTimeUpdated(), "assetBalance lastTimeUpdated");
+        Assert.notNull(assetBalance.getAsset(), "assetBalance asset");
+        Assert.notNull(assetBalance.getPortfolio(), "assetBalance portfolio");
+        Assert.notNull(assetBalance.getCreatedAt(), "assetBalance createdAt");
+        Assert.notNull(assetBalance.getLastTimeUpdated(), "assetBalance lastTimeUpdated");
 
         Assert.isTrue(assetBalance.getAmount() >= 0, "amount cannot be negative");
         Assert.isTrue(assetBalance.getHoldingDays() >= 0, "holdingDays cannot be negative");

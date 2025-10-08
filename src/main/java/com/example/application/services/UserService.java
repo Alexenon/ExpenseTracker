@@ -11,7 +11,6 @@ import com.example.application.utils.exceptions.auth.UsernameTakenException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -107,8 +106,7 @@ public class UserService implements UserDetailsService {
             log.info("Saved successfully {}", savedUser);
             return savedUser;
         } catch (Exception e) {
-            log.error("Failed to save user, cause: {}", e.getMessage());
-            ExceptionUtils.printRootCauseStackTrace(e);
+            log.error("Failed to save {}, cause: {}", user, e.getMessage());
             throw new InternalUnexpectedException(e);
         }
     }

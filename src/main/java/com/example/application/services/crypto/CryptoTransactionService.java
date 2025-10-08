@@ -9,7 +9,6 @@ import com.example.application.repositories.crypto.CryptoTransactionRepository;
 import com.example.application.utils.exceptions.InternalUnexpectedException;
 import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -66,8 +65,7 @@ public class CryptoTransactionService {
             log.info("Saved successfully {}", savedTransaction);
             return savedTransaction;
         } catch (Exception e) {
-            log.error("Failed to save transaction, cause: {}", e.getMessage());
-            ExceptionUtils.printRootCauseStackTrace(e);
+            log.error("Failed to save {}, cause: {}", transaction, e.getMessage());
             throw new InternalUnexpectedException(e);
         }
     }

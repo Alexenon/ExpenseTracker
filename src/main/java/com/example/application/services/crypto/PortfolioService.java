@@ -8,7 +8,6 @@ import com.example.application.utils.common.lang.StringUtils;
 import com.example.application.utils.exceptions.InternalUnexpectedException;
 import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,8 +39,7 @@ public class PortfolioService {
             log.info("Saved successfully {}", savedPortfolio);
             return savedPortfolio;
         } catch (Exception e) {
-            log.error("Failed to save portfolio, cause: {}", e.getMessage());
-            ExceptionUtils.printRootCauseStackTrace(e);
+            log.error("Failed to save {}, cause: {}", portfolio, e.getMessage());
             throw new InternalUnexpectedException(e);
         }
     }
