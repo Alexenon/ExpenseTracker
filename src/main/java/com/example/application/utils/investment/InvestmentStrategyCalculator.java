@@ -64,7 +64,7 @@ public class InvestmentStrategyCalculator {
 
     private static void printSell(double totalInvestAmount, List<Double> pricesToBuy, List<Double> amountToBuy, double sellPrice) {
         System.out.printf("Invest Amount for %s: $%.2f\n", COIN_NAME, totalInvestAmount);
-        AtomicReference<Double> totalProfit = new AtomicReference<>((double) 0);
+        AtomicReference<Double> totalProfit = new AtomicReference<>(0.0);
 
         IntStream.range(0, pricesToBuy.size()).forEach(i -> {
             double buyPrice = pricesToBuy.get(i);

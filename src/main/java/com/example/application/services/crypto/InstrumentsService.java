@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -136,17 +137,17 @@ public class InstrumentsService {
         return assetBalanceService.findHoldingsByPortfolio(portfolio);
     }
 
-//    public List<AssetBalance> getAssetsWithNonZeroAmount(@NotNull List<Portfolio> portfolios) {
-//        return assetBalanceService.getAssetBalancesByPortfolioWithNonZeroAmount(portfolios);
-//    }
-
-    public List<AssetBalance> getBalancesForUser(@NotNull User user) {
+    public List<AssetBalance> getBalances(@NotNull User user) {
         Objects.requireNonNull(user, "user");
-
-        List<Portfolio> portfolios = user.getPortfolios();
-        return null; // TODO: HERE
+        return assetBalanceService.findByPortfolios(user.getPortfolios());
     }
 
+    // TODO: THis should be extracted from database
+    public Map<Asset, List<AssetBalance>> getBalancesGroupedByAsset(@NotNull User user) {
+        return getBalances(user)
+                .stream()
+                .collect(Collectors.groupingBy(AssetBalance::getAsset, Collectors.toList()));
+    }
 
     /*
      * PORTFOLIOS
@@ -160,13 +161,23 @@ public class InstrumentsService {
      * PORTFOLIO BALANCES
      * */
     @NotNull
+    public List<AssetBalance> getAssetBalancesByPortfolio(@NotNull Portfolio portfolio) {
+        return assetBalanceService.findByPortfolio(portfolio);
+    }
+
+    @NotNull
+    public List<AssetBalance> getAssetBalancesByPortfolios(@NotNull List<Portfolio> portfolios) {
+        return assetBalanceService.findByPortfolios(portfolios);
+    }
+
+    @NotNull
     public Optional<AssetBalance> getAssetBalancesByPortfolioAndAsset(@NotNull Portfolio portfolio, @NotNull Asset asset) {
         return assetBalanceService.findByPortfolioAndAsset(portfolio, asset);
     }
 
     @NotNull
-    public List<AssetBalance> getAssetBalancesByPortfolio(@NotNull Portfolio portfolio) {
-        return assetBalanceService.findByPortfolio(portfolio);
+    public List<AssetBalance> getAssetBalancesByPortfoliosAndAsset(@NotNull List<Portfolio> portfolios, @NotNull Asset asset) {
+        return assetBalanceService.findByPortfoliosAndAsset(portfolios, asset);
     }
 
     //<editor-fold desc="METADATA">

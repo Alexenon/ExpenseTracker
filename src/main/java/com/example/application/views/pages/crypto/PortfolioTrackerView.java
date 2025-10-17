@@ -3,6 +3,7 @@ package com.example.application.views.pages.crypto;
 import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.AssetBalance;
 import com.example.application.entities.crypto.CryptoTransaction;
+import com.example.application.entities.crypto.Portfolio;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.utils.common.formatters.CommonFormatters;
@@ -44,7 +45,6 @@ import java.util.stream.Collectors;
             [!] Total Trading Volume
             [!] Gainers vs Loosers (How many assets are now in profit VS aren't)
         => Chart
-            [!] Add chart options -> byCost, byWorth
             [!] Fix chart categories to not display 0 values
  * */
 
@@ -56,6 +56,7 @@ import java.util.stream.Collectors;
 @JavaScript("https://fastly.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js")
 public class PortfolioTrackerView extends DefaultPage implements RebuildablePage, BeforeEnterObserver, BeforeLeaveObserver, PriceChangeblePage {
 
+    private final Portfolio portfolio;
     private final PriceChangeHandler priceChangeHandler;
     private final InstrumentsFacadeService instrumentsFacadeService;
     private final PortfolioPerformanceTracker portfolioPerformanceTracker;
@@ -73,7 +74,10 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
         this.instrumentsFacadeService = instrumentsFacadeService;
         this.portfolioPerformanceTracker = portfolioPerformanceTracker;
         this.priceChangeHandler = priceChangeHandler;
-        this.assetsGrid = new AssetsGrid(instrumentsFacadeService, portfolioPerformanceTracker);
+
+        this.portfolio = instrumentsFacadeService.getAuthenticatedUserMainPortfolio();
+
+        this.assetsGrid = new AssetsGrid(portfolio, instrumentsFacadeService, portfolioPerformanceTracker);
         this.assetsChart = new AssetsChart(instrumentsFacadeService, portfolioPerformanceTracker);
         this.transactionsGrid = new TransactionsGrid(instrumentsFacadeService);
         this.ui = UI.getCurrent();
@@ -131,22 +135,22 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
     }
 
     private void updateGridItems() {
-        List<Asset> assets = instrumentsFacadeService.getAssetsWithNonZeroAmount()
+        List<Asset> assets = instrumentsFacadeService.getAssetsWithNonZeroAmount(portfolio)
                 .stream()
                 .map(AssetBalance::getAsset)
                 .toList();
 
         assetsGrid.setItems(assets);
-        transactionsGrid.setItems(instrumentsFacadeService.getAllTransactions());
+        transactionsGrid.setItems(instrumentsFacadeService.getTransactions(portfolio));
     }
 
     private Section headerSection() {
         Section section = new Section();
         section.addClassName("asset-details-header");
 
-        NumericValueParagraph worth = new NumericValueParagraph(portfolioPerformanceTracker.getPortfolioWorth(), CommonFormatters.CURRENCY);
-        double profit = portfolioPerformanceTracker.getPortfolioTotalProfit();
-        double percentage = portfolioPerformanceTracker.getPortfolioProfitPercentage();
+        NumericValueParagraph worth = new NumericValueParagraph(portfolioPerformanceTracker.getPortfolioWorth(portfolio), CommonFormatters.CURRENCY);
+        double profit = portfolioPerformanceTracker.getPortfolioTotalProfit(portfolio);
+        double percentage = portfolioPerformanceTracker.getPortfolioProfitPercentage(portfolio);
         PricePercentageWrapper profitWrapper = new PricePercentageWrapper(profit, percentage);
 
         Container portfolioWorthWrapper = new Container("price-wrapper", worth, profitWrapper);
@@ -157,7 +161,7 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
         addTransactionBtn.addClassName("add-entity-btn");
         addTransactionBtn.setIconAfterText(false);
         addTransactionBtn.addClickListener(e -> {
-            AddTransactionDialog dialog = new AddTransactionDialog(instrumentsFacadeService);
+            AddTransactionDialog dialog = new AddTransactionDialog(portfolio, instrumentsFacadeService);
             dialog.open();
             dialog.addSaveBtnClickListener(l -> rebuildPage());
         });
@@ -166,7 +170,7 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
         importBtn.addClassName("add-entity-btn");
         importBtn.setIconAfterText(false);
         importBtn.addClickListener(e -> {
-            ImportTransactionsDialog dialog = new ImportTransactionsDialog(instrumentsFacadeService);
+            ImportTransactionsDialog dialog = new ImportTransactionsDialog(instrumentsFacadeService, portfolio);
             dialog.open();
 //            dialog.addSaveBtnClickListener(l -> rebuildPage());
         });
@@ -175,7 +179,7 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
         exportBtn.addClassName("add-entity-btn");
         exportBtn.setIconAfterText(false);
         exportBtn.addClickListener(e -> {
-            ExportTransactionDialog dialog = new ExportTransactionDialog(instrumentsFacadeService);
+            ExportTransactionDialog dialog = new ExportTransactionDialog(instrumentsFacadeService, portfolio);
             dialog.open();
         });
 
@@ -202,18 +206,18 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
         H3 title = new H3("Portfolio Statistics");
         title.setClassName("section-title");
 
-        double totalProfit = portfolioPerformanceTracker.getPortfolioTotalProfit();
-        String nrOfAssets = String.valueOf(instrumentsFacadeService.getAssetsWithNonZeroAmount().size());
-        String realized = CommonFormatters.CURRENCY.format(portfolioPerformanceTracker.getPortfolioRealizedProfit());
-        String unrealized = CommonFormatters.CURRENCY.format(portfolioPerformanceTracker.getPortfolioUnrealizedProfit());
-        String avgTimeHolding = String.format("%.1f days", portfolioPerformanceTracker.getPortfolioAverageHoldingDays());
-        String ratio = portfolioPerformanceTracker.getPortfolioBuySellRatio();
+        double totalProfit = portfolioPerformanceTracker.getPortfolioTotalProfit(portfolio);
+        String nrOfAssets = String.valueOf(instrumentsFacadeService.getAssetsWithNonZeroAmount(portfolio).size());
+        String realized = CommonFormatters.CURRENCY.format(portfolioPerformanceTracker.getPortfolioRealizedProfit(portfolio));
+        String unrealized = CommonFormatters.CURRENCY.format(portfolioPerformanceTracker.getPortfolioUnrealizedProfit(portfolio));
+        String avgTimeHolding = String.format("%.1f days", portfolioPerformanceTracker.getPortfolioAverageHoldingDays(portfolio));
+        String ratio = portfolioPerformanceTracker.getPortfolioBuySellRatio(portfolio);
 
         Div totalWorth = new PortfolioStatsDisplay("Total Worth",
-                CommonFormatters.CURRENCY.format(portfolioPerformanceTracker.getPortfolioWorth()),
+                CommonFormatters.CURRENCY.format(portfolioPerformanceTracker.getPortfolioWorth(portfolio)),
                 "Total value of all your holdings based on the latest price");
         Div totalCost = new PortfolioStatsDisplay("Total Cost",
-                CommonFormatters.CURRENCY.format(portfolioPerformanceTracker.getPortfolioCost()),
+                CommonFormatters.CURRENCY.format(portfolioPerformanceTracker.getPortfolioCost(portfolio)),
                 "Total amount of dollars invested to buy all the assets");
         Div numberOfAssets = new PortfolioStatsDisplay("No. of Assets", nrOfAssets,
                 "Current number of assets that are in your portfolio");
@@ -242,7 +246,7 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
     }
 
     private Section performanceSection() {
-        Map<Asset, Double> mostProfitableAssets = getMostProfitableAssetsByProfit();
+        Map<Asset, Double> mostProfitableAssets = portfolioPerformanceTracker.getMostProfitableAssetsByProfit(portfolio);
 
         if (mostProfitableAssets.isEmpty())
             return new Section();
@@ -255,7 +259,7 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
         Asset leastProfitableAsset = Collections.min(mostProfitableAssets.entrySet(), Map.Entry.comparingByValue()).getKey();
 
         // The Assets that are most traded, by NUMBER of trades
-        Map<Asset, Long> assetsNrTransactions = instrumentsFacadeService.getAllTransactions()
+        Map<Asset, Long> assetsNrTransactions = instrumentsFacadeService.getTransactions(portfolio)
                 .stream()
                 .collect(Collectors.groupingBy(CryptoTransaction::getAsset, Collectors.counting()));
 
@@ -276,13 +280,6 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
         return section;
     }
 
-    private Map<Asset, Double> getMostProfitableAssetsByProfit() {
-        return instrumentsFacadeService.getAssetsWithNonZeroAmount()
-                .stream()
-                .map(AssetBalance::getAsset)
-                .collect(Collectors.toMap(asset -> asset, portfolioPerformanceTracker::getAssetTotalProfit, (a, b) -> b));
-    }
-
     private Div createPerformanceItem(String labelText, Asset asset) {
         Div container = new Div();
         container.addClassName("performance-item");
@@ -295,8 +292,8 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
         Image assetImage = new Image(asset.getImageUrl(), asset.getSymbol());
         assetImage.addClassNames("coin-overview-image", "performance-asset-image");
 
-        double profit = portfolioPerformanceTracker.getAssetTotalProfit(asset);
-        double percentageProfit = portfolioPerformanceTracker.getAssetNetProfitPercentage(asset);
+        double profit = portfolioPerformanceTracker.getAssetTotalProfit(portfolio, asset);
+        double percentageProfit = portfolioPerformanceTracker.getAssetNetProfitPercentage(portfolio, asset);
         PricePercentageWrapper pricePercentageWrapper = new PricePercentageWrapper(profit, percentageProfit);
         pricePercentageWrapper.addClassName("performance-values");
 

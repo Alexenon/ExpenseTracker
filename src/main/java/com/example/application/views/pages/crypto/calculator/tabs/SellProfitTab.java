@@ -1,6 +1,7 @@
 package com.example.application.views.pages.crypto.calculator.tabs;
 
 import com.example.application.entities.crypto.Asset;
+import com.example.application.entities.crypto.Portfolio;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.utils.common.formatters.number.PercentageFormatter;
@@ -23,7 +24,6 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.math.BigInteger;
 
@@ -48,9 +48,9 @@ import java.math.BigInteger;
         * [Maybe add a checkbox to give user to exclude placing amount/total cost]
 * */
 
-@Component
 public class SellProfitTab extends BaseCalculatorTab {
 
+    private final Portfolio portfolio;
     private final PortfolioPerformanceTracker portfolioPerformanceTracker;
 
     private final AssetComboBox assetSymbolField;
@@ -64,6 +64,9 @@ public class SellProfitTab extends BaseCalculatorTab {
         super("Sell profit calculator", instrumentsFacadeService);
         this.portfolioPerformanceTracker = portfolioPerformanceTracker;
         this.assetSymbolField = new AssetComboBox(instrumentsFacadeService);
+        // TODO: {?} Maybe here should be the latest portfolio selected
+        //  or here can be information collected across all portfolios - slower performance btw
+        this.portfolio = instrumentsFacadeService.getAuthenticatedUserMainPortfolio();
     }
 
     @Override
@@ -72,19 +75,14 @@ public class SellProfitTab extends BaseCalculatorTab {
     }
 
     private void buildForm() {
-        initializeFields();
         initializeFieldsValues();
         initializeFieldsListeners();
     }
 
-    private void initializeFields() {
-
-    }
-
     private void initializeFieldsValues() {
         Asset selectedAsset = assetSymbolField.getValue();
-        double averageBuyPrice = portfolioPerformanceTracker.getAverageBuyPrice(selectedAsset);
-        double amountOfTokens = assetSymbolField.getAmountTokens();
+        double averageBuyPrice = portfolioPerformanceTracker.getAverageBuyPrice(portfolio, selectedAsset);
+        double amountOfTokens = assetSymbolField.getAmountTokens(portfolio);
         amountField.setValue(amountOfTokens);
         buyPriceField.setValue(averageBuyPrice);
         sellPriceField.setValue(assetSymbolField.getMarketPrice());

@@ -1,5 +1,6 @@
 package com.example.application.views.pages.crypto.calculator.tabs;
 
+import com.example.application.entities.crypto.Portfolio;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.utils.common.formatters.number.AmountFormatter;
 import com.example.application.utils.common.formatters.number.CurrencyFormatter;
@@ -21,6 +22,8 @@ public final class StakingProfitTab extends BaseCalculatorTab {
     private static final AmountFormatter amountFormatter = AmountFormatter.withDefaults();
     private static final CurrencyFormatter currencyFormatter = CurrencyFormatter.withDefaults();
 
+    private final Portfolio portfolio;
+
     private final AssetComboBox assetSymbolField;
     private final AmountField amountField = new AmountField("Amount of tokens");
     private final CurrencyField worthField = new CurrencyField("Current total worth");
@@ -30,6 +33,7 @@ public final class StakingProfitTab extends BaseCalculatorTab {
     public StakingProfitTab(InstrumentsFacadeService instrumentsFacadeService) {
         super("Staking calculator", instrumentsFacadeService);
         this.assetSymbolField = new AssetComboBox(instrumentsFacadeService);
+        this.portfolio = instrumentsFacadeService.getAuthenticatedUserMainPortfolio();
     }
 
     @Override
@@ -49,7 +53,7 @@ public final class StakingProfitTab extends BaseCalculatorTab {
 
     private void initializeFieldsListeners() {
         assetSymbolField.addValueChangeListener(field -> {
-            double amountTokens = assetSymbolField.getAmountTokens();
+            double amountTokens = assetSymbolField.getAmountTokens(portfolio);
             amountField.setValue(amountTokens);
             amountField.setSuffixComponent(new Span(assetSymbolField.getSymbol()));
             worthField.setValue(amountTokens * assetSymbolField.getMarketPrice());

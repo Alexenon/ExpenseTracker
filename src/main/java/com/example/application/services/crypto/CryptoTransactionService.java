@@ -59,7 +59,7 @@ public class CryptoTransactionService {
         validate(transaction);
 
         try {
-            updateTransactionQuantity(transaction);
+            updateQuantityIfRequired(transaction);
             updateAssetBalance(transaction);
             CryptoTransaction savedTransaction = transactionRepository.save(transaction);
             log.info("Saved successfully {}", savedTransaction);
@@ -85,7 +85,7 @@ public class CryptoTransactionService {
     /**
      * Sets order quantity in case it's missing in the transaction itself
      */
-    private void updateTransactionQuantity(@NotNull CryptoTransaction transaction) {
+    private void updateQuantityIfRequired(@NotNull CryptoTransaction transaction) {
         if (transaction.getOrderQuantity() > 0)
             return;
 
@@ -104,6 +104,8 @@ public class CryptoTransactionService {
     private void validate(CryptoTransaction transaction) {
         Objects.requireNonNull(transaction, "Transaction is missing");
         Assert.notNull(transaction.getAsset(), "Asset is missing");
+        Assert.notNull(transaction.getType(), "Type is missing");
+        Assert.notNull(transaction.getPortfolio(), "Portfolio is missing");
         Assert.notNull(transaction.getDateTime(), "DateTime is missing");
         Assert.isTrue(transaction.getMarketPrice() > 0, "Price should be above 0");
         Assert.isTrue(transaction.getOrderTotalCost() > 0, "Order cost should be above 0");

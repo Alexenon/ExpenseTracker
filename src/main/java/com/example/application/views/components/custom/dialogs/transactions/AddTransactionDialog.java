@@ -3,6 +3,7 @@ package com.example.application.views.components.custom.dialogs.transactions;
 import com.example.application.entities.common.TransactionType;
 import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.CryptoTransaction;
+import com.example.application.entities.crypto.Portfolio;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.utils.common.formatters.CommonFormatters;
 import com.example.application.views.components.core.Container;
@@ -33,6 +34,7 @@ import java.util.function.Consumer;
 //  - Ideally should be revisted this form design, with a more complex solution -> sliders, % and $, deposit...
 public class AddTransactionDialog extends Dialog implements HasNotifications {
 
+    private final Portfolio portfolio;
     private final CryptoTransaction transaction;
     private final InstrumentsFacadeService instrumentsFacadeService;
     private final Binder<CryptoTransaction> binder = new Binder<>(CryptoTransaction.class);
@@ -50,11 +52,11 @@ public class AddTransactionDialog extends Dialog implements HasNotifications {
     private final Span symbolSuffix = new Span();
 
     @Autowired
-    public AddTransactionDialog(InstrumentsFacadeService instrumentsFacadeService) {
+    public AddTransactionDialog(Portfolio portfolio, InstrumentsFacadeService instrumentsFacadeService) {
+        this.portfolio = portfolio;
         this.instrumentsFacadeService = instrumentsFacadeService;
         this.assetSymbolField = new AssetComboBox(instrumentsFacadeService);
-        this.transaction = new CryptoTransaction();
-
+        this.transaction = defaultTransaction();
         buildForm();
     }
 
@@ -84,6 +86,7 @@ public class AddTransactionDialog extends Dialog implements HasNotifications {
         typeField.setLabel("Transaction Type");
         typeField.setItems(TransactionType.values());
     }
+
     private void initializeFieldValues() {
         assetSymbolField.setValue("");
         typeField.setValue(TransactionType.BUY);
@@ -159,21 +162,21 @@ public class AddTransactionDialog extends Dialog implements HasNotifications {
         binder.forField(amountField)
                 .asRequired("Please fill this field")
                 .withConverter(new FlexibleAmountConvertor())
-                .withValidator(new DoubleRangeValidator("Invalid decimal value", (double) 0, Double.MAX_VALUE))
+                .withValidator(new DoubleRangeValidator("Invalid decimal value", 0.0, Double.MAX_VALUE))
                 .withValidator(amount -> amount > 0, "Amount should be bigger than 0")
                 .bind(CryptoTransaction::getOrderQuantity, CryptoTransaction::setOrderQuantity);
 
         binder.forField(marketPriceField)
                 .asRequired("Please fill this field")
                 .withConverter(new FlexiblePriceConvertor())
-                .withValidator(new DoubleRangeValidator("Invalid decimal value", (double) 0, Double.MAX_VALUE))
+                .withValidator(new DoubleRangeValidator("Invalid decimal value", 0.0, Double.MAX_VALUE))
                 .withValidator(price -> price > 0, "Market price should be bigger than 0")
                 .bind(CryptoTransaction::getMarketPrice, CryptoTransaction::setMarketPrice);
 
         binder.forField(totalCostField)
                 .asRequired("Please fill this field")
                 .withConverter(new FlexiblePriceConvertor())
-                .withValidator(new DoubleRangeValidator("Invalid decimal value", (double) 0, Double.MAX_VALUE))
+                .withValidator(new DoubleRangeValidator("Invalid decimal value", 0.0, Double.MAX_VALUE))
                 .withValidator(price -> price >= 1, "Total price should be at least one dollar")
                 .bind(CryptoTransaction::getOrderTotalCost, CryptoTransaction::setOrderTotalCost);
 
@@ -194,9 +197,15 @@ public class AddTransactionDialog extends Dialog implements HasNotifications {
 
     private void updateFieldHelperTexts() {
         String formatedPrice = CommonFormatters.CURRENCY.format(assetSymbolField.getMarketPrice());
-        String formatedAmount = CommonFormatters.AMOUNT.format(assetSymbolField.getAmountTokens());
+        String formatedAmount = CommonFormatters.AMOUNT.format(assetSymbolField.getAmountTokens(portfolio));
         marketPriceField.setHelperText("Current price: %s".formatted(formatedPrice));
         amountField.setHelperText("Currently you have %s %s".formatted(formatedAmount, assetSymbolField.getSymbol()));
+    }
+
+    private CryptoTransaction defaultTransaction() {
+        CryptoTransaction newTransaction = new CryptoTransaction();
+        newTransaction.setPortfolio(portfolio);
+        return newTransaction;
     }
 
 }

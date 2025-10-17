@@ -119,14 +119,14 @@ public class EditTransactionModelDialog extends Dialog implements HasNotificatio
         binder.forField(amountField)
                 .asRequired("Please fill this field")
                 .withConverter(new FlexibleAmountConvertor())
-                .withValidator(new DoubleRangeValidator("Invalid decimal value", (double) 0, Double.MAX_VALUE))
+                .withValidator(new DoubleRangeValidator("Invalid decimal value", 0.0, Double.MAX_VALUE))
                 .withValidator(amount -> amount > 0, "Amount should be bigger than 0")
                 .bind(TransactionModel::getAmount, TransactionModel::setAmount);
 
         binder.forField(marketPriceField)
                 .asRequired("Please fill this field")
                 .withConverter(new FlexiblePriceConvertor())
-                .withValidator(new DoubleRangeValidator("Invalid decimal value", (double) 0, Double.MAX_VALUE))
+                .withValidator(new DoubleRangeValidator("Invalid decimal value", 0.0, Double.MAX_VALUE))
                 .withValidator(amount -> amount > 0, "Market price should be bigger than 0")
                 .bind(TransactionModel::getPrice, TransactionModel::setPrice);
 

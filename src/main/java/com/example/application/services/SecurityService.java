@@ -31,18 +31,6 @@ public class SecurityService {
         this.userService = userService;
     }
 
-    public Optional<UserDetails> getAuthenticatedUserDetails() {
-        SecurityContext context = SecurityContextHolder.getContext();
-        Authentication authentication = context.getAuthentication();
-
-        if (authentication == null)
-            throw new UnauthenticatedUserException("Coudn't manage to receive authentication. Please re-login");
-
-        return authentication.getPrincipal() instanceof UserDetails userDetails
-                ? Optional.of(userDetails)
-                : Optional.empty();
-    }
-
     @NotNull
     public User getAuthenticatedUser() {
         String username = getAuthenticatedUserDetails()
@@ -55,6 +43,18 @@ public class SecurityService {
 
     public boolean isCurrentUserAuthenticated() {
         return getAuthenticatedUserDetails().isPresent();
+    }
+
+    private Optional<UserDetails> getAuthenticatedUserDetails() {
+        SecurityContext context = SecurityContextHolder.getContext();
+        Authentication authentication = context.getAuthentication();
+
+        if (authentication == null)
+            throw new UnauthenticatedUserException("Coudn't manage to receive authentication. Please re-login");
+
+        return authentication.getPrincipal() instanceof UserDetails userDetails
+                ? Optional.of(userDetails)
+                : Optional.empty();
     }
 
     public void logout(UI ui) {

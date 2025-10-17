@@ -1,6 +1,7 @@
 package com.example.application.views.components.portfolio;
 
 import com.example.application.entities.crypto.Asset;
+import com.example.application.entities.crypto.Portfolio;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.utils.common.formatters.CommonFormatters;
@@ -45,6 +46,12 @@ import java.util.function.ToDoubleFunction;
                 - cursor: not-allowed;
             [?] grid.setMultiSort(true, MultiSortPriority.APPEND);
 
+
+    // TODO: [URGENT]
+        - Maybe instead of using here Asset everywhere, to use AssetBalance ?
+            + contains all information required for this grid
+            + doesn't need to pass portfolio everytime
+
      Optimize:
         [!!] REMOVE certain columns from ColumnSelector instead of HIDING
     _____________________________________________________________________________________________________________
@@ -57,6 +64,7 @@ public class AssetsGrid extends Div {
     private static final String MISSING_DATA_SIGN = "-";
     private static final int DEFAULT_NUMBER_OF_COLUMNS_VISIBLE = 8;
 
+    private Portfolio portfolio;
     private final InstrumentsFacadeService instrumentsFacadeService;
     private final PortfolioPerformanceTracker portfolioPerformanceTracker;
 
@@ -75,9 +83,11 @@ public class AssetsGrid extends Div {
     private Grid.Column<AssetGridItem> realizedCol;
     private Grid.Column<AssetGridItem> unrealizedCol;
 
-    public AssetsGrid(InstrumentsFacadeService instrumentsFacadeService,
+    public AssetsGrid(Portfolio portfolio,
+                      InstrumentsFacadeService instrumentsFacadeService,
                       PortfolioPerformanceTracker portfolioPerformanceTracker)
     {
+        this.portfolio = portfolio;
         this.instrumentsFacadeService = instrumentsFacadeService;
         this.portfolioPerformanceTracker = portfolioPerformanceTracker;
 
@@ -385,6 +395,10 @@ public class AssetsGrid extends Div {
         hideAssetsCheckbox.setValue(false);
     }
 
+    public void setPortfolio(Portfolio portfolio) {
+        this.portfolio = portfolio;
+    }
+
     public void setItems(List<Asset> assets) {
         this.assets = assets;
         dataView = grid.setItems(getConvertedGridItems());
@@ -400,8 +414,8 @@ public class AssetsGrid extends Div {
         return assets.stream()
                 .map(asset -> {
                     double currentPrice = asset.getMarketPrice();
-                    double avgBuy = portfolioPerformanceTracker.getAverageBuyPrice(asset);
-                    double avgSell = portfolioPerformanceTracker.getAverageSellPrice(asset);
+                    double avgBuy = portfolioPerformanceTracker.getAverageBuyPrice(portfolio, asset);
+                    double avgSell = portfolioPerformanceTracker.getAverageSellPrice(portfolio, asset);
 
                     // TODO: [LONG TERM] Add volume column for: today, this week, this month, this year, total
                     return AssetGridItem.builder()
@@ -409,19 +423,19 @@ public class AssetsGrid extends Div {
                             .name(asset.getFullName())
                             .imageUrl(asset.getImageUrl())
                             .price(currentPrice)
-                            .tokenAmount(instrumentsFacadeService.getAmountOfTokens(asset))
+                            .tokenAmount(instrumentsFacadeService.getAmountOfTokens(portfolio, asset))
                             .priceChangesPercentage24h(asset.getChangePercentage())
-                            .closestBuy(instrumentsFacadeService.getClosestBuyWatcherPrice(asset))
-                            .closestSell(instrumentsFacadeService.getClosestSellWatcherPrice(asset))
+                            .closestBuy(instrumentsFacadeService.getClosestBuyWatcherPrice(portfolio, asset))
+                            .closestSell(instrumentsFacadeService.getClosestSellWatcherPrice(portfolio, asset))
                             .avgBuy(avgBuy)
                             .avgSell(avgSell)
                             .avgBuyCompareWithCurrentPrice(avgPriceComparedCurrentPrice(avgBuy, currentPrice))
                             .avgSellCompareWithCurrentPrice(avgPriceComparedCurrentPrice(avgSell, currentPrice))
-                            .realizedProfit(portfolioPerformanceTracker.getAssetRealizedProfit(asset))
-                            .unrealizedProfit(portfolioPerformanceTracker.getAssetUnrealizedProfit(asset))
-                            .totalCost(portfolioPerformanceTracker.getAssetRemainingTokensCost(asset))
-                            .totalWorth(portfolioPerformanceTracker.getAssetWorth(asset))
-                            .diversityPercentage(portfolioPerformanceTracker.getAssetDiversityPercentage(asset))
+                            .realizedProfit(portfolioPerformanceTracker.getAssetRealizedProfit(portfolio, asset))
+                            .unrealizedProfit(portfolioPerformanceTracker.getAssetUnrealizedProfit(portfolio, asset))
+                            .totalCost(portfolioPerformanceTracker.getAssetRemainingTokensCost(portfolio, asset))
+                            .totalWorth(portfolioPerformanceTracker.getAssetWorth(portfolio, asset))
+                            .diversityPercentage(portfolioPerformanceTracker.getAssetDiversityPercentage(portfolio, asset))
                             .build();
                 })
                 .toList();

@@ -2,6 +2,7 @@ package com.example.application.views.components;
 
 import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.AssetWatcher;
+import com.example.application.entities.crypto.Portfolio;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.utils.common.lang.StringUtils;
 import com.example.application.views.components.core.Container;
@@ -37,11 +38,15 @@ public class PriceWatchlistComponent extends Div implements HasNotifications {
     private final Div priceLayoutContainer = new Div();
 
     @Autowired
-    public PriceWatchlistComponent(Asset asset, AssetWatcher.ActionType actionType, InstrumentsFacadeService instrumentsFacadeService) {
+    public PriceWatchlistComponent(Portfolio portfolio,
+                                   Asset asset,
+                                   AssetWatcher.ActionType actionType,
+                                   InstrumentsFacadeService instrumentsFacadeService)
+    {
         this.asset = asset;
         this.actionType = actionType;
         this.instrumentsFacadeService = instrumentsFacadeService;
-        this.userWatchers = instrumentsFacadeService.getAssetWatchersByAssetAndActionType(asset, actionType);
+        this.userWatchers = instrumentsFacadeService.getAssetWatchersByAssetAndActionType(portfolio, asset, actionType);
 
         add(priceLayoutContainer);
         fillComponent();
@@ -75,7 +80,7 @@ public class PriceWatchlistComponent extends Div implements HasNotifications {
         private final Checkbox markAsCompleted = new Checkbox("Mark as completed");
         // FIXME: Invalid vaadin checkbox version, most probably broken by Add On
         private final Container checkboxContainer = new Container("centered-row", markAsCompleted, new Span("Mark as completed"));
-//        private final DualLabelToggleButton toggleBtn = new DualLabelToggleButton("$", "%");
+        //        private final DualLabelToggleButton toggleBtn = new DualLabelToggleButton("$", "%");
         private final Button saveBtn = new Button("Save");
         private final Button deleteBtn = new Button("Delete");
         private final Button editBtn = new Button(LumoIcon.EDIT.create());
@@ -120,10 +125,6 @@ public class PriceWatchlistComponent extends Div implements HasNotifications {
             status.setClassName("watchlist-status");
             saveBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
             deleteBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_ERROR);
-
-//            toggleBtn.addClickListener(e -> {
-//                System.out.println(toggleBtn.isChecked());
-//            });
 
             saveBtn.addClickListener(event -> {
                 System.out.println("isDraft = " + isDraft);

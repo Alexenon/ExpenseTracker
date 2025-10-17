@@ -119,7 +119,7 @@ public class TransactionDetailsDialog extends Dialog {
                 .addComponent(new PricePercentageWrapper(usdProfit, percentageProfit))
                 .build();
 
-        double tokensAmount = instrumentsFacadeService.getAmountOfTokens(asset);
+        double tokensAmount = instrumentsFacadeService.getAmountOfTokens(transaction.getPortfolio(), asset);
 
         return Container.builder("transaction-details-card")
                 .addComponents(profitLossContainer)

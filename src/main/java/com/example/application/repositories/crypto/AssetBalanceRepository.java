@@ -14,7 +14,11 @@ public interface AssetBalanceRepository extends JpaRepository<AssetBalance, Long
 
     List<AssetBalance> findByPortfolio(Portfolio portfolio);
 
+//    List<AssetBalance> findByPortfoliosUnique(List<Portfolio> portfolios);
+
     Optional<AssetBalance> findByPortfolioAndAsset(Portfolio portfolio, Asset asset);
+
+//    List<AssetBalance> findByPortfoliosAndAsset(List<Portfolio> portfolios, Asset asset);
 
 //    @Query(value = """
 //            SELECT * FROM asset_balances ab

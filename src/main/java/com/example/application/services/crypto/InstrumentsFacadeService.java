@@ -53,9 +53,9 @@ public class InstrumentsFacadeService {
         return instrumentsService.getAssetBySymbol(symbolName);
     }
 
-    public double getAmountOfTokens(Asset asset) {
+    public double getAmountOfTokens(Portfolio portfolio, Asset asset) {
         return Optional.ofNullable(asset)
-                .flatMap(this::getAssetBalanceByAsset)
+                .flatMap(a -> getAssetBalanceByAsset(portfolio, asset))
                 .map(AssetBalance::getAmount)
                 .orElse(Double.NaN);
     }
@@ -77,44 +77,38 @@ public class InstrumentsFacadeService {
         instrumentsService.updateMarkAssetAsFavorite(getAuthenticatedUser(), asset, markedAsFavorite);
     }
 
-    public List<AssetBalance> getAssetsWithNonZeroAmount() {
-        return instrumentsService.getAssetsWithNonZeroAmount(getAuthenticatedUserMainPortfolio());
-    }
-
     public List<AssetBalance> getAssetsWithNonZeroAmount(Portfolio portfolio) {
         return instrumentsService.getAssetsWithNonZeroAmount(portfolio);
     }
 
-    public List<Asset> getAllAssetsEverBought() {
-        return getAllTransactions()
+    public List<Asset> getAllAssetsEverBought(Portfolio portfolio) {
+        return getTransactions(portfolio)
                 .stream()
                 .filter(CryptoTransaction::isBuyTransaction)
                 .map(CryptoTransaction::getAsset)
                 .distinct()
                 .toList();
     }
-
     //</editor-fold>
 
     //<editor-fold desc="TRANSACTIONS">
-    public List<CryptoTransaction> getAllTransactions() {
-        return instrumentsService.getTransactionsBy(getAuthenticatedUserMainPortfolio());
+    public List<CryptoTransaction> getTransactions(Portfolio portfolio) {
+        return instrumentsService.getTransactionsBy(portfolio);
     }
 
-    public List<CryptoTransaction> getTransactionsByAsset(Asset asset) {
-        return instrumentsService.getTransactionsBy(getAuthenticatedUserMainPortfolio(), asset);
+    public List<CryptoTransaction> getTransactions(Portfolio portfolio, LocalDate from) {
+        return getTransactions(portfolio, from, LocalDate.now());
     }
 
-    public List<CryptoTransaction> getTransactions(LocalDate from) {
-        return getTransactions(from, LocalDate.now());
+    public List<CryptoTransaction> getTransactions(Portfolio portfolio, LocalDate from, LocalDate to) {
+        return instrumentsService.getTransactionsBy(portfolio, from, to);
     }
 
-    public List<CryptoTransaction> getTransactions(LocalDate from, LocalDate to) {
-        return instrumentsService.getTransactionsBy(getAuthenticatedUserMainPortfolio(), from, to);
+    public List<CryptoTransaction> getTransactionsByAsset(Portfolio portfolio, Asset asset) {
+        return instrumentsService.getTransactionsBy(portfolio, asset);
     }
 
     public CryptoTransaction saveTransaction(CryptoTransaction transaction) {
-        transaction.setPortfolio(getAuthenticatedUserMainPortfolio());
         return instrumentsService.saveTransaction(transaction);
     }
 
@@ -125,7 +119,6 @@ public class InstrumentsFacadeService {
 
     //<editor-fold desc="ASSET WATCHERS">
     public AssetWatcher saveAssetWatcher(AssetWatcher assetWatcher) {
-        assetWatcher.setPortfolio(getAuthenticatedUserMainPortfolio());
         return instrumentsService.saveAssetWatcher(assetWatcher);
     }
 
@@ -133,16 +126,16 @@ public class InstrumentsFacadeService {
         instrumentsService.deleteAssetWatcher(assetWatcher);
     }
 
-    public List<AssetWatcher> getAssetWatchersByAsset(Asset asset) {
-        return instrumentsService.getAssetWatchersByAsset(getAuthenticatedUserMainPortfolio(), asset);
+    public List<AssetWatcher> getAssetWatchersByAsset(Portfolio portfolio, Asset asset) {
+        return instrumentsService.getAssetWatchersByAsset(portfolio, asset);
     }
 
-    public List<AssetWatcher> getAssetWatchersByAssetAndActionType(Asset asset, AssetWatcher.ActionType actionType) {
-        return instrumentsService.getAssetWatchersByAssetAndActionType(getAuthenticatedUserMainPortfolio(), asset, actionType);
+    public List<AssetWatcher> getAssetWatchersByAssetAndActionType(Portfolio portfolio, Asset asset, AssetWatcher.ActionType actionType) {
+        return instrumentsService.getAssetWatchersByAssetAndActionType(portfolio, asset, actionType);
     }
 
-    public double getClosestBuyWatcherPrice(Asset asset) {
-        return getAssetWatchersByAssetAndActionType(asset, AssetWatcher.ActionType.BUY)
+    public double getClosestBuyWatcherPrice(Portfolio portfolio, Asset asset) {
+        return getAssetWatchersByAssetAndActionType(portfolio, asset, AssetWatcher.ActionType.BUY)
                 .stream()
                 .filter(assetWatcher -> !assetWatcher.isCompleted())
                 .map(AssetWatcher::getTarget)
@@ -150,8 +143,8 @@ public class InstrumentsFacadeService {
                 .orElse(0.0);
     }
 
-    public double getClosestSellWatcherPrice(Asset asset) {
-        return getAssetWatchersByAssetAndActionType(asset, AssetWatcher.ActionType.SELL)
+    public double getClosestSellWatcherPrice(Portfolio portfolio, Asset asset) {
+        return getAssetWatchersByAssetAndActionType(portfolio, asset, AssetWatcher.ActionType.SELL)
                 .stream()
                 .filter(assetWatcher -> !assetWatcher.isCompleted())
                 .map(AssetWatcher::getTarget)
@@ -161,17 +154,26 @@ public class InstrumentsFacadeService {
     //</editor-fold>
 
     //<editor-fold desc="PORTFOLIO BALANCES">
-    public List<AssetBalance> getAssetBalances() {
-        return instrumentsService.getAssetBalancesByPortfolio(getAuthenticatedUserMainPortfolio());
+    public List<AssetBalance> getAssetBalances(Portfolio portfolio) {
+        return instrumentsService.getAssetBalancesByPortfolio(portfolio);
     }
 
-    public Optional<AssetBalance> getAssetBalanceByAsset(Asset asset) {
-        return instrumentsService.getAssetBalancesByPortfolioAndAsset(getAuthenticatedUserMainPortfolio(), asset);
+    public List<AssetBalance> getAssetBalancesForPortfolios(List<Portfolio> portfolios) {
+        return instrumentsService.getAssetBalancesByPortfolios(portfolios);
     }
 
     public Optional<AssetBalance> getAssetBalanceByAsset(Portfolio portfolio, Asset asset) {
         return instrumentsService.getAssetBalancesByPortfolioAndAsset(portfolio, asset);
     }
+
+    public List<AssetBalance> getAssetBalancesByAsset(List<Portfolio> portfolios, Asset asset) {
+        return instrumentsService.getAssetBalancesByPortfoliosAndAsset(portfolios, asset);
+    }
+
+//    public Optional<AssetBalance> getAssetBalanceByAsset(List<Portfolio> portfolios, Asset asset) {
+//        return instrumentsService.getAssetBalancesByPortfolioAndAsset(portfolio, asset);
+//    }
+
     //</editor-fold>
 
     // TODO: [URGENT] -> FILTER BY MAIN PORTFOLIO
@@ -183,8 +185,12 @@ public class InstrumentsFacadeService {
         return instrumentsService.getPortfoliosByUser(user)
                 .stream()
                 .findFirst()
-                .orElseThrow(() -> new InternalUnexpectedException("User '%s' doesn't have MAIN portfolio"
+                .orElseThrow(() -> new InternalUnexpectedException("User '%s' doesn't have any portfolios"
                         .formatted(user.getUsername())));
+    }
+
+    public List<Portfolio> getPortfolios() {
+        return instrumentsService.getPortfoliosByUser(getAuthenticatedUser());
     }
 
     @NotNull

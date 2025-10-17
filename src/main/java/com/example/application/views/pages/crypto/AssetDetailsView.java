@@ -2,6 +2,7 @@ package com.example.application.views.pages.crypto;
 
 import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.AssetWatcher;
+import com.example.application.entities.crypto.Portfolio;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.utils.common.formatters.CommonFormatters;
@@ -53,6 +54,7 @@ import java.util.Objects;
 @Route(value = "asset", layout = MainLayout.class)
 public class AssetDetailsView extends DefaultPage implements HasUrlParameter<String>, RebuildablePage, BeforeEnterObserver, BeforeLeaveObserver, PriceChangeblePage {
 
+    private final Portfolio portfolio;
     private final PriceChangeHandler priceChangeHandler;
     private final InstrumentsFacadeService instrumentsFacadeService;
     private final PortfolioPerformanceTracker portfolioPerformanceTracker;
@@ -63,14 +65,16 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
     private Asset asset;
 
     @Autowired
-    public AssetDetailsView(InstrumentsFacadeService instrumentsFacadeService,
+    public AssetDetailsView(Portfolio portfolio,
+                            InstrumentsFacadeService instrumentsFacadeService,
                             PortfolioPerformanceTracker portfolioPerformanceTracker,
                             PriceChangeHandler priceChangeHandler)
     {
+        this.portfolio = portfolio;
         this.instrumentsFacadeService = instrumentsFacadeService;
         this.portfolioPerformanceTracker = portfolioPerformanceTracker;
         this.priceChangeHandler = priceChangeHandler;
-        this.addTransactionDialog = new AddTransactionDialog(instrumentsFacadeService);
+        this.addTransactionDialog = new AddTransactionDialog(portfolio, instrumentsFacadeService);
         this.ui = UI.getCurrent();
     }
 
@@ -277,23 +281,23 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
                 })
                 .build();
 
-        double assetCost = portfolioPerformanceTracker.getAssetRemainingTokensCost(asset);
-        double assetWorth = portfolioPerformanceTracker.getAssetWorth(asset);
-        double assetProfitLoss = portfolioPerformanceTracker.getAssetTotalProfit(asset);
-        double assetRealized = portfolioPerformanceTracker.getAssetRealizedProfit(asset);
-        double assetUnrealized = portfolioPerformanceTracker.getAssetUnrealizedProfit(asset);
-        double profitLossPercentage = portfolioPerformanceTracker.getAssetNetProfitPercentage(asset);
-        int assetDiversityPercentage = portfolioPerformanceTracker.getAssetDiversityPercentage(asset);
+        double assetCost = portfolioPerformanceTracker.getAssetRemainingTokensCost(portfolio, asset);
+        double assetWorth = portfolioPerformanceTracker.getAssetWorth(portfolio, asset);
+        double assetProfitLoss = portfolioPerformanceTracker.getAssetTotalProfit(portfolio, asset);
+        double assetRealized = portfolioPerformanceTracker.getAssetRealizedProfit(portfolio, asset);
+        double assetUnrealized = portfolioPerformanceTracker.getAssetUnrealizedProfit(portfolio, asset);
+        double profitLossPercentage = portfolioPerformanceTracker.getAssetNetProfitPercentage(portfolio, asset);
+        int assetDiversityPercentage = portfolioPerformanceTracker.getAssetDiversityPercentage(portfolio, asset);
 
         NumericValueParagraph costValue = new NumericValueParagraph(assetCost, CommonFormatters.CURRENCY);
         NumericValueParagraph worthValue = new NumericValueParagraph(assetWorth, CommonFormatters.CURRENCY);
         PricePercentageWrapper profitLossContainer = new PricePercentageWrapper(assetProfitLoss, profitLossPercentage);
         profitLossContainer.setPercentageBadgeBackground(false);
 
-        String ratio = portfolioPerformanceTracker.getAssetBuySellRatio(asset);
+        String ratio = portfolioPerformanceTracker.getAssetBuySellRatio(portfolio, asset);
         String[] ratioParts = ratio.split(":");
-        String avgTimeHolding = String.format("%.1f days", portfolioPerformanceTracker.getAssetAverageHoldingDays(asset));
-        String tokensAmount = AmountFormatter.withDefaults().format(instrumentsFacadeService.getAmountOfTokens(asset), asset);
+        String avgTimeHolding = String.format("%.1f days", portfolioPerformanceTracker.getAssetHoldingDays(portfolio, asset));
+        String tokensAmount = AmountFormatter.withDefaults().format(instrumentsFacadeService.getAmountOfTokens(portfolio, asset), asset);
 
         Div body = new Div();
         body.addClassName("section-card-wrapper");
@@ -370,7 +374,7 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
     }
 
     private Div createWatchlistSection(AssetWatcher.ActionType actionType) {
-        PriceWatchlistComponent watchlistComponent = new PriceWatchlistComponent(asset, actionType, instrumentsFacadeService);
+        PriceWatchlistComponent watchlistComponent = new PriceWatchlistComponent(portfolio, asset, actionType, instrumentsFacadeService);
 
         Container header = Container.builder("section-header")
                 .addComponent(() -> {
@@ -401,7 +405,7 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
 
     private Section transactionHistorySection() {
         TransactionsGrid transactionsGrid = new TransactionsGrid(instrumentsFacadeService);
-        transactionsGrid.setItems(instrumentsFacadeService.getTransactionsByAsset(asset));
+        transactionsGrid.setItems(instrumentsFacadeService.getTransactionsByAsset(portfolio, asset));
         transactionsGrid.setPageSize(10);
         transactionsGrid.addUpdateItemListener(l -> rebuildPage());
 
@@ -412,7 +416,7 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
         addTransactionBtn.setIconAfterText(false);
         addTransactionBtn.addClickListener(e -> {
             addTransactionDialog.open();
-            transactionsGrid.setItems(instrumentsFacadeService.getTransactionsByAsset(asset));
+            transactionsGrid.setItems(instrumentsFacadeService.getTransactionsByAsset(portfolio, asset));
         });
         Button seeAllTransactionsBtn = new Button("See all transactions");
         Container buttonsContainer = new Container("header-buttons", addTransactionBtn, seeAllTransactionsBtn);

@@ -7,6 +7,10 @@ import org.springframework.stereotype.Component;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
+/*
+* TODO: [URGENT] Update name to "PriceChangeNotifier"
+*  Add here a small javadoc why this component is required
+* */
 @Slf4j
 @Component
 public class PriceChangeHandler {
@@ -16,27 +20,27 @@ public class PriceChangeHandler {
     public void addObserver(UI ui, PriceChangeblePage page) {
         Objects.requireNonNull(page, "price changeble price");
         if (ui == null || !ui.isAttached()) {
-            log.debug("UI is null or detached, the page is not added as observer");
+            log.debug("UI is null or detached, the UI is not added as observer");
             return;
         }
 
-        pages.put(ui, page);
         ui.addDetachListener(e -> removeObserver(ui));
-        log.debug("Added page, size: {}", pages.size());
+        pages.put(ui, page);
+        log.debug("Added UI, size: {}", pages.size());
     }
 
     public void removeObserver(UI ui) {
         pages.remove(ui);
-        log.debug("Removed page, size: {}", pages.size());
+        log.debug("Removed UI, size: {}", pages.size());
     }
 
     public void updatePagePrices() {
-        log.debug("Starting updating {} pages", pages.size());
+        log.debug("Starting updating {} UI's", pages.size());
         for (UI ui : pages.keySet()) {
             PriceChangeblePage page = pages.get(ui);
             ui.access(page::updatePage);
         }
-        log.debug("Finished updating {} pages", pages.size());
+        log.debug("Finished updating {} UI's", pages.size());
     }
 
 }

@@ -2,6 +2,7 @@ package com.example.application.views.components.custom.dialogs.transactions.exp
 
 import com.example.application.data.dtos.migration.TransactionModel;
 import com.example.application.entities.crypto.CryptoTransaction;
+import com.example.application.entities.crypto.Portfolio;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.utils.common.parsers.CSVParser;
 import com.example.application.views.components.core.Container;
@@ -17,6 +18,7 @@ import com.vaadin.flow.component.select.Select;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 
 public class ExportTransactionDialog extends Dialog implements HasNotifications {
 
@@ -28,10 +30,12 @@ public class ExportTransactionDialog extends Dialog implements HasNotifications 
     private final DatePicker to = new DatePicker("To");
     private final Download download = new Download();
 
+    private final Portfolio portfolio;
     private List<CryptoTransaction> transactions;
 
-    public ExportTransactionDialog(InstrumentsFacadeService instrumentsFacadeService) {
+    public ExportTransactionDialog(InstrumentsFacadeService instrumentsFacadeService, Portfolio portfolio) {
         this.instrumentsFacadeService = instrumentsFacadeService;
+        this.portfolio = Objects.requireNonNull(portfolio, "portfolio");
         initialize();
     }
 
@@ -52,7 +56,7 @@ public class ExportTransactionDialog extends Dialog implements HasNotifications 
             to.setVisible(value.equals("Custom"));
 
             switch (value) {
-                case "All" -> updateDownloadedItems(instrumentsFacadeService.getAllTransactions());
+                case "All" -> updateDownloadedItems(instrumentsFacadeService.getTransactions(portfolio));
                 case "Last month" -> updateDownloadedItems(currentDate.minusMonths(1));
                 case "Last 3 months" -> updateDownloadedItems(currentDate.minusMonths(3));
                 case "Last 6 months" -> updateDownloadedItems(currentDate.minusMonths(6));
@@ -84,7 +88,7 @@ public class ExportTransactionDialog extends Dialog implements HasNotifications 
     }
 
     public void updateDownloadedItems(LocalDate from, LocalDate to) {
-        updateDownloadedItems(instrumentsFacadeService.getTransactions(from, to));
+        updateDownloadedItems(instrumentsFacadeService.getTransactions(portfolio, from, to));
     }
 
     public void updateDownloadedItems(List<CryptoTransaction> transactions) {

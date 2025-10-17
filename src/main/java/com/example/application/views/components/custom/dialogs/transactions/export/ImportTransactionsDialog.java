@@ -2,6 +2,7 @@ package com.example.application.views.components.custom.dialogs.transactions.exp
 
 import com.example.application.data.dtos.migration.TransactionModel;
 import com.example.application.entities.common.TransactionType;
+import com.example.application.entities.crypto.Portfolio;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.utils.common.formatters.CommonFormatters;
 import com.example.application.utils.common.parsers.CSVParser;
@@ -63,10 +64,12 @@ public class ImportTransactionsDialog extends Dialog implements HasNotifications
     private final Button cancelButton = new Button("Cancel", e -> this.close());
     private final Button closeBtn = new Button(LumoIcon.CROSS.create(), e -> this.close());
 
+    private final Portfolio portfolio;
     private List<TransactionModel> transactions = new ArrayList<>();
 
-    public ImportTransactionsDialog(@Lazy InstrumentsFacadeService instrumentsFacadeService) {
+    public ImportTransactionsDialog(@Lazy InstrumentsFacadeService instrumentsFacadeService, Portfolio portfolio) {
         this.instrumentsFacadeService = instrumentsFacadeService;
+        this.portfolio = Objects.requireNonNull(portfolio, "portfolio");
         initialize();
     }
 
@@ -177,6 +180,7 @@ public class ImportTransactionsDialog extends Dialog implements HasNotifications
         saveButton.setVisible(false);
         saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
         saveButton.addClickListener(e -> {
+            // TODO: [URGENT] Save these transactions
         });
         getFooter().add(saveButton, cancelButton);
     }

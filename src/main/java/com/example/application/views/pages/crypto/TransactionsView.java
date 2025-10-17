@@ -1,5 +1,6 @@
 package com.example.application.views.pages.crypto;
 
+import com.example.application.entities.crypto.Portfolio;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.views.components.TransactionsGrid;
 import com.example.application.views.layouts.MainLayout;
@@ -14,19 +15,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Route(value = "transactions", layout = MainLayout.class)
 public class TransactionsView extends DefaultPage {
 
+    private final Portfolio portfolio;
     private final InstrumentsFacadeService instrumentsFacadeService;
 
     private final TransactionsGrid transactionsGrid;
 
     @Autowired
-    public TransactionsView(InstrumentsFacadeService instrumentsFacadeService) {
+    public TransactionsView(Portfolio portfolio, InstrumentsFacadeService instrumentsFacadeService) {
+        this.portfolio = portfolio;
         this.instrumentsFacadeService = instrumentsFacadeService;
         this.transactionsGrid = new TransactionsGrid(instrumentsFacadeService);
         buildPage();
     }
 
     private void buildPage() {
-        transactionsGrid.setItems(instrumentsFacadeService.getAllTransactions());
+        transactionsGrid.setItems(instrumentsFacadeService.getTransactions(portfolio));
         add(transactionsGrid);
     }
 

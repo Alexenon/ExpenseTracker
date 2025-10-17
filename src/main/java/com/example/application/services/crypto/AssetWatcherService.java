@@ -9,6 +9,7 @@ import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
 
 import java.util.List;
 import java.util.Objects;
@@ -32,7 +33,7 @@ public class AssetWatcherService {
     @NotNull
     @Transactional
     public AssetWatcher save(@NotNull AssetWatcher assetWatcher) {
-        Objects.requireNonNull(assetWatcher, "assetWatcher");
+        validate(assetWatcher);
         try {
             return assetWatcherRepository.save(assetWatcher);
         } catch (Exception e) {
@@ -76,5 +77,13 @@ public class AssetWatcherService {
         return assetWatcherRepository.findByPortfolioAndAssetAndActionType(portfolio, asset, actionType);
     }
 
+    private void validate(AssetWatcher assetWatcher) {
+        Objects.requireNonNull(assetWatcher, "assetWatcher");
+        Assert.notNull(assetWatcher.getAsset(), "Asset is missing");
+        Assert.notNull(assetWatcher.getPortfolio(), "Portfolio is missing");
+        Assert.notNull(assetWatcher.getActionType(), "ActionType is missing");
+        Assert.notNull(assetWatcher.getTargetType(), "TargetType is missing");
+        Assert.isTrue(assetWatcher.getTargetAmount() >= 0, "amount cannot be negative");
+    }
 
 }

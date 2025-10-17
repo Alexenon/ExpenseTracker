@@ -3,6 +3,7 @@ package com.example.application.views.pages.crypto.calculator.tabs;
 import com.example.application.entities.common.TransactionType;
 import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.CryptoTransaction;
+import com.example.application.entities.crypto.Portfolio;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.utils.investment.ProfitCalculator;
@@ -60,6 +61,7 @@ import java.util.List;
 @Slf4j
 public class ProfitEmulatorTab extends BaseCalculatorTab {
 
+    private final Portfolio portfolio;
 	private final InstrumentsFacadeService instrumentsFacadeService;
 	private final PortfolioPerformanceTracker portfolioPerformanceTracker;
 
@@ -76,6 +78,7 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
 		this.instrumentsFacadeService = instrumentsFacadeService;
 		this.portfolioPerformanceTracker = portfolioPerformanceTracker;
 		this.assetSymbolField = new AssetComboBox(instrumentsFacadeService);
+        this.portfolio = instrumentsFacadeService.getAuthenticatedUserMainPortfolio();
 	}
 
 	@Override
@@ -104,7 +107,7 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
 		addNewLayoutBtn.addClickListener(e -> createNewLayout());
 		addNewLayoutBtn.addClassName("add-entity-btn");
 
-		TransactionalLayout defaultLayout = new TransactionalLayout(instrumentsFacadeService, portfolioPerformanceTracker);
+		TransactionalLayout defaultLayout = new TransactionalLayout(portfolio, instrumentsFacadeService, portfolioPerformanceTracker);
 		defaultLayout.addClassName("buy-sell-layout");
 		transactionalLayouts.add(defaultLayout);
 		layoutsContainer.add(defaultLayout);
@@ -195,7 +198,7 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
 	}
 
 	private void createNewLayout() {
-		TransactionalLayout newLayout = new TransactionalLayout(instrumentsFacadeService, portfolioPerformanceTracker);
+		TransactionalLayout newLayout = new TransactionalLayout(portfolio, instrumentsFacadeService, portfolioPerformanceTracker);
 		newLayout.addClassName("buy-sell-layout");
 
 		MonoIcon deleteBtn = PictogramIcon.TRASH_CAN_OUTLINE.create();

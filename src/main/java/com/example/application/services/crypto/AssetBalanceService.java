@@ -5,6 +5,7 @@ import com.example.application.entities.crypto.AssetBalance;
 import com.example.application.entities.crypto.CryptoTransaction;
 import com.example.application.entities.crypto.Portfolio;
 import com.example.application.repositories.crypto.AssetBalanceRepository;
+import com.example.application.utils.common.lang.CollectionUtils;
 import com.example.application.utils.common.lang.MathUtils;
 import com.example.application.utils.common.lang.NumberUtils;
 import com.example.application.utils.exceptions.InternalUnexpectedException;
@@ -36,13 +37,27 @@ public class AssetBalanceService {
     }
 
     public List<AssetBalance> findByPortfolio(@NotNull Portfolio portfolio) {
-        return repository.findByPortfolio(Objects.requireNonNull(portfolio, "portfolio"));
+        Objects.requireNonNull(portfolio, "portfolio");
+        return repository.findByPortfolio(portfolio);
+    }
+
+    public List<AssetBalance> findByPortfolios(@NotNull List<Portfolio> portfolios) {
+        CollectionUtils.requireNotEmpty(portfolios, "portfolios");
+        return null;
+//        return repository.findByPortfoliosUnique(portfolios);
     }
 
     public Optional<AssetBalance> findByPortfolioAndAsset(@NotNull Portfolio portfolio, @NotNull Asset asset) {
         Objects.requireNonNull(portfolio, "portfolio");
         Objects.requireNonNull(asset, "asset");
         return repository.findByPortfolioAndAsset(portfolio, asset);
+    }
+
+    public List<AssetBalance> findByPortfoliosAndAsset(@NotNull List<Portfolio> portfolios, @NotNull Asset asset) {
+        CollectionUtils.requireNotEmpty(portfolios, "portfolios");
+        Objects.requireNonNull(asset, "asset");
+        return null;
+//        return repository.findByPortfoliosAndAsset(portfolios, asset);
     }
 
     @Transactional

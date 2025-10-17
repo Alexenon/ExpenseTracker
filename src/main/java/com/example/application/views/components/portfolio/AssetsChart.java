@@ -2,6 +2,7 @@ package com.example.application.views.components.portfolio;
 
 import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.AssetBalance;
+import com.example.application.entities.crypto.Portfolio;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.utils.common.lang.MathUtils;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class AssetsChart extends Div {
 
+    private Portfolio portfolio;
     private final InstrumentsFacadeService instrumentsFacadeService;
     private final PortfolioPerformanceTracker portfolioPerformanceTracker;
     private final Select<ChartOptions> options = new Select<>();
@@ -69,15 +71,21 @@ public class AssetsChart extends Div {
     }
 
     private Map<String, Double> getChartItems() {
-        Function<Asset, Double> mapper = switch (options.getValue()) {
-            case WORTH -> portfolioPerformanceTracker::getAssetWorth;
-            case INVESTED -> portfolioPerformanceTracker::getAssetRemainingTokensCost;
-        };
-
-        return instrumentsFacadeService.getAssetsWithNonZeroAmount()
+        return instrumentsFacadeService.getAssetsWithNonZeroAmount(portfolio)
                 .stream()
                 .map(AssetBalance::getAsset)
-                .collect(Collectors.toMap(Asset::getSymbol, mapper, (a, b) -> b));
+                .collect(Collectors.toMap(Asset::getSymbol, chartMapper(), (a, b) -> b));
+    }
+
+    private Function<Asset, Double> chartMapper() {
+        return switch (options.getValue()) {
+            case WORTH -> asset -> portfolioPerformanceTracker.getAssetWorth(portfolio, asset);
+            case INVESTED -> asset -> portfolioPerformanceTracker.getAssetRemainingTokensCost(portfolio, asset);
+        };
+    }
+
+    public void setPortfolio(Portfolio portfolio) {
+        this.portfolio = portfolio;
     }
 
     private enum ChartOptions {

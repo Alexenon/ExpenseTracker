@@ -1,6 +1,7 @@
 package com.example.application.views.components.custom.fields;
 
 import com.example.application.entities.crypto.Asset;
+import com.example.application.entities.crypto.Portfolio;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.data.renderer.LitRenderer;
@@ -71,8 +72,8 @@ public class AssetComboBox extends ComboBox<Asset> {
         return extract(Asset::getMarketPrice, 0.0);
     }
 
-    public double getAmountTokens() {
-        return extract(instrumentsFacadeService::getAmountOfTokens, 0.0);
+    public double getAmountTokens(Portfolio portfolio) {
+        return extract(asset -> instrumentsFacadeService.getAmountOfTokens(portfolio, asset), 0.0);
     }
 
     public <R> R extract(Function<Asset, R> getter, R defaultValue) {
