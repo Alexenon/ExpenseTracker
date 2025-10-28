@@ -12,7 +12,7 @@ package com.example.application.views.components;
 
 import com.example.application.entities.common.TransactionType;
 import com.example.application.entities.crypto.Asset;
-import com.example.application.entities.crypto.CryptoTransaction;
+import com.example.application.entities.crypto.Transaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.utils.common.formatters.CommonFormatters;
 import com.example.application.utils.common.formatters.number.AmountFormatter;
@@ -46,8 +46,8 @@ public class TransactionsGrid extends Div {
 
     private final AssetComboBox nameSearchField;
     private final MultiSelectComboBox<TransactionType> typeSearchField = new MultiSelectComboBox<>("Transaction Type");
-    private final Grid<CryptoTransaction> grid = new Grid<>();
-    private final GridListDataView<CryptoTransaction> gridDataView = grid.setItems();
+    private final Grid<Transaction> grid = new Grid<>();
+    private final GridListDataView<Transaction> gridDataView = grid.setItems();
 
     public TransactionsGrid(InstrumentsFacadeService instrumentsFacadeService) {
         this.instrumentsFacadeService = instrumentsFacadeService;
@@ -70,8 +70,8 @@ public class TransactionsGrid extends Div {
         grid.addColumn(t -> t.getAsset().getSymbol()).setHeader("Name").setFrozen(true);
         grid.addColumn(quantityColumnRenderer()).setHeader("Quantity");
         grid.addColumn(priceColumnRenderer()).setHeader("Price");
-        grid.addColumn(priceColumnRenderer(CryptoTransaction::getOrderTotalCost)).setHeader("Total");
-        grid.addColumn(new LocalDateTimeRenderer<>(CryptoTransaction::getDateTime, CommonFormatters.DATE_FRIENDLY_FORMAT)).setHeader("Date");
+        grid.addColumn(priceColumnRenderer(Transaction::getOrderTotalCost)).setHeader("Total");
+        grid.addColumn(new LocalDateTimeRenderer<>(Transaction::getDateTime, CommonFormatters.DATE_FRIENDLY_FORMAT)).setHeader("Date");
         grid.addColumn(profitLossColumnRenderer()).setHeader("Profit/Loss").setFrozenToEnd(true);
         grid.getColumns().forEach(column -> {
             column.setSortable(true);
@@ -109,7 +109,7 @@ public class TransactionsGrid extends Div {
         });
     }
 
-    public void setItems(List<CryptoTransaction> transactions) {
+    public void setItems(List<Transaction> transactions) {
         grid.setItems(Objects.requireNonNull(transactions));
     }
 
@@ -117,14 +117,14 @@ public class TransactionsGrid extends Div {
         grid.setPageSize(size);
     }
 
-    private LitRenderer<CryptoTransaction> priceColumnRenderer() {
-        return LitRenderer.<CryptoTransaction>of("<p class='asset-price'>${item.price}</p>")
+    private LitRenderer<Transaction> priceColumnRenderer() {
+        return LitRenderer.<Transaction>of("<p class='asset-price'>${item.price}</p>")
                 .withProperty("price", t -> CurrencyFormatter.withDefaults().format(t.getMarketPrice()));
     }
 
-    private LitRenderer<CryptoTransaction> quantityColumnRenderer() {
+    private LitRenderer<Transaction> quantityColumnRenderer() {
         AmountFormatter amountFormatter = new AmountFormatter();
-        return LitRenderer.<CryptoTransaction>of("<p class='${item.className}'> ${item.quantity} ${item.symbol}</p>")
+        return LitRenderer.<Transaction>of("<p class='${item.className}'> ${item.quantity} ${item.symbol}</p>")
                 .withProperty("className", t -> t.isBuyTransaction() ? "value-increase" : "value-decrease")
                 .withProperty("quantity", t -> {
                     double quantity = t.getOrderQuantity();
@@ -134,11 +134,11 @@ public class TransactionsGrid extends Div {
                 .withProperty("symbol", t -> t.getAsset().getSymbol());
     }
 
-    private LitRenderer<CryptoTransaction> profitLossColumnRenderer() {
-        return LitRenderer.<CryptoTransaction>of("<div class='transaction-profit-loss ${item.className}'>" +
-                                                 "  <p class='text-l'>${item.profit}</p>" +
-                                                 "  <p class='text-s'>${item.profitPercentage}</p>" +
-                                                 "</div>")
+    private LitRenderer<Transaction> profitLossColumnRenderer() {
+        return LitRenderer.<Transaction>of("<div class='transaction-profit-loss ${item.className}'>" +
+                                           "  <p class='text-l'>${item.profit}</p>" +
+                                           "  <p class='text-s'>${item.profitPercentage}</p>" +
+                                           "</div>")
                 .withProperty("className", this::getProfitLossClassName)
                 .withProperty("profit", transaction -> {
                     double currentPrice = transaction.getAsset().getMarketPrice();
@@ -152,11 +152,11 @@ public class TransactionsGrid extends Div {
                 });
     }
 
-    private NumberRenderer<CryptoTransaction> priceColumnRenderer(ValueProvider<CryptoTransaction, Number> priceProvider) {
+    private NumberRenderer<Transaction> priceColumnRenderer(ValueProvider<Transaction, Number> priceProvider) {
         return new NumberRenderer<>(priceProvider, NumberFormat.getCurrencyInstance(Locale.US), "$0.00");
     }
 
-    private String getProfitLossClassName(CryptoTransaction transaction) {
+    private String getProfitLossClassName(Transaction transaction) {
         double currentPrice = transaction.getAsset().getMarketPrice();
         double profit = ProfitUtils.netProfit(transaction, currentPrice);
 

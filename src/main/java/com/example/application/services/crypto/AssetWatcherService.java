@@ -33,8 +33,8 @@ public class AssetWatcherService {
     @NotNull
     @Transactional
     public AssetWatcher save(@NotNull AssetWatcher assetWatcher) {
-        validate(assetWatcher);
         try {
+            validate(assetWatcher);
             return assetWatcherRepository.save(assetWatcher);
         } catch (Exception e) {
             throw new InternalUnexpectedException(e);

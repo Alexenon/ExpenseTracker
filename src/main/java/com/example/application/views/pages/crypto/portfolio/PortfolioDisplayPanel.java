@@ -1,4 +1,4 @@
-package com.example.application.views.pages.crypto;
+package com.example.application.views.pages.crypto.portfolio;
 
 import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.AssetBalance;
@@ -7,8 +7,6 @@ import com.example.application.entities.crypto.Transaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.utils.common.formatters.CommonFormatters;
-import com.example.application.views.components.PriceChangeHandler;
-import com.example.application.views.components.PriceChangeblePage;
 import com.example.application.views.components.TransactionsGrid;
 import com.example.application.views.components.core.Container;
 import com.example.application.views.components.custom.dialogs.transactions.AddTransactionDialog;
@@ -19,90 +17,52 @@ import com.example.application.views.components.custom.fields.PricePercentageWra
 import com.example.application.views.components.custom.fields.stats.PortfolioStatsDisplay;
 import com.example.application.views.components.portfolio.AssetsChart;
 import com.example.application.views.components.portfolio.AssetsGrid;
-import com.example.application.views.layouts.MainLayout;
-import com.example.application.views.pages.DefaultPage;
-import com.example.application.views.pages.RebuildablePage;
+import com.example.application.views.pages.crypto.AssetDetailsView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.dependency.JavaScript;
-import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.*;
-import com.vaadin.flow.router.*;
 import com.vaadin.flow.theme.lumo.LumoIcon;
-import jakarta.annotation.security.PermitAll;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
-/*
-    TODO:
-        => Info
-            [!] Total Trading Volume
-            [!] Gainers vs Loosers (How many assets are now in profit VS aren't)
-        => Chart
-            [!] Fix chart categories to not display 0 values
- * */
+/**
+ * UI Component required to display information about a certain portfolio
+ */
+public class PortfolioDisplayPanel extends Div {
 
-@Slf4j
-@PermitAll
-@PageTitle("Portfolio Tracker")
-@Route(value = "portfolio", layout = MainLayout.class)
-@JsModule("./themes/light_theme/components/javascript/fillPieChart.js")
-@JavaScript("https://fastly.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js")
-public class PortfolioTrackerView extends DefaultPage implements RebuildablePage, BeforeEnterObserver, BeforeLeaveObserver, PriceChangeblePage {
-
-    private final Portfolio portfolio;
-    private final PriceChangeHandler priceChangeHandler;
     private final InstrumentsFacadeService instrumentsFacadeService;
     private final PortfolioPerformanceTracker portfolioPerformanceTracker;
+    private final Portfolio portfolio;
+
     private final AssetsGrid assetsGrid;
     private final AssetsChart assetsChart;
     private final TransactionsGrid transactionsGrid;
 
-    private final UI ui;
-
     @Autowired
-    public PortfolioTrackerView(InstrumentsFacadeService instrumentsFacadeService,
-                                PortfolioPerformanceTracker portfolioPerformanceTracker,
-                                PriceChangeHandler priceChangeHandler)
+    public PortfolioDisplayPanel(Portfolio portfolio,
+                                 InstrumentsFacadeService instrumentsFacadeService,
+                                 PortfolioPerformanceTracker portfolioPerformanceTracker)
     {
+        this.portfolio = Objects.requireNonNull(portfolio, "portfolio");
         this.instrumentsFacadeService = instrumentsFacadeService;
         this.portfolioPerformanceTracker = portfolioPerformanceTracker;
-        this.priceChangeHandler = priceChangeHandler;
-
-        this.portfolio = instrumentsFacadeService.getAuthenticatedUserMainPortfolio();
-
         this.assetsGrid = new AssetsGrid(portfolio, instrumentsFacadeService, portfolioPerformanceTracker);
         this.assetsChart = new AssetsChart(portfolio, instrumentsFacadeService, portfolioPerformanceTracker);
         this.transactionsGrid = new TransactionsGrid(instrumentsFacadeService);
-        this.ui = UI.getCurrent();
-        initializePage();
+        initialize();
     }
 
-    @Override
-    public void beforeEnter(BeforeEnterEvent event) {
-        buildPage();
-        priceChangeHandler.addObserver(ui, this);
-    }
-
-    @Override
-    public void beforeLeave(BeforeLeaveEvent event) {
-        priceChangeHandler.removeObserver(ui);
-    }
-
-    @Override
-    public void initializePage() {
-        getStyle().set("margin", "100px 30px 30px 30px");
+    private void initialize() {
         initializeGrids();
     }
 
-    @Override
-    public void buildPage() {
+    public void build() {
         add(
                 headerSection(),
                 statisticsSection(),
@@ -113,25 +73,19 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
         updateGridItems();
     }
 
-    @Override
-    public void updatePage() {
-        rebuildPage();
-    }
-
-    @Override
-    public void rebuildPage() {
-        ui.access(() -> {
+    public void rebuild() {
+        getUI().ifPresent(ui -> ui.access(() -> {
             this.removeAll();
-            this.buildPage();
+            this.build();
             assetsChart.updateChartItems();
-        });
+        }));
     }
 
     private void initializeGrids() {
         assetsGrid.setGridFullSize(true);
 
         transactionsGrid.setPageSize(10);
-        transactionsGrid.addUpdateItemListener(l -> rebuildPage());
+        transactionsGrid.addUpdateItemListener(l -> rebuild());
     }
 
     private void updateGridItems() {
@@ -163,7 +117,7 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
         addTransactionBtn.addClickListener(e -> {
             AddTransactionDialog dialog = new AddTransactionDialog(portfolio, instrumentsFacadeService);
             dialog.open();
-            dialog.addSaveBtnClickListener(l -> rebuildPage());
+            dialog.addSaveBtnClickListener(l -> rebuild());
         });
 
         Button importBtn = new Button("Import", LumoIcon.UPLOAD.create());
@@ -172,6 +126,8 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
         importBtn.addClickListener(e -> {
             ImportTransactionsDialog dialog = new ImportTransactionsDialog(portfolio, instrumentsFacadeService);
             dialog.open();
+
+            // TODO: [URGENT] Import should save transactions in batch
 //            dialog.addSaveBtnClickListener(l -> rebuildPage());
         });
 
@@ -189,13 +145,9 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
     }
 
     private Section gridSection(String titleName, Component grid) {
-        Section section = new Section();
-        section.add();
         H3 title = new H3(titleName);
         title.setClassName("section-title");
-
-        section.add(title, grid);
-        return section;
+        return new Section(title, grid);
     }
 
     private Div statisticsSection() {
@@ -246,7 +198,7 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
     }
 
     private Section performanceSection() {
-        Map<Asset, Double> mostProfitableAssets = portfolioPerformanceTracker.getMostProfitableAssetsByProfit(portfolio);
+        Map<Asset, Double> mostProfitableAssets = getMostProfitableAssetsByProfit();
 
         if (mostProfitableAssets.isEmpty())
             return new Section();
@@ -278,6 +230,15 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
 
         section.add(title, body);
         return section;
+    }
+
+    private Map<Asset, Double> getMostProfitableAssetsByProfit() {
+        return instrumentsFacadeService.getAssetsWithNonZeroAmount(portfolio)
+                .stream()
+                .map(AssetBalance::getAsset)
+                .collect(Collectors.toMap(asset -> asset,
+                        asset -> portfolioPerformanceTracker.getAssetTotalProfit(portfolio, asset),
+                        (a, b) -> b));
     }
 
     private Div createPerformanceItem(String labelText, Asset asset) {

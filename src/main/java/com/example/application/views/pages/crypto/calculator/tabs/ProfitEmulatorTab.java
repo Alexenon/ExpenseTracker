@@ -2,8 +2,8 @@ package com.example.application.views.pages.crypto.calculator.tabs;
 
 import com.example.application.entities.common.TransactionType;
 import com.example.application.entities.crypto.Asset;
-import com.example.application.entities.crypto.CryptoTransaction;
 import com.example.application.entities.crypto.Portfolio;
+import com.example.application.entities.crypto.Transaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.utils.investment.ProfitCalculator;
@@ -61,7 +61,7 @@ import java.util.List;
 @Slf4j
 public class ProfitEmulatorTab extends BaseCalculatorTab {
 
-    private final Portfolio portfolio;
+	private final Portfolio portfolio;
 	private final InstrumentsFacadeService instrumentsFacadeService;
 	private final PortfolioPerformanceTracker portfolioPerformanceTracker;
 
@@ -78,7 +78,7 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
 		this.instrumentsFacadeService = instrumentsFacadeService;
 		this.portfolioPerformanceTracker = portfolioPerformanceTracker;
 		this.assetSymbolField = new AssetComboBox(instrumentsFacadeService);
-        this.portfolio = instrumentsFacadeService.getAuthenticatedUserMainPortfolio();
+		this.portfolio = instrumentsFacadeService.getAuthenticatedUserMainPortfolio();
 	}
 
 	@Override
@@ -111,7 +111,7 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
 		defaultLayout.addClassName("buy-sell-layout");
 		transactionalLayouts.add(defaultLayout);
 		layoutsContainer.add(defaultLayout);
-        add(metadataDetailsContainer);
+		add(metadataDetailsContainer);
 
 		return new Div(assetSymbolField, layoutsContainer, addNewLayoutBtn);
 	}
@@ -120,7 +120,7 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
 	protected Button createDisplayResultsBtn() {
 		Button button = new Button("Calculate", e -> {
 			String symbol = assetSymbolField.getSymbol();
-			List<CryptoTransaction> transactions = getListOfTransactions();
+			List<Transaction> transactions = getListOfTransactions();
 
 			double price = assetSymbolField.getSelectedAsset().getMarketPrice();
 			double avgBuy = ProfitCalculator.averageBuyPrice(transactions);
@@ -212,7 +212,7 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
 		layoutsContainer.add(newLayout);
 	}
 
-	private List<CryptoTransaction> getListOfTransactions() {
+	private List<Transaction> getListOfTransactions() {
 		return transactionalLayouts.stream()
 				.map(layout -> {
 					Asset selectedAsset = assetSymbolField.getSelectedAsset();
@@ -220,7 +220,7 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
 					double orderTotalCost = layout.getTotalCostField().doubleValue();
 					TransactionType type = layout.getTypeField().getValue();
 
-					return new CryptoTransaction(selectedAsset, marketPrice, orderTotalCost, type);
+					return new Transaction(selectedAsset, marketPrice, orderTotalCost, type);
 				}).toList();
 	}
 

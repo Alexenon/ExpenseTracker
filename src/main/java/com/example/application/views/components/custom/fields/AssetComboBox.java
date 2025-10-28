@@ -15,7 +15,6 @@ import java.util.function.Function;
 public class AssetComboBox extends ComboBox<Asset> {
 
     private final InstrumentsFacadeService instrumentsFacadeService;
-
     @Autowired
     public AssetComboBox(InstrumentsFacadeService instrumentsFacadeService) {
         this.instrumentsFacadeService = instrumentsFacadeService;
@@ -30,8 +29,10 @@ public class AssetComboBox extends ComboBox<Asset> {
     }
 
     public void setValue(String symbol) {
-        Asset asset = instrumentsFacadeService.getAssetBySymbol(symbol)
+        Asset asset = Optional.ofNullable(symbol)
+                .flatMap(a -> instrumentsFacadeService.getAssetBySymbol(symbol))
                 .orElse(null);
+
         setValue(asset);
     }
 

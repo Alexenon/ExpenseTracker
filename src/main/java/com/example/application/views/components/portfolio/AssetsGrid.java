@@ -64,7 +64,7 @@ public class AssetsGrid extends Div {
     private static final String MISSING_DATA_SIGN = "-";
     private static final int DEFAULT_NUMBER_OF_COLUMNS_VISIBLE = 8;
 
-    private Portfolio portfolio;
+    private final Portfolio portfolio;
     private final InstrumentsFacadeService instrumentsFacadeService;
     private final PortfolioPerformanceTracker portfolioPerformanceTracker;
 
@@ -393,10 +393,6 @@ public class AssetsGrid extends Div {
         setHiddenRowCount(0);
         searchField.setValue("");
         hideAssetsCheckbox.setValue(false);
-    }
-
-    public void setPortfolio(Portfolio portfolio) {
-        this.portfolio = portfolio;
     }
 
     public void setItems(List<Asset> assets) {

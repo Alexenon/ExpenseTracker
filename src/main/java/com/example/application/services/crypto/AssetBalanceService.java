@@ -2,8 +2,8 @@ package com.example.application.services.crypto;
 
 import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.AssetBalance;
-import com.example.application.entities.crypto.CryptoTransaction;
 import com.example.application.entities.crypto.Portfolio;
+import com.example.application.entities.crypto.Transaction;
 import com.example.application.repositories.crypto.AssetBalanceRepository;
 import com.example.application.utils.common.lang.CollectionUtils;
 import com.example.application.utils.common.lang.MathUtils;
@@ -70,7 +70,7 @@ public class AssetBalanceService {
     }
 
     @Transactional
-    public AssetBalance update(@NotNull AssetBalance assetBalance, @NotNull CryptoTransaction transaction) {
+    public AssetBalance update(@NotNull AssetBalance assetBalance, @NotNull Transaction transaction) {
         validate(assetBalance);
 
         updateAvgBuySellPrice(assetBalance, transaction);
@@ -90,12 +90,12 @@ public class AssetBalanceService {
         }
     }
 
-    private static double calculateTotalCost(CryptoTransaction transaction, AssetBalance assetBalance) {
+    private static double calculateTotalCost(Transaction transaction, AssetBalance assetBalance) {
         double newCost = MathUtils.withSign(transaction.getOrderTotalCost(), transaction.isBuyTransaction());
         return NumberUtils.checkDouble(assetBalance.getCost() + newCost);
     }
 
-    private static double calculateAmountAfterSupply(AssetBalance assetBalance, CryptoTransaction transaction) {
+    private static double calculateAmountAfterSupply(AssetBalance assetBalance, Transaction transaction) {
         double transactionAmount = NumberUtils.checkDouble(transaction.getOrderQuantity());
 
         if (transactionAmount <= 0)
@@ -107,7 +107,7 @@ public class AssetBalanceService {
         return NumberUtils.checkDouble(tokensAmountAfterSupply);
     }
 
-    private static void updateAvgBuySellPrice(@NotNull AssetBalance assetBalance, @NotNull CryptoTransaction transaction) {
+    private static void updateAvgBuySellPrice(@NotNull AssetBalance assetBalance, @NotNull Transaction transaction) {
         double marketPrice = transaction.getMarketPrice();
         double previousAmount = assetBalance.getAmount();
         double orderQuantity = transaction.getOrderQuantity();

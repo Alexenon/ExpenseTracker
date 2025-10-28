@@ -12,9 +12,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+/*
+* TODO: [URGENT]  Add javadoc
+* */
 @Slf4j
 @Component
-@SuppressWarnings("LoggingSimilarMessage")
 public class InstrumentsProvider {
 
     private Map<String, AssetMetadata> metadataPerAsset;

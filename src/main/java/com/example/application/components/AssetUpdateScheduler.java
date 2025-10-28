@@ -13,18 +13,18 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class AssetUpdateScheduler {
 
-    @Autowired
-    private InstrumentsService instrumentsService;
+	@Autowired
+	private InstrumentsService instrumentsService;
 
-    @Autowired
-    private PriceChangeHandler priceChangeHandler;
+	@Autowired
+	private PriceChangeHandler priceChangeHandler;
 
-    @Scheduled(fixedDelay = 3, timeUnit = TimeUnit.MINUTES)
-    public void updateAssets() {
-        log.info("------------------- [Task] Starting updating asset data -------------------");
-        instrumentsService.updateAssetData();
-        priceChangeHandler.updatePagePrices();
-        log.info("------------------- [Task] Finished updating asset data -------------------");
-    }
+	@Scheduled(fixedDelay = 5, timeUnit = TimeUnit.MINUTES)
+	public void updateAssets() {
+		log.info("------------------- [Task] Starting updating asset data -------------------");
+		instrumentsService.updateAssetData();
+		priceChangeHandler.updatePagePrices();
+		log.info("------------------- [Task] Finished updating asset data -------------------");
+	}
 
 }

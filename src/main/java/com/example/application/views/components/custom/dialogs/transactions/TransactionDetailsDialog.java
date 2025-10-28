@@ -1,7 +1,7 @@
 package com.example.application.views.components.custom.dialogs.transactions;
 
 import com.example.application.entities.crypto.Asset;
-import com.example.application.entities.crypto.CryptoTransaction;
+import com.example.application.entities.crypto.Transaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.utils.common.formatters.number.AmountFormatter;
 import com.example.application.utils.common.formatters.number.CurrencyFormatter;
@@ -33,14 +33,14 @@ public class TransactionDetailsDialog extends Dialog {
     private static final AmountFormatter amountFormatter = AmountFormatter.withDefaults();
     private static final CurrencyFormatter currencyFormatter = CurrencyFormatter.withDefaults();
 
-    private CryptoTransaction transaction;
+    private Transaction transaction;
     private final InstrumentsFacadeService instrumentsFacadeService;
 
     private final Paragraph editBtn = new Paragraph("Edit");
     private final Button closeBtn = new Button(LumoIcon.CROSS.create(), e -> this.close());
 
     @Autowired
-    public TransactionDetailsDialog(CryptoTransaction transaction, InstrumentsFacadeService instrumentsFacadeService) {
+    public TransactionDetailsDialog(Transaction transaction, InstrumentsFacadeService instrumentsFacadeService) {
         this.transaction = transaction;
         this.instrumentsFacadeService = instrumentsFacadeService;
 

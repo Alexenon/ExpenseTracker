@@ -24,7 +24,6 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 import com.vaadin.flow.dom.DomEventListener;
 import com.vaadin.flow.theme.lumo.LumoIcon;
-import org.springframework.context.annotation.Lazy;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -67,9 +66,9 @@ public class ImportTransactionsDialog extends Dialog implements HasNotifications
     private final Portfolio portfolio;
     private List<TransactionModel> transactions = new ArrayList<>();
 
-    public ImportTransactionsDialog(@Lazy InstrumentsFacadeService instrumentsFacadeService, Portfolio portfolio) {
+    public ImportTransactionsDialog(Portfolio portfolio, InstrumentsFacadeService instrumentsFacadeService) {
+        this.portfolio = portfolio;
         this.instrumentsFacadeService = instrumentsFacadeService;
-        this.portfolio = Objects.requireNonNull(portfolio, "portfolio");
         initialize();
     }
 
@@ -130,7 +129,6 @@ public class ImportTransactionsDialog extends Dialog implements HasNotifications
 
         upload.addFileRejectedListener(e -> errorField.setText("Too many files added, or the file size is bigger than 10MB"));
 
-
         errorField.setVisible(false);
         errorField.getElement().getStyle().set("color", "red");
     }
@@ -178,6 +176,7 @@ public class ImportTransactionsDialog extends Dialog implements HasNotifications
 
     private void initializeFooter() {
         saveButton.setVisible(false);
+        saveButton.addClickShortcut(Key.ENTER);
         saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
         saveButton.addClickListener(e -> {
             // TODO: [URGENT] Save these transactions
@@ -187,7 +186,7 @@ public class ImportTransactionsDialog extends Dialog implements HasNotifications
 
     private void displayGrid() {
         try {
-            // Transactions should be a modifiable list, since it alows client to remove and edit items
+            // Transactions should be converted into a modifiable list, to alow client remove and edit items
             transactions = new ArrayList<>(csvParser.parseImport(buffer.getInputStream()));
             grid.setItems(transactions);
             grid.setVisible(true);

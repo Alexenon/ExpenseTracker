@@ -2,8 +2,8 @@ package com.example.application.views.components.custom.dialogs.transactions;
 
 import com.example.application.entities.common.TransactionType;
 import com.example.application.entities.crypto.Asset;
-import com.example.application.entities.crypto.CryptoTransaction;
 import com.example.application.entities.crypto.Portfolio;
+import com.example.application.entities.crypto.Transaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.utils.common.formatters.CommonFormatters;
 import com.example.application.views.components.core.Container;
@@ -35,9 +35,9 @@ import java.util.function.Consumer;
 public class AddTransactionDialog extends Dialog implements HasNotifications {
 
     private final Portfolio portfolio;
-    private final CryptoTransaction transaction;
+    private final Transaction transaction;
     private final InstrumentsFacadeService instrumentsFacadeService;
-    private final Binder<CryptoTransaction> binder = new Binder<>(CryptoTransaction.class);
+    private final Binder<Transaction> binder = new Binder<>(Transaction.class);
 
     private final AssetComboBox assetSymbolField;
     private final Select<TransactionType> typeField = new Select<>();
@@ -153,38 +153,38 @@ public class AddTransactionDialog extends Dialog implements HasNotifications {
 
         binder.forField(assetSymbolField)
                 .asRequired("Please fill this field")
-                .bind(CryptoTransaction::getAsset, CryptoTransaction::setAsset);
+                .bind(Transaction::getAsset, Transaction::setAsset);
 
         binder.forField(typeField)
                 .asRequired("Please fill this field")
-                .bind(CryptoTransaction::getType, CryptoTransaction::setType);
+                .bind(Transaction::getType, Transaction::setType);
 
         binder.forField(amountField)
                 .asRequired("Please fill this field")
                 .withConverter(new FlexibleAmountConvertor())
                 .withValidator(new DoubleRangeValidator("Invalid decimal value", 0.0, Double.MAX_VALUE))
                 .withValidator(amount -> amount > 0, "Amount should be bigger than 0")
-                .bind(CryptoTransaction::getOrderQuantity, CryptoTransaction::setOrderQuantity);
+                .bind(Transaction::getOrderQuantity, Transaction::setOrderQuantity);
 
         binder.forField(marketPriceField)
                 .asRequired("Please fill this field")
                 .withConverter(new FlexiblePriceConvertor())
                 .withValidator(new DoubleRangeValidator("Invalid decimal value", 0.0, Double.MAX_VALUE))
                 .withValidator(price -> price > 0, "Market price should be bigger than 0")
-                .bind(CryptoTransaction::getMarketPrice, CryptoTransaction::setMarketPrice);
+                .bind(Transaction::getMarketPrice, Transaction::setMarketPrice);
 
         binder.forField(totalCostField)
                 .asRequired("Please fill this field")
                 .withConverter(new FlexiblePriceConvertor())
                 .withValidator(new DoubleRangeValidator("Invalid decimal value", 0.0, Double.MAX_VALUE))
                 .withValidator(price -> price >= 1, "Total price should be at least one dollar")
-                .bind(CryptoTransaction::getOrderTotalCost, CryptoTransaction::setOrderTotalCost);
+                .bind(Transaction::getOrderTotalCost, Transaction::setOrderTotalCost);
 
         binder.forField(notesField)
-                .bind(CryptoTransaction::getNotes, CryptoTransaction::setNotes);
+                .bind(Transaction::getNotes, Transaction::setNotes);
 
         binder.forField(datePicker)
-                .bind(CryptoTransaction::getDateTime, CryptoTransaction::setDateTime);
+                .bind(Transaction::getDateTime, Transaction::setDateTime);
     }
 
     public void addSaveBtnClickListener(Consumer<?> listener) {
@@ -202,8 +202,8 @@ public class AddTransactionDialog extends Dialog implements HasNotifications {
         amountField.setHelperText("Currently you have %s %s".formatted(formatedAmount, assetSymbolField.getSymbol()));
     }
 
-    private CryptoTransaction defaultTransaction() {
-        CryptoTransaction newTransaction = new CryptoTransaction();
+    private Transaction defaultTransaction() {
+        Transaction newTransaction = new Transaction();
         newTransaction.setPortfolio(portfolio);
         return newTransaction;
     }

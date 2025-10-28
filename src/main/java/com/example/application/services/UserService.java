@@ -20,7 +20,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -98,10 +97,9 @@ public class UserService implements UserDetailsService {
     @NotNull
     @Transactional
     public User save(@NotNull User user) {
-        validate(user);
-        updateFields(user);
-
         try {
+            validate(user);
+            updateFields(user);
             User savedUser = userRepository.save(user);
             log.info("Saved successfully {}", savedUser);
             return savedUser;
@@ -142,11 +140,7 @@ public class UserService implements UserDetailsService {
      * Creates and attach a new portfolio to the provided user.
      */
     private Portfolio attachDefaultPortfolio(@NotNull User user) {
-        Portfolio portfolio = new Portfolio();
-        portfolio.setName("Main");
-        portfolio.setUser(user);
-        portfolio.setLastTimeUpdated(LocalDateTime.now());
-        return portfolioService.save(portfolio);
+        return portfolioService.createNewPortfolio("Main", user);
     }
 
 }

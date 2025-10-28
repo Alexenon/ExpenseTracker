@@ -86,9 +86,8 @@ public class UserAssetService {
 
     @Transactional
     private UserAsset save(@NotNull UserAsset userAsset) {
-        validate(userAsset);
-
         try {
+            validate(userAsset);
             userAsset.setLastTimeUpdated(LocalDateTime.now());
             UserAsset entity = userAssetRepository.save(userAsset);
             log.info("Saved successfully {}", entity);

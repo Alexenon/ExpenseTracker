@@ -11,6 +11,11 @@ import java.util.concurrent.ConcurrentHashMap;
 * TODO: [URGENT] Update name to "PriceChangeNotifier"
 *  Add here a small javadoc why this component is required
 * */
+
+/**
+ *
+ * @see com.example.application.components.AssetUpdateScheduler
+ * */
 @Slf4j
 @Component
 public class PriceChangeHandler {

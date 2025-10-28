@@ -49,7 +49,7 @@ public class InstrumentsFacadeService {
         return instrumentsService.getAllAssets();
     }
 
-    public Optional<Asset> getAssetBySymbol(@Nullable String symbolName) {
+    public Optional<Asset> getAssetBySymbol(@NotNull String symbolName) {
         return instrumentsService.getAssetBySymbol(symbolName);
     }
 
@@ -84,35 +84,35 @@ public class InstrumentsFacadeService {
     public List<Asset> getAllAssetsEverBought(Portfolio portfolio) {
         return getTransactions(portfolio)
                 .stream()
-                .filter(CryptoTransaction::isBuyTransaction)
-                .map(CryptoTransaction::getAsset)
+                .filter(Transaction::isBuyTransaction)
+                .map(Transaction::getAsset)
                 .distinct()
                 .toList();
     }
     //</editor-fold>
 
     //<editor-fold desc="TRANSACTIONS">
-    public List<CryptoTransaction> getTransactions(Portfolio portfolio) {
+    public List<Transaction> getTransactions(Portfolio portfolio) {
         return instrumentsService.getTransactionsBy(portfolio);
     }
 
-    public List<CryptoTransaction> getTransactions(Portfolio portfolio, LocalDate from) {
+    public List<Transaction> getTransactions(Portfolio portfolio, LocalDate from) {
         return getTransactions(portfolio, from, LocalDate.now());
     }
 
-    public List<CryptoTransaction> getTransactions(Portfolio portfolio, LocalDate from, LocalDate to) {
+    public List<Transaction> getTransactions(Portfolio portfolio, LocalDate from, LocalDate to) {
         return instrumentsService.getTransactionsBy(portfolio, from, to);
     }
 
-    public List<CryptoTransaction> getTransactionsByAsset(Portfolio portfolio, Asset asset) {
+    public List<Transaction> getTransactionsByAsset(Portfolio portfolio, Asset asset) {
         return instrumentsService.getTransactionsBy(portfolio, asset);
     }
 
-    public CryptoTransaction saveTransaction(CryptoTransaction transaction) {
+    public Transaction saveTransaction(Transaction transaction) {
         return instrumentsService.saveTransaction(transaction);
     }
 
-    public void deleteTransaction(CryptoTransaction transaction) {
+    public void deleteTransaction(Transaction transaction) {
         instrumentsService.deleteTransaction(transaction);
     }
     //</editor-fold>
@@ -169,12 +169,11 @@ public class InstrumentsFacadeService {
     public List<AssetBalance> getAssetBalancesByAsset(List<Portfolio> portfolios, Asset asset) {
         return instrumentsService.getAssetBalancesByPortfoliosAndAsset(portfolios, asset);
     }
-
-//    public Optional<AssetBalance> getAssetBalanceByAsset(List<Portfolio> portfolios, Asset asset) {
-//        return instrumentsService.getAssetBalancesByPortfolioAndAsset(portfolio, asset);
-//    }
-
     //</editor-fold>
+
+    public Portfolio createPortfolio(String name) {
+        return instrumentsService.createNewPortfolio(name, getAuthenticatedUser());
+    }
 
     // TODO: [URGENT] -> FILTER BY MAIN PORTFOLIO
     // TODO: REMOVE ME, SO YOU WILL NOT MISS NOTHING DURING PROPERLY DEVELOPING THIS IMPL
@@ -189,7 +188,7 @@ public class InstrumentsFacadeService {
                         .formatted(user.getUsername())));
     }
 
-    public List<Portfolio> getPortfolios() {
+    public List<Portfolio> getUserPortfolios() {
         return instrumentsService.getPortfoliosByUser(getAuthenticatedUser());
     }
 

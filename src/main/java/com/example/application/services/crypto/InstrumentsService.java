@@ -28,7 +28,7 @@ public class InstrumentsService {
     private final AssetService assetService;
     private final UserAssetService userAssetService;
     private final AssetWatcherService assetWatcherService;
-    private final CryptoTransactionService transactionService;
+    private final TransactionService transactionService;
     private final AssetBalanceService assetBalanceService;
 
     @Autowired
@@ -36,7 +36,7 @@ public class InstrumentsService {
                               PortfolioService portfolioService,
                               AssetService assetService,
                               UserAssetService userAssetService,
-                              CryptoTransactionService transactionService,
+                              TransactionService transactionService,
                               AssetWatcherService assetWatcherService,
                               AssetBalanceService assetBalanceService)
     {
@@ -57,11 +57,11 @@ public class InstrumentsService {
         return assetService.findAll();
     }
 
-    public Optional<Asset> getAssetBySymbol(String symbolName) {
+    public Optional<Asset> getAssetBySymbol(@NotNull String symbolName) {
         return assetService.findBySymbol(symbolName);
     }
 
-    public Asset saveAsset(Asset asset) {
+    public Optional<Asset> saveAsset(Asset asset) {
         return assetService.save(asset);
     }
 
@@ -109,27 +109,27 @@ public class InstrumentsService {
      * Transactions
      * */
 
-    public CryptoTransaction saveTransaction(CryptoTransaction transaction) {
+    public Transaction saveTransaction(Transaction transaction) {
         return transactionService.save(transaction);
     }
 
-    public void deleteTransaction(CryptoTransaction transaction) {
+    public void deleteTransaction(Transaction transaction) {
         transactionService.delete(transaction);
     }
 
-    public List<CryptoTransaction> getTransactionsBy(Portfolio portfolio) {
+    public List<Transaction> getTransactionsBy(Portfolio portfolio) {
         return transactionService.findBy(portfolio);
     }
 
-    public List<CryptoTransaction> getTransactionsBy(Portfolio portfolio, Asset asset) {
+    public List<Transaction> getTransactionsBy(Portfolio portfolio, Asset asset) {
         return transactionService.findBy(portfolio, asset);
     }
 
-    public List<CryptoTransaction> getTransactionsBy(Portfolio portfolio, Asset asset, TransactionType type) {
+    public List<Transaction> getTransactionsBy(Portfolio portfolio, Asset asset, TransactionType type) {
         return transactionService.findBy(portfolio, asset, type);
     }
 
-    public List<CryptoTransaction> getTransactionsBy(Portfolio portfolio, LocalDate from, LocalDate to) {
+    public List<Transaction> getTransactionsBy(Portfolio portfolio, LocalDate from, LocalDate to) {
         return transactionService.findBy(portfolio, from, to);
     }
 
@@ -152,6 +152,9 @@ public class InstrumentsService {
     /*
      * PORTFOLIOS
      * */
+    public Portfolio createNewPortfolio(String name, User user) {
+        return portfolioService.createNewPortfolio(name, user);
+    }
 
     public List<Portfolio> getPortfoliosByUser(User user) {
         return portfolioService.findByUser(user);

@@ -22,15 +22,18 @@ import java.util.stream.Collectors;
 @Slf4j
 public class AssetsChart extends Div {
 
-    private Portfolio portfolio;
+    private final Portfolio portfolio;
     private final InstrumentsFacadeService instrumentsFacadeService;
     private final PortfolioPerformanceTracker portfolioPerformanceTracker;
+
     private final Select<ChartOptions> options = new Select<>();
 
     @Autowired
-    public AssetsChart(InstrumentsFacadeService instrumentsFacadeService,
+    public AssetsChart(Portfolio portfolio,
+                       InstrumentsFacadeService instrumentsFacadeService,
                        PortfolioPerformanceTracker portfolioPerformanceTracker)
     {
+        this.portfolio = portfolio;
         this.instrumentsFacadeService = instrumentsFacadeService;
         this.portfolioPerformanceTracker = portfolioPerformanceTracker;
         initialize();
@@ -82,10 +85,6 @@ public class AssetsChart extends Div {
             case WORTH -> asset -> portfolioPerformanceTracker.getAssetWorth(portfolio, asset);
             case INVESTED -> asset -> portfolioPerformanceTracker.getAssetRemainingTokensCost(portfolio, asset);
         };
-    }
-
-    public void setPortfolio(Portfolio portfolio) {
-        this.portfolio = portfolio;
     }
 
     private enum ChartOptions {

@@ -9,6 +9,10 @@ import java.util.Objects;
 
 public class CollectionUtils {
 
+    private CollectionUtils() {
+        /* Hidden constructor */
+    }
+
     public static boolean isEmpty(@Nullable Collection<?> collection) {
         return collection == null || collection.isEmpty();
     }

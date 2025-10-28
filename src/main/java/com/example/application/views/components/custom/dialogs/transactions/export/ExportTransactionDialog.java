@@ -1,8 +1,8 @@
 package com.example.application.views.components.custom.dialogs.transactions.export;
 
 import com.example.application.data.dtos.migration.TransactionModel;
-import com.example.application.entities.crypto.CryptoTransaction;
 import com.example.application.entities.crypto.Portfolio;
+import com.example.application.entities.crypto.Transaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.utils.common.parsers.CSVParser;
 import com.example.application.views.components.core.Container;
@@ -18,7 +18,6 @@ import com.vaadin.flow.component.select.Select;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Objects;
 
 public class ExportTransactionDialog extends Dialog implements HasNotifications {
 
@@ -31,11 +30,11 @@ public class ExportTransactionDialog extends Dialog implements HasNotifications 
     private final Download download = new Download();
 
     private final Portfolio portfolio;
-    private List<CryptoTransaction> transactions;
+    private List<Transaction> transactions;
 
-    public ExportTransactionDialog(InstrumentsFacadeService instrumentsFacadeService, Portfolio portfolio) {
+    public ExportTransactionDialog(Portfolio portfolio, InstrumentsFacadeService instrumentsFacadeService) {
+        this.portfolio = portfolio;
         this.instrumentsFacadeService = instrumentsFacadeService;
-        this.portfolio = Objects.requireNonNull(portfolio, "portfolio");
         initialize();
     }
 
@@ -91,7 +90,7 @@ public class ExportTransactionDialog extends Dialog implements HasNotifications 
         updateDownloadedItems(instrumentsFacadeService.getTransactions(portfolio, from, to));
     }
 
-    public void updateDownloadedItems(List<CryptoTransaction> transactions) {
+    public void updateDownloadedItems(List<Transaction> transactions) {
         List<TransactionModel> mappedTransactions = transactions.stream()
                 .map(TransactionModel::from)
                 .toList();
