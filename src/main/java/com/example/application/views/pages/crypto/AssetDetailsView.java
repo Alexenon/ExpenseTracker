@@ -10,7 +10,7 @@ import com.example.application.utils.common.formatters.number.AmountFormatter;
 import com.example.application.utils.common.formatters.number.CompactFormatter;
 import com.example.application.utils.common.lang.MathUtils;
 import com.example.application.utils.common.lang.StringUtils;
-import com.example.application.views.components.PriceChangeHandler;
+import com.example.application.views.components.PriceChangeNotifier;
 import com.example.application.views.components.PriceChangeblePage;
 import com.example.application.views.components.PriceWatchlistComponent;
 import com.example.application.views.components.TransactionsGrid;
@@ -55,7 +55,7 @@ import java.util.Objects;
 public class AssetDetailsView extends DefaultPage implements HasUrlParameter<String>, RebuildablePage, BeforeEnterObserver, BeforeLeaveObserver, PriceChangeblePage {
 
     private final Portfolio portfolio;
-    private final PriceChangeHandler priceChangeHandler;
+    private final PriceChangeNotifier priceChangeNotifier;
     private final InstrumentsFacadeService instrumentsFacadeService;
     private final PortfolioPerformanceTracker portfolioPerformanceTracker;
     private final AddTransactionDialog addTransactionDialog;
@@ -68,12 +68,12 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
     public AssetDetailsView(Portfolio portfolio,
                             InstrumentsFacadeService instrumentsFacadeService,
                             PortfolioPerformanceTracker portfolioPerformanceTracker,
-                            PriceChangeHandler priceChangeHandler)
+                            PriceChangeNotifier priceChangeNotifier)
     {
         this.portfolio = portfolio;
         this.instrumentsFacadeService = instrumentsFacadeService;
         this.portfolioPerformanceTracker = portfolioPerformanceTracker;
-        this.priceChangeHandler = priceChangeHandler;
+        this.priceChangeNotifier = priceChangeNotifier;
         this.addTransactionDialog = new AddTransactionDialog(portfolio, instrumentsFacadeService);
         this.ui = UI.getCurrent();
     }
@@ -87,12 +87,12 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         buildPage();
-        priceChangeHandler.addObserver(ui, this);
+        priceChangeNotifier.addObserver(ui, this);
     }
 
     @Override
     public void beforeLeave(BeforeLeaveEvent event) {
-        priceChangeHandler.removeObserver(ui);
+        priceChangeNotifier.removeObserver(ui);
     }
 
     @Override

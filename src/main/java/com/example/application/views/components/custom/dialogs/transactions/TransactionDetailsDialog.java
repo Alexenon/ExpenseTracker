@@ -60,7 +60,7 @@ public class TransactionDetailsDialog extends Dialog {
                 detailsTransaction(),
                 detailsProfitLoss(),
                 createInfoItem("Date & Time", formatDate(transaction.getDateTime())),
-                createInfoItem("Notes", transaction.getNotes())
+                createInfoItem("Notes", transaction.getNote())
         );
     }
 

@@ -1,22 +1,26 @@
 package com.example.application.data.models;
 
 import com.example.application.data.enums.SymbolIndentifier;
+import com.example.application.utils.fetchers.BinanceFetcher;
 import com.example.application.utils.fetchers.CryptoCompareFetcher;
 import com.example.application.utils.fetchers.api_responses.AssetMetaDataApiResp;
 import com.example.application.utils.fetchers.api_responses.AssetMetadata;
 import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-/*
-* TODO: [URGENT]  Add javadoc
-* */
+/**
+ * Service designed load internal instruments from external sources
+ *
+ * @see BinanceFetcher
+ * @see CryptoCompareFetcher
+ * */
 @Slf4j
-@Component
+@Service
 public class InstrumentsProvider {
 
     private Map<String, AssetMetadata> metadataPerAsset;
@@ -25,7 +29,7 @@ public class InstrumentsProvider {
         metadataPerAsset = getUpdatedMetadata();
     }
 
-    // TODO: Compare with  ->  parallelStream()
+    // TODO: [SPYKE] Compare with -> parallelStream()
     @NotNull
     private Map<String, AssetMetadata> fetchMetadata() {
         log.info("Starting retrieving asset data from external API");

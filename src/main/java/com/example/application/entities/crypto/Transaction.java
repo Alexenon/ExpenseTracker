@@ -65,8 +65,8 @@ public class Transaction {
 	private TransactionType type;
 
 	@Nullable
-	@Column(name = "notes", length = 250)
-	private String notes;
+	@Column(name = "note", length = 250)
+	private String note;
 
 	@NotNull
 	@Column(nullable = false)
@@ -81,7 +81,7 @@ public class Transaction {
 	}
 
 	public Transaction(Asset asset, double marketPrice, double orderTotalCost, double avgBuyPriceAtMoment,
-					   TransactionType type, String notes, LocalDateTime dateTime)
+					   TransactionType type, String note, LocalDateTime dateTime)
 	{
 		this.asset = asset;
 		this.marketPrice = marketPrice;
@@ -89,11 +89,12 @@ public class Transaction {
 		this.orderQuantity = orderTotalCost / marketPrice;
 		this.avgBuyPriceAtMoment = avgBuyPriceAtMoment;
 		this.type = type;
-		this.notes = Objects.requireNonNullElse(notes, "");
+		this.note = note;
 		this.dateTime = dateTime;
 	}
 
 	public Transaction(Transaction transaction) {
+		Objects.requireNonNull(transaction, "transaction");
 		this.id = transaction.id;
 		this.portfolio = transaction.portfolio;
 		this.asset = transaction.asset;
@@ -102,7 +103,7 @@ public class Transaction {
 		this.orderQuantity = transaction.orderQuantity;
 		this.avgBuyPriceAtMoment = transaction.avgBuyPriceAtMoment;
 		this.type = transaction.type;
-		this.notes = transaction.notes;
+		this.note = transaction.note;
 		this.dateTime = transaction.dateTime;
 	}
 
@@ -123,7 +124,7 @@ public class Transaction {
 			   ", orderTotalCost=" + orderTotalCost +
 			   ", orderQuantity=" + orderQuantity +
 			   ", type=" + type +
-			   ", notes='" + notes + '\'' +
+			   ", notes='" + note + '\'' +
 			   ", dateTime=" + dateTime +
 			   '}';
 	}

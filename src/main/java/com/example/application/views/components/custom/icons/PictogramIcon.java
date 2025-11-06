@@ -31,6 +31,8 @@ public enum PictogramIcon {
     DELETE_OUTLINE,
     SQUARE_EDIT_OUTLINE,
     INFORMATION_OUTLINE,
+	ALERT_CIRCLE_OUTLINE,
+	CHECK_CIRCLE_OUTLINE,
 
     // Third party applications,
     GITHUB,

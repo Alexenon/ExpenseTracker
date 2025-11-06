@@ -2,7 +2,6 @@ package com.example.application.services;
 
 import com.example.application.entities.User;
 import com.example.application.utils.exceptions.auth.UnauthenticatedUserException;
-import com.example.application.utils.exceptions.auth.UserNotFoundException;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.server.VaadinServletRequest;
 import jakarta.validation.constraints.NotNull;
@@ -21,47 +20,51 @@ import java.util.Optional;
 @Service
 public class SecurityService {
 
-    private static final Logger logger = LoggerFactory.getLogger(SecurityService.class);
-    private static final String LOGOUT_SUCCESS_URL = "/";
+	private static final Logger logger = LoggerFactory.getLogger(SecurityService.class);
+	private static final String LOGOUT_SUCCESS_URL = "/";
 
-    private final UserService userService;
+	private final UserService userService;
 
-    @Autowired
-    public SecurityService(UserService userService) {
-        this.userService = userService;
-    }
+	@Autowired
+	public SecurityService(UserService userService) {
+		this.userService = userService;
+	}
 
-    @NotNull
-    public User getAuthenticatedUser() {
-        String username = getAuthenticatedUserDetails()
-                .orElseThrow(() -> new UnauthenticatedUserException("Unauthorized exception. Please log in."))
-                .getUsername();
+	@NotNull
+	public User getAuthenticatedUser() {
+		String username = getAuthenticatedUserDetails()
+				.orElseThrow(() -> new UnauthenticatedUserException("Unauthorized exception. Please log in."))
+				.getUsername();
 
-        return userService.findByUsername(username)
-                .orElseThrow(() -> new UserNotFoundException("There is no such user with username = %s".formatted(username)));
-    }
+		return userService.findByUsername(username)
+				.orElseThrow(() -> new UnauthenticatedUserException("Authenticated user got deleted"));
+	}
 
-    public boolean isCurrentUserAuthenticated() {
-        return getAuthenticatedUserDetails().isPresent();
-    }
+	public boolean isCurrentUserAuthenticated() {
+		try {
+			return getAuthenticatedUserDetails().isPresent();
+		} catch (UnauthenticatedUserException e) {
+			return false;
+		}
+	}
 
-    private Optional<UserDetails> getAuthenticatedUserDetails() {
-        SecurityContext context = SecurityContextHolder.getContext();
-        Authentication authentication = context.getAuthentication();
+	private Optional<UserDetails> getAuthenticatedUserDetails() {
+		SecurityContext context = SecurityContextHolder.getContext();
+		Authentication authentication = context.getAuthentication();
 
-        if (authentication == null)
-            throw new UnauthenticatedUserException("Coudn't manage to receive authentication. Please re-login");
+		if (authentication == null)
+			throw new UnauthenticatedUserException("Coudn't manage to receive authentication. Please re-login");
 
-        return authentication.getPrincipal() instanceof UserDetails userDetails
-                ? Optional.of(userDetails)
-                : Optional.empty();
-    }
+		return authentication.getPrincipal() instanceof UserDetails userDetails
+				? Optional.of(userDetails)
+				: Optional.empty();
+	}
 
-    public void logout(UI ui) {
-        logger.info("User logged out");
-        Optional.ofNullable(ui).ifPresent(l -> l.getPage().setLocation(LOGOUT_SUCCESS_URL));
-        SecurityContextLogoutHandler logoutHandler = new SecurityContextLogoutHandler();
-        logoutHandler.logout(VaadinServletRequest.getCurrent().getHttpServletRequest(), null, null);
-    }
+	public void logout(UI ui) {
+		logger.info("User logged out");
+		Optional.ofNullable(ui).ifPresent(l -> l.getPage().setLocation(LOGOUT_SUCCESS_URL));
+		SecurityContextLogoutHandler logoutHandler = new SecurityContextLogoutHandler();
+		logoutHandler.logout(VaadinServletRequest.getCurrent().getHttpServletRequest(), null, null);
+	}
 
 }

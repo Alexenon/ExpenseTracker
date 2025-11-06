@@ -66,7 +66,7 @@ public class SellProfitTab extends BaseCalculatorTab {
         this.assetSymbolField = new AssetComboBox(instrumentsFacadeService);
         // TODO: {?} Maybe here should be the latest portfolio selected
         //  or here can be information collected across all portfolios - slower performance btw
-        this.portfolio = instrumentsFacadeService.getAuthenticatedUserMainPortfolio();
+        this.portfolio = instrumentsFacadeService.getMainPortfolio();
     }
 
     @Override

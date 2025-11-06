@@ -7,18 +7,14 @@ import org.springframework.stereotype.Component;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
-/*
-* TODO: [URGENT] Update name to "PriceChangeNotifier"
-*  Add here a small javadoc why this component is required
-* */
-
 /**
+ * Component design to notify UI pages whenever a price has been updated, so the UI can update the information as well.
  *
  * @see com.example.application.components.AssetUpdateScheduler
  * */
 @Slf4j
 @Component
-public class PriceChangeHandler {
+public class PriceChangeNotifier {
 
     private static final ConcurrentHashMap<UI, PriceChangeblePage> pages = new ConcurrentHashMap<>();
 

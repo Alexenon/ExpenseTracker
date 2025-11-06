@@ -46,12 +46,6 @@ import java.util.function.ToDoubleFunction;
                 - cursor: not-allowed;
             [?] grid.setMultiSort(true, MultiSortPriority.APPEND);
 
-
-    // TODO: [URGENT]
-        - Maybe instead of using here Asset everywhere, to use AssetBalance ?
-            + contains all information required for this grid
-            + doesn't need to pass portfolio everytime
-
      Optimize:
         [!!] REMOVE certain columns from ColumnSelector instead of HIDING
     _____________________________________________________________________________________________________________

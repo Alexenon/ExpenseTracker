@@ -26,114 +26,114 @@ import static com.example.application.utils.investment.ProfitCalculator.calculat
 @Service
 public class AssetBalanceService {
 
-    @Autowired
-    private AssetBalanceRepository repository;
+	@Autowired
+	private AssetBalanceRepository repository;
 
-    // TODO: [URGENT] FIND A WAY TO EXTRACT THIS FROM DATABASE WITHOUT ANY EXCEPTIONS
-    public List<AssetBalance> findHoldingsByPortfolio(@NotNull Portfolio portfolio) {
-        Objects.requireNonNull(portfolio, "portfolio");
+	// TODO: [URGENT] FIND A WAY TO EXTRACT THIS FROM DATABASE WITHOUT ANY EXCEPTIONS
+	public List<AssetBalance> findHoldingsByPortfolio(@NotNull Portfolio portfolio) {
+		Objects.requireNonNull(portfolio, "portfolio");
 //        return repository.findByPortfolioWithNonZeroAmount(portfolio.getId());
-        return List.of();
-    }
+		return List.of();
+	}
 
-    public List<AssetBalance> findByPortfolio(@NotNull Portfolio portfolio) {
-        Objects.requireNonNull(portfolio, "portfolio");
-        return repository.findByPortfolio(portfolio);
-    }
+	public List<AssetBalance> findByPortfolio(@NotNull Portfolio portfolio) {
+		Objects.requireNonNull(portfolio, "portfolio");
+		return repository.findByPortfolio(portfolio);
+	}
 
-    public List<AssetBalance> findByPortfolios(@NotNull List<Portfolio> portfolios) {
-        CollectionUtils.requireNotEmpty(portfolios, "portfolios");
-        return null;
+	public List<AssetBalance> findByPortfolios(@NotNull List<Portfolio> portfolios) {
+		CollectionUtils.requireNotEmpty(portfolios, "portfolios");
+		return null;
 //        return repository.findByPortfoliosUnique(portfolios);
-    }
+	}
 
-    public Optional<AssetBalance> findByPortfolioAndAsset(@NotNull Portfolio portfolio, @NotNull Asset asset) {
-        Objects.requireNonNull(portfolio, "portfolio");
-        Objects.requireNonNull(asset, "asset");
-        return repository.findByPortfolioAndAsset(portfolio, asset);
-    }
+	public Optional<AssetBalance> findByPortfolioAndAsset(@NotNull Portfolio portfolio, @NotNull Asset asset) {
+		Objects.requireNonNull(portfolio, "portfolio");
+		Objects.requireNonNull(asset, "asset");
+		return repository.findByPortfolioAndAsset(portfolio, asset);
+	}
 
-    public List<AssetBalance> findByPortfoliosAndAsset(@NotNull List<Portfolio> portfolios, @NotNull Asset asset) {
-        CollectionUtils.requireNotEmpty(portfolios, "portfolios");
-        Objects.requireNonNull(asset, "asset");
-        return null;
+	public List<AssetBalance> findByPortfoliosAndAsset(@NotNull List<Portfolio> portfolios, @NotNull Asset asset) {
+		CollectionUtils.requireNotEmpty(portfolios, "portfolios");
+		Objects.requireNonNull(asset, "asset");
+		return null;
 //        return repository.findByPortfoliosAndAsset(portfolios, asset);
-    }
+	}
 
-    @Transactional
-    public AssetBalance createNew(@NotNull Portfolio portfolio, @NotNull Asset asset) {
-        AssetBalance assetBalance = new AssetBalance();
-        assetBalance.setPortfolio(portfolio);
-        assetBalance.setAsset(asset);
-        validate(assetBalance);
-        return save(assetBalance);
-    }
+	@Transactional
+	public AssetBalance createNew(@NotNull Portfolio portfolio, @NotNull Asset asset) {
+		AssetBalance assetBalance = new AssetBalance();
+		assetBalance.setPortfolio(portfolio);
+		assetBalance.setAsset(asset);
+		validate(assetBalance);
+		return save(assetBalance);
+	}
 
-    @Transactional
-    public AssetBalance update(@NotNull AssetBalance assetBalance, @NotNull Transaction transaction) {
-        validate(assetBalance);
+	@Transactional
+	public AssetBalance update(@NotNull AssetBalance assetBalance, @NotNull Transaction transaction) {
+		validate(assetBalance);
 
-        updateAvgBuySellPrice(assetBalance, transaction);
-        assetBalance.setAmount(calculateAmountAfterSupply(assetBalance, transaction));
-        assetBalance.setCost(calculateTotalCost(transaction, assetBalance));
+		updateAvgBuySellPrice(assetBalance, transaction);
+		assetBalance.setAmount(calculateAmountAfterSupply(assetBalance, transaction));
+		assetBalance.setCost(calculateTotalCost(transaction, assetBalance));
 
-        return save(assetBalance);
-    }
+		return save(assetBalance);
+	}
 
-    @Transactional
-    private AssetBalance save(@NotNull AssetBalance assetBalance) {
-        assetBalance.setLastTimeUpdated(LocalDateTime.now());
-        try {
-            return repository.save(assetBalance);
-        } catch (Exception e) {
-            throw new InternalUnexpectedException(e);
-        }
-    }
+	@Transactional
+	private AssetBalance save(@NotNull AssetBalance assetBalance) {
+		assetBalance.setLastTimeUpdated(LocalDateTime.now());
+		try {
+			return repository.save(assetBalance);
+		} catch (Exception e) {
+			throw new InternalUnexpectedException(e);
+		}
+	}
 
-    private static double calculateTotalCost(Transaction transaction, AssetBalance assetBalance) {
-        double newCost = MathUtils.withSign(transaction.getOrderTotalCost(), transaction.isBuyTransaction());
-        return NumberUtils.checkDouble(assetBalance.getCost() + newCost);
-    }
+	private static double calculateTotalCost(Transaction transaction, AssetBalance assetBalance) {
+		double newCost = MathUtils.withSign(transaction.getOrderTotalCost(), transaction.isBuyTransaction());
+		return NumberUtils.checkDouble(assetBalance.getCost() + newCost);
+	}
 
-    private static double calculateAmountAfterSupply(AssetBalance assetBalance, Transaction transaction) {
-        double transactionAmount = NumberUtils.checkDouble(transaction.getOrderQuantity());
+	private static double calculateAmountAfterSupply(AssetBalance assetBalance, Transaction transaction) {
+		double transactionAmount = NumberUtils.checkDouble(transaction.getOrderQuantity());
 
-        if (transactionAmount <= 0)
-            throw new InvalidBalanceAmountException("Invalid transaction amount");
+		if (transactionAmount <= 0)
+			throw new InvalidBalanceAmountException("Invalid transaction amount");
 
-        double quantityToAdd = MathUtils.withSign(transactionAmount, transaction.isBuyTransaction());
-        double tokensAmountAfterSupply = assetBalance.getAmount() + quantityToAdd;
+		double quantityToAdd = MathUtils.withSign(transactionAmount, transaction.isBuyTransaction());
+		double tokensAmountAfterSupply = assetBalance.getAmount() + quantityToAdd;
 
-        return NumberUtils.checkDouble(tokensAmountAfterSupply);
-    }
+		return NumberUtils.checkDouble(tokensAmountAfterSupply);
+	}
 
-    private static void updateAvgBuySellPrice(@NotNull AssetBalance assetBalance, @NotNull Transaction transaction) {
-        double marketPrice = transaction.getMarketPrice();
-        double previousAmount = assetBalance.getAmount();
-        double orderQuantity = transaction.getOrderQuantity();
+	private static void updateAvgBuySellPrice(@NotNull AssetBalance assetBalance, @NotNull Transaction transaction) {
+		double marketPrice = transaction.getMarketPrice();
+		double previousAmount = assetBalance.getAmount();
+		double orderQuantity = transaction.getOrderQuantity();
 
-        if (transaction.isBuyTransaction()) {
-            assetBalance.setAvgBuyPrice(
-                    calculateNewAvgPrice(assetBalance.getAvgBuyPrice(), previousAmount, orderQuantity, marketPrice)
-            );
-        } else {
-            assetBalance.setAvgSellPrice(
-                    calculateNewAvgPrice(assetBalance.getAvgSellPrice(), previousAmount, orderQuantity, marketPrice)
-            );
-        }
-    }
+		if (transaction.isBuyTransaction()) {
+			assetBalance.setAvgBuyPrice(
+					calculateNewAvgPrice(assetBalance.getAvgBuyPrice(), previousAmount, orderQuantity, marketPrice)
+			);
+		} else {
+			assetBalance.setAvgSellPrice(
+					calculateNewAvgPrice(assetBalance.getAvgSellPrice(), previousAmount, orderQuantity, marketPrice)
+			);
+		}
+	}
 
-    private static void validate(AssetBalance assetBalance) {
-        Objects.requireNonNull(assetBalance, "assetBalance");
-        Assert.notNull(assetBalance.getAsset(), "assetBalance asset");
-        Assert.notNull(assetBalance.getPortfolio(), "assetBalance portfolio");
-        Assert.notNull(assetBalance.getCreatedAt(), "assetBalance createdAt");
-        Assert.notNull(assetBalance.getLastTimeUpdated(), "assetBalance lastTimeUpdated");
+	private static void validate(AssetBalance assetBalance) {
+		Objects.requireNonNull(assetBalance, "assetBalance");
+		Assert.notNull(assetBalance.getAsset(), "assetBalance asset");
+		Assert.notNull(assetBalance.getPortfolio(), "assetBalance portfolio");
+		Assert.notNull(assetBalance.getCreatedAt(), "assetBalance createdAt");
+		Assert.notNull(assetBalance.getLastTimeUpdated(), "assetBalance lastTimeUpdated");
 
-        Assert.isTrue(assetBalance.getAmount() >= 0, "amount cannot be negative");
-        Assert.isTrue(assetBalance.getHoldingDays() >= 0, "holdingDays cannot be negative");
-        Assert.isTrue(assetBalance.getAvgBuyPrice() >= 0, "avgBuyPrice cannot be negative");
-        Assert.isTrue(assetBalance.getAvgSellPrice() >= 0, "avgSellPrice cannot be negative");
-    }
+		Assert.isTrue(assetBalance.getAmount() >= 0, "amount cannot be negative");
+		Assert.isTrue(assetBalance.getHoldingDays() >= 0, "holdingDays cannot be negative");
+		Assert.isTrue(assetBalance.getAvgBuyPrice() >= 0, "avgBuyPrice cannot be negative");
+		Assert.isTrue(assetBalance.getAvgSellPrice() >= 0, "avgSellPrice cannot be negative");
+	}
 
 }

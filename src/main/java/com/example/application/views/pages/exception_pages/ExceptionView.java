@@ -44,11 +44,8 @@ public abstract class ExceptionView<T extends Exception> extends DefaultPage imp
 
     protected abstract String imageSource();
 
+	public ErrorContainer getContent() {
+		return errorContainer;
+	}
+
 }
-
-
-
-
-
-
-

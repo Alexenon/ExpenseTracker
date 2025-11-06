@@ -1,7 +1,7 @@
 package com.example.application.components;
 
 import com.example.application.services.crypto.InstrumentsService;
-import com.example.application.views.components.PriceChangeHandler;
+import com.example.application.views.components.PriceChangeNotifier;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -17,13 +17,13 @@ public class AssetUpdateScheduler {
 	private InstrumentsService instrumentsService;
 
 	@Autowired
-	private PriceChangeHandler priceChangeHandler;
+	private PriceChangeNotifier priceChangeNotifier;
 
 	@Scheduled(fixedDelay = 5, timeUnit = TimeUnit.MINUTES)
 	public void updateAssets() {
 		log.info("------------------- [Task] Starting updating asset data -------------------");
 		instrumentsService.updateAssetData();
-		priceChangeHandler.updatePagePrices();
+		priceChangeNotifier.updatePagePrices();
 		log.info("------------------- [Task] Finished updating asset data -------------------");
 	}
 

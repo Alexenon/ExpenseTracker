@@ -49,11 +49,8 @@ public class InstrumentsService {
         this.assetBalanceService = assetBalanceService;
     }
 
-    /*
-     * ASSETS
-     * */
-
-    public List<Asset> getAllAssets() {
+	//<editor-fold desc="ASSETS">
+	public List<Asset> getAllAssets() {
         return assetService.findAll();
     }
 
@@ -80,12 +77,10 @@ public class InstrumentsService {
     public boolean isAssetMarkedAsFavorite(User user, Asset asset) {
         return userAssetService.isAssetMarkedAsFavorite(user, asset);
     }
+	//</editor-fold>
 
-    /*
-     * AssetWatcher
-     * */
-
-    public AssetWatcher saveAssetWatcher(AssetWatcher assetWatcher) {
+	//<editor-fold desc="ASSET WATCHERS">
+	public AssetWatcher saveAssetWatcher(AssetWatcher assetWatcher) {
         return assetWatcherService.save(assetWatcher);
     }
 
@@ -104,14 +99,16 @@ public class InstrumentsService {
     public List<AssetWatcher> getAssetWatchersByAssetAndActionType(Portfolio portfolio, Asset asset, AssetWatcher.ActionType actionType) {
         return assetWatcherService.findBy(portfolio, asset, actionType);
     }
+	//</editor-fold>
 
-    /*
-     * Transactions
-     * */
-
-    public Transaction saveTransaction(Transaction transaction) {
+	//<editor-fold desc="TRANSACTIONS">
+	public Transaction saveTransaction(Transaction transaction) {
         return transactionService.save(transaction);
     }
+
+	public void saveTransactions(List<Transaction> transactions) {
+		transactionService.saveAll(transactions);
+	}
 
     public void deleteTransaction(Transaction transaction) {
         transactionService.delete(transaction);
@@ -142,17 +139,16 @@ public class InstrumentsService {
         return assetBalanceService.findByPortfolios(user.getPortfolios());
     }
 
-    // TODO: THis should be extracted from database
+    // TODO: [URGENT] THis should be extracted from database
     public Map<Asset, List<AssetBalance>> getBalancesGroupedByAsset(@NotNull User user) {
         return getBalances(user)
                 .stream()
                 .collect(Collectors.groupingBy(AssetBalance::getAsset, Collectors.toList()));
     }
+	//</editor-fold>
 
-    /*
-     * PORTFOLIOS
-     * */
-    public Portfolio createNewPortfolio(String name, User user) {
+	//<editor-fold desc="PORTFOLIOS">
+	public Portfolio createNewPortfolio(String name, User user) {
         return portfolioService.createNewPortfolio(name, user);
     }
 
@@ -160,10 +156,13 @@ public class InstrumentsService {
         return portfolioService.findByUser(user);
     }
 
-    /*
-     * PORTFOLIO BALANCES
-     * */
-    @NotNull
+	public Optional<Portfolio> getPortfolioByNameAndUser(String name, User user) {
+		return portfolioService.findByNameAndUser(name, user);
+	}
+	//</editor-fold>
+
+	//<editor-fold desc="PORTFOLIO BALANCES">
+	@NotNull
     public List<AssetBalance> getAssetBalancesByPortfolio(@NotNull Portfolio portfolio) {
         return assetBalanceService.findByPortfolio(portfolio);
     }
@@ -182,6 +181,7 @@ public class InstrumentsService {
     public List<AssetBalance> getAssetBalancesByPortfoliosAndAsset(@NotNull List<Portfolio> portfolios, @NotNull Asset asset) {
         return assetBalanceService.findByPortfoliosAndAsset(portfolios, asset);
     }
+	//</editor-fold>
 
     //<editor-fold desc="METADATA">
     @NotNull
@@ -193,13 +193,12 @@ public class InstrumentsService {
     public void updateAssetData() {
         Map<String, AssetMetadata> metadataMap = instrumentsProvider.getUpdatedMetadata();
 
-        if (metadataMap == null || metadataMap.isEmpty()) {
+        if (metadataMap.isEmpty()) {
             log.info("Metadata is empty. Skipping updating the database");
-            return;
-        }
-
-        metadataMap.forEach((key, value) -> updateAssetData(SymbolIndentifier.valueOf(key), value));
-        log.info("Updated database for {} assets", metadataMap.size());
+        } else {
+			metadataMap.forEach((key, value) -> updateAssetData(SymbolIndentifier.valueOf(key), value));
+			log.info("Updated database for {} assets", metadataMap.size());
+		}
     }
 
     private void updateAssetData(SymbolIndentifier indentifier, @Nullable AssetMetadata assetMetadata) {
@@ -223,6 +222,5 @@ public class InstrumentsService {
         saveAsset(asset);
     }
 //</editor-fold>
-
 
 }

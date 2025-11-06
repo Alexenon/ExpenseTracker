@@ -1,7 +1,7 @@
 package com.example.application.views.pages;
 
 import com.example.application.utils.common.formatters.CommonFormatters;
-import com.example.application.views.components.PriceChangeHandler;
+import com.example.application.views.components.PriceChangeNotifier;
 import com.example.application.views.components.PriceChangeblePage;
 import com.example.application.views.layouts.MainLayout;
 import com.vaadin.flow.component.UI;
@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
 public class TestView extends AbstractPage implements PriceChangeblePage, BeforeEnterObserver, BeforeLeaveObserver {
 
     @Autowired
-    private PriceChangeHandler priceChangeHandler;
+    private PriceChangeNotifier priceChangeNotifier;
 
     private UI ui;
     private final H3 title = new H3("Counter");
@@ -38,12 +38,12 @@ public class TestView extends AbstractPage implements PriceChangeblePage, Before
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         this.ui = UI.getCurrent();
-        priceChangeHandler.addObserver(ui, this);
+        priceChangeNotifier.addObserver(ui, this);
     }
 
     @Override
     public void beforeLeave(BeforeLeaveEvent event) {
-        priceChangeHandler.removeObserver(ui);
+        priceChangeNotifier.removeObserver(ui);
     }
 
     public void initializePage() {

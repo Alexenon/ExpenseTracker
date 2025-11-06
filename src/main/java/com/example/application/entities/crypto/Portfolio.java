@@ -4,6 +4,7 @@ import com.example.application.entities.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(of = "id")
 @Entity(name = "portfolios")
 public class Portfolio {
 
@@ -33,7 +35,8 @@ public class Portfolio {
 
     @Override
     public String toString() {
-        return "Portfolio{id=%d, name='%s', user='%s', dateCreated=%s}"
-                .formatted(id, name, user.getUsername(), createdAt);
+        return "Portfolio{id=%d, name='%s', user='%s'}"
+                .formatted(id, name, user.getUsername());
     }
+
 }

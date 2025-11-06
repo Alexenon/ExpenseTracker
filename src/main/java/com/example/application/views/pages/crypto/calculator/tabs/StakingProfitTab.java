@@ -33,7 +33,7 @@ public final class StakingProfitTab extends BaseCalculatorTab {
     public StakingProfitTab(InstrumentsFacadeService instrumentsFacadeService) {
         super("Staking calculator", instrumentsFacadeService);
         this.assetSymbolField = new AssetComboBox(instrumentsFacadeService);
-        this.portfolio = instrumentsFacadeService.getAuthenticatedUserMainPortfolio();
+        this.portfolio = instrumentsFacadeService.getMainPortfolio();
     }
 
     @Override

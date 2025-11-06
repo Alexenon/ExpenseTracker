@@ -181,7 +181,7 @@ public class AddTransactionDialog extends Dialog implements HasNotifications {
                 .bind(Transaction::getOrderTotalCost, Transaction::setOrderTotalCost);
 
         binder.forField(notesField)
-                .bind(Transaction::getNotes, Transaction::setNotes);
+                .bind(Transaction::getNote, Transaction::setNote);
 
         binder.forField(datePicker)
                 .bind(Transaction::getDateTime, Transaction::setDateTime);

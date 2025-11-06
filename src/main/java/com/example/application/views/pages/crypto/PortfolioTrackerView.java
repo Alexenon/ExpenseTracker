@@ -7,7 +7,7 @@ import com.example.application.entities.crypto.Transaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.utils.common.formatters.CommonFormatters;
-import com.example.application.views.components.PriceChangeHandler;
+import com.example.application.views.components.PriceChangeNotifier;
 import com.example.application.views.components.PriceChangeblePage;
 import com.example.application.views.components.TransactionsGrid;
 import com.example.application.views.components.core.Container;
@@ -57,7 +57,7 @@ import java.util.stream.Collectors;
 public class PortfolioTrackerView extends DefaultPage implements RebuildablePage, BeforeEnterObserver, BeforeLeaveObserver, PriceChangeblePage {
 
     private final Portfolio portfolio;
-    private final PriceChangeHandler priceChangeHandler;
+    private final PriceChangeNotifier priceChangeNotifier;
     private final InstrumentsFacadeService instrumentsFacadeService;
     private final PortfolioPerformanceTracker portfolioPerformanceTracker;
     private final AssetsGrid assetsGrid;
@@ -69,13 +69,13 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
     @Autowired
     public PortfolioTrackerView(InstrumentsFacadeService instrumentsFacadeService,
                                 PortfolioPerformanceTracker portfolioPerformanceTracker,
-                                PriceChangeHandler priceChangeHandler)
+                                PriceChangeNotifier priceChangeNotifier)
     {
         this.instrumentsFacadeService = instrumentsFacadeService;
         this.portfolioPerformanceTracker = portfolioPerformanceTracker;
-        this.priceChangeHandler = priceChangeHandler;
+        this.priceChangeNotifier = priceChangeNotifier;
 
-        this.portfolio = instrumentsFacadeService.getAuthenticatedUserMainPortfolio();
+        this.portfolio = instrumentsFacadeService.getMainPortfolio();
 
         this.assetsGrid = new AssetsGrid(portfolio, instrumentsFacadeService, portfolioPerformanceTracker);
         this.assetsChart = new AssetsChart(portfolio, instrumentsFacadeService, portfolioPerformanceTracker);
@@ -87,12 +87,12 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         buildPage();
-        priceChangeHandler.addObserver(ui, this);
+        priceChangeNotifier.addObserver(ui, this);
     }
 
     @Override
     public void beforeLeave(BeforeLeaveEvent event) {
-        priceChangeHandler.removeObserver(ui);
+        priceChangeNotifier.removeObserver(ui);
     }
 
     @Override

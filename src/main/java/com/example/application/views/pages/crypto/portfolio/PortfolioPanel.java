@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 /**
  * UI Component required to display information about a certain portfolio
  */
-public class PortfolioDisplayPanel extends Div {
+public class PortfolioPanel extends Div {
 
     private final InstrumentsFacadeService instrumentsFacadeService;
     private final PortfolioPerformanceTracker portfolioPerformanceTracker;
@@ -45,9 +45,9 @@ public class PortfolioDisplayPanel extends Div {
     private final TransactionsGrid transactionsGrid;
 
     @Autowired
-    public PortfolioDisplayPanel(Portfolio portfolio,
-                                 InstrumentsFacadeService instrumentsFacadeService,
-                                 PortfolioPerformanceTracker portfolioPerformanceTracker)
+    public PortfolioPanel(Portfolio portfolio,
+						  InstrumentsFacadeService instrumentsFacadeService,
+						  PortfolioPerformanceTracker portfolioPerformanceTracker)
     {
         this.portfolio = Objects.requireNonNull(portfolio, "portfolio");
         this.instrumentsFacadeService = instrumentsFacadeService;
@@ -102,14 +102,19 @@ public class PortfolioDisplayPanel extends Div {
         Section section = new Section();
         section.addClassName("asset-details-header");
 
+		H2 headerText = new H2(portfolio.getName());
         NumericValueParagraph worth = new NumericValueParagraph(portfolioPerformanceTracker.getPortfolioWorth(portfolio), CommonFormatters.CURRENCY);
         double profit = portfolioPerformanceTracker.getPortfolioTotalProfit(portfolio);
         double percentage = portfolioPerformanceTracker.getPortfolioProfitPercentage(portfolio);
-        PricePercentageWrapper profitWrapper = new PricePercentageWrapper(profit, percentage);
 
-        Container portfolioWorthWrapper = new Container("price-wrapper", worth, profitWrapper);
-        portfolioWorthWrapper.getStyle().set("flex-direction", "column");
-        section.add(portfolioWorthWrapper);
+		Container portfolioHeader = Container.builder("price-wrapper")
+						.addComponent(headerText)
+						.addComponent(worth)
+						.addComponent(new PricePercentageWrapper(profit, percentage))
+						.build();
+
+        portfolioHeader.getStyle().set("flex-direction", "column");
+        section.add(portfolioHeader);
 
         Button addTransactionBtn = new Button("Add Transaction", LumoIcon.PLUS.create());
         addTransactionBtn.addClassName("add-entity-btn");
@@ -126,9 +131,7 @@ public class PortfolioDisplayPanel extends Div {
         importBtn.addClickListener(e -> {
             ImportTransactionsDialog dialog = new ImportTransactionsDialog(portfolio, instrumentsFacadeService);
             dialog.open();
-
-            // TODO: [URGENT] Import should save transactions in batch
-//            dialog.addSaveBtnClickListener(l -> rebuildPage());
+            dialog.addSaveBtnClickListener(l -> rebuild());
         });
 
         Button exportBtn = new Button("Export", LumoIcon.DOWNLOAD.create());

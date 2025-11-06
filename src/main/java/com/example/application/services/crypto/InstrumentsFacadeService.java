@@ -112,7 +112,11 @@ public class InstrumentsFacadeService {
         return instrumentsService.saveTransaction(transaction);
     }
 
-    public void deleteTransaction(Transaction transaction) {
+	public void saveTransactions(List<Transaction> transactions) {
+		instrumentsService.saveTransactions(transactions);
+	}
+
+	public void deleteTransaction(Transaction transaction) {
         instrumentsService.deleteTransaction(transaction);
     }
     //</editor-fold>
@@ -171,26 +175,29 @@ public class InstrumentsFacadeService {
     }
     //</editor-fold>
 
-    public Portfolio createPortfolio(String name) {
+	//<editor-fold desc="PORTFOLIOS">
+	public Portfolio createPortfolio(String name) {
         return instrumentsService.createNewPortfolio(name, getAuthenticatedUser());
     }
 
     // TODO: [URGENT] -> FILTER BY MAIN PORTFOLIO
-    // TODO: REMOVE ME, SO YOU WILL NOT MISS NOTHING DURING PROPERLY DEVELOPING THIS IMPL
-    // THIS METHOD SHOULD BE IN THE VIEW ITSELF NOT HERE
     @NotNull
-    public Portfolio getAuthenticatedUserMainPortfolio() {
-        User user = getAuthenticatedUser();
-        return instrumentsService.getPortfoliosByUser(user)
+    public Portfolio getMainPortfolio() {
+        return getUserPortfolios()
                 .stream()
                 .findFirst()
                 .orElseThrow(() -> new InternalUnexpectedException("User '%s' doesn't have any portfolios"
-                        .formatted(user.getUsername())));
+                        .formatted(getAuthenticatedUser().getUsername())));
     }
+
+	public Optional<Portfolio> getPortfolioByName(String name) {
+		return instrumentsService.getPortfolioByNameAndUser(name, getAuthenticatedUser());
+	}
 
     public List<Portfolio> getUserPortfolios() {
         return instrumentsService.getPortfoliosByUser(getAuthenticatedUser());
     }
+	//</editor-fold>
 
     @NotNull
     public User getAuthenticatedUser() {

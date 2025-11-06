@@ -11,7 +11,13 @@ import org.springframework.http.HttpStatus;
 @PermitAll
 @PageTitle("Not Found")
 public class UnauthenticatedView extends ExceptionView<UnauthenticatedUserException> {
-    @Override
+
+	public UnauthenticatedView() {
+		// TODO: [URGENT] Add 2 buttons -> to Login + Registration page
+		getContent().getButtonContainer();
+	}
+
+	@Override
     protected HttpStatus httpStatus() {
         return HttpStatus.UNAUTHORIZED;
     }
@@ -30,4 +36,7 @@ public class UnauthenticatedView extends ExceptionView<UnauthenticatedUserExcept
     protected String getErrorDescription(ErrorParameter<UnauthenticatedUserException> parameter) {
         return super.getErrorDescription(parameter);
     }
+
+
+
 }
