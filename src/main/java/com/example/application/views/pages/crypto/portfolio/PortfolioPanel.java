@@ -9,6 +9,7 @@ import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.utils.common.formatters.CommonFormatters;
 import com.example.application.views.components.TransactionsGrid;
 import com.example.application.views.components.core.Container;
+import com.example.application.views.components.custom.dialogs.DialogFactory;
 import com.example.application.views.components.custom.dialogs.transactions.AddTransactionDialog;
 import com.example.application.views.components.custom.dialogs.transactions.export.ExportTransactionDialog;
 import com.example.application.views.components.custom.dialogs.transactions.export.ImportTransactionsDialog;
@@ -36,25 +37,28 @@ import java.util.stream.Collectors;
  */
 public class PortfolioPanel extends Div {
 
-    private final InstrumentsFacadeService instrumentsFacadeService;
-    private final PortfolioPerformanceTracker portfolioPerformanceTracker;
-    private final Portfolio portfolio;
+	private final Portfolio portfolio;
+	private final InstrumentsFacadeService instrumentsFacadeService;
+	private final PortfolioPerformanceTracker portfolioPerformanceTracker;
+	private final DialogFactory dialogFactory;
 
-    private final AssetsGrid assetsGrid;
-    private final AssetsChart assetsChart;
-    private final TransactionsGrid transactionsGrid;
+	private final AssetsGrid assetsGrid;
+	private final AssetsChart assetsChart;
+	private final TransactionsGrid transactionsGrid;
 
     @Autowired
     public PortfolioPanel(Portfolio portfolio,
 						  InstrumentsFacadeService instrumentsFacadeService,
-						  PortfolioPerformanceTracker portfolioPerformanceTracker)
+						  PortfolioPerformanceTracker portfolioPerformanceTracker,
+						  DialogFactory dialogFactory)
     {
         this.portfolio = Objects.requireNonNull(portfolio, "portfolio");
         this.instrumentsFacadeService = instrumentsFacadeService;
         this.portfolioPerformanceTracker = portfolioPerformanceTracker;
-        this.assetsGrid = new AssetsGrid(portfolio, instrumentsFacadeService, portfolioPerformanceTracker);
-        this.assetsChart = new AssetsChart(portfolio, instrumentsFacadeService, portfolioPerformanceTracker);
-        this.transactionsGrid = new TransactionsGrid(instrumentsFacadeService);
+		this.dialogFactory = dialogFactory;
+		this.assetsGrid = new AssetsGrid(portfolio, instrumentsFacadeService, portfolioPerformanceTracker);
+		this.assetsChart = new AssetsChart(portfolio, instrumentsFacadeService, portfolioPerformanceTracker);
+        this.transactionsGrid = new TransactionsGrid(instrumentsFacadeService, dialogFactory);
         initialize();
     }
 
@@ -103,13 +107,13 @@ public class PortfolioPanel extends Div {
         section.addClassName("asset-details-header");
 
 		H2 headerText = new H2(portfolio.getName());
-        NumericValueParagraph worth = new NumericValueParagraph(portfolioPerformanceTracker.getPortfolioWorth(portfolio), CommonFormatters.CURRENCY);
+		double worth = portfolioPerformanceTracker.getPortfolioWorth(portfolio);
         double profit = portfolioPerformanceTracker.getPortfolioTotalProfit(portfolio);
         double percentage = portfolioPerformanceTracker.getPortfolioProfitPercentage(portfolio);
 
 		Container portfolioHeader = Container.builder("price-wrapper")
 						.addComponent(headerText)
-						.addComponent(worth)
+						.addComponent(new NumericValueParagraph(worth, CommonFormatters.CURRENCY))
 						.addComponent(new PricePercentageWrapper(profit, percentage))
 						.build();
 

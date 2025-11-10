@@ -16,6 +16,7 @@ import com.example.application.views.components.PriceWatchlistComponent;
 import com.example.application.views.components.TransactionsGrid;
 import com.example.application.views.components.core.ComponentBuilder;
 import com.example.application.views.components.core.Container;
+import com.example.application.views.components.custom.dialogs.DialogFactory;
 import com.example.application.views.components.custom.dialogs.transactions.AddTransactionDialog;
 import com.example.application.views.components.custom.display.NumericValueParagraph;
 import com.example.application.views.components.custom.fields.AmountField;
@@ -58,6 +59,9 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
     private final PriceChangeNotifier priceChangeNotifier;
     private final InstrumentsFacadeService instrumentsFacadeService;
     private final PortfolioPerformanceTracker portfolioPerformanceTracker;
+	private final DialogFactory dialogFactory;
+
+	// TODO: [URGENT] Add dialogs into the DialogFactory
     private final AddTransactionDialog addTransactionDialog;
 
     private final UI ui;
@@ -68,12 +72,14 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
     public AssetDetailsView(Portfolio portfolio,
                             InstrumentsFacadeService instrumentsFacadeService,
                             PortfolioPerformanceTracker portfolioPerformanceTracker,
-                            PriceChangeNotifier priceChangeNotifier)
+                            PriceChangeNotifier priceChangeNotifier,
+							DialogFactory dialogFactory)
     {
         this.portfolio = portfolio;
         this.instrumentsFacadeService = instrumentsFacadeService;
         this.portfolioPerformanceTracker = portfolioPerformanceTracker;
         this.priceChangeNotifier = priceChangeNotifier;
+		this.dialogFactory = dialogFactory;
         this.addTransactionDialog = new AddTransactionDialog(portfolio, instrumentsFacadeService);
         this.ui = UI.getCurrent();
     }
@@ -404,7 +410,7 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
     }
 
     private Section transactionHistorySection() {
-        TransactionsGrid transactionsGrid = new TransactionsGrid(instrumentsFacadeService);
+        TransactionsGrid transactionsGrid = new TransactionsGrid(instrumentsFacadeService, dialogFactory);
         transactionsGrid.setItems(instrumentsFacadeService.getTransactionsByAsset(portfolio, asset));
         transactionsGrid.setPageSize(10);
         transactionsGrid.addUpdateItemListener(l -> rebuildPage());

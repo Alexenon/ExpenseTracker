@@ -29,9 +29,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.time.LocalDateTime;
 import java.util.function.Consumer;
 
-// TODO: [LONG TERM]
-//  - Add slider for percentage buy/transfer
-//  - Ideally should be revisted this form design, with a more complex solution -> sliders, % and $, deposit...
+/*
+	TODO: [LONG TERM]
+		- Add slider for percentage buy/transfer
+		- Ideally should be revisted this form design, with a more complex solution -> sliders, % and $, deposit...
+* */
 public class AddTransactionDialog extends Dialog implements HasNotifications {
 
     private final Portfolio portfolio;
@@ -62,10 +64,10 @@ public class AddTransactionDialog extends Dialog implements HasNotifications {
 
     private void buildForm() {
         setHeaderTitle("Add Transaction");
-        initializeFields();
-        initializeFieldValues();
-        initializeFieldListeners();
-        initializeBinder();
+		initializeBinder();
+		initializeFields();
+		initializeFieldValues();
+		initializeFieldListeners();
 
         Container formBody = Container.builder("transaction-modal")
                 .addComponent(assetSymbolField)
@@ -101,8 +103,11 @@ public class AddTransactionDialog extends Dialog implements HasNotifications {
             binder.setValidatorsDisabled(false);
             marketPriceField.setValue(assetSymbolField.getMarketPrice());
             symbolSuffix.setText(assetSymbolField.getSymbol());
-            updateFieldHelperTexts();
+            displayHintMarketPrice();
+			displayHintAmountOfTokens();
         });
+
+		typeField.addValueChangeListener(l -> displayHintAmountOfTokens());
 
         amountField.setSuffixComponent(symbolSuffix);
         amountField.setValueChangeMode(ValueChangeMode.EAGER);
@@ -184,6 +189,7 @@ public class AddTransactionDialog extends Dialog implements HasNotifications {
                 .bind(Transaction::getNote, Transaction::setNote);
 
         binder.forField(datePicker)
+				.asRequired("Please fill this field")
                 .bind(Transaction::getDateTime, Transaction::setDateTime);
     }
 
@@ -195,12 +201,20 @@ public class AddTransactionDialog extends Dialog implements HasNotifications {
         assetSymbolField.setValue(asset);
     }
 
-    private void updateFieldHelperTexts() {
-        String formatedPrice = CommonFormatters.CURRENCY.format(assetSymbolField.getMarketPrice());
-        String formatedAmount = CommonFormatters.AMOUNT.format(assetSymbolField.getAmountTokens(portfolio));
-        marketPriceField.setHelperText("Current price: %s".formatted(formatedPrice));
-        amountField.setHelperText("Currently you have %s %s".formatted(formatedAmount, assetSymbolField.getSymbol()));
+    private void displayHintMarketPrice() {
+		String formatedPrice = CommonFormatters.CURRENCY.format(assetSymbolField.getMarketPrice());
+		marketPriceField.setHelperText("Current price: %s".formatted(formatedPrice));
     }
+
+	private void displayHintAmountOfTokens() {
+		double amountTokens = assetSymbolField.getAmountTokens(portfolio);
+		String formatedAmount = CommonFormatters.AMOUNT.format(amountTokens);
+		String helperText = typeField.getValue().isBuyTransaction()
+				? null
+				: "Currently you have %s %s".formatted(formatedAmount, assetSymbolField.getSymbol());
+
+		amountField.setHelperText(helperText);
+	}
 
     private Transaction defaultTransaction() {
         Transaction newTransaction = new Transaction();

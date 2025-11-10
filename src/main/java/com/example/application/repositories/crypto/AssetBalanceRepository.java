@@ -12,34 +12,8 @@ import java.util.Optional;
 @Repository
 public interface AssetBalanceRepository extends JpaRepository<AssetBalance, Long> {
 
-    List<AssetBalance> findByPortfolio(Portfolio portfolio);
+	List<AssetBalance> findByPortfolio(Portfolio portfolio);
 
-//    List<AssetBalance> findByPortfoliosUnique(List<Portfolio> portfolios);
-
-    Optional<AssetBalance> findByPortfolioAndAsset(Portfolio portfolio, Asset asset);
-
-//    List<AssetBalance> findByPortfoliosAndAsset(List<Portfolio> portfolios, Asset asset);
-
-//    @Query(value = """
-//            SELECT * FROM asset_balances ab
-//            WHERE ab.portfolio_id = :portfolioId AND ab.amount > 0
-//            """, nativeQuery = true)
-//    List<AssetBalance> findByPortfolioWithNonZeroAmount(@Param("portfolioId") long portfolioId);
-//
-//    @Query(value = """
-//            SELECT * FROM asset_balances ab
-//            WHERE ab.portfolio_id = :portfolioId AND ab.amount > 0
-//            """, nativeQuery = true)
-//    List<AssetBalance> findByPortfoliosWithNonZeroAmount(@Param("userId") long userId);
-
-    /*
-    """
-        SELECT * FROM asset_balances AB
-        INNER JOIN users U ON U.id = AB.user_id
-        INNER JOIN portfolios P ON U.id = P.user_id
-        WHERE P.user_id = :userId;
-
-    """
-    */
+	Optional<AssetBalance> findByPortfolioAndAsset(Portfolio portfolio, Asset asset);
 
 }

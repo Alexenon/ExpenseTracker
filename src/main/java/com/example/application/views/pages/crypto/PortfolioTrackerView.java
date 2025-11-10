@@ -11,6 +11,7 @@ import com.example.application.views.components.PriceChangeNotifier;
 import com.example.application.views.components.PriceChangeblePage;
 import com.example.application.views.components.TransactionsGrid;
 import com.example.application.views.components.core.Container;
+import com.example.application.views.components.custom.dialogs.DialogFactory;
 import com.example.application.views.components.custom.dialogs.transactions.AddTransactionDialog;
 import com.example.application.views.components.custom.dialogs.transactions.export.ExportTransactionDialog;
 import com.example.application.views.components.custom.dialogs.transactions.export.ImportTransactionsDialog;
@@ -68,8 +69,9 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
 
     @Autowired
     public PortfolioTrackerView(InstrumentsFacadeService instrumentsFacadeService,
-                                PortfolioPerformanceTracker portfolioPerformanceTracker,
-                                PriceChangeNotifier priceChangeNotifier)
+								PortfolioPerformanceTracker portfolioPerformanceTracker,
+								PriceChangeNotifier priceChangeNotifier,
+								DialogFactory dialogFactory)
     {
         this.instrumentsFacadeService = instrumentsFacadeService;
         this.portfolioPerformanceTracker = portfolioPerformanceTracker;
@@ -79,7 +81,7 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
 
         this.assetsGrid = new AssetsGrid(portfolio, instrumentsFacadeService, portfolioPerformanceTracker);
         this.assetsChart = new AssetsChart(portfolio, instrumentsFacadeService, portfolioPerformanceTracker);
-        this.transactionsGrid = new TransactionsGrid(instrumentsFacadeService);
+        this.transactionsGrid = new TransactionsGrid(instrumentsFacadeService, dialogFactory);
         this.ui = UI.getCurrent();
         initializePage();
     }

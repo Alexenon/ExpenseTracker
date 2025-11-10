@@ -4,6 +4,7 @@ import com.example.application.entities.crypto.Portfolio;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.views.components.PriceChangeNotifier;
+import com.example.application.views.components.custom.dialogs.DialogFactory;
 import com.example.application.views.components.portfolio.AddPortfolioDialog;
 import com.example.application.views.layouts.MainLayout;
 import com.example.application.views.pages.DefaultPage;
@@ -35,6 +36,7 @@ public class TrackerView extends DefaultPage {
 	private final InstrumentsFacadeService instrumentsFacadeService;
 	private final PortfolioPerformanceTracker portfolioPerformanceTracker;
 	private final PriceChangeNotifier priceChangeNotifier;
+	private final DialogFactory dialogFactory;
 
 	private final UI ui;
 	private final Button addPortfolioBtn = new Button(LumoIcon.PLUS.create());
@@ -46,11 +48,13 @@ public class TrackerView extends DefaultPage {
 	@Autowired
 	public TrackerView(InstrumentsFacadeService instrumentsFacadeService,
 					   PortfolioPerformanceTracker portfolioPerformanceTracker,
-					   PriceChangeNotifier priceChangeNotifier)
+					   PriceChangeNotifier priceChangeNotifier,
+					   DialogFactory dialogFactory)
 	{
 		this.instrumentsFacadeService = instrumentsFacadeService;
 		this.portfolioPerformanceTracker = portfolioPerformanceTracker;
 		this.priceChangeNotifier = priceChangeNotifier;
+		this.dialogFactory = dialogFactory;
 		this.ui = UI.getCurrent();
 		initializePage();
 	}
@@ -95,7 +99,7 @@ public class TrackerView extends DefaultPage {
 
 	private void updatePortfolioPanel(Portfolio portfolio) {
 		Optional.ofNullable(portfolioPanel).ifPresent(Component::removeFromParent);
-		portfolioPanel = new PortfolioPanel(portfolio, instrumentsFacadeService, portfolioPerformanceTracker);
+		portfolioPanel = new PortfolioPanel(portfolio, instrumentsFacadeService, portfolioPerformanceTracker, dialogFactory);
 		portfolioPanel.build();
 		add(portfolioPanel);
 	}

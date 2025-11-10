@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
@@ -13,18 +14,25 @@ import java.util.Objects;
 
 /*
     TODO [LONG TERM]:
-        - Add SpotPairs - BTC/USDT, BTC/USDC, ...
-        - TRANSFER - Add asset amount from external sources
-        - CONVERT  - Switch from one asset to another
+        [!] Add SpotPairs - BTC/USDT, BTC/USDC, ...
+        [!] DEPOSIT / TRANSFER - Add asset amount from external sources
+        [!] CONVERT  - Switch from one asset to another
+
 
     TODO: [NEXT]
-        - store avgBuyPrice at the moment
-            -> for sell transaction to display then aproximateProfit at the moment
-            -> for buy transaction to display then how good was buy compared with previous buy transactions
-        - Add profit compared with current price, that should be not stored here but just displayed
+        [!] store avgBuyPrice at the moment
+            [-] for sell transaction to display then aproximateProfit at the moment
+            [-] for buy transaction to display then how good was buy compared with:
+            	[-] current price
+            	[-] previous avgBuyPrice (which is avgBuyPrice - avgBuyPrice of the current transaction)
+        [!] Add profit
+        	[-] compared with current price, that should be not stored here but just displayed
+
 */
+
 @Data
 @Entity(name = "transactions")
+@EqualsAndHashCode(of = {"id", "portfolio", "asset"})
 @NoArgsConstructor
 public class Transaction {
 

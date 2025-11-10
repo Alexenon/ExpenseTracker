@@ -28,6 +28,10 @@ public enum PictogramIcon {
 
     // Very common
     DELETE,
+	IMPORT,
+	EXPORT,
+	SWAP_VERTICAL,
+	SWAP_HORIZONTAL,
     DELETE_OUTLINE,
     SQUARE_EDIT_OUTLINE,
     INFORMATION_OUTLINE,

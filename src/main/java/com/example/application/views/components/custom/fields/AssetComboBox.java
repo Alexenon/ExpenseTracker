@@ -83,5 +83,4 @@ public class AssetComboBox extends ComboBox<Asset> {
                 .orElse(defaultValue);
     }
 
-
 }

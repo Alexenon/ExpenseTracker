@@ -62,7 +62,6 @@ public class EditTransactionDialog extends Dialog implements HasNotifications {
         initializeFields();
         initializeFieldsValues();
         initializeFieldListeners();
-        updateFieldHelperTexts();
         initializeBinder();
 
         Container formBody = Container.builder("transaction-modal")
@@ -82,6 +81,8 @@ public class EditTransactionDialog extends Dialog implements HasNotifications {
     private void initializeFields() {
         typeField.setLabel("Transaction Type");
         typeField.setItems(TransactionType.values());
+		displayHintMarketPrice();
+		displayHintAmountOfTokens();
     }
 
     private void initializeFieldsValues() {
@@ -98,8 +99,11 @@ public class EditTransactionDialog extends Dialog implements HasNotifications {
             binder.setValidatorsDisabled(false);
             marketPriceField.setValue(assetSymbolField.getMarketPrice());
             symbolSuffix.setText(assetSymbolField.getSymbol());
-            updateFieldHelperTexts();
+            displayHintMarketPrice();
+			displayHintAmountOfTokens();
         });
+
+		typeField.addValueChangeListener(e -> displayHintAmountOfTokens());
 
         amountField.setSuffixComponent(symbolSuffix);
         amountField.setValueChangeMode(ValueChangeMode.EAGER);
@@ -220,11 +224,19 @@ public class EditTransactionDialog extends Dialog implements HasNotifications {
         return binder.getBean();
     }
 
-    private void updateFieldHelperTexts() {
-        String formatedPrice = CommonFormatters.CURRENCY.format(assetSymbolField.getMarketPrice());
-        String formatedAmount = CommonFormatters.AMOUNT.format(assetSymbolField.getAmountTokens(transaction.getPortfolio()));
-        marketPriceField.setHelperText("Current price: %s".formatted(formatedPrice));
-        amountField.setHelperText("Currently you have %s %s".formatted(formatedAmount, assetSymbolField.getSymbol()));
-    }
+	private void displayHintMarketPrice() {
+		String formatedPrice = CommonFormatters.CURRENCY.format(assetSymbolField.getMarketPrice());
+		marketPriceField.setHelperText("Current price: %s".formatted(formatedPrice));
+	}
+
+	private void displayHintAmountOfTokens() {
+		double amountTokens = assetSymbolField.getAmountTokens(transaction.getPortfolio());
+		String formatedAmount = CommonFormatters.AMOUNT.format(amountTokens);
+		String helperText = typeField.getValue().isBuyTransaction()
+				? null
+				: "Currently you have %s %s".formatted(formatedAmount, assetSymbolField.getSymbol());
+
+		amountField.setHelperText(helperText);
+	}
 
 }

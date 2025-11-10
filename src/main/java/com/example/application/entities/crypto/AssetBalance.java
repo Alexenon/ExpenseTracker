@@ -1,16 +1,16 @@
 package com.example.application.entities.crypto;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Data
 @Entity(name = "asset_balances")
+@EqualsAndHashCode(of = {"id", "portfolio", "asset"})
 @NoArgsConstructor
-@AllArgsConstructor
 public class AssetBalance {
 
     @Id

@@ -57,7 +57,7 @@ public class InstrumentsFacadeService {
         return Optional.ofNullable(asset)
                 .flatMap(a -> getAssetBalanceByAsset(portfolio, asset))
                 .map(AssetBalance::getAmount)
-                .orElse(Double.NaN);
+                .orElse(0.0);
     }
 
     @Nullable
@@ -107,6 +107,10 @@ public class InstrumentsFacadeService {
     public List<Transaction> getTransactionsByAsset(Portfolio portfolio, Asset asset) {
         return instrumentsService.getTransactionsBy(portfolio, asset);
     }
+
+	public Transaction transferTransaction(Transaction transaction, Portfolio portfolio, boolean replace) {
+		return instrumentsService.transferTransaction(transaction, portfolio, replace);
+	}
 
     public Transaction saveTransaction(Transaction transaction) {
         return instrumentsService.saveTransaction(transaction);
@@ -162,16 +166,8 @@ public class InstrumentsFacadeService {
         return instrumentsService.getAssetBalancesByPortfolio(portfolio);
     }
 
-    public List<AssetBalance> getAssetBalancesForPortfolios(List<Portfolio> portfolios) {
-        return instrumentsService.getAssetBalancesByPortfolios(portfolios);
-    }
-
     public Optional<AssetBalance> getAssetBalanceByAsset(Portfolio portfolio, Asset asset) {
         return instrumentsService.getAssetBalancesByPortfolioAndAsset(portfolio, asset);
-    }
-
-    public List<AssetBalance> getAssetBalancesByAsset(List<Portfolio> portfolios, Asset asset) {
-        return instrumentsService.getAssetBalancesByPortfoliosAndAsset(portfolios, asset);
     }
     //</editor-fold>
 

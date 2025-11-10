@@ -19,6 +19,16 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
+/*
+	TODO: [CRITICAL]
+		[!!!] Store the images from external sources into the project or somewhere else
+			in case the images got deleted, then we have instances
+
+	TODO: [CRITICAL]
+		[!] After deletion -> profit, realized, ... should be reverted
+			[-] Rollback should also cover the avgBuyPrice for all transactions that are after the deleted transaction
+* */
+
 @Slf4j
 @Service
 public class TransactionService {
@@ -60,6 +70,7 @@ public class TransactionService {
 
 	@Transactional
 	public Transaction transfer(Transaction transaction, Portfolio portfolio, boolean replace) {
+		log.info("Transfering {} from {} to {}", transaction, transaction.getPortfolio(), portfolio);
 		Transaction newTransaction = new Transaction(transaction);
 		newTransaction.setPortfolio(portfolio);
 
@@ -118,11 +129,10 @@ public class TransactionService {
 		Portfolio portfolio = transaction.getPortfolio();
 
 		AssetBalance assetBalance = assetBalanceService.findByPortfolioAndAsset(portfolio, asset)
-				.orElse(assetBalanceService.createNew(portfolio, asset));
+				.orElseGet(() -> assetBalanceService.createNew(portfolio, asset));
 
-		// Saving avgBuyPrice before updating the balance
+		// Saving current avgBuyPrice before updating it
 		transaction.setAvgBuyPriceAtMoment(assetBalance.getAvgBuyPrice());
-
 		assetBalanceService.update(assetBalance, transaction);
 	}
 

@@ -5,7 +5,6 @@ import com.example.application.entities.crypto.AssetBalance;
 import com.example.application.entities.crypto.Portfolio;
 import com.example.application.entities.crypto.Transaction;
 import com.example.application.repositories.crypto.AssetBalanceRepository;
-import com.example.application.utils.common.lang.CollectionUtils;
 import com.example.application.utils.common.lang.MathUtils;
 import com.example.application.utils.common.lang.NumberUtils;
 import com.example.application.utils.exceptions.InternalUnexpectedException;
@@ -41,31 +40,22 @@ public class AssetBalanceService {
 		return repository.findByPortfolio(portfolio);
 	}
 
-	public List<AssetBalance> findByPortfolios(@NotNull List<Portfolio> portfolios) {
-		CollectionUtils.requireNotEmpty(portfolios, "portfolios");
-		return null;
-//        return repository.findByPortfoliosUnique(portfolios);
-	}
-
 	public Optional<AssetBalance> findByPortfolioAndAsset(@NotNull Portfolio portfolio, @NotNull Asset asset) {
 		Objects.requireNonNull(portfolio, "portfolio");
 		Objects.requireNonNull(asset, "asset");
 		return repository.findByPortfolioAndAsset(portfolio, asset);
 	}
 
-	public List<AssetBalance> findByPortfoliosAndAsset(@NotNull List<Portfolio> portfolios, @NotNull Asset asset) {
-		CollectionUtils.requireNotEmpty(portfolios, "portfolios");
-		Objects.requireNonNull(asset, "asset");
-		return null;
-//        return repository.findByPortfoliosAndAsset(portfolios, asset);
-	}
-
 	@Transactional
 	public AssetBalance createNew(@NotNull Portfolio portfolio, @NotNull Asset asset) {
+		Optional<AssetBalance> existing = findByPortfolioAndAsset(portfolio, asset);
+
+		if (existing.isPresent())
+			throw new IllegalStateException("AssetBalance already exists for %s and %s".formatted(portfolio, asset));
+
 		AssetBalance assetBalance = new AssetBalance();
 		assetBalance.setPortfolio(portfolio);
 		assetBalance.setAsset(asset);
-		validate(assetBalance);
 		return save(assetBalance);
 	}
 
@@ -84,6 +74,7 @@ public class AssetBalanceService {
 	private AssetBalance save(@NotNull AssetBalance assetBalance) {
 		assetBalance.setLastTimeUpdated(LocalDateTime.now());
 		try {
+			validate(assetBalance);
 			return repository.save(assetBalance);
 		} catch (Exception e) {
 			throw new InternalUnexpectedException(e);

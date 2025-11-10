@@ -16,8 +16,7 @@ public interface PortfolioRepository extends JpaRepository<Portfolio, Long> {
 	List<Portfolio> findByUser(User user);
 
 	@Query(value = """
-			         SELECT *
-			         FROM portfolios P
+			         SELECT * FROM portfolios P
 			         WHERE P.name = :name AND P.user_id = :userId
 			""", nativeQuery = true)
 	Optional<Portfolio> findByNameAndUser(@Param("name") String name, @Param("userId") long userId);

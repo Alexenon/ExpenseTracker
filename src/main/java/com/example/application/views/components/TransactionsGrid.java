@@ -20,6 +20,7 @@ import com.example.application.utils.common.formatters.number.CurrencyFormatter;
 import com.example.application.utils.common.formatters.number.PercentageFormatter;
 import com.example.application.utils.investment.ProfitUtils;
 import com.example.application.views.components.core.Container;
+import com.example.application.views.components.custom.dialogs.DialogFactory;
 import com.example.application.views.components.custom.dialogs.transactions.TransactionDetailsDialog;
 import com.example.application.views.components.custom.fields.AssetComboBox;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
@@ -43,14 +44,18 @@ import java.util.function.Consumer;
 public class TransactionsGrid extends Div {
 
     private final InstrumentsFacadeService instrumentsFacadeService;
+	private final DialogFactory dialogFactory;
 
     private final AssetComboBox nameSearchField;
     private final MultiSelectComboBox<TransactionType> typeSearchField = new MultiSelectComboBox<>("Transaction Type");
     private final Grid<Transaction> grid = new Grid<>();
     private final GridListDataView<Transaction> gridDataView = grid.setItems();
 
-    public TransactionsGrid(InstrumentsFacadeService instrumentsFacadeService) {
-        this.instrumentsFacadeService = instrumentsFacadeService;
+    public TransactionsGrid(InstrumentsFacadeService instrumentsFacadeService,
+							DialogFactory dialogFactory) {
+		this.instrumentsFacadeService = Objects.requireNonNull(instrumentsFacadeService, "instrumentsFacadeService");
+		this.dialogFactory = Objects.requireNonNull(dialogFactory, "dialogFactory");
+
         this.nameSearchField = new AssetComboBox(instrumentsFacadeService);
         initializeGrid();
         initializeGridColumns();
@@ -169,7 +174,7 @@ public class TransactionsGrid extends Div {
 
     public void addUpdateItemListener(Consumer<?> listener) {
         grid.addItemClickListener(row -> {
-            TransactionDetailsDialog detailsDialog = new TransactionDetailsDialog(row.getItem(), instrumentsFacadeService);
+            TransactionDetailsDialog detailsDialog = new TransactionDetailsDialog(row.getItem(), instrumentsFacadeService, dialogFactory);
             detailsDialog.open();
             detailsDialog.addUpdateTransactionListener(l -> {
                 listener.accept(null);
