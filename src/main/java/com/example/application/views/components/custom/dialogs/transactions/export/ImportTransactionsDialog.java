@@ -28,13 +28,11 @@ import com.vaadin.flow.dom.DomEventListener;
 import com.vaadin.flow.theme.lumo.LumoIcon;
 
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /*
     TODO [LONG TERM]:
-        [?] Add option to replace existing transactions
         [?] What if I add same transaction twice, it should at least warn user
 
     Helper displays info while file is beeing added
@@ -218,10 +216,10 @@ public class ImportTransactionsDialog extends Dialog implements HasNotifications
 	}
 
 	private ComponentRenderer<Button, TransactionModel> columnEditRenderer() {
-		return new ComponentRenderer<>(Button::new, (button, oldTransaction) -> {
-			button.setIcon(PictogramIcon.SQUARE_EDIT_OUTLINE.create("grid-action-btn"));
-			button.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_TERTIARY);
-			button.addClickListener(e -> {
+		return new ComponentRenderer<>(Button::new, (editBtn, oldTransaction) -> {
+			editBtn.setIcon(PictogramIcon.SQUARE_EDIT_OUTLINE.create("grid-action-btn"));
+			editBtn.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_TERTIARY);
+			editBtn.addClickListener(e -> {
 				EditTransactionModelDialog editDialog = new EditTransactionModelDialog(oldTransaction, instrumentsFacadeService);
 				editDialog.open();
 				editDialog.addSaveListener(d -> {
@@ -241,10 +239,10 @@ public class ImportTransactionsDialog extends Dialog implements HasNotifications
 	}
 
 	private ComponentRenderer<Button, TransactionModel> columnDeleteRenderer() {
-		return new ComponentRenderer<>(Button::new, (button, model) -> {
-			button.setIcon(PictogramIcon.DELETE_OUTLINE.create("grid-action-btn"));
-			button.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_ERROR, ButtonVariant.LUMO_TERTIARY);
-			button.addClickListener(e -> {
+		return new ComponentRenderer<>(Button::new, (deleteBtn, model) -> {
+			deleteBtn.setIcon(PictogramIcon.DELETE_OUTLINE.create("grid-action-btn"));
+			deleteBtn.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_ERROR, ButtonVariant.LUMO_TERTIARY);
+			deleteBtn.addClickListener(e -> {
 				mappedTransactions.remove(model);
 				grid.getDataProvider().refreshAll();
 			});
@@ -263,10 +261,6 @@ public class ImportTransactionsDialog extends Dialog implements HasNotifications
 		transaction.setDateTime(model.getDateTime());
 		transaction.setNote(model.getNote());
 		return transaction;
-	}
-
-	public void addSaveBtnClickListener(Consumer<?> listener) {
-		saveButton.addClickListener(e -> listener.accept(null));
 	}
 
 }

@@ -4,11 +4,12 @@ import com.example.application.entities.crypto.Portfolio;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.views.components.PriceChangeNotifier;
-import com.example.application.views.components.custom.dialogs.DialogFactory;
-import com.example.application.views.components.portfolio.AddPortfolioDialog;
+import com.example.application.views.components.portfolio.dialogs.AddPortfolioDialog;
+import com.example.application.views.components.portfolio.dialogs.PortfolioCreatedOrUpdatedEvent;
 import com.example.application.views.layouts.MainLayout;
 import com.example.application.views.pages.DefaultPage;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.JavaScript;
@@ -36,7 +37,6 @@ public class TrackerView extends DefaultPage {
 	private final InstrumentsFacadeService instrumentsFacadeService;
 	private final PortfolioPerformanceTracker portfolioPerformanceTracker;
 	private final PriceChangeNotifier priceChangeNotifier;
-	private final DialogFactory dialogFactory;
 
 	private final UI ui;
 	private final Button addPortfolioBtn = new Button(LumoIcon.PLUS.create());
@@ -48,58 +48,53 @@ public class TrackerView extends DefaultPage {
 	@Autowired
 	public TrackerView(InstrumentsFacadeService instrumentsFacadeService,
 					   PortfolioPerformanceTracker portfolioPerformanceTracker,
-					   PriceChangeNotifier priceChangeNotifier,
-					   DialogFactory dialogFactory)
+					   PriceChangeNotifier priceChangeNotifier)
 	{
 		this.instrumentsFacadeService = instrumentsFacadeService;
 		this.portfolioPerformanceTracker = portfolioPerformanceTracker;
 		this.priceChangeNotifier = priceChangeNotifier;
-		this.dialogFactory = dialogFactory;
 		this.ui = UI.getCurrent();
 		initializePage();
 	}
 
 	private void initializePage() {
 		getStyle().set("margin-top", "100px");
-		buildPage();
+		intializeFields();
+		buildPage(instrumentsFacadeService.getMainPortfolio());
+
+		ComponentUtil.addListener(UI.getCurrent(), PortfolioCreatedOrUpdatedEvent.class,
+				event -> ui.access(() -> rebuildPage(event.getPortfolio())));
 	}
 
-	public void buildPage() {
+	private void intializeFields() {
 		portfolioSelector.setLabel("Portfolio");
 		portfolioSelector.setItemLabelGenerator(Portfolio::getName);
 		portfolioSelector.setEmptySelectionAllowed(false);
 		portfolioSelector.addValueChangeListener(event -> {
-			Portfolio portfolio = event.getValue();
-			Optional.ofNullable(portfolio)
-					.ifPresent(p -> ui.access(() -> updatePortfolioPanel(p)));
+			Portfolio selectedPortfolio = event.getValue();
+			Optional.ofNullable(selectedPortfolio)
+					.ifPresent(p -> ui.access(() -> updatePortfolioPanel(selectedPortfolio)));
 		});
 
-		addPortfolioBtn.addClickListener(event -> {
-			AddPortfolioDialog dialog = new AddPortfolioDialog(instrumentsFacadeService);
-			dialog.open();
-			dialog.addOnSuccessfullSaveListener(l -> {
-				dialog.getPortfolio().ifPresent(portfolio -> {
-					refreshPortfolios(portfolio);
-					ui.access(() -> portfolioSelector.setValue(portfolio));
-				});
-			});
-		});
+		addPortfolioBtn.addClickListener(e -> new AddPortfolioDialog(instrumentsFacadeService).open());
+	}
 
-		Portfolio defaultPortfolio = instrumentsFacadeService.getMainPortfolio();
-		refreshPortfolios(defaultPortfolio);
-
+	private void buildPage(Portfolio portfolio) {
+		List<Portfolio> updatedList = instrumentsFacadeService.getUserPortfolios();
+		dataView = portfolioSelector.setItems(updatedList);
+		portfolioSelector.setValue(portfolio);
+		updatePortfolioPanel(portfolio);
 		add(addPortfolioBtn, portfolioSelector);
 	}
 
-	private void refreshPortfolios(Portfolio newSelection) {
-		List<Portfolio> updatedList = instrumentsFacadeService.getUserPortfolios();
-		dataView = portfolioSelector.setItems(updatedList);
-		portfolioSelector.setValue(newSelection);
+	private void rebuildPage(Portfolio portfolio) {
+		this.removeAll();
+		buildPage(portfolio);
 	}
 
 	private void updatePortfolioPanel(Portfolio portfolio) {
 		Optional.ofNullable(portfolioPanel).ifPresent(Component::removeFromParent);
-		portfolioPanel = new PortfolioPanel(portfolio, instrumentsFacadeService, portfolioPerformanceTracker, dialogFactory);
+		portfolioPanel = new PortfolioPanel(portfolio, instrumentsFacadeService, portfolioPerformanceTracker);
 		portfolioPanel.build();
 		add(portfolioPanel);
 	}

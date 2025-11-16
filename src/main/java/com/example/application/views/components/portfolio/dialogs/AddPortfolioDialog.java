@@ -1,9 +1,11 @@
-package com.example.application.views.components.portfolio;
+package com.example.application.views.components.portfolio.dialogs;
 
 import com.example.application.entities.crypto.Portfolio;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.views.components.utils.HasNotifications;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -13,7 +15,6 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.theme.lumo.LumoIcon;
 
 import java.util.Optional;
-import java.util.function.Consumer;
 
 public class AddPortfolioDialog extends Dialog implements HasNotifications {
 
@@ -50,14 +51,16 @@ public class AddPortfolioDialog extends Dialog implements HasNotifications {
 		saveButton.addClickShortcut(Key.ENTER);
 		saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
 		saveButton.addClickListener(e -> {
-			if (binder.validate().isOk()) {
-				String name = nameField.getValue();
-				portfolio = instrumentsFacadeService.createPortfolio(name);
-				showSuccessfulNotification("Porfolio '%s' successfully created".formatted(name));
-				close();
-			} else {
+			if (!binder.validate().isOk()) {
 				showErrorNotification("Something went wrong");
+				return;
 			}
+
+			String portfolioName = nameField.getValue();
+			portfolio = instrumentsFacadeService.createPortfolio(portfolioName);
+			UI.getCurrent().access(() -> ComponentUtil.fireEvent(UI.getCurrent(), new PortfolioCreatedOrUpdatedEvent(this, portfolio)));
+			showSuccessfulNotification("Porfolio '%s' successfully created".formatted(portfolioName));
+			close();
 		});
 		getFooter().add(saveButton, cancelButton);
 	}
@@ -79,13 +82,6 @@ public class AddPortfolioDialog extends Dialog implements HasNotifications {
 				.withValidator(s -> s.length() <= MAX_NAME_LENGTH, "Porfolio Name must be have maximum %s characters".formatted(MAX_NAME_LENGTH))
 				.withValidator(s -> instrumentsFacadeService.getPortfolioByName(s).isEmpty(), "There is already a portfolio with such name")
 				.bind(Portfolio::getName, Portfolio::setName);
-	}
-
-	public void addOnSuccessfullSaveListener(Consumer<?> listener) {
-		saveButton.addClickListener(e -> {
-			if (getPortfolio().isPresent())
-				listener.accept(null);
-		});
 	}
 
 	public Optional<Portfolio> getPortfolio() {

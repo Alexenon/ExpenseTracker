@@ -13,7 +13,9 @@ import com.example.application.views.components.custom.fields.CurrencyField;
 import com.example.application.views.components.utils.HasNotifications;
 import com.example.application.views.components.utils.convertors.FlexibleAmountConvertor;
 import com.example.application.views.components.utils.convertors.FlexiblePriceConvertor;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
@@ -27,7 +29,6 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDateTime;
-import java.util.function.Consumer;
 
 /*
 	TODO: [LONG TERM]
@@ -141,8 +142,9 @@ public class AddTransactionDialog extends Dialog implements HasNotifications {
         saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
         saveButton.addClickListener(e -> {
             if (binder.validate().isOk()) {
-                instrumentsFacadeService.saveTransaction(binder.getBean());
-                showSuccessfulNotification("The transaction was saved succesfully");
+				Transaction savedTransaction = instrumentsFacadeService.saveTransaction(binder.getBean());
+				showSuccessfulNotification("The transaction was saved succesfully");
+				UI.getCurrent().access(() -> ComponentUtil.fireEvent(UI.getCurrent(), new TransactionCreatedOrUpdatedEvent(this, savedTransaction)));
                 this.close();
             } else {
                 showErrorNotification("Error! Please fill the fields with as required");
@@ -191,10 +193,6 @@ public class AddTransactionDialog extends Dialog implements HasNotifications {
         binder.forField(datePicker)
 				.asRequired("Please fill this field")
                 .bind(Transaction::getDateTime, Transaction::setDateTime);
-    }
-
-    public void addSaveBtnClickListener(Consumer<?> listener) {
-        saveButton.addClickListener(e -> listener.accept(null));
     }
 
     public void setAsset(Asset asset) {

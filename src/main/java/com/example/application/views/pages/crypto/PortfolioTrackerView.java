@@ -11,8 +11,8 @@ import com.example.application.views.components.PriceChangeNotifier;
 import com.example.application.views.components.PriceChangeblePage;
 import com.example.application.views.components.TransactionsGrid;
 import com.example.application.views.components.core.Container;
-import com.example.application.views.components.custom.dialogs.DialogFactory;
 import com.example.application.views.components.custom.dialogs.transactions.AddTransactionDialog;
+import com.example.application.views.components.custom.dialogs.transactions.TransactionCreatedOrUpdatedEvent;
 import com.example.application.views.components.custom.dialogs.transactions.export.ExportTransactionDialog;
 import com.example.application.views.components.custom.dialogs.transactions.export.ImportTransactionsDialog;
 import com.example.application.views.components.custom.display.NumericValueParagraph;
@@ -24,6 +24,7 @@ import com.example.application.views.layouts.MainLayout;
 import com.example.application.views.pages.DefaultPage;
 import com.example.application.views.pages.RebuildablePage;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.JavaScript;
@@ -70,8 +71,7 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
     @Autowired
     public PortfolioTrackerView(InstrumentsFacadeService instrumentsFacadeService,
 								PortfolioPerformanceTracker portfolioPerformanceTracker,
-								PriceChangeNotifier priceChangeNotifier,
-								DialogFactory dialogFactory)
+								PriceChangeNotifier priceChangeNotifier)
     {
         this.instrumentsFacadeService = instrumentsFacadeService;
         this.portfolioPerformanceTracker = portfolioPerformanceTracker;
@@ -81,7 +81,7 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
 
         this.assetsGrid = new AssetsGrid(portfolio, instrumentsFacadeService, portfolioPerformanceTracker);
         this.assetsChart = new AssetsChart(portfolio, instrumentsFacadeService, portfolioPerformanceTracker);
-        this.transactionsGrid = new TransactionsGrid(instrumentsFacadeService, dialogFactory);
+        this.transactionsGrid = new TransactionsGrid(instrumentsFacadeService);
         this.ui = UI.getCurrent();
         initializePage();
     }
@@ -101,6 +101,7 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
     public void initializePage() {
         getStyle().set("margin", "100px 30px 30px 30px");
         initializeGrids();
+		ComponentUtil.addListener(UI.getCurrent(), TransactionCreatedOrUpdatedEvent.class, event -> rebuildPage());
     }
 
     @Override
@@ -133,10 +134,11 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
         assetsGrid.setGridFullSize(true);
 
         transactionsGrid.setPageSize(10);
-        transactionsGrid.addUpdateItemListener(l -> rebuildPage());
+		// TODO: [CRITICAL] Check all these changes
+//		transactionsGrid.addUpdateItemListener(l -> rebuildPage());
     }
 
-    private void updateGridItems() {
+	private void updateGridItems() {
         List<Asset> assets = instrumentsFacadeService.getAssetsWithNonZeroAmount(portfolio)
                 .stream()
                 .map(AssetBalance::getAsset)
@@ -162,28 +164,17 @@ public class PortfolioTrackerView extends DefaultPage implements RebuildablePage
         Button addTransactionBtn = new Button("Add Transaction", LumoIcon.PLUS.create());
         addTransactionBtn.addClassName("add-entity-btn");
         addTransactionBtn.setIconAfterText(false);
-        addTransactionBtn.addClickListener(e -> {
-            AddTransactionDialog dialog = new AddTransactionDialog(portfolio, instrumentsFacadeService);
-            dialog.open();
-            dialog.addSaveBtnClickListener(l -> rebuildPage());
-        });
+        addTransactionBtn.addClickListener(e -> new AddTransactionDialog(portfolio, instrumentsFacadeService).open());
 
         Button importBtn = new Button("Import", LumoIcon.UPLOAD.create());
         importBtn.addClassName("add-entity-btn");
         importBtn.setIconAfterText(false);
-        importBtn.addClickListener(e -> {
-            ImportTransactionsDialog dialog = new ImportTransactionsDialog(portfolio, instrumentsFacadeService);
-            dialog.open();
-//            dialog.addSaveBtnClickListener(l -> rebuildPage());
-        });
+        importBtn.addClickListener(e -> new ImportTransactionsDialog(portfolio, instrumentsFacadeService).open());
 
         Button exportBtn = new Button("Export", LumoIcon.DOWNLOAD.create());
         exportBtn.addClassName("add-entity-btn");
         exportBtn.setIconAfterText(false);
-        exportBtn.addClickListener(e -> {
-            ExportTransactionDialog dialog = new ExportTransactionDialog(portfolio, instrumentsFacadeService);
-            dialog.open();
-        });
+        exportBtn.addClickListener(e -> new ExportTransactionDialog(portfolio, instrumentsFacadeService).open());
 
         section.add(addTransactionBtn, importBtn, exportBtn);
 

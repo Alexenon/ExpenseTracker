@@ -20,9 +20,11 @@ import com.example.application.utils.common.formatters.number.CurrencyFormatter;
 import com.example.application.utils.common.formatters.number.PercentageFormatter;
 import com.example.application.utils.investment.ProfitUtils;
 import com.example.application.views.components.core.Container;
-import com.example.application.views.components.custom.dialogs.DialogFactory;
+import com.example.application.views.components.custom.dialogs.transactions.TransactionCreatedOrUpdatedEvent;
 import com.example.application.views.components.custom.dialogs.transactions.TransactionDetailsDialog;
 import com.example.application.views.components.custom.fields.AssetComboBox;
+import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
@@ -39,22 +41,17 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Consumer;
 
 public class TransactionsGrid extends Div {
+	private final InstrumentsFacadeService instrumentsFacadeService;
 
-    private final InstrumentsFacadeService instrumentsFacadeService;
-	private final DialogFactory dialogFactory;
-
-    private final AssetComboBox nameSearchField;
-    private final MultiSelectComboBox<TransactionType> typeSearchField = new MultiSelectComboBox<>("Transaction Type");
-    private final Grid<Transaction> grid = new Grid<>();
+	private final AssetComboBox nameSearchField;
+	private final MultiSelectComboBox<TransactionType> typeSearchField = new MultiSelectComboBox<>("Transaction Type");
+	private final Grid<Transaction> grid = new Grid<>();
     private final GridListDataView<Transaction> gridDataView = grid.setItems();
 
-    public TransactionsGrid(InstrumentsFacadeService instrumentsFacadeService,
-							DialogFactory dialogFactory) {
+    public TransactionsGrid(InstrumentsFacadeService instrumentsFacadeService) {
 		this.instrumentsFacadeService = Objects.requireNonNull(instrumentsFacadeService, "instrumentsFacadeService");
-		this.dialogFactory = Objects.requireNonNull(dialogFactory, "dialogFactory");
 
         this.nameSearchField = new AssetComboBox(instrumentsFacadeService);
         initializeGrid();
@@ -69,6 +66,8 @@ public class TransactionsGrid extends Div {
 
     private void initializeGrid() {
         grid.setColumnReorderingAllowed(true);
+		grid.addItemClickListener(row -> new TransactionDetailsDialog(row.getItem(), instrumentsFacadeService).open());
+		ComponentUtil.addListener(UI.getCurrent(), TransactionCreatedOrUpdatedEvent.class, event -> rebuildTable());
     }
 
     private void initializeGridColumns() {
@@ -172,16 +171,9 @@ public class TransactionsGrid extends Div {
         return profit > 0 ? "value-increase" : "value-decrease";
     }
 
-    public void addUpdateItemListener(Consumer<?> listener) {
-        grid.addItemClickListener(row -> {
-            TransactionDetailsDialog detailsDialog = new TransactionDetailsDialog(row.getItem(), instrumentsFacadeService, dialogFactory);
-            detailsDialog.open();
-            detailsDialog.addUpdateTransactionListener(l -> {
-                listener.accept(null);
-                grid.removeAllColumns();
-                initializeGridColumns();
-            });
-        });
-    }
+	public void rebuildTable() {
+		grid.removeAllColumns();
+		initializeGridColumns();
+	}
 
 }

@@ -7,12 +7,13 @@ import com.example.application.utils.common.formatters.number.AmountFormatter;
 import com.example.application.utils.common.formatters.number.CurrencyFormatter;
 import com.example.application.utils.investment.ProfitUtils;
 import com.example.application.views.components.core.Container;
-import com.example.application.views.components.custom.dialogs.DialogFactory;
-import com.example.application.views.components.custom.dialogs.transactions.transfer.TransactionTransferedEvent;
+import com.example.application.views.components.custom.dialogs.transactions.transfer.TransferTransactionDialog;
 import com.example.application.views.components.custom.fields.PricePercentageWrapper;
 import com.example.application.views.components.custom.fields.stats.ProfitStatsDisplay;
 import com.example.application.views.components.custom.icons.PictogramIcon;
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.*;
@@ -20,13 +21,31 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.theme.lumo.LumoIcon;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.EventListener;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
-import java.util.function.Consumer;
+
+/*
+	TODO: [CRITICAL]
+		- WHATS THE DIFFERENCE BETWEEN TRANSFARED AND UPDATED TRANSACTION IN TERMS OF WHAT TO DO IF EVENT IS FIRED, I THINK ITS NOTHING
+		- Add button for transaction deletion
+			- Add confirm dialog here in case its deleted or removed
+	 	- What if transfered transaction is removed ?
+
+	TODO: [URGENT]
+		- A transaction that was transfered with replacement, the grid outside of this component should be notified as well
+		- A edited transaction in any way, should notify outside grid, and this component
+		- Move all custom listeners to event buses ideally
+
+	TODO:
+		- [!] ICONS: vaadin:trending-down | vaadin:trending-up
+		- [!] Notes are missing
+		- [!] Edit btn looks very ugly position
+		- Add transfer to other portfolio
+
+* */
 
 public class TransactionDetailsDialog extends Dialog {
 
@@ -35,7 +54,6 @@ public class TransactionDetailsDialog extends Dialog {
 
 	private Transaction transaction;
 	private final InstrumentsFacadeService instrumentsFacadeService;
-	private final DialogFactory dialogFactory;
 
 	private final Button transferBtn = new Button(PictogramIcon.TRANSFER.create());
 	private final Paragraph editBtn = new Paragraph("Edit");
@@ -43,11 +61,10 @@ public class TransactionDetailsDialog extends Dialog {
 
 	@Autowired
 	public TransactionDetailsDialog(Transaction transaction,
-									InstrumentsFacadeService instrumentsFacadeService,
-									DialogFactory dialogFactory) {
+									InstrumentsFacadeService instrumentsFacadeService)
+	{
 		this.transaction = transaction;
 		this.instrumentsFacadeService = instrumentsFacadeService;
-		this.dialogFactory = dialogFactory;
 
 		initializeForm();
 		buildForm();
@@ -57,6 +74,8 @@ public class TransactionDetailsDialog extends Dialog {
 		setClassName("transaction-details-modal");
 		setHeaderTitle("Transaction");
 		initializeFields();
+		ComponentUtil.addListener(UI.getCurrent(), TransactionCreatedOrUpdatedEvent.class, event -> manageTransactionChangedEvent(event.getTransaction()));
+		ComponentUtil.addListener(UI.getCurrent(), TransactionDeletedEvent.class, event -> manageTransactionChangedEvent(event.getTransaction()));
 		getHeader().add(closeBtn);
 	}
 
@@ -69,23 +88,12 @@ public class TransactionDetailsDialog extends Dialog {
 		);
 	}
 
-	@EventListener
-	public void onTransactionSaved(TransactionTransferedEvent event) {
-		Transaction transferedTransaction = event.getTransaction();
-
-		if(transferedTransaction.getPortfolio() != transaction.getPortfolio()) {
-			this.close();
-		} else {
-			transaction = transferedTransaction;
-			rebuildForm();
-		}
-	}
-
 	private void initializeFields() {
 		closeBtn.addClickShortcut(Key.ESCAPE);
 		closeBtn.addClassName("modal-close-btn");
 		editBtn.addClassName("edit-btn");
-		transferBtn.addClickListener(e -> dialogFactory.transferTransactionDialog(transaction).open());
+		editBtn.addClickListener(e -> new EditTransactionDialog(transaction, instrumentsFacadeService).open());
+		transferBtn.addClickListener(e -> new TransferTransactionDialog(transaction, instrumentsFacadeService).open());
 	}
 
 	private Div detailsTransaction() {
@@ -175,30 +183,9 @@ public class TransactionDetailsDialog extends Dialog {
 		buildForm();
 	}
 
-	public void addUpdateTransactionListener(Consumer<?> listener) {
-		editBtn.addClickListener(e -> {
-			EditTransactionDialog editTransactionDialog = new EditTransactionDialog(transaction, instrumentsFacadeService);
-			editTransactionDialog.addSaveListener(dialog -> {
-				transaction = editTransactionDialog.getTransaction();
-				rebuildForm();
-				listener.accept(null);
-			});
-			editTransactionDialog.open();
-		});
+	private void manageTransactionChangedEvent(Transaction transaction) {
+		this.transaction = transaction;
+		rebuildForm();
 	}
 
 }
-
-/*
-	TODO: [URGENT]
-		- A transaction that was transfered with replacement, the grid outside of this component should be notified as well
-		- A edited transaction in any way, should notify outside grid, and this component
-		- Move all custom listeners to event buses ideally
-
-	TODO:
-		- [!] ICONS: vaadin:trending-down | vaadin:trending-up
-		- [!] Notes are missing
-		- [!] Edit btn looks very ugly position
-		- Add transfer to other portfolio
-
-* */
