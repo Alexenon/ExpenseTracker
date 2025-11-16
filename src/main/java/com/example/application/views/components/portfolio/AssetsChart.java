@@ -22,74 +22,74 @@ import java.util.stream.Collectors;
 @Slf4j
 public class AssetsChart extends Div {
 
-    private final Portfolio portfolio;
-    private final InstrumentsFacadeService instrumentsFacadeService;
-    private final PortfolioPerformanceTracker portfolioPerformanceTracker;
+	private final Portfolio portfolio;
+	private final InstrumentsFacadeService instrumentsFacadeService;
+	private final PortfolioPerformanceTracker portfolioPerformanceTracker;
 
-    private final Select<ChartOptions> options = new Select<>();
+	private final Select<ChartOptions> options = new Select<>();
 
-    @Autowired
-    public AssetsChart(Portfolio portfolio,
-                       InstrumentsFacadeService instrumentsFacadeService,
-                       PortfolioPerformanceTracker portfolioPerformanceTracker)
-    {
-        this.portfolio = portfolio;
-        this.instrumentsFacadeService = instrumentsFacadeService;
-        this.portfolioPerformanceTracker = portfolioPerformanceTracker;
-        initialize();
-    }
+	@Autowired
+	public AssetsChart(Portfolio portfolio,
+					   InstrumentsFacadeService instrumentsFacadeService,
+					   PortfolioPerformanceTracker portfolioPerformanceTracker)
+	{
+		this.portfolio = portfolio;
+		this.instrumentsFacadeService = instrumentsFacadeService;
+		this.portfolioPerformanceTracker = portfolioPerformanceTracker;
+		initialize();
+	}
 
-    private void initialize() {
-        addClassName("assets-chart-container");
-        options.setLabel("Group by");
-        options.setItems(ChartOptions.values());
-        options.setValue(ChartOptions.WORTH);
-        options.addValueChangeListener(e -> updateChartItems());
-        add(
-                options,
-                createChart()
-        );
-        updateChartItems();
-    }
+	private void initialize() {
+		addClassName("assets-chart-container");
+		options.setLabel("Group by");
+		options.setItems(ChartOptions.values());
+		options.setValue(ChartOptions.WORTH);
+		options.addValueChangeListener(e -> updateChartItems());
+		add(
+				options,
+				createChart()
+		);
+		updateChartItems();
+	}
 
-    private Div createChart() {
-        Div chart = new Div();
-        chart.setId("assets-diverstity-chart");
-        return chart;
-    }
+	private Div createChart() {
+		Div chart = new Div();
+		chart.setId("assets-diverstity-chart");
+		return chart;
+	}
 
-    public void updateChartItems() {
-        JsonArray jsonOptionData = Json.createArray();
-        AtomicInteger index = new AtomicInteger(0);
-        getChartItems().forEach((assetName, diversityPercentage) -> {
-            JsonObject jsonObject = Json.createObject();
-            jsonObject.put("name", assetName);
-            jsonObject.put("value", MathUtils.twoDecimal(diversityPercentage));
-            jsonOptionData.set(index.get(), jsonObject);
-            index.addAndGet(1);
-        });
+	public void updateChartItems() {
+		JsonArray jsonOptionData = Json.createArray();
+		AtomicInteger index = new AtomicInteger(0);
+		getChartItems().forEach((assetName, diversityPercentage) -> {
+			JsonObject jsonObject = Json.createObject();
+			jsonObject.put("name", assetName);
+			jsonObject.put("value", MathUtils.twoDecimal(diversityPercentage));
+			jsonOptionData.set(index.get(), jsonObject);
+			index.addAndGet(1);
+		});
 
-        getUI().ifPresent(ui -> ui.getPage().executeJs("fillAssetsDiversityChart($0);", jsonOptionData.toJson()));
-        log.info("Created assets pie chart with {} elements", index.intValue());
-    }
+		getUI().ifPresent(ui -> ui.getPage().executeJs("fillAssetsDiversityChart($0);", jsonOptionData.toJson()));
+		log.info("Created assets pie chart with {} elements", index.intValue());
+	}
 
-    private Map<String, Double> getChartItems() {
-        return instrumentsFacadeService.getAssetsWithNonZeroAmount(portfolio)
-                .stream()
-                .map(AssetBalance::getAsset)
-                .collect(Collectors.toMap(Asset::getSymbol, chartMapper(), (a, b) -> b));
-    }
+	private Map<String, Double> getChartItems() {
+		return instrumentsFacadeService.getAssetsWithNonZeroAmount(portfolio)
+				.stream()
+				.map(AssetBalance::getAsset)
+				.collect(Collectors.toMap(Asset::getSymbol, chartMapper(), (a, b) -> b));
+	}
 
-    private Function<Asset, Double> chartMapper() {
-        return switch (options.getValue()) {
-            case WORTH -> asset -> portfolioPerformanceTracker.getAssetWorth(portfolio, asset);
-            case INVESTED -> asset -> portfolioPerformanceTracker.getAssetRemainingTokensCost(portfolio, asset);
-        };
-    }
+	private Function<Asset, Double> chartMapper() {
+		return switch (options.getValue()) {
+			case WORTH -> asset -> portfolioPerformanceTracker.getAssetWorth(portfolio, asset);
+			case INVESTED -> asset -> portfolioPerformanceTracker.getAssetRemainingTokensCost(portfolio, asset);
+		};
+	}
 
-    private enum ChartOptions {
-        WORTH,
-        INVESTED
-    }
+	private enum ChartOptions {
+		WORTH,
+		INVESTED
+	}
 
 }

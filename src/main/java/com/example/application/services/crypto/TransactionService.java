@@ -20,8 +20,8 @@ import java.util.List;
 import java.util.Objects;
 
 /*
-	TODO: [CRITICAL]
-		[!!!] Store the images from external sources into the project or somewhere else
+	TODO: [NEXT]
+		[!] Store the images from external sources into the project or somewhere else
 			in case the images got deleted, then we have instances
 
 	TODO: [CRITICAL]
@@ -70,7 +70,8 @@ public class TransactionService {
 
 	@Transactional
 	public Transaction transfer(Transaction transaction, Portfolio portfolio, boolean replace) {
-		log.info("Transfering {} from {} to {}", transaction, transaction.getPortfolio(), portfolio);
+		String action = replace ? "Replacing" : "Copying";
+		log.info("{} {} from {} to {}", action, transaction, transaction.getPortfolio(), portfolio);
 		Transaction newTransaction = new Transaction(transaction);
 		newTransaction.setPortfolio(portfolio);
 

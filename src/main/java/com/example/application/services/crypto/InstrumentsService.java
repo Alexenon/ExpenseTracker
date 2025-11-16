@@ -5,7 +5,7 @@ import com.example.application.data.models.InstrumentsProvider;
 import com.example.application.entities.User;
 import com.example.application.entities.common.TransactionType;
 import com.example.application.entities.crypto.*;
-import com.example.application.utils.fetchers.api_responses.AssetMetadata;
+import com.example.application.utils.fetchers.crypto_compare.response.AssetMetadata;
 import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

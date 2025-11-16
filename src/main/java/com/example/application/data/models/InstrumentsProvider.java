@@ -2,70 +2,68 @@ package com.example.application.data.models;
 
 import com.example.application.data.enums.SymbolIndentifier;
 import com.example.application.utils.fetchers.BinanceFetcher;
-import com.example.application.utils.fetchers.CryptoCompareFetcher;
-import com.example.application.utils.fetchers.api_responses.AssetMetaDataApiResp;
-import com.example.application.utils.fetchers.api_responses.AssetMetadata;
+import com.example.application.utils.fetchers.crypto_compare.CryptoCompareFetcher;
+import com.example.application.utils.fetchers.crypto_compare.response.AssetMetaDataApiResp;
+import com.example.application.utils.fetchers.crypto_compare.response.AssetMetadata;
 import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 
 /**
  * Service designed load internal instruments from external sources
  *
  * @see BinanceFetcher
  * @see CryptoCompareFetcher
- * */
+ */
 @Slf4j
 @Service
 public class InstrumentsProvider {
 
-    private Map<String, AssetMetadata> metadataPerAsset;
+	private Map<String, AssetMetadata> metadataPerAsset;
 
-    private InstrumentsProvider() {
-        metadataPerAsset = getUpdatedMetadata();
-    }
+	private InstrumentsProvider() {
+		metadataPerAsset = getUpdatedMetadata();
+	}
 
-    // TODO: [SPYKE] Compare with -> parallelStream()
-    @NotNull
-    private Map<String, AssetMetadata> fetchMetadata() {
-        log.info("Starting retrieving asset data from external API");
-        Map<String, AssetMetadata> metadataMap = new HashMap<>();
-        Arrays.stream(SymbolIndentifier.values())
-                .map(Enum::name)
-                .forEach(symbolName -> {
-                    AssetMetaDataApiResp response = CryptoCompareFetcher.getCoinMetaData(symbolName);
-                    // TODO: Re-try on first failure
-                    if (response == null) {
-                        log.warn("Missing response");
-                        return;
-                    }
+	private Map<String, AssetMetadata> fetchMetadata() {
+		log.info("Starting retrieving asset data from external API");
+		Map<String, AssetMetadata> metadataMap = new ConcurrentHashMap<>();
 
-                    AssetMetadata metadata = response.getData();
-                    if (metadata != null) {
-                        metadataMap.put(symbolName, metadata);
-                    } else {
-                        // TODO: getError() is missing
-                        log.warn("Missing asset metadata, cause: {}", response.getError());
-                    }
-                });
+		Stream.of(SymbolIndentifier.values())
+				.map(Enum::name)
+				.parallel()
+				.forEach(symbolName -> {
+					try {
+						AssetMetaDataApiResp response = CryptoCompareFetcher.fetchAssetMetaData(symbolName);
 
-        log.info("Finished retrieving asset data from external API for {} assets", metadataMap.size());
-        return metadataMap;
-    }
+						AssetMetadata metadata = response.getData();
+						if (metadata != null) {
+							metadataMap.put(symbolName, metadata);
+						} else {
+							log.warn("Missing asset metadata, cause: {}", response.getError());
+						}
+					} catch (Exception e) {
+						log.warn("Missing asset metadata", e);
+					}
+				});
 
-    @NotNull
-    public Map<String, AssetMetadata> getMetadata() {
-        return metadataPerAsset;
-    }
+		log.info("Finished retrieving asset data from external API for {} assets", metadataMap.size());
+		return metadataMap;
+	}
 
-    @NotNull
-    public Map<String, AssetMetadata> getUpdatedMetadata() {
-        metadataPerAsset = fetchMetadata();
-        return metadataPerAsset;
-    }
+	@NotNull
+	public Map<String, AssetMetadata> getMetadata() {
+		return metadataPerAsset;
+	}
+
+	@NotNull
+	public Map<String, AssetMetadata> getUpdatedMetadata() {
+		metadataPerAsset = fetchMetadata();
+		return metadataPerAsset;
+	}
 
 }

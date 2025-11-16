@@ -1,4 +1,4 @@
-package com.example.application.utils.fetchers.api_responses;
+package com.example.application.utils.fetchers.crypto_compare.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -17,6 +17,4 @@ public class ApiResponse {
 
     @JsonProperty("Data")
     private Map<String, Coin> data;
-
-    // Getters and Setters
 }

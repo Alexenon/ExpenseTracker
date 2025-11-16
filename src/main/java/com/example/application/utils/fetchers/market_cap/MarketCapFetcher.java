@@ -1,4 +1,4 @@
-package com.example.application.utils.fetchers;
+package com.example.application.utils.fetchers.market_cap;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpHeaders;
