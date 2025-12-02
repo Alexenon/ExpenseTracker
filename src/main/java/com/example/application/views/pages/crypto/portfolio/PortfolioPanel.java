@@ -7,6 +7,8 @@ import com.example.application.entities.crypto.Transaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.utils.common.formatters.CommonFormatters;
+import com.example.application.views.components.PriceChangeNotifier;
+import com.example.application.views.components.PriceUpdatable;
 import com.example.application.views.components.TransactionsGrid;
 import com.example.application.views.components.core.Container;
 import com.example.application.views.components.custom.dialogs.transactions.AddTransactionDialog;
@@ -24,6 +26,10 @@ import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.*;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
+import com.vaadin.flow.router.BeforeLeaveEvent;
+import com.vaadin.flow.router.BeforeLeaveObserver;
 import com.vaadin.flow.theme.lumo.LumoIcon;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -36,11 +42,12 @@ import java.util.stream.Collectors;
 /**
  * UI Component required to display information about a certain portfolio
  */
-public class PortfolioPanel extends Div {
+public class PortfolioPanel extends Div implements BeforeEnterObserver, BeforeLeaveObserver, PriceUpdatable {
 
 	private final Portfolio portfolio;
 	private final InstrumentsFacadeService instrumentsFacadeService;
 	private final PortfolioPerformanceTracker portfolioPerformanceTracker;
+	private final PriceChangeNotifier priceChangeNotifier;
 
 	private final AssetsGrid assetsGrid;
 	private final AssetsChart assetsChart;
@@ -49,23 +56,42 @@ public class PortfolioPanel extends Div {
     @Autowired
     public PortfolioPanel(Portfolio portfolio,
 						  InstrumentsFacadeService instrumentsFacadeService,
-						  PortfolioPerformanceTracker portfolioPerformanceTracker)
+						  PortfolioPerformanceTracker portfolioPerformanceTracker,
+						  PriceChangeNotifier priceChangeNotifier)
     {
         this.portfolio = Objects.requireNonNull(portfolio, "portfolio");
         this.instrumentsFacadeService = instrumentsFacadeService;
         this.portfolioPerformanceTracker = portfolioPerformanceTracker;
+		this.priceChangeNotifier = priceChangeNotifier;
 		this.assetsGrid = new AssetsGrid(portfolio, instrumentsFacadeService, portfolioPerformanceTracker);
 		this.assetsChart = new AssetsChart(portfolio, instrumentsFacadeService, portfolioPerformanceTracker);
         this.transactionsGrid = new TransactionsGrid(instrumentsFacadeService);
         initialize();
+		build();
     }
 
-    private void initialize() {
+	@Override
+	public void beforeEnter(BeforeEnterEvent event) {
+		priceChangeNotifier.addObserver(UI.getCurrent(), this);
+	}
+
+	@Override
+	public void beforeLeave(BeforeLeaveEvent event) {
+		priceChangeNotifier.removeObserver(UI.getCurrent());
+	}
+
+	@Override
+	public void update() {
+		this.removeAll();
+		this.build();
+	}
+
+	private void initialize() {
         initializeGrids();
 		ComponentUtil.addListener(UI.getCurrent(), TransactionCreatedOrUpdatedEvent.class, event -> rebuild());
     }
 
-    public void build() {
+    private void build() {
         add(
                 headerSection(),
                 statisticsSection(),
@@ -76,7 +102,7 @@ public class PortfolioPanel extends Div {
         updateGridItems();
     }
 
-    public void rebuild() {
+    private void rebuild() {
         getUI().ifPresent(ui -> ui.access(() -> {
             this.removeAll();
             this.build();
@@ -86,14 +112,11 @@ public class PortfolioPanel extends Div {
 
     private void initializeGrids() {
         assetsGrid.setGridFullSize(true);
-
         transactionsGrid.setPageSize(10);
-		// TODO: [CRITICAL] Check all these changes
-		// transactionsGrid.addUpdateItemListener(l -> rebuild());
     }
 
     private void updateGridItems() {
-        List<Asset> assets = instrumentsFacadeService.getAssetsWithNonZeroAmount(portfolio)
+        List<Asset> assets = instrumentsFacadeService.getAssetBalances(portfolio)
                 .stream()
                 .map(AssetBalance::getAsset)
                 .toList();
@@ -157,7 +180,7 @@ public class PortfolioPanel extends Div {
         title.setClassName("section-title");
 
         double totalProfit = portfolioPerformanceTracker.getPortfolioTotalProfit(portfolio);
-        String nrOfAssets = String.valueOf(instrumentsFacadeService.getAssetsWithNonZeroAmount(portfolio).size());
+        String nrOfAssets = String.valueOf(instrumentsFacadeService.getAssetBalances(portfolio).size());
         String realized = CommonFormatters.CURRENCY.format(portfolioPerformanceTracker.getPortfolioRealizedProfit(portfolio));
         String unrealized = CommonFormatters.CURRENCY.format(portfolioPerformanceTracker.getPortfolioUnrealizedProfit(portfolio));
         String avgTimeHolding = String.format("%.1f days", portfolioPerformanceTracker.getPortfolioAverageHoldingDays(portfolio));
@@ -231,7 +254,7 @@ public class PortfolioPanel extends Div {
     }
 
     private Map<Asset, Double> getMostProfitableAssetsByProfit() {
-        return instrumentsFacadeService.getAssetsWithNonZeroAmount(portfolio)
+        return instrumentsFacadeService.getAssetBalances(portfolio)
                 .stream()
                 .map(AssetBalance::getAsset)
                 .collect(Collectors.toMap(asset -> asset,

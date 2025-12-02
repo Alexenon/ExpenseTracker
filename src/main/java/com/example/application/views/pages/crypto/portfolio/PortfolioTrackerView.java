@@ -15,7 +15,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.select.Select;
-import com.vaadin.flow.component.select.data.SelectListDataView;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoIcon;
@@ -32,7 +31,7 @@ import java.util.Optional;
 @Route(value = "panel", layout = MainLayout.class)
 @JsModule("./themes/light_theme/components/javascript/fillPieChart.js")
 @JavaScript("https://fastly.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js")
-public class TrackerView extends DefaultPage {
+public class PortfolioTrackerView extends DefaultPage {
 
 	private final InstrumentsFacadeService instrumentsFacadeService;
 	private final PortfolioPerformanceTracker portfolioPerformanceTracker;
@@ -41,14 +40,13 @@ public class TrackerView extends DefaultPage {
 	private final UI ui;
 	private final Button addPortfolioBtn = new Button(LumoIcon.PLUS.create());
 	private final Select<Portfolio> portfolioSelector = new Select<>();
-	private SelectListDataView<Portfolio> dataView;
 
 	private PortfolioPanel portfolioPanel;
 
 	@Autowired
-	public TrackerView(InstrumentsFacadeService instrumentsFacadeService,
-					   PortfolioPerformanceTracker portfolioPerformanceTracker,
-					   PriceChangeNotifier priceChangeNotifier)
+	public PortfolioTrackerView(InstrumentsFacadeService instrumentsFacadeService,
+								PortfolioPerformanceTracker portfolioPerformanceTracker,
+								PriceChangeNotifier priceChangeNotifier)
 	{
 		this.instrumentsFacadeService = instrumentsFacadeService;
 		this.portfolioPerformanceTracker = portfolioPerformanceTracker;
@@ -80,8 +78,8 @@ public class TrackerView extends DefaultPage {
 	}
 
 	private void buildPage(Portfolio portfolio) {
-		List<Portfolio> updatedList = instrumentsFacadeService.getUserPortfolios();
-		dataView = portfolioSelector.setItems(updatedList);
+		List<Portfolio> updatedPortfolioList = instrumentsFacadeService.getUserPortfolios();
+		portfolioSelector.setItems(updatedPortfolioList);
 		portfolioSelector.setValue(portfolio);
 		updatePortfolioPanel(portfolio);
 		add(addPortfolioBtn, portfolioSelector);
@@ -94,8 +92,7 @@ public class TrackerView extends DefaultPage {
 
 	private void updatePortfolioPanel(Portfolio portfolio) {
 		Optional.ofNullable(portfolioPanel).ifPresent(Component::removeFromParent);
-		portfolioPanel = new PortfolioPanel(portfolio, instrumentsFacadeService, portfolioPerformanceTracker);
-		portfolioPanel.build();
+		portfolioPanel = new PortfolioPanel(portfolio, instrumentsFacadeService, portfolioPerformanceTracker, priceChangeNotifier);
 		add(portfolioPanel);
 	}
 

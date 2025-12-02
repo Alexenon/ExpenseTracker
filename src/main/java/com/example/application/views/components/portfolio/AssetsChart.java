@@ -74,7 +74,7 @@ public class AssetsChart extends Div {
 	}
 
 	private Map<String, Double> getChartItems() {
-		return instrumentsFacadeService.getAssetsWithNonZeroAmount(portfolio)
+		return instrumentsFacadeService.getAssetBalances(portfolio)
 				.stream()
 				.map(AssetBalance::getAsset)
 				.collect(Collectors.toMap(Asset::getSymbol, chartMapper(), (a, b) -> b));

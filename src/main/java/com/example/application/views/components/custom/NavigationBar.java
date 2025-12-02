@@ -2,7 +2,7 @@ package com.example.application.views.components.custom;
 
 import com.example.application.views.pages.HomeView;
 import com.example.application.views.pages.crypto.calculator.AssetCalculatorView;
-import com.example.application.views.pages.crypto.portfolio.TrackerView;
+import com.example.application.views.pages.crypto.portfolio.PortfolioTrackerView;
 import com.example.application.views.pages.expenses.DashboardView;
 import com.example.application.views.pages.expenses.ExpensesView;
 import com.vaadin.flow.component.Component;
@@ -27,7 +27,7 @@ public class NavigationBar extends Nav {
     private final Image logoImage = new Image("/images/logos/logo-white-background.png", "Logo image");
     private final RouterLink expensesLink = new RouterLink("Expenses", ExpensesView.class);
     private final RouterLink dashboardLink = new RouterLink("Dashboard", DashboardView.class);
-	private final RouterLink portfolioLink = new RouterLink("Portfolio", TrackerView.class);
+	private final RouterLink portfolioLink = new RouterLink("Portfolio", PortfolioTrackerView.class);
 	private final RouterLink calculatorLink = new RouterLink("Calculator", AssetCalculatorView.class);
 
     public NavigationBar() {

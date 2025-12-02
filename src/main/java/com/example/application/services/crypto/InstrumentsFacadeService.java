@@ -77,10 +77,6 @@ public class InstrumentsFacadeService {
         instrumentsService.updateMarkAssetAsFavorite(getAuthenticatedUser(), asset, markedAsFavorite);
     }
 
-    public List<AssetBalance> getAssetsWithNonZeroAmount(Portfolio portfolio) {
-        return instrumentsService.getAssetsWithNonZeroAmount(portfolio);
-    }
-
     public List<Asset> getAllAssetsEverBought(Portfolio portfolio) {
         return getTransactions(portfolio)
                 .stream()
@@ -161,7 +157,7 @@ public class InstrumentsFacadeService {
     }
     //</editor-fold>
 
-    //<editor-fold desc="PORTFOLIO BALANCES">
+    //<editor-fold desc="ASSET BALANCES">
     public List<AssetBalance> getAssetBalances(Portfolio portfolio) {
         return instrumentsService.getAssetBalancesByPortfolio(portfolio);
     }

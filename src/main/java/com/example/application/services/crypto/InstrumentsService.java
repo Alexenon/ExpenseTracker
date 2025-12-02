@@ -132,10 +132,6 @@ public class InstrumentsService {
 	public List<Transaction> getTransactionsBy(Portfolio portfolio, LocalDate from, LocalDate to) {
 		return transactionService.findBy(portfolio, from, to);
 	}
-
-	public List<AssetBalance> getAssetsWithNonZeroAmount(@NotNull Portfolio portfolio) {
-		return assetBalanceService.findHoldingsByPortfolio(portfolio);
-	}
 	//</editor-fold>
 
 	//<editor-fold desc="PORTFOLIOS">

@@ -11,7 +11,7 @@ import com.example.application.utils.common.formatters.number.CompactFormatter;
 import com.example.application.utils.common.lang.MathUtils;
 import com.example.application.utils.common.lang.StringUtils;
 import com.example.application.views.components.PriceChangeNotifier;
-import com.example.application.views.components.PriceChangeblePage;
+import com.example.application.views.components.PriceUpdatable;
 import com.example.application.views.components.PriceWatchlistComponent;
 import com.example.application.views.components.TransactionsGrid;
 import com.example.application.views.components.core.ComponentBuilder;
@@ -54,7 +54,7 @@ import java.util.Objects;
 @PermitAll
 @PageTitle("Asset Details")
 @Route(value = "asset", layout = MainLayout.class)
-public class AssetDetailsView extends DefaultPage implements HasUrlParameter<String>, RebuildablePage, BeforeEnterObserver, BeforeLeaveObserver, PriceChangeblePage {
+public class AssetDetailsView extends DefaultPage implements HasUrlParameter<String>, RebuildablePage, BeforeEnterObserver, BeforeLeaveObserver, PriceUpdatable {
 
     private final Portfolio portfolio;
     private final PriceChangeNotifier priceChangeNotifier;
@@ -124,7 +124,7 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
     }
 
     @Override
-    public void updatePage() {
+    public void update() {
         rebuildPage();
     }
 

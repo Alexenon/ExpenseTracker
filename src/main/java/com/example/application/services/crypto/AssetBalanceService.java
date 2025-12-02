@@ -28,14 +28,9 @@ public class AssetBalanceService {
 	@Autowired
 	private AssetBalanceRepository repository;
 
-	// TODO: [CRITICAL] FIND A WAY TO EXTRACT THIS FROM DATABASE WITHOUT ANY EXCEPTIONS
-	// 		DOESNT DISPLAY CHART ITEMS BECAUSE OF THIS
-	public List<AssetBalance> findHoldingsByPortfolio(@NotNull Portfolio portfolio) {
-		Objects.requireNonNull(portfolio, "portfolio");
-//        return repository.findByPortfolioWithNonZeroAmount(portfolio.getId());
-		return List.of();
-	}
-
+	/**
+	 * @return list of {@link AssetBalance} that are currently holded in the provided portfolio.
+	 * */
 	public List<AssetBalance> findByPortfolio(@NotNull Portfolio portfolio) {
 		Objects.requireNonNull(portfolio, "portfolio");
 		return repository.findByPortfolio(portfolio);

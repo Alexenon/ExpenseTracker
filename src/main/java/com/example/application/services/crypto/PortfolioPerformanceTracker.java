@@ -156,7 +156,7 @@ public class PortfolioPerformanceTracker {
     }
 
     public Map<Asset, Double> getMostProfitableAssetsByProfit(Portfolio portfolio) {
-        return instrumentsFacadeService.getAssetsWithNonZeroAmount(portfolio)
+        return instrumentsFacadeService.getAssetBalances(portfolio)
                 .stream()
                 .map(AssetBalance::getAsset)
                 .collect(Collectors.toMap(asset -> asset,

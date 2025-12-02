@@ -2,7 +2,7 @@ package com.example.application.views.pages;
 
 import com.example.application.utils.common.formatters.CommonFormatters;
 import com.example.application.views.components.PriceChangeNotifier;
-import com.example.application.views.components.PriceChangeblePage;
+import com.example.application.views.components.PriceUpdatable;
 import com.example.application.views.layouts.MainLayout;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.H3;
@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 @AnonymousAllowed
 @PageTitle("Test")
 @Route(value = "test", layout = MainLayout.class)
-public class TestView extends AbstractPage implements PriceChangeblePage, BeforeEnterObserver, BeforeLeaveObserver {
+public class TestView extends AbstractPage implements PriceUpdatable, BeforeEnterObserver, BeforeLeaveObserver {
 
     @Autowired
     private PriceChangeNotifier priceChangeNotifier;
@@ -64,7 +64,7 @@ public class TestView extends AbstractPage implements PriceChangeblePage, Before
     }
 
     @Override
-    public void updatePage() {
+    public void update() {
         String formatedDateTime = CommonFormatters.TIME.format(LocalDateTime.now());
         double value = counter.getValue();
         counter.setValue(value + 1);
