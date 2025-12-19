@@ -5,6 +5,9 @@ import lombok.Data;
 
 import java.util.List;
 
+/**
+ * Deposit calculator, to find what's the avgBuyPrice and fees paid for all P2P transactions
+ * */
 public class DepositsCalculator {
 
     public static void main(String[] args) {
@@ -16,11 +19,11 @@ public class DepositsCalculator {
         printAverage(deposits);
     }
 
-    private static Deposit create(double amount, double buyPrice, FeeCalculator feeCalculator) {
+    private static Deposit create(double usdAmount, double buyPrice, FeeCalculator feeCalculator) {
         return Deposit.builder()
-                .amount(amount)
+                .amount(usdAmount)
                 .buyPrice(buyPrice)
-                .fee(feeCalculator.calculateFee(amount * buyPrice))
+                .fee(feeCalculator.calculateFee(usdAmount * buyPrice))
                 .build();
     }
 

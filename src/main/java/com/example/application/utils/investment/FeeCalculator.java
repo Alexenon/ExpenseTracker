@@ -5,10 +5,7 @@ import lombok.Builder;
 @Builder
 public class FeeCalculator {
 
-    public static FeeCalculator NONE = FeeCalculator.builder()
-            .feePercentage(0)
-            .feeAmount(0)
-            .build();
+    public static FeeCalculator NONE = FeeCalculator.builder().build();
 
     public static FeeCalculator MOLDINCOMBANK = FeeCalculator.builder()
             .feePercentage(0)
@@ -30,14 +27,14 @@ public class FeeCalculator {
     private double feeAmount;
 
     public static void main(String[] args) {
-        double sumToTransfer = 1200;      // MDL
+        double sumToTransfer = 4956;      // MDL
 
         // MOLDINCOMBANK
-        double rateForSameCard = 17.30;
+        double rateForSameCard = 17;
         double feeMoldincombank = MOLDINCOMBANK.calculateFee(sumToTransfer);
 
         // VICTORIABANK
-        double rateForOtherCard = 17.00;
+        double rateForOtherCard = 16.80;
         double feeOtherCard = NON_MOLDINCOMBANK_INTERNAL.calculateFee(sumToTransfer);
 
         printResults(sumToTransfer, rateForOtherCard, feeOtherCard);

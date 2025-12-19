@@ -1,6 +1,7 @@
 package com.example.application.views.components.custom;
 
 import com.example.application.views.pages.HomeView;
+import com.example.application.views.pages.blockchain.BlockchainView;
 import com.example.application.views.pages.crypto.calculator.AssetCalculatorView;
 import com.example.application.views.pages.crypto.portfolio.PortfolioTrackerView;
 import com.example.application.views.pages.expenses.DashboardView;
@@ -22,6 +23,7 @@ public class NavigationBar extends Nav {
 	private final RouterLink dashboardLink = new RouterLink("Dashboard", DashboardView.class);
 	private final RouterLink portfolioLink = new RouterLink("Portfolio", PortfolioTrackerView.class);
 	private final RouterLink calculatorLink = new RouterLink("Calculator", AssetCalculatorView.class);
+	private final RouterLink blockchainLink = new RouterLink("Blockchain Demo", BlockchainView.class);
 
 	public NavigationBar() {
 		addClassName("navbar");
@@ -41,9 +43,9 @@ public class NavigationBar extends Nav {
 		add(menu);
 	}
 
-	public List<Component> getRoutes() {
-		return List.of(expensesLink, dashboardLink, portfolioLink, calculatorLink);
-	}
+    public List<Component> getRoutes() {
+        return List.of(expensesLink, dashboardLink, portfolioLink, calculatorLink, blockchainLink);
+    }
 
 	public Image getLogo() {
 		return logoImage;
