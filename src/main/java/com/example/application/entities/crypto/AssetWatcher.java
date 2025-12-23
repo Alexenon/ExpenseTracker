@@ -15,7 +15,7 @@ public class AssetWatcher {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "portfolio_id", nullable = false)

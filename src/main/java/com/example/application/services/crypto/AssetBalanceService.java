@@ -30,7 +30,7 @@ public class AssetBalanceService {
 
 	/**
 	 * @return list of {@link AssetBalance} that are currently holded in the provided portfolio.
-	 * */
+	 */
 	public List<AssetBalance> findByPortfolio(@NotNull Portfolio portfolio) {
 		Objects.requireNonNull(portfolio, "portfolio");
 		return repository.findByPortfolio(portfolio);
@@ -114,7 +114,7 @@ public class AssetBalanceService {
 		Objects.requireNonNull(assetBalance, "assetBalance");
 		Assert.notNull(assetBalance.getAsset(), "assetBalance asset");
 		Assert.notNull(assetBalance.getPortfolio(), "assetBalance portfolio");
-		Assert.notNull(assetBalance.getCreatedAt(), "assetBalance createdAt");
+		Assert.notNull(assetBalance.getTimeCreatedAt(), "assetBalance createdAt");
 		Assert.notNull(assetBalance.getLastTimeUpdated(), "assetBalance lastTimeUpdated");
 
 		Assert.isTrue(assetBalance.getAmount() >= 0, "amount cannot be negative");

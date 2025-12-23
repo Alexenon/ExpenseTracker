@@ -57,7 +57,6 @@ public class RegistrationView extends DefaultPage implements HasNotifications {
 
 	private void addSubmitListener() {
 		registerForm.getSubmitBtn().addClickListener(l -> {
-			log.info("Clicked");
 			if (binder.validate().isOk()) {
 				User user = binder.getBean();
 				userService.createNewUser(user);

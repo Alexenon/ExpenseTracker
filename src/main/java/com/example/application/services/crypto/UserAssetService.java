@@ -18,6 +18,9 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * Service responsible for API on the {@link UserAsset} entity
+ * */
 @Slf4j
 @Service
 public class UserAssetService {

@@ -15,7 +15,7 @@ public class AssetBalance {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "portfolio_id", nullable = false)
@@ -46,7 +46,7 @@ public class AssetBalance {
     @Column(name = "last_time_updated", nullable = false)
     private LocalDateTime lastTimeUpdated = LocalDateTime.now();
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @Column(name = "time_created_at", nullable = false, updatable = false)
+    private LocalDateTime timeCreatedAt = LocalDateTime.now();
 
 }

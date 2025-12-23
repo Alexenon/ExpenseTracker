@@ -4,9 +4,11 @@ import com.example.application.entities.crypto.Portfolio;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.StringJoiner;
 
 @Data
 @Entity(name = "users")
@@ -26,6 +28,10 @@ public class User {
     @Column(name = "email", unique = true, nullable = false)
     private String email;
 
+	@OneToOne
+	@JoinColumn(name = "active_portfolio_id")
+	private Portfolio activePortfolio;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Portfolio> portfolios;
 
@@ -41,8 +47,32 @@ public class User {
         SUPER_ADMIN_ROLE
     }
 
+	@Column(name = "last_time_updated", nullable = false)
+	private LocalDateTime lastTimeUpdated = LocalDateTime.now();
+
+	@Column(name = "time_created_at", nullable = false, updatable = false)
+	private final LocalDateTime timeCreatedAt = LocalDateTime.now();
+
+	public boolean isNew() {
+		return id != null;
+	}
+
     @Override
     public String toString() {
         return "User{username='%s', email='%s', roles=%s, id=%d}".formatted(username, email, roles, id);
     }
+
+	public String toFullString() {
+		return new StringJoiner(", ", User.class.getSimpleName() + "[", "]")
+				.add("id=" + id)
+				.add("username='" + username + "'")
+				.add("password='" + password + "'")
+				.add("email='" + email + "'")
+				.add("activePortfolio=" + activePortfolio)
+				.add("portfolios=" + portfolios)
+				.add("roles=" + roles)
+				.add("timeCreatedAt=" + timeCreatedAt)
+				.add("lastTimeUpdated=" + lastTimeUpdated)
+				.toString();
+	}
 }

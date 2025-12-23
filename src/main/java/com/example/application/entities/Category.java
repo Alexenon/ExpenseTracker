@@ -12,7 +12,7 @@ public class Category {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @Column(unique = true, nullable = false)
     @JsonProperty(required = true)
@@ -22,11 +22,6 @@ public class Category {
     }
 
     public Category(String name) {
-        this.name = name;
-    }
-
-    public Category(long id, String name) {
-        this.id = id;
         this.name = name;
     }
 }
