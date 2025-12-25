@@ -21,4 +21,12 @@ public interface PortfolioRepository extends JpaRepository<Portfolio, Long> {
 			""", nativeQuery = true)
 	Optional<Portfolio> findByNameAndUser(@Param("name") String name, @Param("userId") long userId);
 
+	@Query(value = """
+			         SELECT * FROM portfolios P
+			         WHERE P.user_id = :userId
+			         ORDER BY last_time_updated
+			         LIMIT 1
+			""", nativeQuery = true)
+	Portfolio findLatestUpdatedPortfolio(@Param("userId") long userId);
+
 }

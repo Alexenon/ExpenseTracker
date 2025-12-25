@@ -70,8 +70,12 @@ public class PortfolioTrackerView extends DefaultPage {
 		portfolioSelector.setEmptySelectionAllowed(false);
 		portfolioSelector.addValueChangeListener(event -> {
 			Portfolio selectedPortfolio = event.getValue();
-			Optional.ofNullable(selectedPortfolio)
-					.ifPresent(p -> ui.access(() -> updatePortfolioPanel(selectedPortfolio)));
+
+			if(selectedPortfolio == null)
+				return;
+
+			instrumentsFacadeService.setPortfolioAsActive(selectedPortfolio);
+			ui.access(() -> updatePortfolioPanel(selectedPortfolio));
 		});
 
 		addPortfolioBtn.addClickListener(e -> new AddPortfolioDialog(instrumentsFacadeService).open());

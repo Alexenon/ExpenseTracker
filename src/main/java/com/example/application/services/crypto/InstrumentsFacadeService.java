@@ -44,6 +44,20 @@ public class InstrumentsFacadeService {
         this.instrumentsService = instrumentsService;
     }
 
+	//<editor-fold desc="USERS">
+	public User createNewUser(User user) {
+		return instrumentsService.createNewUser(user);
+	}
+
+	public boolean isUsernameTaken(String username) {
+		return instrumentsService.isUsernameTaken(username);
+	}
+
+	public boolean isEmailTaken(String email) {
+		return instrumentsService.isEmailTaken(email);
+	}
+	//</editor-fold>
+
     //<editor-fold desc="ASSET">
     public List<Asset> getAllAssets() {
         return instrumentsService.getAllAssets();
@@ -172,6 +186,11 @@ public class InstrumentsFacadeService {
         return instrumentsService.createNewPortfolio(name, getAuthenticatedUser());
     }
 
+	@NotNull
+	public Portfolio getActivePortfolio() {
+		return getAuthenticatedUser().getActivePortfolio();
+	}
+
     // TODO: [URGENT] -> FILTER BY MAIN PORTFOLIO
     @NotNull
     public Portfolio getMainPortfolio() {
@@ -189,6 +208,10 @@ public class InstrumentsFacadeService {
     public List<Portfolio> getUserPortfolios() {
         return instrumentsService.getPortfoliosByUser(getAuthenticatedUser());
     }
+
+	public Portfolio setPortfolioAsActive(Portfolio portfolio) {
+		return instrumentsService.setPortfolioAsActive(portfolio);
+	}
 	//</editor-fold>
 
     @NotNull

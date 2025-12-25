@@ -1,7 +1,7 @@
 package com.example.application.views.pages;
 
 import com.example.application.entities.User;
-import com.example.application.services.UserService;
+import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.views.components.custom.forms.RegisterForm;
 import com.example.application.views.components.utils.HasNotifications;
 import com.vaadin.flow.component.button.Button;
@@ -28,7 +28,7 @@ public class RegistrationView extends DefaultPage implements HasNotifications {
 	private final RegisterForm registerForm;
 
 	@Autowired
-	private UserService userService;
+	private InstrumentsFacadeService instrumentsFacadeService;
 
 	public RegistrationView() {
 		binder = new Binder<>(User.class);
@@ -59,7 +59,7 @@ public class RegistrationView extends DefaultPage implements HasNotifications {
 		registerForm.getSubmitBtn().addClickListener(l -> {
 			if (binder.validate().isOk()) {
 				User user = binder.getBean();
-				userService.createNewUser(user);
+				instrumentsFacadeService.createNewUser(user);
 				log.info("User '{}' created successfully", user.getUsername());
 				showSuccessfulNotification("User created successfully!");
 				getUI().ifPresent(ui -> ui.navigate(LoginView.class));
@@ -97,7 +97,7 @@ public class RegistrationView extends DefaultPage implements HasNotifications {
 				.asRequired("Please fill this field")
 				.withValidator(s -> s.length() > 3, "Username must contain at least 4 characters")
 				.withValidator(s -> s.length() < 12, "Username must contain less than 12 characters")
-				.withValidator(s -> !userService.isUsernameTaken(s), "Username already exists")
+				.withValidator(s -> !instrumentsFacadeService.isUsernameTaken(s), "Username already exists")
 				.bind(User::getUsername, User::setUsername);
 
 		binder.forField(registerForm.getPassword())
@@ -115,7 +115,7 @@ public class RegistrationView extends DefaultPage implements HasNotifications {
 		binder.forField(registerForm.getEmail())
 				.asRequired("Please fill this field")
 				.withValidator(new EmailValidator("Please enter a valid email address"))
-				.withValidator(s -> !userService.isEmailTaken(s), "This email is already used")
+				.withValidator(s -> !instrumentsFacadeService.isEmailTaken(s), "This email is already used")
 				.bind(User::getEmail, User::setEmail);
 	}
 

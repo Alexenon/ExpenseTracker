@@ -12,13 +12,13 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(of = {"id", "name", "user"})
+@EqualsAndHashCode(of = {"id", "name", "user", "lastTimeUpdated", "timeCreatedAt"})
 @Entity(name = "portfolios")
 public class Portfolio {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @Column(name = "name", nullable = false)
     private String name;
@@ -27,11 +27,11 @@ public class Portfolio {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(name = "last_time_updated", nullable = false)
-    private LocalDateTime lastTimeUpdated = LocalDateTime.now();
+	@Column(name = "last_time_updated", nullable = false)
+	private LocalDateTime lastTimeUpdated = LocalDateTime.now();
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private final LocalDateTime createdAt = LocalDateTime.now();
+	@Column(name = "time_created_at", nullable = false, updatable = false)
+	private final LocalDateTime timeCreatedAt = LocalDateTime.now();
 
     @Override
     public String toString() {

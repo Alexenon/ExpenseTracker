@@ -5,6 +5,7 @@ import com.example.application.data.models.InstrumentsProvider;
 import com.example.application.entities.User;
 import com.example.application.entities.common.TransactionType;
 import com.example.application.entities.crypto.*;
+import com.example.application.services.UserService;
 import com.example.application.utils.fetchers.crypto_compare.response.AssetMetadata;
 import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +24,7 @@ import java.util.Optional;
 public class InstrumentsService {
 
 	private final InstrumentsProvider instrumentsProvider;
+	private final UserService userService;
 	private final PortfolioService portfolioService;
 	private final AssetService assetService;
 	private final UserAssetService userAssetService;
@@ -32,6 +34,7 @@ public class InstrumentsService {
 
 	@Autowired
 	public InstrumentsService(InstrumentsProvider instrumentsProvider,
+							  UserService userService,
 							  PortfolioService portfolioService,
 							  AssetService assetService,
 							  UserAssetService userAssetService,
@@ -40,6 +43,7 @@ public class InstrumentsService {
 							  AssetBalanceService assetBalanceService)
 	{
 		this.instrumentsProvider = instrumentsProvider;
+		this.userService = userService;
 		this.portfolioService = portfolioService;
 		this.assetService = assetService;
 		this.userAssetService = userAssetService;
@@ -47,6 +51,23 @@ public class InstrumentsService {
 		this.assetWatcherService = assetWatcherService;
 		this.assetBalanceService = assetBalanceService;
 	}
+
+	//<editor-fold desc="USERS">
+	public User createNewUser(User user) {
+		User newUser = userService.createNewUser(user);
+		Portfolio defaultPortfolio = portfolioService.addPortfolio("Main", newUser.getId());
+		user.addPortfolio(defaultPortfolio);
+		return newUser;
+	}
+
+	public boolean isUsernameTaken(String username) {
+		return userService.isUsernameTaken(username);
+	}
+
+	public boolean isEmailTaken(String email) {
+		return userService.isEmailTaken(email);
+	}
+	//</editor-fold>
 
 	//<editor-fold desc="ASSETS">
 	public List<Asset> getAllAssets() {
@@ -135,10 +156,6 @@ public class InstrumentsService {
 	//</editor-fold>
 
 	//<editor-fold desc="PORTFOLIOS">
-	public Portfolio createNewPortfolio(String name, User user) {
-		return portfolioService.createNewPortfolio(name, user);
-	}
-
 	public List<Portfolio> getPortfoliosByUser(User user) {
 		return portfolioService.findByUser(user);
 	}
@@ -146,6 +163,25 @@ public class InstrumentsService {
 	public Optional<Portfolio> getPortfolioByNameAndUser(String name, User user) {
 		return portfolioService.findByNameAndUser(name, user);
 	}
+
+	public Portfolio createNewPortfolio(String name, User user) {
+		return portfolioService.addPortfolio(name, user.getId());
+	}
+
+	public void deletePortfolio(Portfolio portfolio) {
+		portfolioService.delete(portfolio);
+		User user = portfolio.getUser();
+		setPortfolioAsActive(getLatestUpdatedPortfolio(user));
+	}
+
+	public Portfolio setPortfolioAsActive(Portfolio portfolio) {
+		return portfolioService.setActivePortfolio(portfolio.getUser().getId(), portfolio.getId());
+	}
+
+	public Portfolio getLatestUpdatedPortfolio(User user) {
+		return portfolioService.getLatestCreatedPortfolio(user);
+	}
+
 	//</editor-fold>
 
 	//<editor-fold desc="PORTFOLIO BALANCES">

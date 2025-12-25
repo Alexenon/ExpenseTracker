@@ -1,15 +1,15 @@
 package com.example.application.entities;
 
 import com.example.application.entities.crypto.Portfolio;
+import com.example.application.utils.exceptions.InternalUnexpectedException;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.StringJoiner;
+import java.util.*;
 
+@EqualsAndHashCode(of = {"id", "username", "email"})
 @Data
 @Entity(name = "users")
 public class User {
@@ -28,12 +28,16 @@ public class User {
     @Column(name = "email", unique = true, nullable = false)
     private String email;
 
-	@OneToOne
+	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "active_portfolio_id")
 	private Portfolio activePortfolio;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<Portfolio> portfolios;
+	@OneToMany(
+			mappedBy = "user",
+			cascade = CascadeType.ALL,
+			orphanRemoval = true
+	)
+    private List<Portfolio> portfolios = new ArrayList<>();
 
     @Column(name = "role", nullable = false)
     @Enumerated(EnumType.STRING)
@@ -55,6 +59,39 @@ public class User {
 
 	public boolean isNew() {
 		return id != null;
+	}
+
+	public void addPortfolio(Portfolio portfolio) {
+		Objects.requireNonNull(portfolio, "portfolio");
+
+		portfolio.setUser(this);
+		portfolios.add(portfolio);
+
+		if (activePortfolio == null) {
+			setActivePortfolio(portfolio);
+		}
+	}
+
+	public void removePortfolio(Portfolio portfolio) {
+		if (!portfolios.contains(portfolio))
+			throw new InternalUnexpectedException("Portfolio does not belong to user");
+
+		if (portfolios.size() == 1)
+			throw new IllegalArgumentException("Cannot remove last portfolio");
+
+		portfolio.setUser(null);
+		portfolios.remove(portfolio);
+
+		if (portfolio.equals(activePortfolio)) {
+			setActivePortfolio(portfolios.getFirst());
+		}
+	}
+
+	public void setActivePortfolio(Portfolio portfolio) {
+		if (!portfolios.contains(portfolio))
+			throw new InternalUnexpectedException("Portfolio must belong to user");
+
+		this.activePortfolio = portfolio;
 	}
 
     @Override
