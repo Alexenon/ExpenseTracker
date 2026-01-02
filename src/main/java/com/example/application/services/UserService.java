@@ -8,8 +8,8 @@ import com.example.application.utils.exceptions.InternalUnexpectedException;
 import com.example.application.utils.exceptions.auth.UsernameTakenException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -30,24 +30,23 @@ import java.util.Set;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class UserService implements UserDetailsService {
 
-	@Autowired
-	private UserRepository userRepository;
+	private final UserRepository userRepository;
+	private final PasswordEncoder passwordEncoder;
 
-	@Autowired
-	private PasswordEncoder passwordEncoder;
-
+	//<editor-fold desc="SEARCH">
 	public Optional<User> findById(long id) {
 		return userRepository.findById(id);
 	}
 
 	public Optional<User> findByUsername(@NotNull String username) {
-		return userRepository.findByUsernameIgnoreCase(Objects.requireNonNull(username, "username"));
+		return userRepository.findByUsernameIgnoreCase(Objects.requireNonNull(username, "username").trim());
 	}
 
 	public Optional<User> findByEmail(@NotNull String email) {
-		return userRepository.findByEmailIgnoreCase(Objects.requireNonNull(email, "email"));
+		return userRepository.findByEmailIgnoreCase(Objects.requireNonNull(email, "email").trim());
 	}
 
 	public Optional<User> findByUsernameOrEmail(@NotNull String usernameOrEmail) {
@@ -61,7 +60,7 @@ public class UserService implements UserDetailsService {
 	@NotNull
 	@Override
 	public UserDetails loadUserByUsername(String usernameOrEmail) {
-		User user = findByUsernameOrEmail(usernameOrEmail)
+		User user = findByUsername(usernameOrEmail)
 				.orElseThrow(() -> new UsernameNotFoundException(usernameOrEmail + " not found."));
 
 		return new org.springframework.security.core.userdetails.User(
@@ -70,6 +69,7 @@ public class UserService implements UserDetailsService {
 				user.getRoles().stream().map(role -> new SimpleGrantedAuthority(role.name())).toList()
 		);
 	}
+	//</editor-fold>
 
 	public User createNewUser(RegisterUserRequest request) {
 		if (!request.getPassword().equals(request.getConfirmPassword()))
@@ -85,15 +85,15 @@ public class UserService implements UserDetailsService {
 
 	@Transactional
 	public User createNewUser(User user) {
-		return userRepository.save(user);
+		return save(user);
 	}
 
 	@NotNull
 	@Transactional
 	public User save(@NotNull User user) {
 		try {
-			normalizeUserFields(user);
 			validate(user);
+			normalizeUserFields(user);
 			User savedUser = userRepository.save(user);
 			log.info("Saved successfully {}", savedUser);
 			return savedUser;
@@ -118,21 +118,20 @@ public class UserService implements UserDetailsService {
 			throw new UsernameTakenException("There is already a user with this email");
 	}
 
+	private void normalizeUserFields(User user) {
+		user.setEmail(user.getEmail().trim().toLowerCase());
+		user.setUsername(user.getUsername().trim().toLowerCase());
+		user.setPassword(passwordEncoder.encode(user.getPassword()));
+		user.setRoles(Set.of(User.Role.USER_ROLE));
+		user.setLastTimeUpdated(LocalDateTime.now());
+	}
+
 	public boolean isUsernameTaken(String username) {
 		return userRepository.findByUsernameIgnoreCase(username).isPresent();
 	}
 
 	public boolean isEmailTaken(String email) {
 		return userRepository.findByEmailIgnoreCase(email).isPresent();
-	}
-
-	private void normalizeUserFields(User user) {
-		if (user.isNew()) {
-			user.setPassword(passwordEncoder.encode(user.getPassword()));
-			user.setRoles(Set.of(User.Role.USER_ROLE));
-		}
-		user.setEmail(user.getEmail().trim().toLowerCase());
-		user.setLastTimeUpdated(LocalDateTime.now());
 	}
 
 }

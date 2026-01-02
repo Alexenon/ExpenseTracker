@@ -149,7 +149,7 @@ public class PortfolioService {
 	}
 
 	/**
-	 * Post validation is required, for validation queries acros entity
+	 * Post validation is required, for validation like has active portfolio changed, is it valid, and so on.
 	 */
 	private void postValidation(Portfolio portfolio) {
 		User user = portfolio.getUser();
