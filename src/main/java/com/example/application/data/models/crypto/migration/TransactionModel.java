@@ -1,4 +1,4 @@
-package com.example.application.data.dtos.migration;
+package com.example.application.data.models.crypto.migration;
 
 import com.example.application.entities.common.TransactionType;
 import com.example.application.entities.crypto.Transaction;

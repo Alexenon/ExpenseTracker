@@ -1,6 +1,6 @@
 package com.example.application.utils.fetchers;
 
-import com.example.application.data.CryptoCurrency;
+import com.example.application.data.models.crypto.CryptoCurrency;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 

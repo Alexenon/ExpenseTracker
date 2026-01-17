@@ -1,4 +1,4 @@
-package com.example.application.data;
+package com.example.application.data.models.crypto;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonProperty;

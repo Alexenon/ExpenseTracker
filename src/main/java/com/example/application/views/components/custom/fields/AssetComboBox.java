@@ -1,7 +1,8 @@
 package com.example.application.views.components.custom.fields;
 
+import com.example.application.data.dtos.AssetDTO;
+import com.example.application.data.dtos.PortfolioDTO;
 import com.example.application.entities.crypto.Asset;
-import com.example.application.entities.crypto.Portfolio;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.data.renderer.LitRenderer;
@@ -12,7 +13,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 @Component
-public class AssetComboBox extends ComboBox<Asset> {
+public class AssetComboBox extends ComboBox<AssetDTO> {
 
 	private final InstrumentsFacadeService instrumentsFacadeService;
 
@@ -25,12 +26,12 @@ public class AssetComboBox extends ComboBox<Asset> {
 	private void initialize() {
 		setLabel("Asset");
 		setItemsWithFilter();
-		setItemLabelGenerator(Asset::getFullName);
+		setItemLabelGenerator(AssetDTO::getFullName);
 		setRenderer(assetSymbolRenderer());
 	}
 
 	public void setValue(String symbol) {
-		Asset asset = Optional.ofNullable(symbol)
+		AssetDTO asset = Optional.ofNullable(symbol)
 				.flatMap(a -> instrumentsFacadeService.getAssetBySymbol(symbol))
 				.orElse(null);
 
@@ -49,36 +50,36 @@ public class AssetComboBox extends ComboBox<Asset> {
 		this.setItems(defaultFilter, instrumentsFacadeService.getAllAssets());
 	}
 
-	protected LitRenderer<Asset> assetSymbolRenderer() {
+	protected LitRenderer<AssetDTO> assetSymbolRenderer() {
 		String templateExpression = """
 				<div class='coin-overview-name-container'>
 				  <img class='rounded coin-overview-image' src='${item.imgUrl}' alt='${item.fullName}'/>
 				  <span>${item.symbol}</span>
 				  <p>${item.fullName}</p>
 				</div>""";
-		return LitRenderer.<Asset>of(templateExpression)
-				.withProperty("imgUrl", Asset::getImageUrl)
-				.withProperty("symbol", Asset::getSymbol)
-				.withProperty("fullName", Asset::getFullName);
+		return LitRenderer.<AssetDTO>of(templateExpression)
+				.withProperty("imgUrl", AssetDTO::getImageUrl)
+				.withProperty("symbol", AssetDTO::getSymbol)
+				.withProperty("fullName", AssetDTO::getFullName);
 	}
 
-	public Asset getSelectedAsset() {
+	public AssetDTO getSelectedAsset() {
 		return this.getValue();
 	}
 
 	public String getSymbol() {
-		return extract(Asset::getSymbol, "");
+		return extract(AssetDTO::getSymbol, "");
 	}
 
 	public double getMarketPrice() {
-		return extract(Asset::getMarketPrice, 0.0);
+		return extract(AssetDTO::getMarketPrice, 0.0);
 	}
 
-	public double getAmountTokens(Portfolio portfolio) {
+	public double getAmountTokens(PortfolioDTO portfolio) {
 		return extract(asset -> instrumentsFacadeService.getAmountOfTokens(portfolio, asset), 0.0);
 	}
 
-	public <R> R extract(Function<Asset, R> getter, R defaultValue) {
+	public <R> R extract(Function<AssetDTO, R> getter, R defaultValue) {
 		return Optional.ofNullable(this.getValue())
 				.map(getter)
 				.orElse(defaultValue);

@@ -10,7 +10,7 @@ import com.example.application.utils.common.lang.NumberUtils;
 import com.example.application.utils.exceptions.InternalUnexpectedException;
 import com.example.application.utils.exceptions.InvalidBalanceAmountException;
 import jakarta.validation.constraints.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -23,31 +23,39 @@ import java.util.Optional;
 import static com.example.application.utils.investment.ProfitCalculator.calculateNewAvgPrice;
 
 @Service
+@RequiredArgsConstructor
 public class AssetBalanceService {
 
-	@Autowired
 	private AssetBalanceRepository repository;
+	private AssetService assetService;
+	private PortfolioService portfolioService;
 
 	/**
 	 * @return list of {@link AssetBalance} that are currently holded in the provided portfolio.
 	 */
-	public List<AssetBalance> findByPortfolio(@NotNull Portfolio portfolio) {
-		Objects.requireNonNull(portfolio, "portfolio");
-		return repository.findByPortfolio(portfolio);
+	public List<AssetBalance> findByPortfolio(@NotNull Long portfolioId) {
+		Objects.requireNonNull(portfolioId, "portfolioId");
+		return repository.findByPortfolio(portfolioId);
 	}
 
-	public Optional<AssetBalance> findByPortfolioAndAsset(@NotNull Portfolio portfolio, @NotNull Asset asset) {
-		Objects.requireNonNull(portfolio, "portfolio");
-		Objects.requireNonNull(asset, "asset");
-		return repository.findByPortfolioAndAsset(portfolio, asset);
+	public Optional<AssetBalance> findByPortfolioAndAsset(@NotNull Long portfolioId, @NotNull String assetSymbol) {
+		Objects.requireNonNull(portfolioId, "portfolioId");
+		Objects.requireNonNull(assetSymbol, "assetSymbol");
+		return repository.findByPortfolioAndAsset(portfolioId, assetSymbol);
 	}
 
 	@Transactional
-	public AssetBalance createNew(@NotNull Portfolio portfolio, @NotNull Asset asset) {
-		Optional<AssetBalance> existing = findByPortfolioAndAsset(portfolio, asset);
+	public AssetBalance createNew(@NotNull Long portfolioId, @NotNull String assetSymbol) {
+		Optional<AssetBalance> existing = findByPortfolioAndAsset(portfolioId, assetSymbol);
 
 		if (existing.isPresent())
-			throw new IllegalStateException("AssetBalance already exists for %s and %s".formatted(portfolio, asset));
+			throw new IllegalStateException("AssetBalance already exists -> #%d and %s".formatted(portfolioId, assetSymbol));
+
+		Portfolio portfolio = portfolioService.findById(portfolioId)
+				.orElseThrow(() -> new IllegalArgumentException("Cannot find portfolio: #" + portfolioId));
+
+		Asset asset = assetService.findBySymbol(assetSymbol)
+				.orElseThrow(() -> new IllegalArgumentException("Cannot find asset: " + assetSymbol));
 
 		AssetBalance assetBalance = new AssetBalance();
 		assetBalance.setPortfolio(portfolio);

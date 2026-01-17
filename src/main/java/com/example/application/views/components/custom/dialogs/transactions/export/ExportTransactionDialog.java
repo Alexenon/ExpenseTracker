@@ -1,6 +1,6 @@
 package com.example.application.views.components.custom.dialogs.transactions.export;
 
-import com.example.application.data.dtos.migration.TransactionModel;
+import com.example.application.data.models.crypto.migration.TransactionModel;
 import com.example.application.entities.crypto.Portfolio;
 import com.example.application.entities.crypto.Transaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;

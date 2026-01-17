@@ -78,7 +78,7 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
 		this.instrumentsFacadeService = instrumentsFacadeService;
 		this.portfolioPerformanceTracker = portfolioPerformanceTracker;
 		this.assetSymbolField = new AssetComboBox(instrumentsFacadeService);
-		this.portfolio = instrumentsFacadeService.getMainPortfolio();
+		this.portfolio = instrumentsFacadeService.getActivePortfolio();
 	}
 
 	@Override

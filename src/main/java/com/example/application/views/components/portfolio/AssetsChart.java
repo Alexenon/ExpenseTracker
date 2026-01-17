@@ -1,8 +1,8 @@
 package com.example.application.views.components.portfolio;
 
+import com.example.application.data.dtos.PortfolioDTO;
 import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.AssetBalance;
-import com.example.application.entities.crypto.Portfolio;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.utils.common.lang.MathUtils;
@@ -22,14 +22,14 @@ import java.util.stream.Collectors;
 @Slf4j
 public class AssetsChart extends Div {
 
-	private final Portfolio portfolio;
+	private final PortfolioDTO portfolio;
 	private final InstrumentsFacadeService instrumentsFacadeService;
 	private final PortfolioPerformanceTracker portfolioPerformanceTracker;
 
 	private final Select<ChartOptions> options = new Select<>();
 
 	@Autowired
-	public AssetsChart(Portfolio portfolio,
+	public AssetsChart(PortfolioDTO portfolio,
 					   InstrumentsFacadeService instrumentsFacadeService,
 					   PortfolioPerformanceTracker portfolioPerformanceTracker)
 	{

@@ -24,7 +24,7 @@ import java.util.Optional;
 import java.util.Set;
 
 /*
-    TODO:
+    TODO: [CRITICAL]
      [?] Don't allow spaces in the username / email  ->  pattern !!!
 * */
 
@@ -37,7 +37,7 @@ public class UserService implements UserDetailsService {
 	private final PasswordEncoder passwordEncoder;
 
 	//<editor-fold desc="SEARCH">
-	public Optional<User> findById(long id) {
+	public Optional<User> findById(Long id) {
 		return userRepository.findById(id);
 	}
 
@@ -71,6 +71,7 @@ public class UserService implements UserDetailsService {
 	}
 	//</editor-fold>
 
+	@NotNull
 	public User createNewUser(RegisterUserRequest request) {
 		if (!request.getPassword().equals(request.getConfirmPassword()))
 			throw new IllegalArgumentException("User register passwords does not match");
@@ -80,17 +81,12 @@ public class UserService implements UserDetailsService {
 		user.setEmail(request.getEmail());
 		user.setPassword(request.getPassword());
 
-		return createNewUser(user);
-	}
-
-	@Transactional
-	public User createNewUser(User user) {
 		return save(user);
 	}
 
 	@NotNull
 	@Transactional
-	public User save(@NotNull User user) {
+	private User save(@NotNull User user) {
 		try {
 			validate(user);
 			normalizeUserFields(user);

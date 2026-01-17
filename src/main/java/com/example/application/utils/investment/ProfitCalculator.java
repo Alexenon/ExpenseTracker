@@ -1,5 +1,6 @@
 package com.example.application.utils.investment;
 
+import com.example.application.data.dtos.TransactionDTO;
 import com.example.application.entities.crypto.Transaction;
 import com.example.application.utils.common.lang.DateUtils;
 import com.example.application.utils.common.lang.MathUtils;
@@ -35,13 +36,13 @@ public class ProfitCalculator {
 		return (currentSellPrice - avgBuyPrice) * tokensSoldNow;
 	}
 
-	public static double averageBuyPrice(List<Transaction> transactions) {
+	public static double averageBuyPrice(List<TransactionDTO> transactions) {
 		double totalCost = totalCostForBuyTransactions(transactions);
 		double totalQuantity = totalQuantityForBuyTransactions(transactions);
 		return calculateAveragePrice(totalCost, totalQuantity);
 	}
 
-	public static double averageSellPrice(List<Transaction> transactions) {
+	public static double averageSellPrice(List<TransactionDTO> transactions) {
 		double totalSellCost = totalCostForSellTransactions(transactions);
 		double totalQuantitySold = totalQuantityForSellTransactions(transactions);
 		return calculateAveragePrice(totalSellCost, totalQuantitySold);
@@ -141,7 +142,7 @@ public class ProfitCalculator {
 		return remainingCost;
 	}
 
-	public static String buySellRatio(List<Transaction> transactions) {
+	public static String buySellRatio(List<TransactionDTO> transactions) {
 		if (transactions == null || transactions.isEmpty())
 			return "N/A";
 
@@ -155,35 +156,35 @@ public class ProfitCalculator {
 	}
 
     //region CALCULATION METHODS
-    public static double totalCostForBuyTransactions(List<Transaction> transactions) {
+    public static double totalCostForBuyTransactions(List<TransactionDTO> transactions) {
         return transactions.stream()
-                .filter(Transaction::isBuyTransaction)
-                .mapToDouble(Transaction::getOrderTotalCost)
+                .filter(TransactionDTO::isBuyTransaction)
+                .mapToDouble(TransactionDTO::getOrderTotalCost)
                 .sum();
     }
 
-    public static double totalCostForSellTransactions(List<Transaction> transactions) {
+    public static double totalCostForSellTransactions(List<TransactionDTO> transactions) {
         return transactions.stream()
-                .filter(Transaction::isSellTransaction)
-                .mapToDouble(Transaction::getOrderTotalCost)
+                .filter(TransactionDTO::isSellTransaction)
+                .mapToDouble(TransactionDTO::getOrderTotalCost)
                 .sum();
     }
 
-    public static double totalQuantityForBuyTransactions(List<Transaction> transactions) {
+    public static double totalQuantityForBuyTransactions(List<TransactionDTO> transactions) {
         return transactions.stream()
-                .filter(Transaction::isBuyTransaction)
-                .mapToDouble(Transaction::getOrderQuantity)
+                .filter(TransactionDTO::isBuyTransaction)
+                .mapToDouble(TransactionDTO::getOrderQuantity)
                 .sum();
     }
 
-    public static double totalQuantityForSellTransactions(List<Transaction> transactions) {
+    public static double totalQuantityForSellTransactions(List<TransactionDTO> transactions) {
         return transactions.stream()
-                .filter(Transaction::isSellTransaction)
-                .mapToDouble(Transaction::getOrderQuantity)
+                .filter(TransactionDTO::isSellTransaction)
+                .mapToDouble(TransactionDTO::getOrderQuantity)
                 .sum();
     }
 
-    public static double getAmountOfRemainingTokens(List<Transaction> transactions) {
+    public static double getAmountOfRemainingTokens(List<TransactionDTO> transactions) {
         return totalQuantityForBuyTransactions(transactions) - totalQuantityForSellTransactions(transactions);
     }
 
@@ -191,7 +192,7 @@ public class ProfitCalculator {
         return MathUtils.safeDivision(totalCost, totalQuantity);
     }
 
-    private static long getHoldingTimeInDays(Transaction buyTransaction, Transaction sellTransaction) {
+    private static long getHoldingTimeInDays(TransactionDTO buyTransaction, TransactionDTO sellTransaction) {
         return DateUtils.daysBetween(buyTransaction.getDateTime(), sellTransaction.getDateTime());
     }
 	//endregion

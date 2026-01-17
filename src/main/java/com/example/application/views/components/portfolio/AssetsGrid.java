@@ -1,7 +1,7 @@
 package com.example.application.views.components.portfolio;
 
+import com.example.application.data.dtos.PortfolioDTO;
 import com.example.application.entities.crypto.Asset;
-import com.example.application.entities.crypto.Portfolio;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.utils.common.formatters.CommonFormatters;
@@ -58,7 +58,7 @@ public class AssetsGrid extends Div {
 	private static final String MISSING_DATA_SIGN = "-";
 	private static final int DEFAULT_NUMBER_OF_COLUMNS_VISIBLE = 8;
 
-	private final Portfolio portfolio;
+	private final PortfolioDTO portfolio;
 	private final InstrumentsFacadeService instrumentsFacadeService;
 	private final PortfolioPerformanceTracker portfolioPerformanceTracker;
 
@@ -77,7 +77,7 @@ public class AssetsGrid extends Div {
 	private Grid.Column<AssetGridItem> realizedCol;
 	private Grid.Column<AssetGridItem> unrealizedCol;
 
-	public AssetsGrid(Portfolio portfolio,
+	public AssetsGrid(PortfolioDTO portfolio,
 					  InstrumentsFacadeService instrumentsFacadeService,
 					  PortfolioPerformanceTracker portfolioPerformanceTracker)
 	{

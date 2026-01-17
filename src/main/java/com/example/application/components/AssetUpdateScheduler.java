@@ -1,6 +1,5 @@
 package com.example.application.components;
 
-import com.example.application.services.crypto.InstrumentsService;
 import com.example.application.views.components.PriceChangeNotifier;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

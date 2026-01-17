@@ -1,7 +1,7 @@
 package com.example.application.services;
 
 import com.example.application.data.dtos.ExpenseDTO;
-import com.example.application.data.dtos.projections.MonthlyExpensesProjection;
+import com.example.application.data.models.projections.MonthlyExpensesProjection;
 import com.example.application.data.requests.ExpenseRequest;
 import com.example.application.entities.Expense;
 import com.example.application.entities.User;

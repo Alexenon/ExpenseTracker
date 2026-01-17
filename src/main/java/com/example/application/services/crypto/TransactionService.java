@@ -8,8 +8,8 @@ import com.example.application.entities.crypto.Transaction;
 import com.example.application.repositories.crypto.TransactionRepository;
 import com.example.application.utils.exceptions.InternalUnexpectedException;
 import jakarta.validation.constraints.NotNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 /*
 	TODO: [NEXT]
@@ -31,52 +32,71 @@ import java.util.Objects;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class TransactionService {
 
+	private final PortfolioService portfolioService;
 	private final AssetBalanceService assetBalanceService;
 	private final TransactionRepository transactionRepository;
 
-	@Autowired
-	public TransactionService(TransactionRepository transactionRepository, AssetBalanceService assetBalanceService) {
-		this.assetBalanceService = assetBalanceService;
-		this.transactionRepository = transactionRepository;
+	//<editor-fold desc="SEARCH">
+	public Optional<Transaction> findById(@NotNull Long transactionId) {
+		Objects.requireNonNull(transactionId, "transactionId");
+		return transactionRepository.findById(transactionId);
 	}
 
-	public List<Transaction> findBy(@NotNull Portfolio portfolio) {
-		return transactionRepository.findByPortfolio(portfolio);
+	public List<Transaction> findBy(@NotNull Long portfolioId) {
+		Objects.requireNonNull(portfolioId, "portfolioId");
+		return transactionRepository.findByPortfolio(portfolioId);
 	}
 
-	public List<Transaction> findBy(@NotNull Portfolio portfolio, @NotNull Asset asset) {
-		return transactionRepository.findByPortfolioAndAsset(portfolio, asset);
+	public List<Transaction> findBy(@NotNull Long portfolioId, @NotNull String assetSymbol) {
+		Objects.requireNonNull(portfolioId, "portfolioId");
+		Objects.requireNonNull(assetSymbol, "assetSymbol");
+		return transactionRepository.findByPortfolioAndAsset(portfolioId, assetSymbol);
 	}
 
-	public List<Transaction> findBy(@NotNull Portfolio portfolio, @NotNull Asset asset, @NotNull TransactionType type) {
-		return transactionRepository.findByPortfolioAndAssetAndType(portfolio, asset, type);
+	public List<Transaction> findBy(@NotNull Long portfolioId, @NotNull String assetSymbol, @NotNull TransactionType type) {
+		Objects.requireNonNull(portfolioId, "portfolioId");
+		Objects.requireNonNull(assetSymbol, "assetSymbol");
+		Objects.requireNonNull(type, "type");
+		return transactionRepository.findByPortfolioAndAssetAndType(portfolioId, assetSymbol, type);
 	}
 
-	public List<Transaction> findBy(@NotNull Portfolio portfolio, @NotNull LocalDate from, @NotNull LocalDate to) {
-		Objects.requireNonNull(portfolio, "portfolio");
+	public List<Transaction> findBy(@NotNull Long portfolioId, @NotNull LocalDate from, @NotNull LocalDate to) {
+		Objects.requireNonNull(portfolioId, "portfolioId");
 		Objects.requireNonNull(from, "from");
 		Objects.requireNonNull(to, "to");
 		LocalDateTime fromDateTime = from.atStartOfDay();
 		LocalDateTime toDateTime = to.plusDays(1).atStartOfDay();
-		return transactionRepository.findByPortfolioAndDateTimeBetween(portfolio, fromDateTime, toDateTime);
+		return transactionRepository.findByPortfolioAndDateTimeBetween(portfolioId, fromDateTime, toDateTime);
+	}
+	//</editor-fold>
+
+	@NotNull
+	@Transactional
+	public Transaction transfer(@NotNull Long transactionId, @NotNull Long portfolioId) {
+		return transfer(transactionId, portfolioId, false);
 	}
 
+	@NotNull
 	@Transactional
-	public Transaction transfer(Transaction transaction, Portfolio portfolio) {
-		return transfer(transaction, portfolio, false);
-	}
+	public Transaction transfer(@NotNull Long transactionId, @NotNull Long portfolioId, boolean replace) {
+		Transaction oldTransaction = findById(transactionId)
+				.orElseThrow(() -> new IllegalArgumentException("There is no such transaction with id: #" + transactionId));
 
-	@Transactional
-	public Transaction transfer(Transaction transaction, Portfolio portfolio, boolean replace) {
-		String action = replace ? "Replacing" : "Copying";
-		log.info("{} {} from {} to {}", action, transaction, transaction.getPortfolio(), portfolio);
-		Transaction newTransaction = new Transaction(transaction);
+		Portfolio portfolio = portfolioService.findById(portfolioId)
+				.orElseThrow(() -> new IllegalArgumentException("There is no such portfolio with id: #" + transactionId));
+
+		Transaction newTransaction = new Transaction(oldTransaction);
 		newTransaction.setPortfolio(portfolio);
 
-		if (replace)
-			delete(transaction);
+		if (replace) {
+			log.info("Replacing {} from {} to {}", oldTransaction, oldTransaction.getPortfolio(), portfolio);
+			delete(oldTransaction.getId());
+		} else {
+			log.info("Moving {} from {} to {}", oldTransaction, oldTransaction.getPortfolio(), portfolio);
+		}
 
 		return save(newTransaction);
 	}
@@ -103,8 +123,11 @@ public class TransactionService {
 	}
 
 	@Transactional
-	public void delete(@NotNull Transaction transaction) {
-		Objects.requireNonNull(transaction, "transaction");
+	public void delete(@NotNull Long transactionId) {
+		Objects.requireNonNull(transactionId, "transactionId");
+		Transaction transaction = findById(transactionId)
+				.orElseThrow(() -> new IllegalArgumentException("Cannot delete an unexistent transaction: #" + transactionId));
+
 		try {
 			transactionRepository.delete(transaction);
 			log.info("Deleted successfully {}", transaction);
@@ -129,8 +152,8 @@ public class TransactionService {
 		Asset asset = transaction.getAsset();
 		Portfolio portfolio = transaction.getPortfolio();
 
-		AssetBalance assetBalance = assetBalanceService.findByPortfolioAndAsset(portfolio, asset)
-				.orElseGet(() -> assetBalanceService.createNew(portfolio, asset));
+		AssetBalance assetBalance = assetBalanceService.findByPortfolioAndAsset(portfolio.getId(), asset.getSymbol())
+				.orElseGet(() -> assetBalanceService.createNew(portfolio.getId(), asset.getSymbol()));
 
 		// Saving current avgBuyPrice before updating it
 		transaction.setAvgBuyPriceAtMoment(assetBalance.getAvgBuyPrice());

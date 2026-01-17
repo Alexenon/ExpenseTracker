@@ -1,8 +1,6 @@
 package com.example.application.repositories.crypto;
 
 import com.example.application.entities.common.TransactionType;
-import com.example.application.entities.crypto.Asset;
-import com.example.application.entities.crypto.Portfolio;
 import com.example.application.entities.crypto.Transaction;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -15,19 +13,38 @@ import java.util.List;
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
 
-	List<Transaction> findByPortfolio(Portfolio portfolio);
-
-	List<Transaction> findByPortfolioAndAsset(Portfolio portfolio, Asset asset);
-
-	List<Transaction> findByPortfolioAndAssetAndType(Portfolio portfolio, Asset asset, TransactionType type);
+	@Query(value = """
+			SELECT t FROM transactions t
+			WHERE t.portfolio_id = :portfolio_id
+			""")
+	List<Transaction> findByPortfolio(@Param("portfolioId") Long portfolioId);
 
 	@Query(value = """
 			SELECT t FROM transactions t
-			WHERE t.portfolio = :portfolio
+			INNER JOIN assets a ON a.id = t.asset_id
+			WHERE t.portfolio_id = :portfolio_id AND a.symbol = :assetSymbol
+			""")
+	List<Transaction> findByPortfolioAndAsset(@Param("portfolioId") Long portfolioId,
+											  @Param("assetSymbol") String assetSymbol);
+
+	@Query(value = """
+			SELECT t FROM transactions t
+			INNER JOIN assets a ON a.id = t.asset_id
+			WHERE t.portfolio_id = :portfolio_id
+				AND a.symbol = :assetSymbol
+				AND t.type = :transactionType
+			""")
+	List<Transaction> findByPortfolioAndAssetAndType(@Param("portfolioId") Long portfolioId,
+													 @Param("assetSymbol") String assetSymbol,
+													 @Param("transactionType") TransactionType type);
+
+	@Query(value = """
+			SELECT t FROM transactions t
+			WHERE t.portfolio_id = :portfolio_id
 			    AND t.dateTime BETWEEN :fromDateTime AND :toDateTime
 			""")
 	List<Transaction> findByPortfolioAndDateTimeBetween(
-			@Param("portfolio") Portfolio portfolio,
+			@Param("portfolioId") Long portfolioId,
 			@Param("fromDateTime") LocalDateTime fromDateTime,
 			@Param("toDateTime") LocalDateTime toDateTime
 	);

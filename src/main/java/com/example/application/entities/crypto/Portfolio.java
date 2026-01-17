@@ -4,7 +4,6 @@ import com.example.application.entities.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
@@ -12,7 +11,6 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(of = {"id", "name", "user", "lastTimeUpdated", "timeCreatedAt"})
 @Entity(name = "portfolios")
 public class Portfolio {
 
@@ -32,6 +30,23 @@ public class Portfolio {
 
 	@Column(name = "time_created_at", nullable = false, updatable = false)
 	private final LocalDateTime timeCreatedAt = LocalDateTime.now();
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+
+		if (!(o instanceof Portfolio other))
+			return false;
+
+		return id != null && id.equals(other.getId())
+			   && this.name.equals(other.getName());
+	}
+
+	@Override
+	public int hashCode() {
+		return getClass().hashCode();
+	}
 
     @Override
     public String toString() {

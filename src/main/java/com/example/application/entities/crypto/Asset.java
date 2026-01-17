@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.StringJoiner;
 
@@ -14,10 +13,6 @@ import java.util.StringJoiner;
 @AllArgsConstructor
 @Entity(name = "assets")
 public class Asset {
-
-	public static final double MISSING_DOUBLE_VALUE = Double.NaN;
-	public static final BigInteger MISSING_BIG_INTEGER_VALUE = BigInteger.valueOf(-1);
-	public static final BigDecimal MISSING_BIG_DECIMAL_VALUE = BigDecimal.valueOf(-1);
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

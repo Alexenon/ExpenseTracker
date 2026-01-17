@@ -1,8 +1,8 @@
 package com.example.application.views.pages.crypto.portfolio;
 
+import com.example.application.data.dtos.PortfolioDTO;
 import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.AssetBalance;
-import com.example.application.entities.crypto.Portfolio;
 import com.example.application.entities.crypto.Transaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
@@ -44,7 +44,7 @@ import java.util.stream.Collectors;
  */
 public class PortfolioPanel extends Div implements BeforeEnterObserver, BeforeLeaveObserver, PriceUpdatable {
 
-	private final Portfolio portfolio;
+	private final PortfolioDTO portfolio;
 	private final InstrumentsFacadeService instrumentsFacadeService;
 	private final PortfolioPerformanceTracker portfolioPerformanceTracker;
 	private final PriceChangeNotifier priceChangeNotifier;
@@ -54,7 +54,7 @@ public class PortfolioPanel extends Div implements BeforeEnterObserver, BeforeLe
 	private final TransactionsGrid transactionsGrid;
 
 	@Autowired
-	public PortfolioPanel(Portfolio portfolio,
+	public PortfolioPanel(PortfolioDTO portfolio,
 						  InstrumentsFacadeService instrumentsFacadeService,
 						  PortfolioPerformanceTracker portfolioPerformanceTracker,
 						  PriceChangeNotifier priceChangeNotifier)
@@ -129,7 +129,7 @@ public class PortfolioPanel extends Div implements BeforeEnterObserver, BeforeLe
 		Section section = new Section();
 		section.addClassName("asset-details-header");
 
-		H2 headerText = new H2(portfolio.getName());
+		H2 headerText = new H2(portfolio.name());
 		double worth = portfolioPerformanceTracker.getPortfolioWorth(portfolio);
 		double profit = portfolioPerformanceTracker.getPortfolioTotalProfit(portfolio);
 		double percentage = portfolioPerformanceTracker.getPortfolioProfitPercentage(portfolio);

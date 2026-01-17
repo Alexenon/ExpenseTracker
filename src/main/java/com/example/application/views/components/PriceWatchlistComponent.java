@@ -157,7 +157,7 @@ public class PriceWatchlistComponent extends Div implements HasNotifications {
 
         private Div buildBody() {
             return new Container("card-wrapper-body", target, targetAmount,
-//                    toggleBtn,  // TODO: Add me again and continue styling
+//                    toggleBtn,  // TODO: [LONG TERM] Add me again and continue styling
                     checkboxContainer);
         }
 
@@ -176,7 +176,7 @@ public class PriceWatchlistComponent extends Div implements HasNotifications {
             editBtn.setIcon(isEditMode ? LumoIcon.UNDO.create() : LumoIcon.EDIT.create());
         }
 
-        // TODO: Make same for percentage, this is for price
+        // TODO: Make same for percentage --> this implementation is for price
         private void initBinder() {
             binder.forField(target)
                     .asRequired("Please fill this field")

@@ -1,9 +1,9 @@
 package com.example.application.repositories.crypto;
 
-import com.example.application.entities.User;
-import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.UserAsset;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -11,6 +11,12 @@ import java.util.Optional;
 @Repository
 public interface UserAssetRepository extends JpaRepository<UserAsset, Long> {
 
-    Optional<UserAsset> findByUserAndAsset(User user, Asset asset);
+	@Query(value = """
+			SELECT t FROM user_assets ua
+			INNER JOIN assets a ON a.id = ua.asset_id
+			WHERE a.symbol = :assetSymbol AND ua.user_id = :userId
+			""")
+	Optional<UserAsset> findByUserAndAsset(@Param("userId") Long userId,
+										   @Param("assetSymbol") String assetSymbol);
 
 }

@@ -1,8 +1,8 @@
 package com.example.application.views.components.custom.dialogs.transactions;
 
+import com.example.application.data.dtos.PortfolioDTO;
 import com.example.application.entities.common.TransactionType;
 import com.example.application.entities.crypto.Asset;
-import com.example.application.entities.crypto.Portfolio;
 import com.example.application.entities.crypto.Transaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.utils.common.formatters.CommonFormatters;
@@ -41,7 +41,7 @@ import java.util.Objects;
 public class AddTransactionDialog extends Dialog implements HasNotifications {
 
 	private final Asset asset;
-	private final Portfolio portfolio;
+	private final PortfolioDTO portfolio;
 	private final Transaction transaction;
 	private final InstrumentsFacadeService instrumentsFacadeService;
 	private final Binder<Transaction> binder = new Binder<>(Transaction.class);
@@ -58,12 +58,12 @@ public class AddTransactionDialog extends Dialog implements HasNotifications {
 	private final Button cancelButton = new Button("Cancel");
 	private final Span symbolSuffix = new Span();
 
-	public AddTransactionDialog(Portfolio portfolio, InstrumentsFacadeService instrumentsFacadeService) {
+	public AddTransactionDialog(PortfolioDTO portfolio, InstrumentsFacadeService instrumentsFacadeService) {
 		this(portfolio, null, instrumentsFacadeService);
 	}
 
 	@Autowired
-	public AddTransactionDialog(@NotNull Portfolio portfolio,
+	public AddTransactionDialog(@NotNull PortfolioDTO portfolio,
 								@Nullable Asset asset,
 								@NotNull InstrumentsFacadeService instrumentsFacadeService)
 	{

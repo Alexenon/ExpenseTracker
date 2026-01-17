@@ -9,16 +9,18 @@ public class RegisterUserRequest {
 
     @NotNull
     @Size(min = 4, max = 20)
-    String username;
+    private String username;
+
+	@NotNull
+	@Size(min = 4, max = 20)
+	private String email;
 
     @NotNull
     @Size(min = 4, max = 20)
-    String password;
+	private String password;
 
     @NotNull
     @Size(min = 4, max = 20)
-    String confirmPassword;
+	private String confirmPassword;
 
-    @NotNull
-    String email;
 }

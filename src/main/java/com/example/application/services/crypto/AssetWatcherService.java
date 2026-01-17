@@ -1,8 +1,6 @@
 package com.example.application.services.crypto;
 
-import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.AssetWatcher;
-import com.example.application.entities.crypto.Portfolio;
 import com.example.application.repositories.crypto.AssetWatcherRepository;
 import com.example.application.utils.exceptions.InternalUnexpectedException;
 import jakarta.validation.constraints.NotNull;
@@ -13,77 +11,81 @@ import org.springframework.util.Assert;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 /*
- * TODO: [LONG TERM] Add retrieve from holdings, on successful state
+ * TODO: [LONG TERM]
+ *  - (checkbox) Retrieve from holdings, on successful state if user wants to
  *
- * TODO: [VERY URGENT] - DECIDE WHAT IF AN ASSET IS EMPTY IN THE FIND_ANY
- *    EITHER, ENSURE THAT NEVER PASS A NULL ASSET, OR ANY NULL ENITITY IN ANY OF THE SERVICES,
- *    OR IN CASE ITS NULL, RETURN AN EMPTY LIST
- *      PROS - {SILENT FAIL, NO EXCEPTION THROWN}
- *      CONS - {WAY HARDER TO SEE IF SOMETHING WENT WRONG}
  * */
 
 @Service
 public class AssetWatcherService {
 
-    @Autowired
-    private AssetWatcherRepository assetWatcherRepository;
+	@Autowired
+	private AssetWatcherRepository assetWatcherRepository;
 
-    @NotNull
-    @Transactional
-    public AssetWatcher save(@NotNull AssetWatcher assetWatcher) {
-        try {
-            validate(assetWatcher);
-            return assetWatcherRepository.save(assetWatcher);
-        } catch (Exception e) {
-            throw new InternalUnexpectedException(e);
-        }
-    }
+	public Optional<AssetWatcher> findById(@NotNull Long assetWatcherId) {
+		Objects.requireNonNull(assetWatcherId, "assetWatcherId");
+		return assetWatcherRepository.findById(assetWatcherId);
+	}
 
-    @Transactional
-    public void delete(@NotNull AssetWatcher assetWatcher) {
-        Objects.requireNonNull(assetWatcher, "assetWatcher");
-        try {
-            assetWatcherRepository.delete(assetWatcher);
-        } catch (Exception e) {
-            throw new InternalUnexpectedException(e);
-        }
-    }
+	public List<AssetWatcher> findBy(@NotNull Long portfolioId) {
+		Objects.requireNonNull(portfolioId, "portfolioId");
+		return assetWatcherRepository.findByPortfolio(portfolioId);
+	}
 
-    public List<AssetWatcher> findBy(@NotNull Portfolio portfolio) {
-        Objects.requireNonNull(portfolio, "portfolio");
-        return assetWatcherRepository.findByPortfolio(portfolio);
-    }
+	public List<AssetWatcher> findBy(@NotNull String assetSymbol) {
+		Objects.requireNonNull(assetSymbol, "assetSymbol");
+		return assetWatcherRepository.findByAsset(assetSymbol);
+	}
 
-    public List<AssetWatcher> findBy(@NotNull Asset asset) {
-        Objects.requireNonNull(asset, "asset");
-        return assetWatcherRepository.findByAsset(asset);
-    }
+	public List<AssetWatcher> findBy(@NotNull Long portfolioId, @NotNull String assetSymbol) {
+		Objects.requireNonNull(portfolioId, "portfolioId");
+		Objects.requireNonNull(assetSymbol, "assetSymbol");
+		return assetWatcherRepository.findByPortfolioAndAsset(portfolioId, assetSymbol);
+	}
 
-    public List<AssetWatcher> findBy(@NotNull Portfolio portfolio, @NotNull Asset asset) {
-        Objects.requireNonNull(portfolio, "portfolio");
-        Objects.requireNonNull(asset, "asset");
-        return assetWatcherRepository.findByPortfolioAndAsset(portfolio, asset);
-    }
+	public List<AssetWatcher> findBy(@NotNull Long portfolioId,
+									 @NotNull String assetSymbol,
+									 @NotNull AssetWatcher.ActionType actionType)
+	{
+		Objects.requireNonNull(portfolioId, "portfolioId");
+		Objects.requireNonNull(assetSymbol, "assetSymbol");
+		Objects.requireNonNull(actionType, "actionType");
+		return assetWatcherRepository.findByPortfolioAndAssetAndActionType(portfolioId, assetSymbol, actionType);
+	}
 
-    public List<AssetWatcher> findBy(@NotNull Portfolio portfolio,
-                                     @NotNull Asset asset,
-                                     @NotNull AssetWatcher.ActionType actionType)
-    {
-        Objects.requireNonNull(portfolio, "portfolio");
-        Objects.requireNonNull(asset, "asset");
-        Objects.requireNonNull(actionType, "actionType");
-        return assetWatcherRepository.findByPortfolioAndAssetAndActionType(portfolio, asset, actionType);
-    }
+	@NotNull
+	@Transactional
+	public AssetWatcher save(@NotNull AssetWatcher assetWatcher) {
+		try {
+			validate(assetWatcher);
+			return assetWatcherRepository.save(assetWatcher);
+		} catch (Exception e) {
+			throw new InternalUnexpectedException(e);
+		}
+	}
 
-    private void validate(AssetWatcher assetWatcher) {
-        Objects.requireNonNull(assetWatcher, "assetWatcher");
-        Assert.notNull(assetWatcher.getAsset(), "Asset is missing");
-        Assert.notNull(assetWatcher.getPortfolio(), "Portfolio is missing");
-        Assert.notNull(assetWatcher.getActionType(), "ActionType is missing");
-        Assert.notNull(assetWatcher.getTargetType(), "TargetType is missing");
-        Assert.isTrue(assetWatcher.getTargetAmount() >= 0, "amount cannot be negative");
-    }
+	@Transactional
+	public void delete(@NotNull Long assetWatcherId) {
+		Objects.requireNonNull(assetWatcherId, "assetWatcherId");
+		AssetWatcher assetWatcher = findById(assetWatcherId)
+				.orElseThrow(() -> new IllegalArgumentException("Cannot delete an unexistent transaction: #" + assetWatcherId));
+		try {
+			assetWatcherRepository.delete(assetWatcher);
+		} catch (Exception e) {
+			throw new InternalUnexpectedException(e);
+		}
+	}
+
+	private void validate(AssetWatcher assetWatcher) {
+		Objects.requireNonNull(assetWatcher, "assetWatcher");
+		Assert.notNull(assetWatcher.getAsset(), "Asset is missing");
+		Assert.notNull(assetWatcher.getPortfolio(), "Portfolio is missing");
+		Assert.notNull(assetWatcher.getActionType(), "ActionType is missing");
+		Assert.notNull(assetWatcher.getTargetType(), "TargetType is missing");
+		Assert.isTrue(assetWatcher.getTargetAmount() >= 0, "amount cannot be negative");
+	}
 
 }

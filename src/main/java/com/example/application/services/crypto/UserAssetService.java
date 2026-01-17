@@ -1,7 +1,5 @@
 package com.example.application.services.crypto;
 
-import com.example.application.entities.User;
-import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.UserAsset;
 import com.example.application.repositories.crypto.UserAssetRepository;
 import com.example.application.utils.common.lang.StringUtils;
@@ -20,93 +18,103 @@ import java.util.Optional;
 
 /**
  * Service responsible for API on the {@link UserAsset} entity
- * */
+ */
 @Slf4j
 @Service
 public class UserAssetService {
 
-    private final UserAssetRepository userAssetRepository;
+	private final UserAssetRepository userAssetRepository;
 
-    public UserAssetService(UserAssetRepository userAssetRepository) {
-        this.userAssetRepository = userAssetRepository;
-    }
+	public UserAssetService(UserAssetRepository userAssetRepository) {
+		this.userAssetRepository = userAssetRepository;
+	}
 
-    public void updateAssetComment(@NotNull User user, @NotNull Asset asset, @Nullable String comment) {
-        UserAsset userAsset = findByUserAndAsset(user, asset)
-                .orElse(new UserAsset());
+	public Optional<UserAsset> findById(Long userAssetId) {
+		return userAssetRepository.findById(Objects.requireNonNull(userAssetId, "userAssetId"));
+	}
 
-        userAsset.setComment(comment);
-        update(userAsset);
-    }
+	public Optional<UserAsset> findByUserAndAsset(@NotNull Long userId, @NotNull String assetSymbol) {
+		Objects.requireNonNull(userId, "userId");
+		Objects.requireNonNull(assetSymbol, "assetSymbol");
+		return userAssetRepository.findByUserAndAsset(userId, assetSymbol);
+	}
 
-    public void updateMarkAssetAsFavorite(@NotNull User user, @NotNull Asset asset, boolean markAsFavorite) {
-        UserAsset userAsset = findByUserAndAsset(user, asset)
-                .orElse(new UserAsset());
+	public void updateAssetComment(@NotNull Long userId, @NotNull String assetSymbol, @Nullable String comment) {
+		UserAsset userAsset = findByUserAndAsset(userId, assetSymbol)
+				.orElse(new UserAsset());
 
-        userAsset.setMarkedAsFavorite(markAsFavorite);
-        update(userAsset);
-    }
+		userAsset.setComment(comment);
+		update(userAsset);
+	}
 
-    public String getAssetComment(User user, Asset asset) {
-        return findByUserAndAsset(user, asset)
-                .map(UserAsset::getComment)
-                .orElse(null);
-    }
+	public void updateMarkAssetAsFavorite(@NotNull Long userId, @NotNull String assetSymbol, boolean markAsFavorite) {
+		UserAsset userAsset = findByUserAndAsset(userId, assetSymbol)
+				.orElse(new UserAsset());
 
-    public boolean isAssetMarkedAsFavorite(User user, Asset asset) {
-        return findByUserAndAsset(user, asset)
-                .map(UserAsset::isMarkedAsFavorite)
-                .orElse(false);
-    }
+		userAsset.setMarkedAsFavorite(markAsFavorite);
+		update(userAsset);
+	}
 
-    public Optional<UserAsset> findByUserAndAsset(@NotNull User user, @NotNull Asset asset) {
-        Objects.requireNonNull(user, "user");
-        Objects.requireNonNull(asset, "asset");
-        return userAssetRepository.findByUserAndAsset(user, asset);
-    }
+	@Nullable
+	public String getAssetComment(Long userId, String assetSymbol) {
+		return findByUserAndAsset(userId, assetSymbol)
+				.map(UserAsset::getComment)
+				.orElse(null);
+	}
 
-    public void update(@NotNull UserAsset userAsset) {
-        validate(userAsset);
+	public boolean isAssetMarkedAsFavorite(Long userId, String assetSymbol) {
+		return findByUserAndAsset(userId, assetSymbol)
+				.map(UserAsset::isMarkedAsFavorite)
+				.orElse(false);
+	}
 
-        if (StringUtils.isBlank(userAsset.getComment()) && !userAsset.isMarkedAsFavorite()) {
-            delete(userAsset);
-        } else {
-            save(userAsset);
-        }
-    }
+	@Transactional
+	private void update(@NotNull UserAsset userAsset) {
+		validate(userAsset);
 
-    @Transactional
-    public void delete(@NotNull UserAsset userAsset) {
-        Objects.requireNonNull(userAsset, "userAsset");
-        try {
-            userAssetRepository.delete(userAsset);
-            log.info("Deleted successfully {}", userAsset);
-        } catch (Exception e) {
-            log.error("Failed to delete {}, cause: {}", userAsset, e.getMessage());
-            throw new InternalUnexpectedException(e);
-        }
-    }
+		if (StringUtils.isBlank(userAsset.getComment()) && !userAsset.isMarkedAsFavorite()) {
+			delete(userAsset.getId());
+		} else {
+			save(userAsset);
+		}
+	}
 
-    @Transactional
-    private UserAsset save(@NotNull UserAsset userAsset) {
-        try {
-            validate(userAsset);
-            userAsset.setLastTimeUpdated(LocalDateTime.now());
-            UserAsset entity = userAssetRepository.save(userAsset);
-            log.info("Saved successfully {}", entity);
-            return entity;
-        } catch (Exception e) {
-            log.error("Failed to save {}, cause: {}", userAsset, e.getMessage());
-            ExceptionUtils.printRootCauseStackTrace(e);
-            throw new InternalUnexpectedException(e);
-        }
-    }
+	@Transactional
+	private UserAsset save(@NotNull UserAsset userAsset) {
+		try {
+			validate(userAsset);
+			userAsset.setLastTimeUpdated(LocalDateTime.now());
+			UserAsset entity = userAssetRepository.save(userAsset);
+			log.info("Saved successfully {}", entity);
+			return entity;
+		} catch (Exception e) {
+			log.error("Failed to save {}, cause: {}", userAsset, e.getMessage());
+			ExceptionUtils.printRootCauseStackTrace(e);
+			throw new InternalUnexpectedException(e);
+		}
+	}
 
-    public void validate(UserAsset userAsset) {
-        Objects.requireNonNull(userAsset, "user-asset");
-        Assert.isTrue(userAsset.getUser() != null, "user is missing");
-        Assert.isTrue(userAsset.getAsset() != null, "asset is missing");
-        Assert.isTrue(userAsset.getLastTimeUpdated() != null, "lastTimeUpdated is missing");
-    }
+	@Transactional
+	public void delete(@NotNull Long userAssetId) {
+		Objects.requireNonNull(userAssetId, "userAssetId");
+
+		UserAsset userAsset = findById(userAssetId)
+				.orElseThrow(() -> new IllegalArgumentException("Cannot find user asset by id: #" + userAssetId));
+
+		try {
+			userAssetRepository.delete(userAsset);
+			log.info("Deleted successfully {}", userAssetId);
+		} catch (Exception e) {
+			log.error("Failed to delete {}, cause: {}", userAsset, e.getMessage());
+			throw new InternalUnexpectedException(e);
+		}
+	}
+
+	public void validate(UserAsset userAsset) {
+		Objects.requireNonNull(userAsset, "userAsset");
+		Assert.isTrue(userAsset.getUser() != null, "user is missing");
+		Assert.isTrue(userAsset.getAsset() != null, "asset is missing");
+		Assert.isTrue(userAsset.getLastTimeUpdated() != null, "lastTimeUpdated is missing");
+	}
 
 }

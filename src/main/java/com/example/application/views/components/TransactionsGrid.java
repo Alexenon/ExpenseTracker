@@ -1,7 +1,7 @@
 package com.example.application.views.components;
 
 /*
-    TODO:
+    TODO: [LONG TERM]
      - [!] Add Edit/Delete btn, directly in the grid, and in the display itself
      - [?] Add sync button functionality(don't forget about checkbox value)
     _______________________________________________________________________________________________________________________________________

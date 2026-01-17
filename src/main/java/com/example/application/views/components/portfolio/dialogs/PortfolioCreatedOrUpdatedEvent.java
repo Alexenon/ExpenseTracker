@@ -1,18 +1,18 @@
 package com.example.application.views.components.portfolio.dialogs;
 
-import com.example.application.entities.crypto.Portfolio;
+import com.example.application.data.dtos.PortfolioDTO;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.dialog.Dialog;
 
 public class PortfolioCreatedOrUpdatedEvent extends ComponentEvent<Dialog> {
-	private final Portfolio portfolio;
+	private final PortfolioDTO portfolio;
 
-	public PortfolioCreatedOrUpdatedEvent(Dialog source, Portfolio portfolio) {
+	public PortfolioCreatedOrUpdatedEvent(Dialog source, PortfolioDTO portfolio) {
 		super(source, false);
 		this.portfolio = portfolio;
 	}
 
-	public Portfolio getPortfolio() {
+	public PortfolioDTO getPortfolio() {
 		return portfolio;
 	}
 }
