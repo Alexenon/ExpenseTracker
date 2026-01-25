@@ -48,7 +48,7 @@ public class AssetService {
 			assetRepository.delete(asset);
 			log.info("Deleted successfully {}", asset);
 		} catch (Exception e) {
-			log.error("Failed to delete {}, cause: {}", asset, e.getMessage());
+			log.error("Failed to delete {}", asset, e);
 			throw new InternalUnexpectedException(e);
 		}
 	}
@@ -64,7 +64,7 @@ public class AssetService {
 			log.info("Saved successfully {}", saved);
 			return saved;
 		} catch (InvalidDataException e) {
-			log.error("Failed to save {}, cause: {}", asset, e.getMessage());
+			log.error("Failed to save {}", asset, e);
 			return null;
 		} catch (Exception e) {
 			throw new InternalUnexpectedException(e);

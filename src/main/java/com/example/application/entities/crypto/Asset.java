@@ -1,6 +1,8 @@
 package com.example.application.entities.crypto;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,34 +20,38 @@ public class Asset {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	@NotNull
+	@Size(min = 1, max = 12)
 	@Column(nullable = false, unique = true)
 	private String symbol;
 
+	@NotNull
+	@Size(min = 1, max = 55)
 	@Column(nullable = false)
 	private String fullName;
 
-	@Column(nullable = false)
+	@Column(name = "market_price", nullable = false)
 	private double marketPrice;
 
-	@Column(nullable = false)
+	@Column(name = "change_percentage", nullable = false)
 	private double changePercentage;
 
-	@Column(nullable = false, length = 1000)
+	@Column(name = "summary_description", nullable = false, length = 1000)
 	private String summaryDescription = "";
 
-	@Column(nullable = false)
+	@Column(name = "total_market_cap", nullable = false)
 	private BigInteger totalMarketCap;
 
-	@Column(nullable = false)
+	@Column(name = "total_supply", nullable = false)
 	private BigInteger totalSupply;
 
-	@Column(nullable = false)
+	@Column(name = "circulation_supply", nullable = false)
 	private BigInteger circulationSupply;
 
-	@Column(nullable = false)
+	@Column(name = "today_volume", nullable = false)
 	private double todayVolume;
 
-	@Column(nullable = false)
+	@Column(name = "image_url", nullable = false)
 	private String imageUrl = "";
 
 	@Override

@@ -1,6 +1,6 @@
 package com.example.application.utils.investment;
 
-import com.example.application.entities.crypto.Transaction;
+import com.example.application.data.dtos.TransactionDTO;
 import com.example.application.utils.common.lang.MathUtils;
 
 import java.math.BigDecimal;
@@ -23,7 +23,7 @@ public class ProfitUtils {
         return (sellPrice - buyPrice) * coinsBought(buyPrice, investedAmount);
     }
 
-    public static double netProfit(Transaction transaction, double currentPrice) {
+    public static double netProfit(TransactionDTO transaction, double currentPrice) {
         return netProfit(transaction.getMarketPrice(), currentPrice, transaction.getOrderTotalCost());
     }
 
@@ -82,12 +82,12 @@ public class ProfitUtils {
     /**
      * Calculates the total realized profit from provided transactions
      */
-    public static double getTransactionsRealizedProfit(List<Transaction> transactions) {
+    public static double getTransactionsRealizedProfit(List<TransactionDTO> transactions) {
         double totalCost = 0.0;
         double remainingQuantity = 0.0;
         double realizedProfit = 0.0;
 
-        for (Transaction transaction : transactions) {
+        for (TransactionDTO transaction : transactions) {
             if (transaction.isBuyTransaction()) {
                 totalCost += transaction.getOrderTotalCost();
                 remainingQuantity += transaction.getOrderQuantity();

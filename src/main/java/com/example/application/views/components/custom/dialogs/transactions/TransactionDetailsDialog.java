@@ -1,7 +1,7 @@
 package com.example.application.views.components.custom.dialogs.transactions;
 
-import com.example.application.entities.crypto.Asset;
-import com.example.application.entities.crypto.Transaction;
+import com.example.application.data.dtos.AssetDTO;
+import com.example.application.data.dtos.TransactionDTO;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.utils.common.formatters.number.AmountFormatter;
 import com.example.application.utils.common.formatters.number.CurrencyFormatter;
@@ -51,7 +51,7 @@ public class TransactionDetailsDialog extends Dialog {
 	private static final AmountFormatter amountFormatter = AmountFormatter.withDefaults();
 	private static final CurrencyFormatter currencyFormatter = CurrencyFormatter.withDefaults();
 
-	private Transaction transaction;
+	private TransactionDTO transaction;
 	private final InstrumentsFacadeService instrumentsFacadeService;
 
 	private final Button transferBtn = new Button(PictogramIcon.TRANSFER.create());
@@ -59,7 +59,7 @@ public class TransactionDetailsDialog extends Dialog {
 	private final Button closeBtn = new Button(LumoIcon.CROSS.create(), e -> this.close());
 
 	@Autowired
-	public TransactionDetailsDialog(Transaction transaction,
+	public TransactionDetailsDialog(TransactionDTO transaction,
 									InstrumentsFacadeService instrumentsFacadeService)
 	{
 		this.transaction = transaction;
@@ -96,7 +96,7 @@ public class TransactionDetailsDialog extends Dialog {
 	}
 
 	private Div detailsTransaction() {
-		Asset asset = transaction.getAsset();
+		AssetDTO asset = instrumentsFacadeService.getAssetBySymbol(transaction.getAssetSymbol()).orElseThrow();
 		String symbol = asset.getSymbol();
 		String formattedPrice = currencyFormatter.format(transaction.getMarketPrice());
 		String formattedAmount = amountFormatter.format(transaction.getOrderQuantity(), symbol);
@@ -127,7 +127,7 @@ public class TransactionDetailsDialog extends Dialog {
 	}
 
 	private Div detailsProfitLoss() {
-		Asset asset = transaction.getAsset();
+		AssetDTO asset = instrumentsFacadeService.getAssetBySymbol(transaction.getAssetSymbol()).orElseThrow();
 		double buyPrice = transaction.getMarketPrice();
 		double sellPrice = asset.getMarketPrice();
 		double totalCost = transaction.getOrderTotalCost();
@@ -145,14 +145,14 @@ public class TransactionDetailsDialog extends Dialog {
 				.addComponent(new PricePercentageWrapper(usdProfit, percentageProfit))
 				.build();
 
-		double tokensAmount = instrumentsFacadeService.getAmountOfTokens(transaction.getPortfolio(), asset);
+		double tokensAmount = instrumentsFacadeService.getAmountOfTokens(transaction.getPortfolioId(), asset.getSymbol());
 
 		return Container.builder("transaction-details-card")
 				.addComponents(profitLossContainer)
 				.addElement(new Element("hr"))
 				.addComponent(new ProfitStatsDisplay("Current Price", currencyFormatter.format(asset.getMarketPrice())))
 				.addElement(new Element("hr"))
-				.addComponent(new ProfitStatsDisplay("Current Amount", amountFormatter.format(tokensAmount, asset)))
+				.addComponent(new ProfitStatsDisplay("Current Amount", amountFormatter.format(tokensAmount, asset.getSymbol())))
 				.build();
 	}
 
@@ -181,7 +181,7 @@ public class TransactionDetailsDialog extends Dialog {
 		buildForm();
 	}
 
-	private void manageTransactionChangedEvent(Transaction transaction) {
+	private void manageTransactionChangedEvent(TransactionDTO transaction) {
 		this.transaction = transaction;
 		rebuildForm();
 	}

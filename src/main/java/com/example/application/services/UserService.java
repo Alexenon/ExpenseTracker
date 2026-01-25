@@ -2,6 +2,7 @@ package com.example.application.services;
 
 import com.example.application.data.requests.RegisterUserRequest;
 import com.example.application.entities.User;
+import com.example.application.entities.crypto.Portfolio;
 import com.example.application.repositories.UserRepository;
 import com.example.application.utils.common.lang.StringUtils;
 import com.example.application.utils.exceptions.InternalUnexpectedException;
@@ -21,7 +22,6 @@ import org.springframework.util.Assert;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 
 /*
     TODO: [CRITICAL]
@@ -37,8 +37,8 @@ public class UserService implements UserDetailsService {
 	private final PasswordEncoder passwordEncoder;
 
 	//<editor-fold desc="SEARCH">
-	public Optional<User> findById(Long id) {
-		return userRepository.findById(id);
+	public Optional<User> findById(Long userId) {
+		return userRepository.findById(Objects.requireNonNull(userId, "userId"));
 	}
 
 	public Optional<User> findByUsername(@NotNull String username) {
@@ -73,6 +73,14 @@ public class UserService implements UserDetailsService {
 
 	@NotNull
 	public User createNewUser(RegisterUserRequest request) {
+		Objects.requireNonNull(request, "request");
+
+		if (isUsernameTaken(request.getUsername()))
+			throw new UsernameTakenException("There is already a user with this username");
+
+		if (isEmailTaken(request.getEmail()))
+			throw new UsernameTakenException("There is already a user with this email");
+
 		if (!request.getPassword().equals(request.getConfirmPassword()))
 			throw new IllegalArgumentException("User register passwords does not match");
 
@@ -81,6 +89,33 @@ public class UserService implements UserDetailsService {
 		user.setEmail(request.getEmail());
 		user.setPassword(request.getPassword());
 
+		return save(user);
+	}
+
+	@Transactional
+	public User addPortfolio(@NotNull Long userId, @NotNull Portfolio portfolio) {
+		User user = findById(userId)
+				.orElseThrow(() -> new UsernameNotFoundException("User #" + userId + " not found."));
+
+		user.addPortfolio(portfolio);
+		return save(user);
+	}
+
+	@Transactional
+	public User removePortfolio(@NotNull Long userId, @NotNull Portfolio portfolio) {
+		User user = findById(userId)
+				.orElseThrow(() -> new UsernameNotFoundException("User #" + userId + " not found."));
+
+		user.removePortfolio(portfolio);
+		return save(user);
+	}
+
+	@Transactional
+	public User setPortfolioAsActive(@NotNull Long userId, @NotNull Portfolio portfolio) {
+		User user = findById(userId)
+				.orElseThrow(() -> new UsernameNotFoundException("User #" + userId + " not found."));
+
+		user.setActivePortfolio(portfolio);
 		return save(user);
 	}
 
@@ -94,7 +129,7 @@ public class UserService implements UserDetailsService {
 			log.info("Saved successfully {}", savedUser);
 			return savedUser;
 		} catch (Exception e) {
-			log.error("Failed to save {}, cause: {}", user.toFullString(), e.getMessage());
+			log.error("Failed to save {}", user.toFullString(), e);
 			throw new InternalUnexpectedException(e);
 		}
 	}
@@ -106,27 +141,23 @@ public class UserService implements UserDetailsService {
 		Assert.isTrue(StringUtils.isNotBlank(user.getPassword()), "User -> password is missing");
 		Assert.notNull(user.getLastTimeUpdated(), "User -> lastTimeUpdated is missing");
 		Assert.notNull(user.getTimeCreatedAt(), "User -> date creation is missing");
-
-		if (isUsernameTaken(user.getUsername()))
-			throw new UsernameTakenException("There is already a user with this username");
-
-		if (isEmailTaken(user.getEmail()))
-			throw new UsernameTakenException("There is already a user with this email");
 	}
 
 	private void normalizeUserFields(User user) {
 		user.setEmail(user.getEmail().trim().toLowerCase());
 		user.setUsername(user.getUsername().trim().toLowerCase());
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
-		user.setRoles(Set.of(User.Role.USER_ROLE));
+		user.getRoles().add(User.Role.USER_ROLE);
 		user.setLastTimeUpdated(LocalDateTime.now());
 	}
 
-	public boolean isUsernameTaken(String username) {
+	public boolean isUsernameTaken(@NotNull String username) {
+		Objects.requireNonNull(username, "username");
 		return userRepository.findByUsernameIgnoreCase(username).isPresent();
 	}
 
-	public boolean isEmailTaken(String email) {
+	public boolean isEmailTaken(@NotNull String email) {
+		Objects.requireNonNull(email, "email");
 		return userRepository.findByEmailIgnoreCase(email).isPresent();
 	}
 

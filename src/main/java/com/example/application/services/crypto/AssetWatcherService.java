@@ -1,5 +1,6 @@
 package com.example.application.services.crypto;
 
+import com.example.application.entities.common.TransactionType;
 import com.example.application.entities.crypto.AssetWatcher;
 import com.example.application.repositories.crypto.AssetWatcherRepository;
 import com.example.application.utils.exceptions.InternalUnexpectedException;
@@ -25,6 +26,7 @@ public class AssetWatcherService {
 	@Autowired
 	private AssetWatcherRepository assetWatcherRepository;
 
+	//<editor-fold desc="SEARCH">
 	public Optional<AssetWatcher> findById(@NotNull Long assetWatcherId) {
 		Objects.requireNonNull(assetWatcherId, "assetWatcherId");
 		return assetWatcherRepository.findById(assetWatcherId);
@@ -48,13 +50,14 @@ public class AssetWatcherService {
 
 	public List<AssetWatcher> findBy(@NotNull Long portfolioId,
 									 @NotNull String assetSymbol,
-									 @NotNull AssetWatcher.ActionType actionType)
+									 @NotNull TransactionType transactionType)
 	{
 		Objects.requireNonNull(portfolioId, "portfolioId");
 		Objects.requireNonNull(assetSymbol, "assetSymbol");
-		Objects.requireNonNull(actionType, "actionType");
-		return assetWatcherRepository.findByPortfolioAndAssetAndActionType(portfolioId, assetSymbol, actionType);
+		Objects.requireNonNull(transactionType, "transactionType");
+		return assetWatcherRepository.findByPortfolioAndAssetAndTransactionType(portfolioId, assetSymbol, transactionType);
 	}
+	//</editor-fold>
 
 	@NotNull
 	@Transactional
@@ -83,8 +86,8 @@ public class AssetWatcherService {
 		Objects.requireNonNull(assetWatcher, "assetWatcher");
 		Assert.notNull(assetWatcher.getAsset(), "Asset is missing");
 		Assert.notNull(assetWatcher.getPortfolio(), "Portfolio is missing");
-		Assert.notNull(assetWatcher.getActionType(), "ActionType is missing");
-		Assert.notNull(assetWatcher.getTargetType(), "TargetType is missing");
+		Assert.notNull(assetWatcher.getTransactionType(), "ActionType is missing");
+		Assert.isTrue(assetWatcher.getTargetPrice() >= 0, "price cannot be negative");
 		Assert.isTrue(assetWatcher.getTargetAmount() >= 0, "amount cannot be negative");
 	}
 

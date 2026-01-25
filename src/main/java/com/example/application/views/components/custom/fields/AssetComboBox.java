@@ -1,8 +1,6 @@
 package com.example.application.views.components.custom.fields;
 
 import com.example.application.data.dtos.AssetDTO;
-import com.example.application.data.dtos.PortfolioDTO;
-import com.example.application.entities.crypto.Asset;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.data.renderer.LitRenderer;
@@ -39,7 +37,7 @@ public class AssetComboBox extends ComboBox<AssetDTO> {
 	}
 
 	private void setItemsWithFilter() {
-		ComboBox.ItemFilter<Asset> defaultFilter = (asset, filterString) -> {
+		ComboBox.ItemFilter<AssetDTO> defaultFilter = (asset, filterString) -> {
 			String lowercaseInput = filterString.toLowerCase();
 			String lowercaseSymbol = asset.getSymbol().toLowerCase();
 			String lowercaseName = asset.getFullName().toLowerCase();
@@ -75,8 +73,8 @@ public class AssetComboBox extends ComboBox<AssetDTO> {
 		return extract(AssetDTO::getMarketPrice, 0.0);
 	}
 
-	public double getAmountTokens(PortfolioDTO portfolio) {
-		return extract(asset -> instrumentsFacadeService.getAmountOfTokens(portfolio, asset), 0.0);
+	public double getAmountTokens(Long portfolioId) {
+		return extract(asset -> instrumentsFacadeService.getAmountOfTokens(portfolioId, asset.getSymbol()), 0.0);
 	}
 
 	public <R> R extract(Function<AssetDTO, R> getter, R defaultValue) {

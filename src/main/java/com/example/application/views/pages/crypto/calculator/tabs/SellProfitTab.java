@@ -80,7 +80,7 @@ public class SellProfitTab extends BaseCalculatorTab {
     private void initializeFieldsValues() {
         AssetDTO selectedAsset = assetSymbolField.getValue();
         double averageBuyPrice = portfolioPerformanceTracker.getAverageBuyPrice(portfolio, selectedAsset);
-        double amountOfTokens = assetSymbolField.getAmountTokens(portfolio);
+        double amountOfTokens = assetSymbolField.getAmountTokens(portfolio.getId());
         amountField.setValue(amountOfTokens);
         buyPriceField.setValue(averageBuyPrice);
         sellPriceField.setValue(assetSymbolField.getMarketPrice());

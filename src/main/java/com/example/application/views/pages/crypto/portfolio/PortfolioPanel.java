@@ -1,9 +1,7 @@
 package com.example.application.views.pages.crypto.portfolio;
 
+import com.example.application.data.dtos.AssetDTO;
 import com.example.application.data.dtos.PortfolioDTO;
-import com.example.application.entities.crypto.Asset;
-import com.example.application.entities.crypto.AssetBalance;
-import com.example.application.entities.crypto.Transaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.utils.common.formatters.CommonFormatters;
@@ -116,20 +114,20 @@ public class PortfolioPanel extends Div implements BeforeEnterObserver, BeforeLe
 	}
 
 	private void updateGridItems() {
-		List<Asset> assets = instrumentsFacadeService.getAssetBalances(portfolio)
+		List<AssetDTO> assets = instrumentsFacadeService.getPorfolioAssetBalances(portfolio.getId())
 				.stream()
-				.map(AssetBalance::getAsset)
+				.map(assetBalanceDTO -> instrumentsFacadeService.getAssetBySymbol(assetBalanceDTO.getAssetSymbol()).orElseThrow())
 				.toList();
 
 		assetsGrid.setItems(assets);
-		transactionsGrid.setItems(instrumentsFacadeService.getTransactions(portfolio));
+		transactionsGrid.setItems(instrumentsFacadeService.getTransactions(portfolio.getId()));
 	}
 
 	private Section headerSection() {
 		Section section = new Section();
 		section.addClassName("asset-details-header");
 
-		H2 headerText = new H2(portfolio.name());
+		H2 headerText = new H2(portfolio.getName());
 		double worth = portfolioPerformanceTracker.getPortfolioWorth(portfolio);
 		double profit = portfolioPerformanceTracker.getPortfolioTotalProfit(portfolio);
 		double percentage = portfolioPerformanceTracker.getPortfolioProfitPercentage(portfolio);
@@ -180,7 +178,7 @@ public class PortfolioPanel extends Div implements BeforeEnterObserver, BeforeLe
 		title.setClassName("section-title");
 
 		double totalProfit = portfolioPerformanceTracker.getPortfolioTotalProfit(portfolio);
-		String nrOfAssets = String.valueOf(instrumentsFacadeService.getAssetBalances(portfolio).size());
+		String nrOfAssets = String.valueOf(instrumentsFacadeService.getPorfolioAssetBalances(portfolio.getId()).size());
 		String realized = CommonFormatters.CURRENCY.format(portfolioPerformanceTracker.getPortfolioRealizedProfit(portfolio));
 		String unrealized = CommonFormatters.CURRENCY.format(portfolioPerformanceTracker.getPortfolioUnrealizedProfit(portfolio));
 		String avgTimeHolding = String.format("%.1f days", portfolioPerformanceTracker.getPortfolioAverageHoldingDays(portfolio));
@@ -219,7 +217,7 @@ public class PortfolioPanel extends Div implements BeforeEnterObserver, BeforeLe
 	}
 
 	private Section performanceSection() {
-		Map<Asset, Double> mostProfitableAssets = getMostProfitableAssetsByProfit();
+		Map<AssetDTO, Double> mostProfitableAssets = getMostProfitableAssetsByProfit();
 
 		if (mostProfitableAssets.isEmpty())
 			return new Section();
@@ -228,16 +226,17 @@ public class PortfolioPanel extends Div implements BeforeEnterObserver, BeforeLe
 		H3 title = new H3("Performance");
 		title.setClassName("section-title");
 
-		Asset mostProfitableAsset = Collections.max(mostProfitableAssets.entrySet(), Map.Entry.comparingByValue()).getKey();
-		Asset leastProfitableAsset = Collections.min(mostProfitableAssets.entrySet(), Map.Entry.comparingByValue()).getKey();
+		AssetDTO mostProfitableAsset = Collections.max(mostProfitableAssets.entrySet(), Map.Entry.comparingByValue()).getKey();
+		AssetDTO leastProfitableAsset = Collections.min(mostProfitableAssets.entrySet(), Map.Entry.comparingByValue()).getKey();
 
 		// The Assets that are most traded, by NUMBER of trades
-		Map<Asset, Long> assetsNrTransactions = instrumentsFacadeService.getTransactions(portfolio)
+		Map<AssetDTO, Long> assetsNrTransactions = instrumentsFacadeService.getTransactions(portfolio.getId())
 				.stream()
-				.collect(Collectors.groupingBy(Transaction::getAsset, Collectors.counting()));
+				.collect(Collectors.groupingBy(t -> instrumentsFacadeService.getAssetBySymbol(t.getAssetSymbol()).orElseThrow(),
+						Collectors.counting()));
 
-		Asset mostTradedAsset = Collections.max(assetsNrTransactions.entrySet(), Map.Entry.comparingByValue()).getKey();
-		Asset leastTradedAsset = Collections.min(assetsNrTransactions.entrySet(), Map.Entry.comparingByValue()).getKey();
+		AssetDTO mostTradedAsset = Collections.max(assetsNrTransactions.entrySet(), Map.Entry.comparingByValue()).getKey();
+		AssetDTO leastTradedAsset = Collections.min(assetsNrTransactions.entrySet(), Map.Entry.comparingByValue()).getKey();
 
 
 		Div body = new Div();
@@ -253,16 +252,16 @@ public class PortfolioPanel extends Div implements BeforeEnterObserver, BeforeLe
 		return section;
 	}
 
-	private Map<Asset, Double> getMostProfitableAssetsByProfit() {
-		return instrumentsFacadeService.getAssetBalances(portfolio)
+	private Map<AssetDTO, Double> getMostProfitableAssetsByProfit() {
+		return instrumentsFacadeService.getPorfolioAssetBalances(portfolio.getId())
 				.stream()
-				.map(AssetBalance::getAsset)
+				.map(assetBalance -> instrumentsFacadeService.getAssetBySymbol(assetBalance.getAssetSymbol()).orElseThrow())
 				.collect(Collectors.toMap(asset -> asset,
 						asset -> portfolioPerformanceTracker.getAssetTotalProfit(portfolio, asset),
 						(a, b) -> b));
 	}
 
-	private Div createPerformanceItem(String labelText, Asset asset) {
+	private Div createPerformanceItem(String labelText, AssetDTO asset) {
 		Div container = new Div();
 		container.addClassName("performance-item");
 

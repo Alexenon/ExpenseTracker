@@ -6,7 +6,6 @@ import com.example.application.utils.common.lang.StringUtils;
 import com.example.application.utils.exceptions.InternalUnexpectedException;
 import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -88,8 +87,7 @@ public class UserAssetService {
 			log.info("Saved successfully {}", entity);
 			return entity;
 		} catch (Exception e) {
-			log.error("Failed to save {}, cause: {}", userAsset, e.getMessage());
-			ExceptionUtils.printRootCauseStackTrace(e);
+			log.error("Failed to save {}", userAsset, e);
 			throw new InternalUnexpectedException(e);
 		}
 	}
@@ -105,7 +103,7 @@ public class UserAssetService {
 			userAssetRepository.delete(userAsset);
 			log.info("Deleted successfully {}", userAssetId);
 		} catch (Exception e) {
-			log.error("Failed to delete {}, cause: {}", userAsset, e.getMessage());
+			log.error("Failed to delete {}", userAsset, e);
 			throw new InternalUnexpectedException(e);
 		}
 	}

@@ -2,9 +2,12 @@ package com.example.application.entities.crypto;
 
 import com.example.application.entities.User;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.lang.Nullable;
 
 import java.time.LocalDateTime;
 
@@ -14,23 +17,30 @@ import java.time.LocalDateTime;
 @Entity(name = "portfolios")
 public class Portfolio {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Nullable
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @Column(name = "name", nullable = false)
-    private String name;
+	@NotNull
+	@Size(min = 4, max = 20, message = "Portfolio name should be between 4 and 20 characters")
+	@Column(name = "name", nullable = false)
+	private String name;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+	@NotNull
+	@ManyToOne
+	@JoinColumn(name = "user_id", nullable = false)
+	private User user;
 
+	@NotNull
 	@Column(name = "last_time_updated", nullable = false)
 	private LocalDateTime lastTimeUpdated = LocalDateTime.now();
 
+	@NotNull
 	@Column(name = "time_created_at", nullable = false, updatable = false)
 	private final LocalDateTime timeCreatedAt = LocalDateTime.now();
 
+	//<editor-fold desc="UTILS">
 	@Override
 	public boolean equals(Object o) {
 		if (this == o)
@@ -48,10 +58,11 @@ public class Portfolio {
 		return getClass().hashCode();
 	}
 
-    @Override
-    public String toString() {
-        return "Portfolio{id=%d, name='%s', user='%s'}"
-                .formatted(id, name, user.getUsername());
-    }
+	@Override
+	public String toString() {
+		return "Portfolio{id=%d, name='%s', user='%s'}"
+				.formatted(id, name, user.getUsername());
+	}
+	//</editor-fold>
 
 }

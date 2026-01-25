@@ -1,7 +1,8 @@
 package com.example.application.views.components.custom.dialogs.transactions;
 
+import com.example.application.data.dtos.TransactionDTO;
+import com.example.application.data.requests.UpdateTransactionRequest;
 import com.example.application.entities.common.TransactionType;
-import com.example.application.entities.crypto.Transaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.utils.common.formatters.CommonFormatters;
 import com.example.application.views.components.core.Container;
@@ -31,11 +32,12 @@ import java.util.Objects;
 
 public class EditTransactionDialog extends Dialog implements HasNotifications {
 
-	private final Transaction transaction;
-	private final Transaction initialTransaction;
+	private final TransactionDTO transaction;
+	private final UpdateTransactionRequest request;
+	private final UpdateTransactionRequest initialRequest;
 	private final InstrumentsFacadeService instrumentsFacadeService;
 
-	private final Binder<Transaction> binder = new Binder<>(Transaction.class);
+	private final Binder<UpdateTransactionRequest> binder = new Binder<>(UpdateTransactionRequest.class);
 
 	private final AssetComboBox assetSymbolField;
 	private final Select<TransactionType> typeField = new Select<>();
@@ -50,12 +52,13 @@ public class EditTransactionDialog extends Dialog implements HasNotifications {
 	private final Span symbolSuffix = new Span();
 
 	@Autowired
-	public EditTransactionDialog(Transaction transaction,
+	public EditTransactionDialog(TransactionDTO transactionDTO,
 								 InstrumentsFacadeService instrumentsFacadeService)
 	{
-		this.transaction = transaction;
+		this.transaction = transactionDTO;
+		this.request = new UpdateTransactionRequest(transactionDTO);
+		this.initialRequest = new UpdateTransactionRequest(request);
 		this.instrumentsFacadeService = instrumentsFacadeService;
-		this.initialTransaction = new Transaction(transaction);
 		this.assetSymbolField = new AssetComboBox(instrumentsFacadeService);
 
 		buildForm();
@@ -90,12 +93,12 @@ public class EditTransactionDialog extends Dialog implements HasNotifications {
 	}
 
 	private void initializeFieldsValues() {
-		assetSymbolField.setValue(initialTransaction.getAsset());
-		typeField.setValue(initialTransaction.getType());
-		amountField.setValue(initialTransaction.getOrderQuantity());
-		totalCostField.setValue(initialTransaction.getOrderTotalCost());
-		marketPriceField.setValue(initialTransaction.getMarketPrice());
-		datePicker.setValue(initialTransaction.getDateTime());
+		assetSymbolField.setValue(initialRequest.getAssetSymbol());
+		typeField.setValue(initialRequest.getType());
+		amountField.setValue(initialRequest.getOrderQuantity());
+		totalCostField.setValue(initialRequest.getOrderTotalCost());
+		marketPriceField.setValue(initialRequest.getMarketPrice());
+		datePicker.setValue(initialRequest.getDateTime());
 	}
 
 	private void initializeFieldListeners() {
@@ -149,42 +152,42 @@ public class EditTransactionDialog extends Dialog implements HasNotifications {
 	}
 
 	private void initializeBinder() {
-		binder.setBean(transaction);
+		binder.setBean(request);
 
 		binder.forField(assetSymbolField)
 				.asRequired("Please fill this field")
-				.bind(Transaction::getAsset, Transaction::setAsset);
+				.bind(req -> instrumentsFacadeService.getAssetBySymbol(req.getAssetSymbol()).orElseThrow(),
+						(req, field) -> req.setAssetSymbol(field.getSymbol()));
 
 		binder.forField(typeField)
 				.asRequired("Please fill this field")
-				.bind(Transaction::getType, Transaction::setType);
+				.bind(UpdateTransactionRequest::getType, UpdateTransactionRequest::setType);
 
 		binder.forField(amountField)
 				.asRequired("Please fill this field")
 				.withConverter(new FlexibleAmountConvertor())
 				.withValidator(new DoubleRangeValidator("Invalid decimal value", 0.0, Double.MAX_VALUE))
 				.withValidator(amount -> amount > 0, "Amount should be bigger than 0")
-				.bind(Transaction::getOrderQuantity, Transaction::setOrderQuantity);
+				.bind(UpdateTransactionRequest::getOrderQuantity, UpdateTransactionRequest::setOrderQuantity);
 
 		binder.forField(marketPriceField)
 				.asRequired("Please fill this field")
 				.withConverter(new FlexiblePriceConvertor())
 				.withValidator(new DoubleRangeValidator("Invalid decimal value", 0.0, Double.MAX_VALUE))
 				.withValidator(amount -> amount > 0, "Market price should be bigger than 0")
-				.bind(Transaction::getMarketPrice, Transaction::setMarketPrice);
+				.bind(UpdateTransactionRequest::getMarketPrice, UpdateTransactionRequest::setMarketPrice);
 
 		binder.forField(totalCostField)
 				.asRequired("Please fill this field")
 				.withConverter(new FlexiblePriceConvertor())
 				.withValidator(new DoubleRangeValidator("Invalid decimal value", 0.0, Double.MAX_VALUE))
-				.withValidator(price -> price >= 1, "Total price should be at least one dollar")
-				.bind(Transaction::getOrderTotalCost, Transaction::setOrderTotalCost);
+				.withValidator(price -> price >= 1, "Total price should be at least one dollar");
 
 		binder.forField(notesField)
-				.bind(Transaction::getNote, Transaction::setNote);
+				.bind(UpdateTransactionRequest::getNote, UpdateTransactionRequest::setNote);
 
 		binder.forField(datePicker)
-				.bind(Transaction::getDateTime, Transaction::setDateTime);
+				.bind(UpdateTransactionRequest::getDateTime, UpdateTransactionRequest::setDateTime);
 	}
 
 	private void handleTransactionSave() {
@@ -207,12 +210,12 @@ public class EditTransactionDialog extends Dialog implements HasNotifications {
 	}
 
 	private boolean hasAssetChanged() {
-		return !Objects.equals(initialTransaction.getAsset(), binder.getBean().getAsset());
+		return !Objects.equals(initialRequest.getAssetSymbol(), binder.getBean().getAssetSymbol());
 	}
 
 	private void saveTransaction() {
 		try {
-			Transaction savedTransaction = instrumentsFacadeService.saveTransaction(binder.getBean());
+			TransactionDTO savedTransaction = instrumentsFacadeService.updateTransaction(binder.getBean());
 			UI.getCurrent().access(() -> ComponentUtil.fireEvent(UI.getCurrent(), new TransactionCreatedOrUpdatedEvent(this, savedTransaction)));
 			showSuccessfulNotification("The transaction was saved succesfully");
 			this.close();
@@ -221,7 +224,7 @@ public class EditTransactionDialog extends Dialog implements HasNotifications {
 		}
 	}
 
-	public Transaction getTransaction() {
+	public UpdateTransactionRequest getRequest() {
 		return binder.getBean();
 	}
 
@@ -231,7 +234,7 @@ public class EditTransactionDialog extends Dialog implements HasNotifications {
 	}
 
 	private void displayHintAmountOfTokens() {
-		double amountTokens = assetSymbolField.getAmountTokens(transaction.getPortfolio());
+		double amountTokens = assetSymbolField.getAmountTokens(transaction.getPortfolioId());
 		String formatedAmount = CommonFormatters.AMOUNT.format(amountTokens);
 
 		String helperText = typeField.getOptionalValue()

@@ -1,5 +1,7 @@
 package com.example.application.entities.crypto;
 
+import com.example.application.entities.common.TransactionType;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -7,6 +9,17 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+/*
+	TODO: [LONG-TEM]
+		- @param targetType      represents the type of the target - price / percentage
+* */
+
+/**
+ * {@code targetPrice}     represents the price target or percentage target of the asset price<br>
+ * {@code targetAmount}    represents the amount to invest when the target is reached<br>
+ * {@code transactionType} represents the type of the watcher - buy / sell<br>
+ * {@code isCompleted}     represents if the target was achieved<br>
+ */
 @Data
 @Entity(name = "asset_watchers")
 @ToString
@@ -14,64 +27,35 @@ import lombok.ToString;
 @AllArgsConstructor
 public class AssetWatcher {
 
+	@Nullable
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	@NotNull
 	@ManyToOne
 	@JoinColumn(name = "portfolio_id", nullable = false)
 	private Portfolio portfolio;
 
+	@NotNull
 	@ManyToOne
 	@JoinColumn(name = "asset_id", nullable = false)
 	private Asset asset;
 
-	@Column(nullable = false)
-	private double target;
-
-	@Column(nullable = false)
-	private double targetAmount;
-
-	@Column(nullable = false)
-	@Enumerated(EnumType.STRING)
-	private TargetType targetType;
+	@NotNull
+	@Column(name = "target_price", nullable = false)
+	private double targetPrice;
 
 	@NotNull
-	@Column(name = "action_type", nullable = false)
+	@Column(name = "target_amount", nullable = false)
+	private double targetAmount;
+
+	@NotNull
+	@Column(name = "transaction_type", nullable = false)
 	@Enumerated(EnumType.STRING)
-	private ActionType actionType;
+	private TransactionType transactionType;
 
-	@Column(nullable = false)
+	@Column(name = "is_completed", nullable = false)
 	private boolean isCompleted;
-
-	public AssetWatcher(Asset asset, double target, double targetAmount, TargetType targetType, ActionType actionType) {
-		this(asset, target, targetAmount, targetType, actionType, false);
-	}
-
-	/**
-	 * @param target       represents the price target or percentage target of the asset price
-	 * @param targetAmount represents the amount to invest when the target is reached
-	 * @param targetType   represents the type of the target - price / percentage
-	 * @param actionType   represents the type of the watcher - buy / sell
-	 * @param isCompleted  represents if the target was achieved
-	 */
-	public AssetWatcher(Asset asset, double target, double targetAmount, TargetType targetType, ActionType actionType, boolean isCompleted) {
-		this.asset = asset;
-		this.target = target;
-		this.targetAmount = targetAmount;
-		this.targetType = targetType;
-		this.actionType = actionType;
-		this.isCompleted = isCompleted;
-	}
-
-	public enum TargetType {
-		PERCENTAGE,
-		PRICE
-	}
-
-	public enum ActionType {
-		BUY,
-		SELL
-	}
 
 }

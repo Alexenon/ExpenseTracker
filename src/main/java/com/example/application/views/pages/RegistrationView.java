@@ -1,6 +1,6 @@
 package com.example.application.views.pages;
 
-import com.example.application.entities.User;
+import com.example.application.data.requests.RegisterUserRequest;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.views.components.custom.forms.RegisterForm;
 import com.example.application.views.components.utils.HasNotifications;
@@ -24,16 +24,13 @@ public class RegistrationView extends DefaultPage implements HasNotifications {
 
 	private static final Logger log = LoggerFactory.getLogger(RegistrationView.class);
 
-	private final Binder<User> binder;
-	private final RegisterForm registerForm;
+	private final Binder<RegisterUserRequest> binder = new Binder<>(RegisterUserRequest.class);
+	private final RegisterForm registerForm = new RegisterForm();
 
 	@Autowired
 	private InstrumentsFacadeService instrumentsFacadeService;
 
 	public RegistrationView() {
-		binder = new Binder<>(User.class);
-		registerForm = new RegisterForm();
-
 		initBinder();
 		initContent();
 	}
@@ -58,9 +55,9 @@ public class RegistrationView extends DefaultPage implements HasNotifications {
 	private void addSubmitListener() {
 		registerForm.getSubmitBtn().addClickListener(l -> {
 			if (binder.validate().isOk()) {
-				User user = binder.getBean();
-				instrumentsFacadeService.createNewUser(user);
-				log.info("User '{}' created successfully", user.getUsername());
+				RegisterUserRequest request = binder.getBean();
+				instrumentsFacadeService.createNewUser(request);
+				log.info("User '{}' created successfully", request.getUsername());
 				showSuccessfulNotification("User created successfully!");
 				getUI().ifPresent(ui -> ui.navigate(LoginView.class));
 			} else {
@@ -92,31 +89,32 @@ public class RegistrationView extends DefaultPage implements HasNotifications {
 	}
 
 	private void initBinder() {
-		binder.setBean(new User());
+		binder.setBean(new RegisterUserRequest());
 		binder.forField(registerForm.getUsername())
 				.asRequired("Please fill this field")
 				.withValidator(s -> s.length() > 3, "Username must contain at least 4 characters")
 				.withValidator(s -> s.length() < 12, "Username must contain less than 12 characters")
 				.withValidator(s -> !instrumentsFacadeService.isUsernameTaken(s), "Username already exists")
-				.bind(User::getUsername, User::setUsername);
+				.bind(RegisterUserRequest::getUsername, RegisterUserRequest::setUsername);
 
 		binder.forField(registerForm.getPassword())
 				.asRequired("Please fill this field")
 				.withValidator(t -> t.length() > 3, "Password must contain at least 4 characters")
-				.withValidator(s -> s.length() < 12, "Password must contain less than 12 characters")
-				.bind(User::getPassword, User::setPassword);
+				.withValidator(s -> s.length() < 20, "Password must contain less than 20 characters")
+				.bind(RegisterUserRequest::getPassword, RegisterUserRequest::setPassword);
 
 		binder.forField(registerForm.getConfirmPassword())
 				.asRequired("Please fill this field")
 				.withValidator(s -> s.length() > 3, "Password must contain at least 4 characters")
 				.withValidator(s -> s.equals(registerForm.getPassword().getValue()), "Passwords don't match")
-				.bind(User::getPassword, User::setPassword);
+				.bind(RegisterUserRequest::getConfirmPassword, RegisterUserRequest::setConfirmPassword);
 
 		binder.forField(registerForm.getEmail())
 				.asRequired("Please fill this field")
 				.withValidator(new EmailValidator("Please enter a valid email address"))
 				.withValidator(s -> !instrumentsFacadeService.isEmailTaken(s), "This email is already used")
-				.bind(User::getEmail, User::setEmail);
+				.withValidator(s -> s.length() < 30, "Email must contain less than 30 characters")
+				.bind(RegisterUserRequest::getEmail, RegisterUserRequest::setEmail);
 	}
 
 }

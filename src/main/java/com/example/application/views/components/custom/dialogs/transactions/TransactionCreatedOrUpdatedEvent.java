@@ -1,18 +1,18 @@
 package com.example.application.views.components.custom.dialogs.transactions;
 
-import com.example.application.entities.crypto.Transaction;
+import com.example.application.data.dtos.TransactionDTO;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.dialog.Dialog;
 
 public class TransactionCreatedOrUpdatedEvent extends ComponentEvent<Dialog> {
-    private final Transaction transaction;
+	private final TransactionDTO transaction;
 
-    public TransactionCreatedOrUpdatedEvent(Dialog source, Transaction transaction) {
-        super(source, false);
-        this.transaction = transaction;
-    }
+	public TransactionCreatedOrUpdatedEvent(Dialog source, TransactionDTO transaction) {
+		super(source, false);
+		this.transaction = transaction;
+	}
 
-    public Transaction getTransaction() {
-        return transaction;
-    }
+	public TransactionDTO getTransaction() {
+		return transaction;
+	}
 }

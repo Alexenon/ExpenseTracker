@@ -1,7 +1,6 @@
 package com.example.application.views.pages.crypto.portfolio;
 
 import com.example.application.data.dtos.PortfolioDTO;
-import com.example.application.entities.crypto.Portfolio;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.views.components.PriceChangeNotifier;
@@ -67,7 +66,7 @@ public class PortfolioTrackerView extends DefaultPage {
 
 	private void intializeFields() {
 		portfolioSelector.setLabel("Portfolio");
-		portfolioSelector.setItemLabelGenerator(Portfolio::getName);
+		portfolioSelector.setItemLabelGenerator(PortfolioDTO::getName);
 		portfolioSelector.setEmptySelectionAllowed(false);
 		portfolioSelector.addValueChangeListener(event -> {
 			PortfolioDTO selectedPortfolio = event.getValue();

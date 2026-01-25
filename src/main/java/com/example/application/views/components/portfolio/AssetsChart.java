@@ -1,8 +1,8 @@
 package com.example.application.views.components.portfolio;
 
+import com.example.application.data.dtos.AssetBalanceDTO;
+import com.example.application.data.dtos.AssetDTO;
 import com.example.application.data.dtos.PortfolioDTO;
-import com.example.application.entities.crypto.Asset;
-import com.example.application.entities.crypto.AssetBalance;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.utils.common.lang.MathUtils;
@@ -74,13 +74,14 @@ public class AssetsChart extends Div {
 	}
 
 	private Map<String, Double> getChartItems() {
-		return instrumentsFacadeService.getAssetBalances(portfolio)
+		return instrumentsFacadeService.getPorfolioAssetBalances(portfolio.getId())
 				.stream()
-				.map(AssetBalance::getAsset)
-				.collect(Collectors.toMap(Asset::getSymbol, chartMapper(), (a, b) -> b));
+				.map(AssetBalanceDTO::getAssetSymbol)
+				.map(s -> instrumentsFacadeService.getAssetBySymbol(s).orElseThrow())
+				.collect(Collectors.toMap(AssetDTO::getSymbol, chartMapper(), (a, b) -> b));
 	}
 
-	private Function<Asset, Double> chartMapper() {
+	private Function<AssetDTO, Double> chartMapper() {
 		return switch (options.getValue()) {
 			case WORTH -> asset -> portfolioPerformanceTracker.getAssetWorth(portfolio, asset);
 			case INVESTED -> asset -> portfolioPerformanceTracker.getAssetRemainingTokensCost(portfolio, asset);

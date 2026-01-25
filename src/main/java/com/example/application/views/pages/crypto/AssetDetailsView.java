@@ -1,8 +1,8 @@
 package com.example.application.views.pages.crypto;
 
-import com.example.application.entities.crypto.Asset;
-import com.example.application.entities.crypto.AssetWatcher;
-import com.example.application.entities.crypto.Portfolio;
+import com.example.application.data.dtos.AssetDTO;
+import com.example.application.data.dtos.PortfolioDTO;
+import com.example.application.entities.common.TransactionType;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.utils.common.formatters.CommonFormatters;
@@ -62,8 +62,8 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
 
 	private final UI ui;
 	private String assetSymbol;
-	private Asset asset;
-	private Portfolio portfolio;
+	private AssetDTO asset;
+	private PortfolioDTO portfolio;
 
 	@Autowired
 	public AssetDetailsView(InstrumentsFacadeService instrumentsFacadeService,
@@ -158,7 +158,7 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
 		markAsFavorite.addClassName("rounded-button");
 		markAsFavorite.addClickListener(e -> {
 			boolean isFavorite = isAssetMarkedAsFavorite();
-			instrumentsFacadeService.updateMarkAssetAsFavorite(asset, !isFavorite);
+			instrumentsFacadeService.updateMarkAssetAsFavorite(asset.getSymbol(), !isFavorite);
 			markAsFavorite.setIcon(getStarIcon(!isFavorite));
 		});
 
@@ -169,7 +169,7 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
 	}
 
 	private boolean isAssetMarkedAsFavorite() {
-		return instrumentsFacadeService.isAssetMarkedAsFavorite(asset);
+		return instrumentsFacadeService.isAssetMarkedAsFavorite(asset.getSymbol());
 	}
 
 	private Section notesAndConvertorSection() {
@@ -186,12 +186,12 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
 		TextArea notesArea = new TextArea();
 		notesArea.setClassName("note-area");
 		notesArea.setPlaceholder("Add your thoughts about coin here.");
-		String comment = Objects.requireNonNullElse(instrumentsFacadeService.getAssetComment(asset), "");
+		String comment = Objects.requireNonNullElse(instrumentsFacadeService.getAssetComment(asset.getSymbol()), "");
 		notesArea.setValue(comment);
 		Button saveBtn = new Button("Save");
 		saveBtn.addClickListener(l -> {
 			try {
-				instrumentsFacadeService.updateAssetComment(asset, notesArea.getValue());
+				instrumentsFacadeService.updateAssetComment(asset.getSymbol(), notesArea.getValue());
 				showSuccessfulNotification("Succesfully saved asset note");
 			} catch (Exception e) {
 				showErrorNotification("Something went wrong: " + e.getLocalizedMessage());
@@ -296,7 +296,7 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
 		String ratio = portfolioPerformanceTracker.getAssetBuySellRatio(portfolio, asset);
 		String[] ratioParts = ratio.split(":");
 		String avgTimeHolding = String.format("%.1f days", portfolioPerformanceTracker.getAssetHoldingDays(portfolio, asset));
-		String tokensAmount = AmountFormatter.withDefaults().format(instrumentsFacadeService.getAmountOfTokens(portfolio, asset), asset);
+		String tokensAmount = AmountFormatter.withDefaults().format(instrumentsFacadeService.getAmountOfTokens(portfolio.getId(), asset.getSymbol()));
 
 		Div body = new Div();
 		body.addClassName("section-card-wrapper");
@@ -354,7 +354,7 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
 	private Section aboutSection() {
 		H3 title = new H3("About " + asset.getFullName());
 		title.setClassName("section-title");
-		Paragraph description = new Paragraph(asset.getSummaryDescription());
+		Paragraph description = new Paragraph(asset.getDescription());
 		Container body = new Container("section-card-wrapper", description);
 		return new Section(title, body);
 	}
@@ -365,19 +365,19 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
 
 	private Section watchlistSection() {
 		Section section = new Section(
-				createWatchlistSection(AssetWatcher.ActionType.BUY),
-				createWatchlistSection(AssetWatcher.ActionType.SELL)
+				createWatchlistSection(TransactionType.BUY),
+				createWatchlistSection(TransactionType.SELL)
 		);
 		section.addClassName("notes-convertor-section");
 		return section;
 	}
 
-	private Div createWatchlistSection(AssetWatcher.ActionType actionType) {
-		PriceWatchlistComponent watchlistComponent = new PriceWatchlistComponent(portfolio, asset, actionType, instrumentsFacadeService);
+	private Div createWatchlistSection(TransactionType transactionType) {
+		PriceWatchlistComponent watchlistComponent = new PriceWatchlistComponent(portfolio, asset, transactionType, instrumentsFacadeService);
 
 		Container header = Container.builder("section-header")
 				.addComponent(() -> {
-					H3 title = new H3(StringUtils.uppercaseFirstLetter(actionType.name()) + " Watchlist");
+					H3 title = new H3(StringUtils.uppercaseFirstLetter(transactionType.name()) + " Watchlist");
 					title.setClassName("section-title");
 					return title;
 				})
@@ -404,7 +404,7 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
 
 	private Section transactionHistorySection() {
 		TransactionsGrid transactionsGrid = new TransactionsGrid(instrumentsFacadeService);
-		transactionsGrid.setItems(instrumentsFacadeService.getTransactionsByAsset(portfolio, asset));
+		transactionsGrid.setItems(instrumentsFacadeService.getTransactionsByAsset(portfolio.getId(), asset.getSymbol()));
 		transactionsGrid.setPageSize(10);
 
 		H3 title = new H3("Transactions");
@@ -414,7 +414,7 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
 		addTransactionBtn.setIconAfterText(false);
 		addTransactionBtn.addClickListener(e -> {
 			new AddTransactionDialog(portfolio, asset, instrumentsFacadeService).open();
-			transactionsGrid.setItems(instrumentsFacadeService.getTransactionsByAsset(portfolio, asset));
+			transactionsGrid.setItems(instrumentsFacadeService.getTransactionsByAsset(portfolio.getId(), asset.getSymbol()));
 		});
 
 		Button seeAllTransactionsBtn = new Button("See all transactions");

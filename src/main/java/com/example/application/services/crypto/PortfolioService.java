@@ -43,20 +43,6 @@ public class PortfolioService {
 	}
 	//</editor-fold>
 
-	@Transactional
-	public Portfolio createPortfolio(String portfolioName, Long userId) {
-		Objects.requireNonNull(portfolioName, "portfolioName");
-		Objects.requireNonNull(userId, "userId");
-
-		if (portfolioRepository.findByNameAndUser(portfolioName, userId).isPresent())
-			throw new IllegalArgumentException("Portfolio name already exists for user");
-
-		Portfolio portfolio = createNewPortfolio(portfolioName, userId);
-		setPortfolioAsActive(portfolio.getId());
-
-		return portfolio;
-	}
-
 	public void delete(Long portfolioId) {
 		Portfolio portfolio = findById(portfolioId)
 				.orElseThrow(() -> new IllegalArgumentException("Invalid portfolio: #%d".formatted(portfolioId)));
@@ -86,7 +72,7 @@ public class PortfolioService {
 
 		user.setActivePortfolio(portfolio);
 
-		log.info("Updated active portfolio from '{}' to '{}', for {}", oldActivePortfolioName, portfolio.getName(), user);
+		log.info("Updated activePortfolio from '{}' to '{}', for {}", oldActivePortfolioName, portfolio.getName(), user);
 		return portfolio;
 	}
 
@@ -99,7 +85,8 @@ public class PortfolioService {
 				.orElseThrow(() -> new InternalUnexpectedException("User #%d doesn't have any portfolios".formatted(userId)));
 	}
 
-	private Portfolio save(@NotNull Portfolio portfolio) {
+	@Transactional
+	public Portfolio save(@NotNull Portfolio portfolio) {
 		try {
 			preValidation(portfolio);
 			portfolio.setLastTimeUpdated(LocalDateTime.now());
@@ -108,7 +95,7 @@ public class PortfolioService {
 			log.info("Saved successfully {}", savedPortfolio);
 			return savedPortfolio;
 		} catch (Exception e) {
-			log.error("Failed to save {}, cause: {}", portfolio, e.getMessage());
+			log.error("Failed to save {}", portfolio, e);
 			throw new InternalUnexpectedException(e);
 		}
 	}
@@ -118,10 +105,10 @@ public class PortfolioService {
 		User user = portfolio.getUser();
 		String portfolioName = portfolio.getName();
 
+		Assert.isTrue(StringUtils.isNotBlank(portfolioName), "Portfolio -> name is missing");
 		Assert.notNull(user, "Portfolio -> user is missing");
 		Assert.notNull(portfolio.getLastTimeUpdated(), "Portfolio -> lastTimeUpdated is missing");
 		Assert.notNull(portfolio.getTimeCreatedAt(), "Portfolio -> date creation is missing");
-		Assert.isTrue(StringUtils.isNotBlank(portfolioName), "Portfolio -> name is missing");
 
 		if (findByNameAndUser(portfolioName, user.getId()).isPresent())
 			throw new IllegalArgumentException("Duplicate portfolio name for %s".formatted(user));
@@ -140,17 +127,6 @@ public class PortfolioService {
 			Assert.notEmpty(user.getPortfolios(), "User doesn't have any portfolios");
 			Assert.notNull(user.getActivePortfolio(), "User -> active portfolio is missing");
 		}
-	}
-
-	private Portfolio createNewPortfolio(String portfolioName, Long userId) {
-		User user = userService.findById(userId)
-				.orElseThrow(() -> new IllegalArgumentException("User #%d not found".formatted(userId)));
-
-		Portfolio portfolio = new Portfolio();
-		portfolio.setName(portfolioName.trim());
-		portfolio.setUser(user);
-		portfolio.setLastTimeUpdated(LocalDateTime.now());
-		return portfolio;
 	}
 
 

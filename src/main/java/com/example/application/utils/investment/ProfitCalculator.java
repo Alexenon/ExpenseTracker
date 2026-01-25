@@ -1,7 +1,6 @@
 package com.example.application.utils.investment;
 
 import com.example.application.data.dtos.TransactionDTO;
-import com.example.application.entities.crypto.Transaction;
 import com.example.application.utils.common.lang.DateUtils;
 import com.example.application.utils.common.lang.MathUtils;
 import com.example.application.utils.common.lang.NumberUtils;
@@ -70,12 +69,12 @@ public class ProfitCalculator {
 	 *
 	 * <p>If there are just BUYS transactions, then the value will be {@code 0}
 	 */
-	public static double realizedProfit(List<Transaction> transactions) {
+	public static double realizedProfit(List<TransactionDTO> transactions) {
 		double totalCost = 0.0;
 		double remainingQuantity = 0.0;
 		double realizedProfit = 0.0;
 
-		for (Transaction transaction : transactions) {
+		for (TransactionDTO transaction : transactions) {
 			if (transaction.isBuyTransaction()) {
 				totalCost += transaction.getOrderTotalCost();
 				remainingQuantity += transaction.getOrderQuantity();
@@ -103,11 +102,11 @@ public class ProfitCalculator {
 	 * Calculates the cost of remaining tokens, where if contains SELL transactions, then the cost value
 	 * is substracted confirming with transaction order cost
 	 */
-	public static double remainingTokensCost(List<Transaction> transactions) {
+	public static double remainingTokensCost(List<TransactionDTO> transactions) {
 		Queue<Order> fifoQueue = new LinkedList<>();
 		double remainingCost = 0.0;
 
-		for (Transaction transaction : transactions) {
+		for (TransactionDTO transaction : transactions) {
 			if (transaction.isBuyTransaction()) {
 				Order newOrder = new Order(transaction.getOrderQuantity(), transaction.getOrderTotalCost());
 				fifoQueue.offer(newOrder);

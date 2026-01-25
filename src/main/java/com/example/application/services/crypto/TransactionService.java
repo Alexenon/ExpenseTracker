@@ -117,7 +117,7 @@ public class TransactionService {
 			log.info("Saved successfully {}", savedTransaction);
 			return savedTransaction;
 		} catch (Exception e) {
-			log.error("Failed to save {}, cause: {}", transaction, e.getMessage());
+			log.error("Failed to save {}", transaction, e);
 			throw new InternalUnexpectedException(e);
 		}
 	}
@@ -132,7 +132,7 @@ public class TransactionService {
 			transactionRepository.delete(transaction);
 			log.info("Deleted successfully {}", transaction);
 		} catch (Exception e) {
-			log.error("Failed to delete {}, cause: {}", transaction, e.getMessage());
+			log.error("Failed to delete {}", transaction, e);
 			throw new InternalUnexpectedException(e);
 		}
 	}

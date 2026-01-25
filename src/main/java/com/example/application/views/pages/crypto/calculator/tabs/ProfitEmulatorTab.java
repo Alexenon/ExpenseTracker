@@ -1,9 +1,9 @@
 package com.example.application.views.pages.crypto.calculator.tabs;
 
+import com.example.application.data.dtos.AssetDTO;
+import com.example.application.data.dtos.PortfolioDTO;
+import com.example.application.data.dtos.TransactionDTO;
 import com.example.application.entities.common.TransactionType;
-import com.example.application.entities.crypto.Asset;
-import com.example.application.entities.crypto.Portfolio;
-import com.example.application.entities.crypto.Transaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.utils.investment.ProfitCalculator;
@@ -61,7 +61,7 @@ import java.util.List;
 @Slf4j
 public class ProfitEmulatorTab extends BaseCalculatorTab {
 
-	private final Portfolio portfolio;
+	private final PortfolioDTO portfolio;
 	private final InstrumentsFacadeService instrumentsFacadeService;
 	private final PortfolioPerformanceTracker portfolioPerformanceTracker;
 
@@ -91,7 +91,7 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
 			if (field.getHasValue().isEmpty())
 				return;
 
-			Asset selectedAsset = field.getValue();
+			AssetDTO selectedAsset = field.getValue();
 			transactionalLayouts.forEach(layout -> layout.setValue(selectedAsset));
 			updateVisibilityForMetaData(selectedAsset);
 		});
@@ -120,7 +120,7 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
 	protected Button createDisplayResultsBtn() {
 		Button button = new Button("Calculate", e -> {
 			String symbol = assetSymbolField.getSymbol();
-			List<Transaction> transactions = getListOfTransactions();
+			List<TransactionDTO> transactions = getListOfTransactions();
 
 			double price = assetSymbolField.getSelectedAsset().getMarketPrice();
 			double avgBuy = ProfitCalculator.averageBuyPrice(transactions);
@@ -189,7 +189,7 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
 		return button;
 	}
 
-	private void updateVisibilityForMetaData(Asset asset) {
+	private void updateVisibilityForMetaData(AssetDTO asset) {
 		metadataDetailsContainer.setVisible(asset != null);
 	}
 
@@ -212,20 +212,26 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
 		layoutsContainer.add(newLayout);
 	}
 
-	private List<Transaction> getListOfTransactions() {
+	private List<TransactionDTO> getListOfTransactions() {
 		return transactionalLayouts.stream()
 				.map(layout -> {
-					Asset selectedAsset = assetSymbolField.getSelectedAsset();
+					AssetDTO selectedAsset = assetSymbolField.getSelectedAsset();
 					double marketPrice = layout.getMarketPriceField().doubleValue();
+					double orderQuantity = layout.getAmountField().doubleValue();
 					double orderTotalCost = layout.getTotalCostField().doubleValue();
 					TransactionType type = layout.getTypeField().getValue();
 
-					return new Transaction(selectedAsset, marketPrice, orderTotalCost, type);
+					TransactionDTO dto = new TransactionDTO();
+					dto.setAssetSymbol(selectedAsset.getSymbol());
+					dto.setMarketPrice(marketPrice);
+					dto.setOrderQuantity(orderQuantity);
+					dto.setType(type);
+					return dto;
 				}).toList();
 	}
 
 	// TODO: Update this
-	private Html createTable(Asset asset, double averageBuyPrice, double averageSellPrice) {
+	private Html createTable(AssetDTO asset, double averageBuyPrice, double averageSellPrice) {
 		double currentPrice = asset.getMarketPrice();
 
 		BigInteger totalMarketSupply = asset.getTotalSupply();
