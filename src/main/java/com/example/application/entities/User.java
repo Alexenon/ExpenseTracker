@@ -35,7 +35,7 @@ public class User {
 	private String email;
 
 	@Nullable
-	@OneToOne(fetch = FetchType.LAZY)
+	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	@JoinColumn(name = "active_portfolio_id")
 	private Portfolio activePortfolio;
 
@@ -71,6 +71,9 @@ public class User {
 
 	public void addPortfolio(@NotNull Portfolio portfolio) {
 		Objects.requireNonNull(portfolio, "portfolio");
+
+		if (portfolio.getUser() != null && portfolio.getUser() != this)
+			throw new IllegalStateException("Portfolio already belongs to another user");
 
 		portfolio.setUser(this);
 		portfolios.add(portfolio);

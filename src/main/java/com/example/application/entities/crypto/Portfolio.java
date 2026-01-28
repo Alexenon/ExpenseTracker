@@ -40,6 +40,10 @@ public class Portfolio {
 	@Column(name = "time_created_at", nullable = false, updatable = false)
 	private final LocalDateTime timeCreatedAt = LocalDateTime.now();
 
+	public Portfolio(String name) {
+		this.name = name;
+	}
+
 	//<editor-fold desc="UTILS">
 	@Override
 	public boolean equals(Object o) {

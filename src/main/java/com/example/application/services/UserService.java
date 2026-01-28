@@ -72,8 +72,9 @@ public class UserService implements UserDetailsService {
 	//</editor-fold>
 
 	@NotNull
-	public User createNewUser(RegisterUserRequest request) {
-		Objects.requireNonNull(request, "request");
+	@Transactional
+	public User createNewUser(@NotNull RegisterUserRequest request) {
+		validate(request);
 
 		if (isUsernameTaken(request.getUsername()))
 			throw new UsernameTakenException("There is already a user with this username");
@@ -85,46 +86,43 @@ public class UserService implements UserDetailsService {
 			throw new IllegalArgumentException("User register passwords does not match");
 
 		User user = new User();
-		user.setUsername(request.getUsername());
-		user.setEmail(request.getEmail());
-		user.setPassword(request.getPassword());
+		user.setUsername(request.getUsername().trim().toLowerCase());
+		user.setEmail(request.getEmail().trim().toLowerCase());
+		user.setPassword(passwordEncoder.encode(request.getPassword().trim()));
+		user.getRoles().add(User.Role.USER_ROLE);
 
 		return save(user);
 	}
 
 	@Transactional
-	public User addPortfolio(@NotNull Long userId, @NotNull Portfolio portfolio) {
+	public void addPortfolio(@NotNull Long userId, @NotNull Portfolio portfolio) {
 		User user = findById(userId)
 				.orElseThrow(() -> new UsernameNotFoundException("User #" + userId + " not found."));
 
 		user.addPortfolio(portfolio);
-		return save(user);
 	}
 
 	@Transactional
-	public User removePortfolio(@NotNull Long userId, @NotNull Portfolio portfolio) {
+	public void removePortfolio(@NotNull Long userId, @NotNull Portfolio portfolio) {
 		User user = findById(userId)
 				.orElseThrow(() -> new UsernameNotFoundException("User #" + userId + " not found."));
 
 		user.removePortfolio(portfolio);
-		return save(user);
 	}
 
 	@Transactional
-	public User setPortfolioAsActive(@NotNull Long userId, @NotNull Portfolio portfolio) {
+	public void setPortfolioAsActive(@NotNull Long userId, @NotNull Portfolio portfolio) {
 		User user = findById(userId)
 				.orElseThrow(() -> new UsernameNotFoundException("User #" + userId + " not found."));
 
 		user.setActivePortfolio(portfolio);
-		return save(user);
 	}
 
 	@NotNull
 	@Transactional
-	private User save(@NotNull User user) {
+	public User save(@NotNull User user) {
 		try {
-			validate(user);
-			normalizeUserFields(user);
+			user.setLastTimeUpdated(LocalDateTime.now());
 			User savedUser = userRepository.save(user);
 			log.info("Saved successfully {}", savedUser);
 			return savedUser;
@@ -134,21 +132,11 @@ public class UserService implements UserDetailsService {
 		}
 	}
 
-	private void validate(User user) {
-		Objects.requireNonNull(user, "User cannot be null");
-		Assert.isTrue(StringUtils.isNotBlank(user.getUsername()), "User -> username is missing");
-		Assert.isTrue(StringUtils.isNotBlank(user.getEmail()), "User -> email is missing");
-		Assert.isTrue(StringUtils.isNotBlank(user.getPassword()), "User -> password is missing");
-		Assert.notNull(user.getLastTimeUpdated(), "User -> lastTimeUpdated is missing");
-		Assert.notNull(user.getTimeCreatedAt(), "User -> date creation is missing");
-	}
-
-	private void normalizeUserFields(User user) {
-		user.setEmail(user.getEmail().trim().toLowerCase());
-		user.setUsername(user.getUsername().trim().toLowerCase());
-		user.setPassword(passwordEncoder.encode(user.getPassword()));
-		user.getRoles().add(User.Role.USER_ROLE);
-		user.setLastTimeUpdated(LocalDateTime.now());
+	private void validate(RegisterUserRequest request) {
+		Objects.requireNonNull(request, "request cannot be null");
+		Assert.isTrue(StringUtils.isNotBlank(request.getUsername()), "User -> username is missing");
+		Assert.isTrue(StringUtils.isNotBlank(request.getEmail()), "User -> email is missing");
+		Assert.isTrue(StringUtils.isNotBlank(request.getPassword()), "User -> password is missing");
 	}
 
 	public boolean isUsernameTaken(@NotNull String username) {

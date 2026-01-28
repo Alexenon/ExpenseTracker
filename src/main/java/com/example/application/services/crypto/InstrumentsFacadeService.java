@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -69,6 +70,7 @@ public class InstrumentsFacadeService {
 	}
 
 	//<editor-fold desc="USERS">
+	@Transactional
 	public UserDTO createNewUser(RegisterUserRequest request) {
 		User userEntity = userService.createNewUser(request);
 
@@ -302,15 +304,11 @@ public class InstrumentsFacadeService {
 
 		String portfolioName = request.getPortfolioName();
 		if (portfolioService.findByNameAndUser(portfolioName, request.getUserId()).isPresent())
-			throw new IllegalArgumentException("Portfolio name already exists for user");
+			throw new IllegalArgumentException("Portfolio '" + portfolioName + "' already exists for " + user);
 
-		Portfolio newEntity = new Portfolio();
-		newEntity.setName(portfolioName.trim());
-		newEntity.setUser(user);
-
-		Portfolio savedPortfolio = portfolioService.save(newEntity);
-		userService.setPortfolioAsActive(user.getId(), savedPortfolio);
-		return new PortfolioDTO(savedPortfolio);
+		Portfolio portfolio = new Portfolio(portfolioName);
+		user.addPortfolio(portfolio);
+		return new PortfolioDTO(portfolio);
 	}
 
 	public Optional<PortfolioDTO> getPortfolioByName(String name) {
@@ -337,8 +335,8 @@ public class InstrumentsFacadeService {
 				.orElseThrow(() -> new InternalUnexpectedException(getAuthenticatedUser() + "doesn't have any active portfolio"));
 	}
 
-	public PortfolioDTO setPortfolioAsActive(Long portfolioId) {
-		return new PortfolioDTO(portfolioService.setPortfolioAsActive(portfolioId));
+	public void setPortfolioAsActive(Long portfolioId) {
+		portfolioService.setPortfolioAsActive(portfolioId);
 	}
 	//</editor-fold>
 

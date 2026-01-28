@@ -60,7 +60,7 @@ public class PortfolioService {
 	}
 
 	@Transactional
-	public Portfolio setPortfolioAsActive(Long portfolioId) {
+	public void setPortfolioAsActive(Long portfolioId) {
 		Portfolio portfolio = findById(portfolioId)
 				.orElseThrow(() -> new IllegalArgumentException("Portfolio not found"));
 
@@ -73,7 +73,6 @@ public class PortfolioService {
 		user.setActivePortfolio(portfolio);
 
 		log.info("Updated activePortfolio from '{}' to '{}', for {}", oldActivePortfolioName, portfolio.getName(), user);
-		return portfolio;
 	}
 
 	@NotNull

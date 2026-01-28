@@ -8,6 +8,7 @@ import com.example.application.views.components.portfolio.dialogs.AddPortfolioDi
 import com.example.application.views.components.portfolio.dialogs.PortfolioCreatedOrUpdatedEvent;
 import com.example.application.views.layouts.MainLayout;
 import com.example.application.views.pages.DefaultPage;
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.UI;
@@ -58,6 +59,10 @@ public class PortfolioTrackerView extends DefaultPage {
 	private void initializePage() {
 		getStyle().set("margin-top", "100px");
 		intializeFields();
+	}
+
+	@Override
+	protected void onAttach(AttachEvent attachEvent) {
 		buildPage(instrumentsFacadeService.getActivePortfolio());
 
 		ComponentUtil.addListener(UI.getCurrent(), PortfolioCreatedOrUpdatedEvent.class,
@@ -71,7 +76,7 @@ public class PortfolioTrackerView extends DefaultPage {
 		portfolioSelector.addValueChangeListener(event -> {
 			PortfolioDTO selectedPortfolio = event.getValue();
 
-			if(selectedPortfolio == null)
+			if (selectedPortfolio == null)
 				return;
 
 			instrumentsFacadeService.setPortfolioAsActive(selectedPortfolio.getId());
