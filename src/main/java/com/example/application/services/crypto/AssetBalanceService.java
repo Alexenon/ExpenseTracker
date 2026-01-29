@@ -10,7 +10,7 @@ import com.example.application.utils.common.lang.NumberUtils;
 import com.example.application.utils.exceptions.InternalUnexpectedException;
 import com.example.application.utils.exceptions.InvalidBalanceAmountException;
 import jakarta.validation.constraints.NotNull;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -23,12 +23,21 @@ import java.util.Optional;
 import static com.example.application.utils.investment.ProfitCalculator.calculateNewAvgPrice;
 
 @Service
-@RequiredArgsConstructor
 public class AssetBalanceService {
 
-	private AssetBalanceRepository repository;
-	private AssetService assetService;
-	private PortfolioService portfolioService;
+	private final AssetBalanceRepository repository;
+	private final AssetService assetService;
+	private final PortfolioService portfolioService;
+
+	@Autowired
+	public AssetBalanceService(AssetBalanceRepository repository,
+							   AssetService assetService,
+							   PortfolioService portfolioService)
+	{
+		this.repository = repository;
+		this.assetService = assetService;
+		this.portfolioService = portfolioService;
+	}
 
 	/**
 	 * @return list of {@link AssetBalance} that are currently holded in the provided portfolio.

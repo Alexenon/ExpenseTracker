@@ -35,8 +35,11 @@ public class User {
 	private String email;
 
 	@Nullable
-	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-	@JoinColumn(name = "active_portfolio_id")
+	@OneToOne(
+			fetch = FetchType.LAZY,
+			cascade = {CascadeType.PERSIST, CascadeType.MERGE}
+	)
+	@JoinColumn(name = "active_portfolio_id", unique = true)
 	private Portfolio activePortfolio;
 
 	@OneToMany(

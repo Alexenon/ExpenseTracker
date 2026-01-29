@@ -62,7 +62,7 @@ public class PortfolioService {
 	@Transactional
 	public void setPortfolioAsActive(Long portfolioId) {
 		Portfolio portfolio = findById(portfolioId)
-				.orElseThrow(() -> new IllegalArgumentException("Portfolio not found"));
+				.orElseThrow(() -> new IllegalArgumentException("Invalid portfolio: #%d".formatted(portfolioId)));
 
 		User user = portfolio.getUser();
 
@@ -70,8 +70,10 @@ public class PortfolioService {
 				.map(Portfolio::getName)
 				.orElse(null);
 
-		user.setActivePortfolio(portfolio);
+		if (portfolio.getName().equals(oldActivePortfolioName))
+			return;
 
+		user.setActivePortfolio(portfolio);
 		log.info("Updated activePortfolio from '{}' to '{}', for {}", oldActivePortfolioName, portfolio.getName(), user);
 	}
 

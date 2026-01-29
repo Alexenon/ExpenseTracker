@@ -57,6 +57,7 @@ public class PortfolioTrackerView extends DefaultPage {
 	}
 
 	private void initializePage() {
+		log.info("Initializing page");
 		getStyle().set("margin-top", "100px");
 		intializeFields();
 	}
@@ -87,6 +88,7 @@ public class PortfolioTrackerView extends DefaultPage {
 	}
 
 	private void buildPage(PortfolioDTO portfolio) {
+		log.info("Building page");
 		List<PortfolioDTO> updatedPortfolioList = instrumentsFacadeService.getUserPortfolios();
 		portfolioSelector.setItems(updatedPortfolioList);
 		portfolioSelector.setValue(portfolio);
