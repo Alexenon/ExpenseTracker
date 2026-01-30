@@ -181,6 +181,7 @@ public class InstrumentsFacadeService {
 		transaction.setPortfolio(portfolio);
 		transaction.setMarketPrice(request.getMarketPrice());
 		transaction.setOrderQuantity(request.getOrderQuantity());
+		transaction.setOrderTotalCost(request.getOrderTotalCost());
 		transaction.setType(request.getType());
 		transaction.setNote(request.getNote());
 		transaction.setDateTime(request.getDateTime());
@@ -199,6 +200,7 @@ public class InstrumentsFacadeService {
 		transaction.setAsset(asset);
 		transaction.setMarketPrice(request.getMarketPrice());
 		transaction.setOrderQuantity(request.getOrderQuantity());
+		transaction.setOrderTotalCost(request.getOrderTotalCost());
 		transaction.setType(request.getType());
 		transaction.setNote(request.getNote());
 		transaction.setDateTime(request.getDateTime());

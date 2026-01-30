@@ -16,4 +16,8 @@ public class CreateTransactionRequest {
 	private String note;
 	private LocalDateTime dateTime;
 
+	public double getOrderTotalCost() {
+		return orderQuantity * marketPrice;
+	}
+
 }

@@ -14,13 +14,13 @@ import java.util.List;
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
 
 	@Query(value = """
-			SELECT * FROM transactions t
+			SELECT t.* FROM transactions t
 			WHERE t.portfolio_id = :portfolioId
 			""", nativeQuery = true)
 	List<Transaction> findByPortfolio(@Param("portfolioId") Long portfolioId);
 
 	@Query(value = """
-			SELECT * FROM transactions t
+			SELECT t.* FROM transactions t
 			INNER JOIN assets a ON a.id = t.asset_id
 			WHERE t.portfolio_id = :portfolioId AND a.symbol = :assetSymbol
 			""", nativeQuery = true)
@@ -28,7 +28,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 											  @Param("assetSymbol") String assetSymbol);
 
 	@Query(value = """
-			SELECT * FROM transactions t
+			SELECT t.* FROM transactions t
 			INNER JOIN assets a ON a.id = t.asset_id
 			WHERE t.portfolio_id = :portfolioId
 				AND a.symbol = :assetSymbol
@@ -39,7 +39,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 													 @Param("transactionType") TransactionType type);
 
 	@Query(value = """
-			SELECT * FROM transactions t
+			SELECT t.* FROM transactions t
 			WHERE t.portfolio_id = :portfolioId
 			    AND t.dateTime BETWEEN :fromDateTime AND :toDateTime
 			""", nativeQuery = true)

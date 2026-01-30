@@ -43,7 +43,6 @@ public class AddTransactionDialog extends Dialog implements HasNotifications {
 
 	private final AssetDTO asset;
 	private final PortfolioDTO portfolio;
-	private final CreateTransactionRequest request;
 	private final InstrumentsFacadeService instrumentsFacadeService;
 	private final Binder<CreateTransactionRequest> binder = new Binder<>(CreateTransactionRequest.class);
 
@@ -72,7 +71,6 @@ public class AddTransactionDialog extends Dialog implements HasNotifications {
 		this.asset = asset;
 		this.instrumentsFacadeService = Objects.requireNonNull(instrumentsFacadeService, "instrumentsFacadeService");
 		this.assetSymbolField = new AssetComboBox(instrumentsFacadeService);
-		this.request = defaultRequest();
 		buildForm();
 	}
 
@@ -169,12 +167,12 @@ public class AddTransactionDialog extends Dialog implements HasNotifications {
 	}
 
 	private void initializeBinder() {
-		binder.setBean(request);
+		binder.setBean(defaultRequest());
 
 		binder.forField(assetSymbolField)
 				.asRequired("Please fill this field")
-				.bind(req -> instrumentsFacadeService.getAssetBySymbol(req.getAssetSymbol()).orElseThrow(),
-						(req, asset) -> req.setAssetSymbol(asset.getSymbol()));
+				.bind(req -> req.getAssetSymbol() == null ? null : instrumentsFacadeService.getAssetBySymbol(req.getAssetSymbol()).orElseThrow(),
+						(req, asset) -> req.setAssetSymbol(asset == null ? null : asset.getSymbol()));
 
 		binder.forField(typeField)
 				.asRequired("Please fill this field")
@@ -227,7 +225,7 @@ public class AddTransactionDialog extends Dialog implements HasNotifications {
 	private CreateTransactionRequest defaultRequest() {
 		CreateTransactionRequest newTransaction = new CreateTransactionRequest();
 		newTransaction.setPortfolioId(portfolio.getId());
-		newTransaction.setAssetSymbol(asset.getSymbol());
+		newTransaction.setAssetSymbol(asset == null ? null : asset.getSymbol());
 		return newTransaction;
 	}
 

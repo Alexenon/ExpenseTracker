@@ -13,13 +13,13 @@ import java.util.Optional;
 public interface AssetBalanceRepository extends JpaRepository<AssetBalance, Long> {
 
 	@Query(value = """
-			         SELECT * FROM asset_balances ab
+			         SELECT ab.* FROM asset_balances ab
 			         WHERE ab.portfolio_id = :portfolioId
 			""", nativeQuery = true)
 	List<AssetBalance> findByPortfolio(@Param("portfolioId") Long portfolioId);
 
 	@Query(value = """
-			         SELECT * FROM asset_balances ab
+			         SELECT ab.* FROM asset_balances ab
 			         INNER JOIN assets a ON a.id = ab.asset_id
 			         WHERE ab.portfolio_id = :portfolioId AND a.symbol = :assetSymbol
 			""", nativeQuery = true)

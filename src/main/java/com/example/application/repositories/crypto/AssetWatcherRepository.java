@@ -13,20 +13,20 @@ import java.util.List;
 public interface AssetWatcherRepository extends JpaRepository<AssetWatcher, Long> {
 
 	@Query(value = """
-			SELECT * FROM asset_watchers aw
+			SELECT aw.* FROM asset_watchers aw
 			WHERE aw.portfolio_id = :portfolioId
 			""", nativeQuery = true)
 	List<AssetWatcher> findByPortfolio(@Param("portfolioId") Long portfolioId);
 
 	@Query(value = """
-			SELECT * FROM asset_watchers aw
+			SELECT aw.* FROM asset_watchers aw
 			INNER JOIN assets a ON a.id = aw.asset_id
 			WHERE a.symbol = :assetSymbol
 			""", nativeQuery = true)
 	List<AssetWatcher> findByAsset(@Param("assetSymbol") String assetSymbol);
 
 	@Query(value = """
-			SELECT * FROM asset_watchers aw
+			SELECT aw.* FROM asset_watchers aw
 			INNER JOIN assets a ON a.id = aw.asset_id
 			WHERE a.symbol = :assetSymbol AND aw.portfolio_id = :portfolioId
 			""", nativeQuery = true)
@@ -34,9 +34,9 @@ public interface AssetWatcherRepository extends JpaRepository<AssetWatcher, Long
 											   @Param("assetSymbol") String assetSymbol);
 
 	@Query(value = """
-			SELECT * FROM asset_watchers aw
+			SELECT aw.* FROM asset_watchers aw
 			INNER JOIN assets a ON a.id = aw.asset_id
-			WHERE a.symbol = :assetSymbol AND aw.portfolio_id = :portfolioId AND aw.transactionType = :transactionType
+			WHERE a.symbol = :assetSymbol AND aw.portfolio_id = :portfolioId AND aw.transaction_type = :transactionType
 			""", nativeQuery = true)
 	List<AssetWatcher> findByPortfolioAndAssetAndTransactionType(@Param("portfolioId") Long portfolioId,
 																 @Param("assetSymbol") String assetSymbol,
