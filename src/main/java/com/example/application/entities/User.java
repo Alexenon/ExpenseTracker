@@ -4,6 +4,7 @@ import com.example.application.entities.crypto.Portfolio;
 import com.example.application.utils.exceptions.InternalUnexpectedException;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
+import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -69,7 +70,7 @@ public class User {
 
 	//<editor-fold desc="UTILS">
 	public boolean isNew() {
-		return id != null;
+		return id == null;
 	}
 
 	public void addPortfolio(@NotNull Portfolio portfolio) {
@@ -103,11 +104,12 @@ public class User {
 		}
 	}
 
+	@Transactional
 	public void setActivePortfolio(@NotNull Portfolio portfolio) {
 		Objects.requireNonNull(portfolio, "portfolio");
 
-		if (!portfolios.contains(portfolio))
-			throw new InternalUnexpectedException("Portfolio must belong to user");
+		if (!portfolios.isEmpty() && !portfolios.contains(portfolio))
+			throw new InternalUnexpectedException("Cannot set portfolio as active, because user doesn't have such portfolio");
 
 		this.activePortfolio = portfolio;
 	}

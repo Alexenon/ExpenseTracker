@@ -6,16 +6,16 @@ import lombok.Data;
 @Data
 public class UserDTO {
 
-    private Long id;
-    private String username;
-    private String email;
+	private Long id;
+	private String username;
+	private String email;
 
-    public static UserDTO mappedFrom(User user) {
-        UserDTO dto = new UserDTO();
-        dto.setId(user.getId());
-        dto.setUsername(user.getUsername());
-        dto.setEmail(user.getEmail());
-        return dto;
-    }
+	public static UserDTO mappedFrom(User user) {
+		UserDTO dto = new UserDTO();
+		dto.setId(user.getId());
+		dto.setUsername(user.getUsername());
+		dto.setEmail(user.getEmail());
+		return dto;
+	}
 
 }

@@ -23,12 +23,14 @@ import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -70,7 +72,7 @@ public class InstrumentsFacadeService {
 	}
 
 	//<editor-fold desc="USERS">
-	@Transactional
+	@Transactional(rollbackFor = Exception.class)
 	public UserDTO createNewUser(RegisterUserRequest request) {
 		User userEntity = userService.createNewUser(request);
 
@@ -299,18 +301,7 @@ public class InstrumentsFacadeService {
 
 	@NotNull
 	public PortfolioDTO createPortfolio(@NotNull CreatePortfolioRequest request) {
-		Objects.requireNonNull(request, "request");
-
-		User user = userService.findById(request.getUserId())
-				.orElseThrow(() -> new UsernameNotFoundException("User #" + request.getUserId() + " not found. (deleted ?)"));
-
-		String portfolioName = request.getPortfolioName();
-		if (portfolioService.findByNameAndUser(portfolioName, request.getUserId()).isPresent())
-			throw new IllegalArgumentException("Portfolio '" + portfolioName + "' already exists for " + user);
-
-		Portfolio portfolio = new Portfolio(portfolioName);
-		user.addPortfolio(portfolio);
-		return new PortfolioDTO(portfolio);
+		return portfolioService.createPortfolio(request);
 	}
 
 	public Optional<PortfolioDTO> getPortfolioByName(String name) {

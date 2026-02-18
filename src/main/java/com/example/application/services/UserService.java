@@ -74,6 +74,7 @@ public class UserService implements UserDetailsService {
 	@NotNull
 	@Transactional
 	public User createNewUser(@NotNull RegisterUserRequest request) {
+		log.info("Creating new user: {}", request);
 		validate(request);
 
 		if (isUsernameTaken(request.getUsername()))
@@ -96,31 +97,38 @@ public class UserService implements UserDetailsService {
 
 	@Transactional
 	public void addPortfolio(@NotNull Long userId, @NotNull Portfolio portfolio) {
+		log.info("Adding portfolio '{}' to user: #{}", portfolio.getName(), userId);
 		User user = findById(userId)
 				.orElseThrow(() -> new UsernameNotFoundException("User #" + userId + " not found."));
 
 		user.addPortfolio(portfolio);
+		log.info("Portfolio '{}' is added for user: #{}", portfolio.getName(), userId);
 	}
 
 	@Transactional
 	public void removePortfolio(@NotNull Long userId, @NotNull Portfolio portfolio) {
+		log.info("Removing portfolio '{}' from user: #{}", portfolio.getName(), userId);
 		User user = findById(userId)
 				.orElseThrow(() -> new UsernameNotFoundException("User #" + userId + " not found."));
 
 		user.removePortfolio(portfolio);
+		log.info("Portfolio '{}' is removed from user: #{}", portfolio.getName(), userId);
 	}
 
 	@Transactional
 	public void setPortfolioAsActive(@NotNull Long userId, @NotNull Portfolio portfolio) {
+		log.info("Setting portfolio '{}' as active for user: #{}", portfolio.getName(), userId);
 		User user = findById(userId)
 				.orElseThrow(() -> new UsernameNotFoundException("User #" + userId + " not found."));
 
 		user.setActivePortfolio(portfolio);
+		log.info("Portfolio '{}' is marked as active for user: #{}", portfolio.getName(), userId);
 	}
 
 	@NotNull
 	@Transactional
 	public User save(@NotNull User user) {
+		log.info("Saving {}", user);
 		try {
 			user.setLastTimeUpdated(LocalDateTime.now());
 			User savedUser = userRepository.save(user);
@@ -130,6 +138,10 @@ public class UserService implements UserDetailsService {
 			log.error("Failed to save {}", user.toFullString(), e);
 			throw new InternalUnexpectedException(e);
 		}
+	}
+
+	public void delete(Long userId) {
+		userRepository.deleteById(userId);
 	}
 
 	private void validate(RegisterUserRequest request) {

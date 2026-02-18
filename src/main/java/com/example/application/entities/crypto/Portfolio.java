@@ -65,7 +65,7 @@ public class Portfolio {
 	@Override
 	public String toString() {
 		return "Portfolio{id=%d, name='%s', user='%s'}"
-				.formatted(id, name, user.getUsername());
+				.formatted(id, name, user.getId());
 	}
 	//</editor-fold>
 

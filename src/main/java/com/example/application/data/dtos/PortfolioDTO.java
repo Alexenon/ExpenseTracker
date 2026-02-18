@@ -8,7 +8,7 @@ public class PortfolioDTO {
 
 	private final Long id;
 	private String name;
-	private String ownerUsername;
+	private Long userId;
 
 	public PortfolioDTO() {
 		this.id = null;
@@ -17,7 +17,7 @@ public class PortfolioDTO {
 	public PortfolioDTO(Portfolio portfolio) {
 		this.id = portfolio.getId();
 		this.name = portfolio.getName();
-		this.ownerUsername = portfolio.getUser().getUsername();
+		this.userId = portfolio.getUser().getId();
 	}
 
 }

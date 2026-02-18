@@ -1,3 +1,5 @@
+package com.example.application;
+
 import com.example.application.utils.investment.ProfitCalculator;
 import org.junit.jupiter.api.Test;
 

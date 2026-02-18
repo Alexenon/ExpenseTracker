@@ -1,5 +1,7 @@
 package com.example.application.services.crypto;
 
+import com.example.application.data.dtos.PortfolioDTO;
+import com.example.application.data.requests.portfolio.CreatePortfolioRequest;
 import com.example.application.entities.User;
 import com.example.application.entities.crypto.Portfolio;
 import com.example.application.repositories.crypto.PortfolioRepository;
@@ -28,8 +30,8 @@ public class PortfolioService {
 	private final PortfolioRepository portfolioRepository;
 
 	//<editor-fold desc="SEARCH">
-	public Optional<Portfolio> findById(@NotNull Long id) {
-		return portfolioRepository.findById(Objects.requireNonNull(id, "id"));
+	public Optional<Portfolio> findById(@NotNull Long portfolioId) {
+		return portfolioRepository.findById(Objects.requireNonNull(portfolioId, "portfolioId"));
 	}
 
 	public List<Portfolio> findByUserId(@NotNull Long userId) {
@@ -43,20 +45,25 @@ public class PortfolioService {
 	}
 	//</editor-fold>
 
+	@Transactional
 	public void delete(Long portfolioId) {
+		log.info("Deleting portfolio: #{}", portfolioId);
 		Portfolio portfolio = findById(portfolioId)
 				.orElseThrow(() -> new IllegalArgumentException("Invalid portfolio: #%d".formatted(portfolioId)));
 
-		List<Portfolio> otherPortfolios = portfolio.getUser()
-				.getPortfolios()
-				.stream()
-				.filter(userPortfolio -> userPortfolio != portfolio)
-				.toList();
+		User user = portfolio.getUser();
+		List<Portfolio> userPortfolios = findByUserId(user.getId());
 
-		if (otherPortfolios.isEmpty())
+		if (userPortfolios.size() == 1)
 			throw new InvalidDataException("Cannot delete the last remaining portfolio");
 
-		portfolioRepository.delete(Objects.requireNonNull(portfolio, "portflio"));
+		Portfolio latestUpdatedPortfolio = findLatestUpdatedPortfolio(user.getId());
+		setPortfolioAsActive(latestUpdatedPortfolio.getId());
+
+		user.getPortfolios().remove(portfolio);
+		portfolioRepository.deleteById(portfolioId);
+
+		log.info("Portfolio #{}, was deleted successfully", portfolioId);
 	}
 
 	@Transactional
@@ -78,7 +85,7 @@ public class PortfolioService {
 	}
 
 	@NotNull
-	public Portfolio getLatestCreatedPortfolio(@NotNull Long userId) {
+	public Portfolio findLatestUpdatedPortfolio(@NotNull Long userId) {
 		Objects.requireNonNull(userId, "userId");
 		Portfolio latestUpdatedPortfolio = portfolioRepository.findLatestUpdatedPortfolio(userId);
 
@@ -86,13 +93,35 @@ public class PortfolioService {
 				.orElseThrow(() -> new InternalUnexpectedException("User #%d doesn't have any portfolios".formatted(userId)));
 	}
 
+	@NotNull
+	@Transactional
+	public PortfolioDTO createPortfolio(@NotNull CreatePortfolioRequest request) {
+		log.info("Creating new portfolio: {}", request);
+		Objects.requireNonNull(request, "request");
+
+		User user = userService.findById(request.getUserId())
+				.orElseThrow(() -> new IllegalArgumentException("User #" + request.getUserId() + " not found. (deleted ?)"));
+
+		String portfolioName = request.getPortfolioName();
+		if (findByNameAndUser(portfolioName, request.getUserId()).isPresent())
+			throw new IllegalArgumentException("Portfolio '" + portfolioName + "' already exists for " + user);
+
+		Portfolio portfolio = new Portfolio();
+		portfolio.setName(portfolioName);
+		portfolio.setUser(user);
+
+		Portfolio saved = save(portfolio);
+		userService.setPortfolioAsActive(user.getId(), saved);
+		return new PortfolioDTO(saved);
+	}
+
 	@Transactional
 	public Portfolio save(@NotNull Portfolio portfolio) {
+		portfolio.setLastTimeUpdated(LocalDateTime.now());
+		preValidation(portfolio);
 		try {
-			preValidation(portfolio);
-			portfolio.setLastTimeUpdated(LocalDateTime.now());
 			Portfolio savedPortfolio = portfolioRepository.save(portfolio);
-			postValidation(savedPortfolio);
+//			postValidation(savedPortfolio);
 			log.info("Saved successfully {}", savedPortfolio);
 			return savedPortfolio;
 		} catch (Exception e) {
@@ -114,21 +143,5 @@ public class PortfolioService {
 		if (findByNameAndUser(portfolioName, user.getId()).isPresent())
 			throw new IllegalArgumentException("Duplicate portfolio name for %s".formatted(user));
 	}
-
-	/**
-	 * Post validation is required, for validation like has active portfolio changed, is it valid, and so on.
-	 */
-	private void postValidation(Portfolio portfolio) {
-		User user = portfolio.getUser();
-		String portfolioName = portfolio.getName();
-
-//		Assert.isTrue(findByNameAndUser(portfolioName, user).isEmpty(), "Duplicate portfolio name '%s', for %s".formatted(portfolioName, user));
-
-		if (!user.isNew()) {
-			Assert.notEmpty(user.getPortfolios(), "User doesn't have any portfolios");
-			Assert.notNull(user.getActivePortfolio(), "User -> active portfolio is missing");
-		}
-	}
-
 
 }

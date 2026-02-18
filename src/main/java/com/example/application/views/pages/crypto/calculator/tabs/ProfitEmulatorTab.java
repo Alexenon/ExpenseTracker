@@ -230,7 +230,6 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
 				}).toList();
 	}
 
-	// TODO: Update this
 	private Html createTable(AssetDTO asset, double averageBuyPrice, double averageSellPrice) {
 		double currentPrice = asset.getMarketPrice();
 
