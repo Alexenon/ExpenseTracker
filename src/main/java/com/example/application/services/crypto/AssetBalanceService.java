@@ -39,6 +39,11 @@ public class AssetBalanceService {
 		this.portfolioService = portfolioService;
 	}
 
+	public Optional<AssetBalance> findById(@NotNull Long assetBalanceId) {
+		Objects.requireNonNull(assetBalanceId, "assetBalanceId");
+		return repository.findById(assetBalanceId);
+	}
+
 	/**
 	 * @return list of {@link AssetBalance} that are currently holded in the provided portfolio.
 	 */
@@ -51,6 +56,12 @@ public class AssetBalanceService {
 		Objects.requireNonNull(portfolioId, "portfolioId");
 		Objects.requireNonNull(assetSymbol, "assetSymbol");
 		return repository.findByPortfolioAndAsset(portfolioId, assetSymbol);
+	}
+
+	public Optional<AssetBalance> findByPortfolioAndAsset(@NotNull Long portfolioId, @NotNull Long assetId) {
+		Objects.requireNonNull(portfolioId, "portfolioId");
+		Objects.requireNonNull(assetId, "assetId");
+		return repository.findByPortfolioAndAsset(portfolioId, assetId);
 	}
 
 	@Transactional
@@ -78,7 +89,7 @@ public class AssetBalanceService {
 
 		updateAvgBuySellPrice(assetBalance, transaction);
 		assetBalance.setAmount(calculateAmountAfterSupply(assetBalance, transaction));
-		assetBalance.setCost(calculateTotalCost(transaction, assetBalance));
+		assetBalance.setCost(calculateTotalCost(assetBalance, transaction));
 
 		return save(assetBalance);
 	}
@@ -94,19 +105,30 @@ public class AssetBalanceService {
 		}
 	}
 
-	private static double calculateTotalCost(Transaction transaction, AssetBalance assetBalance) {
+	/**
+	 * @return totalCost calculated for provided transaction, that cannot be less than ZERO.
+	 */
+	private static double calculateTotalCost(@NotNull AssetBalance assetBalance, @NotNull Transaction transaction) {
 		double newCost = MathUtils.withSign(transaction.getOrderTotalCost(), transaction.isBuyTransaction());
-		return NumberUtils.checkDouble(assetBalance.getCost() + newCost);
+		double formatedCost = Math.max(0, assetBalance.getCost() + newCost);
+		return NumberUtils.checkDouble(formatedCost);
 	}
 
-	private static double calculateAmountAfterSupply(AssetBalance assetBalance, Transaction transaction) {
+	/**
+	 * @return amount of tokens that should be in the asset balance after transaction is commited.
+	 * Cannot be less than ZERO.
+	 */
+	private static double calculateAmountAfterSupply(@NotNull AssetBalance assetBalance, @NotNull Transaction transaction) {
 		double transactionAmount = NumberUtils.checkDouble(transaction.getOrderQuantity());
 
 		if (transactionAmount <= 0)
-			throw new InvalidBalanceAmountException("Invalid transaction amount");
+			throw new InvalidBalanceAmountException("Invalid transaction amount. Transaction amount should be greater than 0");
 
 		double quantityToAdd = MathUtils.withSign(transactionAmount, transaction.isBuyTransaction());
 		double tokensAmountAfterSupply = assetBalance.getAmount() + quantityToAdd;
+
+		if (tokensAmountAfterSupply < 0)
+			throw new InvalidBalanceAmountException("Invalid transaction amount. The amount of tokens after transaction is less than 0");
 
 		return NumberUtils.checkDouble(tokensAmountAfterSupply);
 	}

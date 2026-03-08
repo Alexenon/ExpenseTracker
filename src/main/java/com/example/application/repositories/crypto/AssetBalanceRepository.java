@@ -26,4 +26,12 @@ public interface AssetBalanceRepository extends JpaRepository<AssetBalance, Long
 	Optional<AssetBalance> findByPortfolioAndAsset(@Param("portfolioId") Long portfolioId,
 												   @Param("assetSymbol") String assetSymbol);
 
+	@Query(value = """
+			         SELECT ab.* FROM asset_balances ab
+			         INNER JOIN assets a ON a.id = ab.asset_id
+			         WHERE ab.portfolio_id = :portfolioId AND a.id = :assetId
+			""", nativeQuery = true)
+	Optional<AssetBalance> findByPortfolioAndAsset(@Param("portfolioId") Long portfolioId,
+												   @Param("assetId") Long assetId);
+
 }

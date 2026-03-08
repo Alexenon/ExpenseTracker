@@ -1,4 +1,4 @@
-package com.example.application.users;
+package com.example.application.integrational;
 
 import com.example.application.Application;
 import com.example.application.data.dtos.UserDTO;

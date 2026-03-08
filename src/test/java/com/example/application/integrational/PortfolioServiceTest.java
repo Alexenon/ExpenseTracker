@@ -1,9 +1,12 @@
-package com.example.application;
+package com.example.application.integrational;
 
+import com.example.application.Application;
 import com.example.application.data.dtos.PortfolioDTO;
+import com.example.application.data.requests.CreateTransactionRequest;
 import com.example.application.data.requests.RegisterUserRequest;
 import com.example.application.data.requests.portfolio.CreatePortfolioRequest;
 import com.example.application.entities.User;
+import com.example.application.entities.common.TransactionType;
 import com.example.application.entities.crypto.Portfolio;
 import com.example.application.services.UserService;
 import com.example.application.services.crypto.InstrumentsFacadeService;
@@ -21,7 +24,7 @@ import java.util.List;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = Application.class)
 @ActiveProfiles("test")
-class PortfolioServiceTest {
+class PortfolioServiceTest extends AbstractTest {
 
 	private final InstrumentsFacadeService instrumentsFacadeService;
 	private final UserService userService;
@@ -120,6 +123,17 @@ class PortfolioServiceTest {
 	}
 
 	@Test
+	void deletePortfolioShouldDeleteAssetBalancesAndTransactionsAssociated() {
+		CreatePortfolioRequest request = createPortfolioRequest("Seond portfolio");
+		PortfolioDTO portfolio = portfolioService.createPortfolio(request);
+
+		createAsset("BTC", 100_000);
+
+		portfolioService.delete(portfolio.getId());
+
+	}
+
+	@Test
 	void deleteShouldRemovePortfolioWhenMultipleExist() {
 		CreatePortfolioRequest request = CreatePortfolioRequest.builder()
 				.portfolioName("Crypto")
@@ -145,5 +159,23 @@ class PortfolioServiceTest {
 		);
 	}
 
+	//<editor-fold desc="UTILS">
+	private CreatePortfolioRequest createPortfolioRequest(String portoflioName) {
+		return CreatePortfolioRequest.builder()
+				.portfolioName(portoflioName)
+				.userId(user.getId())
+				.build();
+	}
+
+	private CreateTransactionRequest buyTransaction(double marketPrice, double orderQuantity) {
+		return CreateTransactionRequest.builder()
+				.assetSymbol(asset.getSymbol())
+				.type(TransactionType.BUY)
+				.marketPrice(marketPrice)
+				.orderQuantity(orderQuantity)
+				.portfolioId(portfolio.getId())
+				.build();
+	}
+	//</editor-fold>
 
 }

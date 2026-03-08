@@ -7,6 +7,7 @@ import com.example.application.entities.crypto.Portfolio;
 import com.example.application.entities.crypto.Transaction;
 import com.example.application.repositories.crypto.TransactionRepository;
 import com.example.application.utils.exceptions.InternalUnexpectedException;
+import com.example.application.utils.exceptions.InvalidBalanceAmountException;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -109,13 +110,14 @@ public class TransactionService {
 	@NotNull
 	@Transactional
 	public Transaction save(@NotNull Transaction transaction) {
+		validate(transaction);
 		try {
-			validate(transaction);
-			updateQuantityIfRequired(transaction);
 			updateAssetBalance(transaction);
 			Transaction savedTransaction = transactionRepository.save(transaction);
 			log.info("Saved successfully {}", savedTransaction);
 			return savedTransaction;
+		} catch (InvalidBalanceAmountException e) {
+			throw e;
 		} catch (Exception e) {
 			log.error("Failed to save {}", transaction, e);
 			throw new InternalUnexpectedException(e);
@@ -135,17 +137,6 @@ public class TransactionService {
 			log.error("Failed to delete {}", transaction, e);
 			throw new InternalUnexpectedException(e);
 		}
-	}
-
-	/**
-	 * Sets order quantity in case it's missing in the transaction itself
-	 */
-	private void updateQuantityIfRequired(@NotNull Transaction transaction) {
-		if (transaction.getOrderQuantity() > 0)
-			return;
-
-		double orderQuantity = transaction.getOrderTotalCost() / transaction.getMarketPrice();
-		transaction.setOrderQuantity(orderQuantity);
 	}
 
 	private void updateAssetBalance(Transaction transaction) {

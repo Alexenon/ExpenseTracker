@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -184,9 +185,9 @@ public class InstrumentsFacadeService {
 		transaction.setMarketPrice(request.getMarketPrice());
 		transaction.setOrderQuantity(request.getOrderQuantity());
 		transaction.setOrderTotalCost(request.getOrderTotalCost());
-		transaction.setType(request.getType());
+		transaction.setType(request.getType() != null ? request.getType() : TransactionType.BUY);
 		transaction.setNote(request.getNote());
-		transaction.setDateTime(request.getDateTime());
+		transaction.setDateTime(request.getDateTime() != null ? request.getDateTime() : LocalDateTime.now());
 
 		Transaction savedEntity = transactionService.save(transaction);
 		return new TransactionDTO(savedEntity);

@@ -75,21 +75,17 @@ public class UserService implements UserDetailsService {
 	@Transactional
 	public User createNewUser(@NotNull RegisterUserRequest request) {
 		log.info("Creating new user: {}", request);
-		validate(request);
-
-		if (isUsernameTaken(request.getUsername()))
-			throw new UsernameTakenException("There is already a user with this username");
-
-		if (isEmailTaken(request.getEmail()))
-			throw new UsernameTakenException("There is already a user with this email");
 
 		if (!request.getPassword().equals(request.getConfirmPassword()))
 			throw new IllegalArgumentException("User register passwords does not match");
 
+		// TODO: [CRITICAL
+		// 	VERIFY EACH request what has valid data before passing it to entity
+
 		User user = new User();
 		user.setUsername(request.getUsername().trim().toLowerCase());
 		user.setEmail(request.getEmail().trim().toLowerCase());
-		user.setPassword(passwordEncoder.encode(request.getPassword().trim()));
+		user.setPassword(passwordEncoder.encode(request.getPassword()));
 		user.getRoles().add(User.Role.USER_ROLE);
 
 		return save(user);
@@ -129,6 +125,7 @@ public class UserService implements UserDetailsService {
 	@Transactional
 	public User save(@NotNull User user) {
 		log.info("Saving {}", user);
+		validate(user);
 		try {
 			user.setLastTimeUpdated(LocalDateTime.now());
 			User savedUser = userRepository.save(user);
@@ -144,11 +141,17 @@ public class UserService implements UserDetailsService {
 		userRepository.deleteById(userId);
 	}
 
-	private void validate(RegisterUserRequest request) {
-		Objects.requireNonNull(request, "request cannot be null");
-		Assert.isTrue(StringUtils.isNotBlank(request.getUsername()), "User -> username is missing");
-		Assert.isTrue(StringUtils.isNotBlank(request.getEmail()), "User -> email is missing");
-		Assert.isTrue(StringUtils.isNotBlank(request.getPassword()), "User -> password is missing");
+	private void validate(User user) {
+		Objects.requireNonNull(user, "request cannot be null");
+		Assert.isTrue(StringUtils.isNotBlank(user.getUsername()), "User -> username is missing");
+		Assert.isTrue(StringUtils.isNotBlank(user.getEmail()), "User -> email is missing");
+		Assert.isTrue(StringUtils.isNotBlank(user.getPassword()), "User -> password is missing");
+
+		if (isUsernameTaken(user.getUsername()))
+			throw new UsernameTakenException("There is already a user with this username");
+
+		if (isEmailTaken(user.getEmail()))
+			throw new UsernameTakenException("There is already a user with this email");
 	}
 
 	public boolean isUsernameTaken(@NotNull String username) {

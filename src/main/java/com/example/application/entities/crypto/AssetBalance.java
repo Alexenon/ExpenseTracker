@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 /*
-	TODO: [URGENT] VERRY
+	TODO: [URGENT] VERY
 		- Add for each entity annotations like @Size, @Min, @Max, @NotBlank...
 * */
 

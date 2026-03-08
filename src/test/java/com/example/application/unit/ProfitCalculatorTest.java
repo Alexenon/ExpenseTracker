@@ -1,4 +1,4 @@
-package com.example.application;
+package com.example.application.unit;
 
 import com.example.application.utils.investment.ProfitCalculator;
 import org.junit.jupiter.api.Test;
