@@ -15,13 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-@SuppressWarnings("DataFlowIssue")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = Application.class)
 @ActiveProfiles("test")
-public class UserAssetBalanceTest {
+public class UserAssetBalanceTest extends AbstractTest {
 
-	private final InstrumentsFacadeService instrumentsFacadeService;
 	private final UserService userService;
 	private final PortfolioService portfolioService;
 

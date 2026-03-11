@@ -10,6 +10,7 @@ import com.example.application.utils.common.lang.NumberUtils;
 import com.example.application.utils.exceptions.InternalUnexpectedException;
 import com.example.application.utils.exceptions.InvalidBalanceAmountException;
 import jakarta.validation.constraints.NotNull;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,26 +23,21 @@ import java.util.Optional;
 
 import static com.example.application.utils.investment.ProfitCalculator.calculateNewAvgPrice;
 
+@Slf4j
 @Service
 public class AssetBalanceService {
 
-	private final AssetBalanceRepository repository;
-	private final AssetService assetService;
-	private final PortfolioService portfolioService;
+	private final AssetBalanceRepository assetBalanceRepository;
 
 	@Autowired
-	public AssetBalanceService(AssetBalanceRepository repository,
-							   AssetService assetService,
-							   PortfolioService portfolioService)
+	public AssetBalanceService(AssetBalanceRepository repository)
 	{
-		this.repository = repository;
-		this.assetService = assetService;
-		this.portfolioService = portfolioService;
+		this.assetBalanceRepository = repository;
 	}
 
 	public Optional<AssetBalance> findById(@NotNull Long assetBalanceId) {
 		Objects.requireNonNull(assetBalanceId, "assetBalanceId");
-		return repository.findById(assetBalanceId);
+		return assetBalanceRepository.findById(assetBalanceId);
 	}
 
 	/**
@@ -49,34 +45,23 @@ public class AssetBalanceService {
 	 */
 	public List<AssetBalance> findByPortfolio(@NotNull Long portfolioId) {
 		Objects.requireNonNull(portfolioId, "portfolioId");
-		return repository.findByPortfolio(portfolioId);
+		return assetBalanceRepository.findByPortfolio(portfolioId);
 	}
 
 	public Optional<AssetBalance> findByPortfolioAndAsset(@NotNull Long portfolioId, @NotNull String assetSymbol) {
 		Objects.requireNonNull(portfolioId, "portfolioId");
 		Objects.requireNonNull(assetSymbol, "assetSymbol");
-		return repository.findByPortfolioAndAsset(portfolioId, assetSymbol);
+		return assetBalanceRepository.findByPortfolioAndAsset(portfolioId, assetSymbol);
 	}
 
 	public Optional<AssetBalance> findByPortfolioAndAsset(@NotNull Long portfolioId, @NotNull Long assetId) {
 		Objects.requireNonNull(portfolioId, "portfolioId");
 		Objects.requireNonNull(assetId, "assetId");
-		return repository.findByPortfolioAndAsset(portfolioId, assetId);
+		return assetBalanceRepository.findByPortfolioAndAsset(portfolioId, assetId);
 	}
 
 	@Transactional
-	public AssetBalance createNew(@NotNull Long portfolioId, @NotNull String assetSymbol) {
-		Optional<AssetBalance> existing = findByPortfolioAndAsset(portfolioId, assetSymbol);
-
-		if (existing.isPresent())
-			throw new IllegalStateException("AssetBalance already exists -> #%d and %s".formatted(portfolioId, assetSymbol));
-
-		Portfolio portfolio = portfolioService.findById(portfolioId)
-				.orElseThrow(() -> new IllegalArgumentException("Cannot find portfolio: #" + portfolioId));
-
-		Asset asset = assetService.findBySymbol(assetSymbol)
-				.orElseThrow(() -> new IllegalArgumentException("Cannot find asset: " + assetSymbol));
-
+	public AssetBalance createNew(@NotNull Portfolio portfolio, @NotNull Asset asset) {
 		AssetBalance assetBalance = new AssetBalance();
 		assetBalance.setPortfolio(portfolio);
 		assetBalance.setAsset(asset);
@@ -95,14 +80,38 @@ public class AssetBalanceService {
 	}
 
 	@Transactional
-	private AssetBalance save(@NotNull AssetBalance assetBalance) {
+	public AssetBalance save(@NotNull AssetBalance assetBalance) {
 		assetBalance.setLastTimeUpdated(LocalDateTime.now());
+		validate(assetBalance);
 		try {
-			validate(assetBalance);
-			return repository.save(assetBalance);
+			return assetBalanceRepository.save(assetBalance);
 		} catch (Exception e) {
 			throw new InternalUnexpectedException(e);
 		}
+	}
+
+	@Transactional
+	public void delete(@NotNull Long assetBalanceId) {
+		try {
+			assetBalanceRepository.deleteById(assetBalanceId);
+			log.info("Deleted successfully transaction: #{}", assetBalanceId);
+		} catch (Exception e) {
+			log.error("Failed to delete transaction: #{}", assetBalanceId, e);
+			throw new InternalUnexpectedException(e);
+		}
+	}
+
+	@Transactional
+	public void deleteAll(@NotNull List<AssetBalance> assetBalances) {
+		int size = assetBalances.size();
+		log.info("Deleting {} assetBalances", size);
+		try {
+			assetBalanceRepository.deleteAll(assetBalances);
+		} catch (Exception e) {
+			log.error("Failed to delete {} assetBalances", size, e);
+			throw new InternalUnexpectedException(e);
+		}
+		log.info("Deleted successfully {} assetBalances", size);
 	}
 
 	/**

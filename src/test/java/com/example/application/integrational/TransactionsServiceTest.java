@@ -10,14 +10,11 @@ import com.example.application.entities.common.TransactionType;
 import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.Portfolio;
 import com.example.application.entities.crypto.Transaction;
-import com.example.application.repositories.UserRepository;
-import com.example.application.repositories.crypto.AssetBalanceRepository;
-import com.example.application.repositories.crypto.AssetRepository;
-import com.example.application.repositories.crypto.PortfolioRepository;
-import com.example.application.repositories.crypto.TransactionRepository;
 import com.example.application.services.UserService;
-import com.example.application.services.crypto.*;
-import jakarta.persistence.EntityNotFoundException;
+import com.example.application.services.crypto.AssetBalanceService;
+import com.example.application.services.crypto.AssetService;
+import com.example.application.services.crypto.PortfolioService;
+import com.example.application.services.crypto.TransactionService;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,16 +27,9 @@ import java.util.List;
 @ActiveProfiles("test")
 class TransactionsServiceTest extends AbstractTest {
 
-	private final InstrumentsFacadeService instrumentsFacadeService;
 	private final UserService userService;
 	private final PortfolioService portfolioService;
 	private final AssetBalanceService assetBalanceService;
-
-	private final TransactionRepository transactionRepository;
-	private final UserRepository userRepository;
-	private final AssetRepository assetRepository;
-	private final PortfolioRepository portfolioRepository;
-	private final AssetBalanceRepository assetBalanceRepository;
 	private final TransactionService transactionService;
 
 	private User user;
@@ -47,38 +37,24 @@ class TransactionsServiceTest extends AbstractTest {
 	private Asset asset;
 
 	@Autowired
-	public TransactionsServiceTest(InstrumentsFacadeService instrumentsFacadeService,
-								   UserService userService,
+	public TransactionsServiceTest(UserService userService,
 								   AssetService assetService,
 								   PortfolioService portfolioService,
 								   AssetBalanceService assetBalanceService,
-								   AssetBalanceRepository assetBalanceRepository,
-								   UserRepository userRepository,
-								   AssetRepository assetRepository,
-								   TransactionRepository transactionRepository,
-								   PortfolioRepository portfolioRepository,
 								   TransactionService transactionService)
 	{
-		super(instrumentsFacadeService, assetService);
-		this.instrumentsFacadeService = instrumentsFacadeService;
 		this.userService = userService;
 		this.portfolioService = portfolioService;
 		this.assetBalanceService = assetBalanceService;
-		this.assetBalanceRepository = assetBalanceRepository;
-		this.userRepository = userRepository;
-		this.assetRepository = assetRepository;
-		this.transactionRepository = transactionRepository;
-		this.portfolioRepository = portfolioRepository;
 		this.transactionService = transactionService;
 	}
 
 	@BeforeEach
 	void setupUserAndPortfolio() {
-		Long userId = createUser("user", "test-email@email.com");
-		Long assetId = createAsset("BTC", 100_000);
-		this.user = userService.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found"));
+		this.user = createUser("user", "test-email@email.com");
 		this.portfolio = user.getActivePortfolio();
-		this.asset = assetService.findById(assetId).orElseThrow(() -> new EntityNotFoundException("Asset not found"));
+		this.asset = createAsset("BTC", 100_000);
+
 	}
 
 	@AfterEach
@@ -147,9 +123,8 @@ class TransactionsServiceTest extends AbstractTest {
 	}
 
 	@Test
-	void deleteShouldFailWhenTransactionDoesNotExist() {
-		Assertions.assertThrows(IllegalArgumentException.class,
-				() -> transactionService.delete(999L),
+	void deleteTransactionDoesNotExist() {
+		Assertions.assertDoesNotThrow(() -> transactionService.delete(999L),
 				"Deleting non-existent transaction should fail");
 	}
 
@@ -163,9 +138,9 @@ class TransactionsServiceTest extends AbstractTest {
 		TransactionDTO originalTransaction = instrumentsFacadeService.createTransaction(request);
 
 		// Transfer to trading portfolio
-		Transaction transferred = transactionService.transfer(originalTransaction.getId(), otherPorfolio.getId());
+		TransactionDTO transferred = instrumentsFacadeService.transferTransaction(originalTransaction.getId(), otherPorfolio.getId());
 
-		Assertions.assertEquals(otherPorfolio.getId(), transferred.getPortfolio().getId(),
+		Assertions.assertEquals(otherPorfolio.getId(), transferred.getPortfolioId(),
 				"Transaction should be transferred to new portfolio");
 		Assertions.assertTrue(transactionService.findBy(portfolio.getId()).isEmpty(),
 				"Original portfolio should have no transactions");

@@ -1,11 +1,9 @@
 package com.example.application.services.crypto;
 
-import com.example.application.data.dtos.PortfolioDTO;
 import com.example.application.data.requests.portfolio.CreatePortfolioRequest;
 import com.example.application.entities.User;
 import com.example.application.entities.crypto.Portfolio;
 import com.example.application.repositories.crypto.PortfolioRepository;
-import com.example.application.services.UserService;
 import com.example.application.utils.common.lang.StringUtils;
 import com.example.application.utils.exceptions.InternalUnexpectedException;
 import com.example.application.utils.exceptions.InvalidDataException;
@@ -26,7 +24,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class PortfolioService {
 
-	private final UserService userService;
 	private final PortfolioRepository portfolioRepository;
 
 	//<editor-fold desc="SEARCH">
@@ -44,27 +41,6 @@ public class PortfolioService {
 		return portfolioRepository.findByNameAndUser(portfolioName, userId);
 	}
 	//</editor-fold>
-
-	@Transactional
-	public void delete(Long portfolioId) {
-		log.info("Deleting portfolio: #{}", portfolioId);
-		Portfolio portfolio = findById(portfolioId)
-				.orElseThrow(() -> new IllegalArgumentException("Invalid portfolio: #%d".formatted(portfolioId)));
-
-		User user = portfolio.getUser();
-		List<Portfolio> userPortfolios = findByUserId(user.getId());
-
-		if (userPortfolios.size() == 1)
-			throw new InvalidDataException("Cannot delete the last remaining portfolio");
-
-		Portfolio latestUpdatedPortfolio = findLatestUpdatedPortfolio(user.getId());
-		setPortfolioAsActive(latestUpdatedPortfolio.getId());
-
-		user.getPortfolios().remove(portfolio);
-		portfolioRepository.deleteById(portfolioId);
-
-		log.info("Portfolio #{}, was deleted successfully", portfolioId);
-	}
 
 	@Transactional
 	public void setPortfolioAsActive(Long portfolioId) {
@@ -95,12 +71,9 @@ public class PortfolioService {
 
 	@NotNull
 	@Transactional
-	public PortfolioDTO createPortfolio(@NotNull CreatePortfolioRequest request) {
+	public Portfolio createPortfolio(@NotNull CreatePortfolioRequest request, User user) {
 		log.info("Creating new portfolio: {}", request);
 		Objects.requireNonNull(request, "request");
-
-		User user = userService.findById(request.getUserId())
-				.orElseThrow(() -> new IllegalArgumentException("User #" + request.getUserId() + " not found. (deleted ?)"));
 
 		String portfolioName = request.getPortfolioName();
 		if (findByNameAndUser(portfolioName, request.getUserId()).isPresent())
@@ -109,10 +82,7 @@ public class PortfolioService {
 		Portfolio portfolio = new Portfolio();
 		portfolio.setName(portfolioName);
 		portfolio.setUser(user);
-
-		Portfolio saved = save(portfolio);
-		userService.setPortfolioAsActive(user.getId(), saved);
-		return new PortfolioDTO(saved);
+		return save(portfolio);
 	}
 
 	@Transactional
@@ -121,13 +91,55 @@ public class PortfolioService {
 		preValidation(portfolio);
 		try {
 			Portfolio savedPortfolio = portfolioRepository.save(portfolio);
-//			postValidation(savedPortfolio);
 			log.info("Saved successfully {}", savedPortfolio);
 			return savedPortfolio;
 		} catch (Exception e) {
 			log.error("Failed to save {}", portfolio, e);
 			throw new InternalUnexpectedException(e);
 		}
+	}
+
+	@Transactional
+	public void delete(Long portfolioId) {
+		log.info("Deleting portfolio: #{}", portfolioId);
+		Portfolio portfolio = findById(portfolioId)
+				.orElseThrow(() -> new IllegalArgumentException("Invalid portfolio: #%d".formatted(portfolioId)));
+
+		User user = portfolio.getUser();
+		List<Portfolio> userPortfolios = findByUserId(user.getId());
+
+		if (userPortfolios.size() == 1)
+			throw new InvalidDataException("Cannot delete the last remaining portfolio");
+
+		Portfolio latestUpdatedPortfolio = findLatestUpdatedPortfolio(user.getId());
+		setPortfolioAsActive(latestUpdatedPortfolio.getId());
+
+		user.getPortfolios().remove(portfolio);
+
+		try {
+			portfolioRepository.deleteById(portfolioId);
+			log.info("Portfolio #{}, was deleted successfully", portfolioId);
+		} catch (Exception e) {
+			throw new InternalUnexpectedException(e);
+		}
+	}
+
+	@Transactional
+	public void deleteAll(@NotNull List<Portfolio> portfolios) {
+		int size = portfolios.size();
+		log.info("Deleting {} portfolios", size);
+		try {
+			portfolioRepository.deleteAll(portfolios);
+		} catch (Exception e) {
+			log.error("Failed to delete {} portfolios", size, e);
+			throw new InternalUnexpectedException(e);
+		}
+		log.info("Deleted successfully {} portfolios", size);
+	}
+
+	@Transactional
+	public void deleteAllUserPortfolios(Long userId) {
+		deleteAll(findByUserId(userId));
 	}
 
 	private void preValidation(Portfolio portfolio) {

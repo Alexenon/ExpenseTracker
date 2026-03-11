@@ -1,8 +1,6 @@
 package com.example.application.services.crypto;
 
 import com.example.application.entities.common.TransactionType;
-import com.example.application.entities.crypto.Asset;
-import com.example.application.entities.crypto.AssetBalance;
 import com.example.application.entities.crypto.Portfolio;
 import com.example.application.entities.crypto.Transaction;
 import com.example.application.repositories.crypto.TransactionRepository;
@@ -36,8 +34,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class TransactionService {
 
-	private final PortfolioService portfolioService;
-	private final AssetBalanceService assetBalanceService;
 	private final TransactionRepository transactionRepository;
 
 	//<editor-fold desc="SEARCH">
@@ -76,18 +72,9 @@ public class TransactionService {
 
 	@NotNull
 	@Transactional
-	public Transaction transfer(@NotNull Long transactionId, @NotNull Long portfolioId) {
-		return transfer(transactionId, portfolioId, false);
-	}
-
-	@NotNull
-	@Transactional
-	public Transaction transfer(@NotNull Long transactionId, @NotNull Long portfolioId, boolean replace) {
+	public Transaction transfer(@NotNull Long transactionId, @NotNull Portfolio portfolio, boolean replace) {
 		Transaction oldTransaction = findById(transactionId)
 				.orElseThrow(() -> new IllegalArgumentException("There is no such transaction with id: #" + transactionId));
-
-		Portfolio portfolio = portfolioService.findById(portfolioId)
-				.orElseThrow(() -> new IllegalArgumentException("There is no such portfolio with id: #" + transactionId));
 
 		Transaction newTransaction = new Transaction(oldTransaction);
 		newTransaction.setPortfolio(portfolio);
@@ -110,9 +97,9 @@ public class TransactionService {
 	@NotNull
 	@Transactional
 	public Transaction save(@NotNull Transaction transaction) {
+		log.info("Saving {}", transaction);
 		validate(transaction);
 		try {
-			updateAssetBalance(transaction);
 			Transaction savedTransaction = transactionRepository.save(transaction);
 			log.info("Saved successfully {}", savedTransaction);
 			return savedTransaction;
@@ -126,29 +113,33 @@ public class TransactionService {
 
 	@Transactional
 	public void delete(@NotNull Long transactionId) {
-		Objects.requireNonNull(transactionId, "transactionId");
-		Transaction transaction = findById(transactionId)
-				.orElseThrow(() -> new IllegalArgumentException("Cannot delete an unexistent transaction: #" + transactionId));
-
 		try {
-			transactionRepository.delete(transaction);
-			log.info("Deleted successfully {}", transaction);
+			log.info("Deleting transaction :#{}", transactionId);
+			transactionRepository.deleteById(transactionId);
+			log.info("Deleted successfully transaction: #{}", transactionId);
 		} catch (Exception e) {
-			log.error("Failed to delete {}", transaction, e);
+			log.error("Failed to delete transaction: #{}", transactionId, e);
 			throw new InternalUnexpectedException(e);
 		}
 	}
 
-	private void updateAssetBalance(Transaction transaction) {
-		Asset asset = transaction.getAsset();
-		Portfolio portfolio = transaction.getPortfolio();
+	@Transactional
+	public void deleteAll(@NotNull List<Transaction> transactions) {
+		int numberOfTransactions = transactions.size();
+		log.info("Deleting {} transactions", numberOfTransactions);
+		try {
+			transactionRepository.deleteAll(transactions);
+		} catch (Exception e) {
+			log.error("Failed to delete {} transactions", numberOfTransactions, e);
+			throw new InternalUnexpectedException(e);
+		}
+		log.info("Deleted successfully {} transactions", numberOfTransactions);
+	}
 
-		AssetBalance assetBalance = assetBalanceService.findByPortfolioAndAsset(portfolio.getId(), asset.getSymbol())
-				.orElseGet(() -> assetBalanceService.createNew(portfolio.getId(), asset.getSymbol()));
-
-		// Saving current avgBuyPrice before updating it
-		transaction.setAvgBuyPriceAtMoment(assetBalance.getAvgBuyPrice());
-		assetBalanceService.update(assetBalance, transaction);
+	@Transactional
+	public void deleteAllPorfolioTransactions(@NotNull Long portfolioId) {
+		log.info("Deleting all transactions for poftfolio #{}", portfolioId);
+		deleteAll(findBy(portfolioId));
 	}
 
 	private void validate(Transaction transaction) {

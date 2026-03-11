@@ -7,11 +7,12 @@ import com.example.application.entities.common.TransactionType;
 import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.AssetBalance;
 import com.example.application.entities.crypto.Portfolio;
-import com.example.application.repositories.crypto.AssetBalanceRepository;
-import com.example.application.repositories.crypto.PortfolioRepository;
-import com.example.application.repositories.crypto.TransactionRepository;
+import com.example.application.entities.crypto.Transaction;
 import com.example.application.services.UserService;
-import com.example.application.services.crypto.*;
+import com.example.application.services.crypto.AssetBalanceService;
+import com.example.application.services.crypto.AssetService;
+import com.example.application.services.crypto.PortfolioService;
+import com.example.application.services.crypto.TransactionService;
 import com.example.application.utils.exceptions.InvalidBalanceAmountException;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.*;
@@ -27,49 +28,34 @@ import java.util.Optional;
 @ActiveProfiles("test")
 class AssetBalanceServiceTest extends AbstractTest {
 
-	private final InstrumentsFacadeService instrumentsFacadeService;
 	private final UserService userService;
 	private final PortfolioService portfolioService;
-	private final AssetBalanceService assetBalanceService;
-
-	private final TransactionRepository transactionRepository;
-	private final PortfolioRepository portfolioRepository;
-	private final AssetBalanceRepository assetBalanceRepository;
 	private final TransactionService transactionService;
+	private final AssetBalanceService assetBalanceService;
 
 	private User user;
 	private Portfolio portfolio;
 	private Asset asset;
 
 	@Autowired
-	public AssetBalanceServiceTest(InstrumentsFacadeService instrumentsFacadeService,
-								   UserService userService,
-								   AssetService assetService,
-								   PortfolioService portfolioService,
-								   AssetBalanceService assetBalanceService,
-								   AssetBalanceRepository assetBalanceRepository,
-								   TransactionRepository transactionRepository,
-								   PortfolioRepository portfolioRepository,
-								   TransactionService transactionService)
+	public AssetBalanceServiceTest(
+			UserService userService,
+			AssetService assetService,
+			PortfolioService portfolioService,
+			AssetBalanceService assetBalanceService,
+			TransactionService transactionService)
 	{
-		super(instrumentsFacadeService, assetService);
-		this.instrumentsFacadeService = instrumentsFacadeService;
 		this.userService = userService;
 		this.portfolioService = portfolioService;
 		this.assetBalanceService = assetBalanceService;
-		this.assetBalanceRepository = assetBalanceRepository;
-		this.transactionRepository = transactionRepository;
-		this.portfolioRepository = portfolioRepository;
 		this.transactionService = transactionService;
 	}
 
 	@BeforeEach
 	void setupUserAndPortfolio() {
-		Long userId = createUser("user", "test-email@email.com");
-		Long assetId = createAsset("BTC", 100_000);
-		this.user = userService.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found"));
+		this.user = createUser("user", "test-email@email.com");
+		this.asset = createAsset("BTC", 100_000);
 		this.portfolio = user.getActivePortfolio();
-		this.asset = assetService.findById(assetId).orElseThrow(() -> new EntityNotFoundException("Asset not found"));
 	}
 
 	@AfterEach
@@ -87,7 +73,7 @@ class AssetBalanceServiceTest extends AbstractTest {
 
 	@Test
 	void createNewAssetBalanceSuccessfully() {
-		AssetBalance created = assetBalanceService.createNew(portfolio.getId(), "BTC");
+		AssetBalance created = instrumentsFacadeService.createAssetBalance(portfolio, asset);
 
 		Assertions.assertNotNull(created.getId(), "AssetBalance ID should be generated");
 		Assertions.assertEquals(portfolio.getId(), created.getPortfolio().getId(), "Should belong to correct portfolio");
@@ -98,7 +84,7 @@ class AssetBalanceServiceTest extends AbstractTest {
 
 	@Test
 	void findByPortfolioAndAssetShouldReturnExistingBalance() {
-		AssetBalance created = assetBalanceService.createNew(portfolio.getId(), asset.getSymbol());
+		AssetBalance created = assetBalanceService.createNew(portfolio, asset);
 
 		AssetBalance found = assetBalanceService.findByPortfolioAndAsset(portfolio.getId(), asset.getSymbol())
 				.orElseThrow(() -> new EntityNotFoundException("Asset balance not found"));
@@ -110,12 +96,12 @@ class AssetBalanceServiceTest extends AbstractTest {
 	@Test
 	void updateShouldModifyExistingBalance() {
 		Long portfolioId = portfolio.getId();
-		Long assetId = createAsset("BTC", 100_000);
-		Long transactionId = createTransaction("BTC", 100_000, portfolioId);
+		Asset asset = createAsset("BTC", 100_000);
+		Transaction transaction = createTransaction("BTC", 100_000, portfolioId);
 
-		Assertions.assertTrue(transactionService.findById(transactionId).isPresent(), "Transaction was not created");
+		Assertions.assertTrue(transactionService.findById(transaction.getId()).isPresent(), "Transaction was not created");
 
-		AssetBalance assetBalance = assetBalanceService.findByPortfolioAndAsset(portfolioId, assetId)
+		AssetBalance assetBalance = assetBalanceService.findByPortfolioAndAsset(portfolioId, asset.getId())
 				.orElseThrow(() -> new EntityNotFoundException("Asset Balance is missing"));
 
 		Assertions.assertTrue(assetBalanceService.findById(assetBalance.getId()).isPresent(),
@@ -139,7 +125,7 @@ class AssetBalanceServiceTest extends AbstractTest {
 	void invalidTransactionShouldNotCreateAssetBalance() {
 		CreateTransactionRequest invalidRequest = buyTransaction(100_000, -100);
 
-		Assertions.assertThrows(IllegalArgumentException.class, () -> instrumentsFacadeService.createTransaction(invalidRequest),
+		Assertions.assertThrows(InvalidBalanceAmountException.class, () -> instrumentsFacadeService.createTransaction(invalidRequest),
 				"Invalid transaction was created");
 
 		Assertions.assertTrue(assetBalanceRepository.findByPortfolioAndAsset(portfolio.getId(), asset.getId()).isEmpty(),

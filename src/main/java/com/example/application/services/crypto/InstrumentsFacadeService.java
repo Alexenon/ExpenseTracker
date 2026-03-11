@@ -11,10 +11,7 @@ import com.example.application.data.requests.asset_watchers.UpdateAssetWatcherRe
 import com.example.application.data.requests.portfolio.CreatePortfolioRequest;
 import com.example.application.entities.User;
 import com.example.application.entities.common.TransactionType;
-import com.example.application.entities.crypto.Asset;
-import com.example.application.entities.crypto.AssetWatcher;
-import com.example.application.entities.crypto.Portfolio;
-import com.example.application.entities.crypto.Transaction;
+import com.example.application.entities.crypto.*;
 import com.example.application.services.SecurityService;
 import com.example.application.services.UserService;
 import com.example.application.utils.exceptions.InternalUnexpectedException;
@@ -87,6 +84,14 @@ public class InstrumentsFacadeService {
 		return UserDTO.mappedFrom(userEntity);
 	}
 
+	@Transactional
+	public void deleteUser(Long userId) {
+		log.info("Starting deleting user #{} in batch", userId);
+		deletePortfolios(portfolioService.findByUserId(userId));
+		userService.delete(userId);
+		log.info("Finished deleting user #{} in batch", userId);
+	}
+
 	public boolean isUsernameTaken(String username) {
 		return userService.isUsernameTaken(username);
 	}
@@ -123,10 +128,12 @@ public class InstrumentsFacadeService {
 		return userAssetService.isAssetMarkedAsFavorite(getAuthenticatedUser().getId(), assetSymbol);
 	}
 
+	@Transactional
 	public void updateAssetComment(String assetSymbol, @Nullable String comment) {
 		userAssetService.updateAssetComment(getAuthenticatedUser().getId(), assetSymbol, comment);
 	}
 
+	@Transactional
 	public void updateMarkAssetAsFavorite(String assetSymbol, boolean isFavorite) {
 		userAssetService.updateMarkAssetAsFavorite(getAuthenticatedUser().getId(), assetSymbol, isFavorite);
 	}
@@ -167,11 +174,22 @@ public class InstrumentsFacadeService {
 				.toList();
 	}
 
-	public TransactionDTO transferTransaction(Long transactionId, Long portfolioId, boolean replace) {
-		return new TransactionDTO(transactionService.transfer(transactionId, portfolioId, replace));
+	@Transactional
+	public TransactionDTO transferTransaction(Long transactionId, Long portfolioId) {
+		return transferTransaction(transactionId, portfolioId, false);
 	}
 
+	@Transactional
+	public TransactionDTO transferTransaction(Long transactionId, Long portfolioId, boolean replace) {
+		Portfolio portfolio = portfolioService.findById(portfolioId)
+				.orElseThrow(() -> new IllegalArgumentException("There is no such portfolio with id: #" + transactionId));
+
+		return new TransactionDTO(transactionService.transfer(transactionId, portfolio, replace));
+	}
+
+	@Transactional
 	public TransactionDTO createTransaction(CreateTransactionRequest request) {
+		log.info("Creating new transaction: {}", request);
 		Transaction transaction = new Transaction();
 
 		Asset asset = assetService.findBySymbol(request.getAssetSymbol())
@@ -189,11 +207,14 @@ public class InstrumentsFacadeService {
 		transaction.setNote(request.getNote());
 		transaction.setDateTime(request.getDateTime() != null ? request.getDateTime() : LocalDateTime.now());
 
+		updateAssetBalance(transaction);
 		Transaction savedEntity = transactionService.save(transaction);
 		return new TransactionDTO(savedEntity);
 	}
 
+	@Transactional
 	public TransactionDTO updateTransaction(UpdateTransactionRequest request) {
+		log.info("Updating transaction: {}", request);
 		Transaction transaction = transactionService.findById(request.getId())
 				.orElseThrow(() -> new IllegalArgumentException("Cannot find transaction with id: #" + request.getId()));
 
@@ -208,12 +229,14 @@ public class InstrumentsFacadeService {
 		transaction.setNote(request.getNote());
 		transaction.setDateTime(request.getDateTime());
 
+		updateAssetBalance(transaction);
 		Transaction savedEntity = transactionService.save(transaction);
 		return new TransactionDTO(savedEntity);
 	}
 	//</editor-fold>
 
 	//<editor-fold desc="ASSET WATCHERS">
+	@Transactional
 	public AssetWatcherDTO createAssetWatcher(CreateAssetWatcherRequest request) {
 		Asset asset = assetService.findBySymbol(request.getAssetSymbol())
 				.orElseThrow(() -> new IllegalArgumentException("Cannot find asset: " + request.getAssetSymbol()));
@@ -233,6 +256,7 @@ public class InstrumentsFacadeService {
 		return new AssetWatcherDTO(savedEntity);
 	}
 
+	@Transactional
 	public AssetWatcherDTO updateAssetWatcher(UpdateAssetWatcherRequest request) {
 		AssetWatcher entity = assetWatcherService.findById(request.getId())
 				.orElseThrow(() -> new IllegalArgumentException("Cannot find assetWatcher: #" + request.getId() + " (deleted ?)"));
@@ -296,13 +320,70 @@ public class InstrumentsFacadeService {
 				.findByPortfolioAndAsset(portfolioId, assetSymbol)
 				.map(AssetBalanceDTO::mappedFrom);
 	}
+
+	@Transactional
+	private void updateAssetBalance(Transaction transaction) {
+		Long assetId = transaction.getAsset().getId();
+		Long portfolioId = transaction.getPortfolio().getId();
+
+		Portfolio portfolio = portfolioService.findById(portfolioId)
+				.orElseThrow(() -> new IllegalArgumentException("Cannot find portfolio: #" + portfolioId));
+
+		Asset asset = assetService.findById(assetId)
+				.orElseThrow(() -> new IllegalArgumentException("Cannot find asset: #" + assetId));
+
+		AssetBalance assetBalance = assetBalanceService.findByPortfolioAndAsset(portfolio.getId(), asset.getSymbol())
+				.orElseGet(() -> createAssetBalance(portfolio, asset));
+
+		// Saving current avgBuyPrice before updating it
+		transaction.setAvgBuyPriceAtMoment(assetBalance.getAvgBuyPrice());
+		assetBalanceService.update(assetBalance, transaction);
+	}
+
+	@Transactional
+	public AssetBalance createAssetBalance(Portfolio portfolio, Asset asset) {
+		AssetBalance assetBalance = new AssetBalance();
+		assetBalance.setPortfolio(portfolio);
+		assetBalance.setAsset(asset);
+		return assetBalanceService.save(assetBalance);
+	}
 	//</editor-fold>
 
 	//<editor-fold desc="PORTFOLIOS">
 
 	@NotNull
+	@Transactional
 	public PortfolioDTO createPortfolio(@NotNull CreatePortfolioRequest request) {
-		return portfolioService.createPortfolio(request);
+		User user = userService.findById(request.getUserId())
+				.orElseThrow(() -> new IllegalArgumentException("User #" + request.getUserId() + " not found. (deleted ?)"));
+
+		Portfolio portfolio = portfolioService.createPortfolio(request, user);
+		userService.setPortfolioAsActive(user.getId(), portfolio);
+
+		return new PortfolioDTO(portfolio);
+	}
+
+	@Transactional
+	public void deletePortfolio(Long portfolioId) {
+		log.info("Starting deleting portfolio #{} in batch", portfolioId);
+		transactionService.deleteAllPorfolioTransactions(portfolioId);
+		List<AssetBalance> assetBalances = assetBalanceService.findByPortfolio(portfolioId);
+		assetBalanceService.deleteAll(assetBalances);
+		portfolioService.delete(portfolioId);
+		log.info("Finished deleting portfolio #{} in batch", portfolioId);
+	}
+
+	@Transactional
+	public void deletePortfolios(List<Portfolio> portfolios) {
+		int size = portfolios.size();
+		log.info("Starting deleting all portfolios #{} in batch", size);
+
+		for (Portfolio portfolio : portfolios) {
+			transactionService.deleteAllPorfolioTransactions(portfolio.getId());
+		}
+
+		portfolioService.deleteAll(portfolios);
+		log.info("Finished deleting all portfolios #{} in batch", size);
 	}
 
 	public Optional<PortfolioDTO> getPortfolioByName(String name) {

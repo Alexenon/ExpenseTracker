@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -137,8 +138,29 @@ public class UserService implements UserDetailsService {
 		}
 	}
 
-	public void delete(Long userId) {
-		userRepository.deleteById(userId);
+	@Transactional
+	public void delete(@NotNull Long userId) {
+		try {
+			log.info("Deleting user :#{}", userId);
+			userRepository.deleteById(userId);
+			log.info("Deleted successfully user: #{}", userId);
+		} catch (Exception e) {
+			log.error("Failed to delete user: #{}", userId, e);
+			throw new InternalUnexpectedException(e);
+		}
+	}
+
+	@Transactional
+	public void deleteAll(@NotNull List<User> users) {
+		int numberOfTransactions = users.size();
+		try {
+			log.info("Deleting {} users", numberOfTransactions);
+			userRepository.deleteAll(users);
+			log.info("Deleted successfully {} users", numberOfTransactions);
+		} catch (Exception e) {
+			log.error("Failed to delete {} users", numberOfTransactions, e);
+			throw new InternalUnexpectedException(e);
+		}
 	}
 
 	private void validate(User user) {

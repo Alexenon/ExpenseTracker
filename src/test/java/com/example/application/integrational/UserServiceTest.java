@@ -4,7 +4,9 @@ import com.example.application.Application;
 import com.example.application.data.dtos.UserDTO;
 import com.example.application.data.requests.RegisterUserRequest;
 import com.example.application.entities.User;
+import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.Portfolio;
+import com.example.application.entities.crypto.Transaction;
 import com.example.application.repositories.UserRepository;
 import com.example.application.services.UserService;
 import com.example.application.services.crypto.InstrumentsFacadeService;
@@ -21,14 +23,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@SuppressWarnings("DataFlowIssue")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = Application.class)
 @ActiveProfiles("test")
 @Transactional
-class UserServiceTest {
+class UserServiceTest extends AbstractTest {
 
 	private final UserService userService;
-	private final InstrumentsFacadeService instrumentsFacadeService;
 	private final UserRepository userRepository;
 	private final PortfolioService portfolioService;
 
@@ -39,7 +41,6 @@ class UserServiceTest {
 						   PortfolioService portfolioService)
 	{
 		this.userService = userService;
-		this.instrumentsFacadeService = instrumentsFacadeService;
 		this.userRepository = userRepository;
 		this.portfolioService = portfolioService;
 	}
@@ -68,10 +69,8 @@ class UserServiceTest {
 		Assertions.assertNotNull(user.getLastTimeUpdated(), "Last update timestamp should be set");
 		Assertions.assertNotNull(user.getTimeCreatedAt(), "Creation timestamp should be set");
 
-		Assertions.assertTrue(
-				userRepository.findByUsernameIgnoreCase("john").isPresent(),
-				"User should be retrievable from database"
-		);
+		Assertions.assertTrue(userRepository.findByUsernameIgnoreCase("john").isPresent(),
+				"User should be retrievable from database");
 	}
 
 	@Test
@@ -87,19 +86,10 @@ class UserServiceTest {
 
 		List<Portfolio> userPortfolios = portfolioService.findByUserId(createdUser.getId());
 
-		Assertions.assertEquals(
-				1,
-				userPortfolios.size(),
-				"User should have exactly one portfolio"
-		);
-
-		Portfolio mainPortfolioFirst = userPortfolios.getFirst();
-
-		Assertions.assertEquals(
-				"Main",
-				mainPortfolioFirst.getName(),
-				"Default portfolio name should be 'Main'"
-		);
+		Assertions.assertEquals(1, userPortfolios.size(),
+				"User should have exactly one portfolio");
+		Assertions.assertEquals("Main", userPortfolios.getFirst().getName(),
+				"Default portfolio name should be 'Main'");
 	}
 
 	@Test
@@ -138,13 +128,43 @@ class UserServiceTest {
 
 		Assertions.assertThrows(
 				IllegalArgumentException.class,
-				() -> userService.createNewUser(request),
+				() -> instrumentsFacadeService.createNewUser(request),
 				"Mismatched passwords should throw IllegalArgumentException"
 		);
-
-		Assertions.assertTrue(
-				userRepository.findByUsernameIgnoreCase("john").isEmpty(),
-				"User should not be persisted when validation fails"
-		);
+		Assertions.assertTrue(userRepository.findByUsernameIgnoreCase("john").isEmpty(),
+				"User should not be added to database with invalid fields");
+		Assertions.assertEquals(0, portfolioRepository.count(),
+				"No portfolio should be created, because user was not created");
 	}
+
+	@Test
+	void deleteUserTest() {
+		User user = createUser("test", "test-email.com");
+		Long defaultUserPortfolioId = user.getActivePortfolio().getId();
+
+		instrumentsFacadeService.deleteUser(user.getId());
+
+		Assertions.assertTrue(userRepository.findById(user.getId()).isEmpty(),
+				"User after deletion is not removed from database");
+		Assertions.assertTrue(portfolioRepository.findById(defaultUserPortfolioId).isEmpty(),
+				"User portfolio is not removed from database");
+	}
+
+	@Test
+	void deleteUserWithPortfolioAndTransactionsTest() {
+		User user = createUser("test", "test-email.com");
+
+		Portfolio secondPortfolio = createPortfolio("Second Portfolio", user.getId());
+		Asset asset = createAsset("BTC", 100_000);
+		Transaction transaction = createTransaction(asset.getSymbol(), 80_000, 1, secondPortfolio.getId());
+
+		instrumentsFacadeService.deleteUser(user.getId());
+		Assertions.assertTrue(userRepository.findById(user.getId()).isEmpty(),
+				"User after deletion is not removed from database");
+		Assertions.assertTrue(portfolioRepository.findById(secondPortfolio.getId()).isEmpty(),
+				"User portfolio after user deletion is not removed from database");
+		Assertions.assertTrue(transactionRepository.findById(transaction.getId()).isEmpty(),
+				"User transaction after user deletion is not removed from database");
+	}
+
 }

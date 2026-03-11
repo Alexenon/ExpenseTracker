@@ -14,9 +14,9 @@ public class CreateTransactionRequest {
 	private Long portfolioId;
 	private double marketPrice;
 	private double orderQuantity;
-	private TransactionType type;
+	private TransactionType type = TransactionType.BUY;
 	private String note;
-	private LocalDateTime dateTime;
+	private LocalDateTime dateTime = LocalDateTime.now();
 
 	public CreateTransactionRequest() {
 	}
