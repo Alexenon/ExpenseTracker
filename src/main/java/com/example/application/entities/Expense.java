@@ -4,6 +4,7 @@ import com.example.application.utils.common.formatters.CommonFormatters;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -12,11 +13,12 @@ import java.util.StringJoiner;
 
 @Data
 @Entity(name = "expenses")
+@EqualsAndHashCode(of = {"id", "name", "category", "user"})
 public class Expense {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @Column(name = "name", nullable = false)
     private String name;

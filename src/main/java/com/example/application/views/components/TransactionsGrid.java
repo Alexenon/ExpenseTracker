@@ -12,7 +12,7 @@ package com.example.application.views.components;
 
 import com.example.application.entities.common.TransactionType;
 import com.example.application.entities.crypto.Asset;
-import com.example.application.entities.crypto.CryptoTransaction;
+import com.example.application.entities.crypto.Transaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.utils.common.formatters.CommonFormatters;
 import com.example.application.utils.common.formatters.number.AmountFormatter;
@@ -20,8 +20,11 @@ import com.example.application.utils.common.formatters.number.CurrencyFormatter;
 import com.example.application.utils.common.formatters.number.PercentageFormatter;
 import com.example.application.utils.investment.ProfitUtils;
 import com.example.application.views.components.core.Container;
+import com.example.application.views.components.custom.dialogs.transactions.TransactionCreatedOrUpdatedEvent;
 import com.example.application.views.components.custom.dialogs.transactions.TransactionDetailsDialog;
 import com.example.application.views.components.custom.fields.AssetComboBox;
+import com.vaadin.flow.component.ComponentUtil;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.dataview.GridListDataView;
@@ -38,19 +41,18 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Consumer;
 
 public class TransactionsGrid extends Div {
+	private final InstrumentsFacadeService instrumentsFacadeService;
 
-    private final InstrumentsFacadeService instrumentsFacadeService;
-
-    private final AssetComboBox nameSearchField;
-    private final MultiSelectComboBox<TransactionType> typeSearchField = new MultiSelectComboBox<>("Transaction Type");
-    private final Grid<CryptoTransaction> grid = new Grid<>();
-    private final GridListDataView<CryptoTransaction> gridDataView = grid.setItems();
+	private final AssetComboBox nameSearchField;
+	private final MultiSelectComboBox<TransactionType> typeSearchField = new MultiSelectComboBox<>("Transaction Type");
+	private final Grid<Transaction> grid = new Grid<>();
+    private final GridListDataView<Transaction> gridDataView = grid.setItems();
 
     public TransactionsGrid(InstrumentsFacadeService instrumentsFacadeService) {
-        this.instrumentsFacadeService = instrumentsFacadeService;
+		this.instrumentsFacadeService = Objects.requireNonNull(instrumentsFacadeService, "instrumentsFacadeService");
+
         this.nameSearchField = new AssetComboBox(instrumentsFacadeService);
         initializeGrid();
         initializeGridColumns();
@@ -64,14 +66,16 @@ public class TransactionsGrid extends Div {
 
     private void initializeGrid() {
         grid.setColumnReorderingAllowed(true);
+		grid.addItemClickListener(row -> new TransactionDetailsDialog(row.getItem(), instrumentsFacadeService).open());
+		ComponentUtil.addListener(UI.getCurrent(), TransactionCreatedOrUpdatedEvent.class, event -> rebuildTable());
     }
 
     private void initializeGridColumns() {
         grid.addColumn(t -> t.getAsset().getSymbol()).setHeader("Name").setFrozen(true);
         grid.addColumn(quantityColumnRenderer()).setHeader("Quantity");
         grid.addColumn(priceColumnRenderer()).setHeader("Price");
-        grid.addColumn(priceColumnRenderer(CryptoTransaction::getOrderTotalCost)).setHeader("Total");
-        grid.addColumn(new LocalDateTimeRenderer<>(CryptoTransaction::getDateTime, CommonFormatters.DATE_FRIENDLY_FORMAT)).setHeader("Date");
+        grid.addColumn(priceColumnRenderer(Transaction::getOrderTotalCost)).setHeader("Total");
+        grid.addColumn(new LocalDateTimeRenderer<>(Transaction::getDateTime, CommonFormatters.DATE_FRIENDLY_FORMAT)).setHeader("Date");
         grid.addColumn(profitLossColumnRenderer()).setHeader("Profit/Loss").setFrozenToEnd(true);
         grid.getColumns().forEach(column -> {
             column.setSortable(true);
@@ -109,7 +113,7 @@ public class TransactionsGrid extends Div {
         });
     }
 
-    public void setItems(List<CryptoTransaction> transactions) {
+    public void setItems(List<Transaction> transactions) {
         grid.setItems(Objects.requireNonNull(transactions));
     }
 
@@ -117,14 +121,14 @@ public class TransactionsGrid extends Div {
         grid.setPageSize(size);
     }
 
-    private LitRenderer<CryptoTransaction> priceColumnRenderer() {
-        return LitRenderer.<CryptoTransaction>of("<p class='asset-price'>${item.price}</p>")
+    private LitRenderer<Transaction> priceColumnRenderer() {
+        return LitRenderer.<Transaction>of("<p class='asset-price'>${item.price}</p>")
                 .withProperty("price", t -> CurrencyFormatter.withDefaults().format(t.getMarketPrice()));
     }
 
-    private LitRenderer<CryptoTransaction> quantityColumnRenderer() {
+    private LitRenderer<Transaction> quantityColumnRenderer() {
         AmountFormatter amountFormatter = new AmountFormatter();
-        return LitRenderer.<CryptoTransaction>of("<p class='${item.className}'> ${item.quantity} ${item.symbol}</p>")
+        return LitRenderer.<Transaction>of("<p class='${item.className}'> ${item.quantity} ${item.symbol}</p>")
                 .withProperty("className", t -> t.isBuyTransaction() ? "value-increase" : "value-decrease")
                 .withProperty("quantity", t -> {
                     double quantity = t.getOrderQuantity();
@@ -134,11 +138,11 @@ public class TransactionsGrid extends Div {
                 .withProperty("symbol", t -> t.getAsset().getSymbol());
     }
 
-    private LitRenderer<CryptoTransaction> profitLossColumnRenderer() {
-        return LitRenderer.<CryptoTransaction>of("<div class='transaction-profit-loss ${item.className}'>" +
-                                                 "  <p class='text-l'>${item.profit}</p>" +
-                                                 "  <p class='text-s'>${item.profitPercentage}</p>" +
-                                                 "</div>")
+    private LitRenderer<Transaction> profitLossColumnRenderer() {
+        return LitRenderer.<Transaction>of("<div class='transaction-profit-loss ${item.className}'>" +
+                                           "  <p class='text-l'>${item.profit}</p>" +
+                                           "  <p class='text-s'>${item.profitPercentage}</p>" +
+                                           "</div>")
                 .withProperty("className", this::getProfitLossClassName)
                 .withProperty("profit", transaction -> {
                     double currentPrice = transaction.getAsset().getMarketPrice();
@@ -152,11 +156,11 @@ public class TransactionsGrid extends Div {
                 });
     }
 
-    private NumberRenderer<CryptoTransaction> priceColumnRenderer(ValueProvider<CryptoTransaction, Number> priceProvider) {
+    private NumberRenderer<Transaction> priceColumnRenderer(ValueProvider<Transaction, Number> priceProvider) {
         return new NumberRenderer<>(priceProvider, NumberFormat.getCurrencyInstance(Locale.US), "$0.00");
     }
 
-    private String getProfitLossClassName(CryptoTransaction transaction) {
+    private String getProfitLossClassName(Transaction transaction) {
         double currentPrice = transaction.getAsset().getMarketPrice();
         double profit = ProfitUtils.netProfit(transaction, currentPrice);
 
@@ -167,16 +171,9 @@ public class TransactionsGrid extends Div {
         return profit > 0 ? "value-increase" : "value-decrease";
     }
 
-    public void addUpdateItemListener(Consumer<?> listener) {
-        grid.addItemClickListener(row -> {
-            TransactionDetailsDialog detailsDialog = new TransactionDetailsDialog(row.getItem(), instrumentsFacadeService);
-            detailsDialog.open();
-            detailsDialog.addUpdateTransactionListener(l -> {
-                listener.accept(null);
-                grid.removeAllColumns();
-                initializeGridColumns();
-            });
-        });
-    }
+	public void rebuildTable() {
+		grid.removeAllColumns();
+		initializeGridColumns();
+	}
 
 }

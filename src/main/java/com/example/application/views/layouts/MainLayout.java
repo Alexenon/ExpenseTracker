@@ -66,12 +66,12 @@ public class MainLayout extends AppLayout {
         logoutIconTooltip.setPosition(Tooltip.TooltipPosition.BOTTOM);
 
         loginIcon.addClickListener(e -> {
-            UI.getCurrent().navigate(LoginView.class);
+            getUI().ifPresent(ui -> ui.navigate(LoginView.class));
             buildNavigationBar();
         });
 
         logoutIcon.addClickListener(e -> {
-            securityService.logout();
+            securityService.logout(UI.getCurrent());
             buildNavigationBar();
         });
 

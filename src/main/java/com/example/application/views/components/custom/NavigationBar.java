@@ -1,8 +1,8 @@
 package com.example.application.views.components.custom;
 
 import com.example.application.views.pages.HomeView;
-import com.example.application.views.pages.crypto.PortfolioTrackerView;
 import com.example.application.views.pages.crypto.calculator.AssetCalculatorView;
+import com.example.application.views.pages.crypto.portfolio.PortfolioTrackerView;
 import com.example.application.views.pages.expenses.DashboardView;
 import com.example.application.views.pages.expenses.ExpensesView;
 import com.vaadin.flow.component.Component;
@@ -15,7 +15,10 @@ import com.vaadin.flow.router.RouterLink;
 import java.util.List;
 
 /*
-    TODO: Add Contact Page
+    TODO: [LONG TERM]
+    	- Add Contact Page
+    	- Settings
+    	- Email confirmation
 * */
 
 @Tag(Tag.NAV)
@@ -24,9 +27,8 @@ public class NavigationBar extends Nav {
     private final Image logoImage = new Image("/images/logos/logo-white-background.png", "Logo image");
     private final RouterLink expensesLink = new RouterLink("Expenses", ExpensesView.class);
     private final RouterLink dashboardLink = new RouterLink("Dashboard", DashboardView.class);
-//    private final RouterLink yearlyLink = new RouterLink("Yearly", YearyExpensesView.class);
-    private final RouterLink calculatorLink = new RouterLink("Calculator", AssetCalculatorView.class);
-    private final RouterLink assetsLink = new RouterLink("Portfolio", PortfolioTrackerView.class);
+	private final RouterLink portfolioLink = new RouterLink("Portfolio", PortfolioTrackerView.class);
+	private final RouterLink calculatorLink = new RouterLink("Calculator", AssetCalculatorView.class);
 
     public NavigationBar() {
         addClassName("navbar");
@@ -47,7 +49,7 @@ public class NavigationBar extends Nav {
     }
 
     public List<Component> getRoutes() {
-        return List.of(expensesLink, dashboardLink, assetsLink, calculatorLink);
+        return List.of(expensesLink, dashboardLink, portfolioLink, calculatorLink);
     }
 
     public Image getLogo() {

@@ -1,6 +1,6 @@
 package com.example.application.utils.investment;
 
-import com.example.application.entities.crypto.CryptoTransaction;
+import com.example.application.entities.crypto.Transaction;
 import com.example.application.utils.common.lang.DateUtils;
 import com.example.application.utils.common.lang.MathUtils;
 import com.example.application.utils.common.lang.NumberUtils;
@@ -35,23 +35,13 @@ public class ProfitCalculator {
 		return (currentSellPrice - avgBuyPrice) * tokensSoldNow;
 	}
 
-	private static class Order {
-		double quantity;
-		double cost;
-
-		Order(double quantity, double cost) {
-			this.quantity = quantity;
-			this.cost = cost;
-		}
-	}
-
-	public static double getAverageBuyPrice(List<CryptoTransaction> transactions) {
+	public static double averageBuyPrice(List<Transaction> transactions) {
 		double totalCost = totalCostForBuyTransactions(transactions);
 		double totalQuantity = totalQuantityForBuyTransactions(transactions);
 		return calculateAveragePrice(totalCost, totalQuantity);
 	}
 
-	public static double getAverageSellPrice(List<CryptoTransaction> transactions) {
+	public static double averageSellPrice(List<Transaction> transactions) {
 		double totalSellCost = totalCostForSellTransactions(transactions);
 		double totalQuantitySold = totalQuantityForSellTransactions(transactions);
 		return calculateAveragePrice(totalSellCost, totalQuantitySold);
@@ -63,17 +53,28 @@ public class ProfitCalculator {
 	 * -----------------------------------------------------------------
 	 * */
 
+    private static class Order {
+        double quantity;
+        double cost;
+
+        Order(double quantity, double cost) {
+            this.quantity = quantity;
+            this.cost = cost;
+        }
+    }
+
+    // FIXME: TODO: [URGENT] HERE IS SOMETHING STRANGE
 	/**
 	 * Calculates the total realized profit from provided transactions
 	 *
 	 * <p>If there are just BUYS transactions, then the value will be {@code 0}
 	 */
-	public static double getRealizedProfit(List<CryptoTransaction> transactions) {
+	public static double realizedProfit(List<Transaction> transactions) {
 		double totalCost = 0.0;
 		double remainingQuantity = 0.0;
 		double realizedProfit = 0.0;
 
-		for (CryptoTransaction transaction : transactions) {
+		for (Transaction transaction : transactions) {
 			if (transaction.isBuyTransaction()) {
 				totalCost += transaction.getOrderTotalCost();
 				remainingQuantity += transaction.getOrderQuantity();
@@ -101,11 +102,11 @@ public class ProfitCalculator {
 	 * Calculates the cost of remaining tokens, where if contains SELL transactions, then the cost value
 	 * is substracted confirming with transaction order cost
 	 */
-	public static double getRemainingTokensCost(List<CryptoTransaction> transactions) {
+	public static double remainingTokensCost(List<Transaction> transactions) {
 		Queue<Order> fifoQueue = new LinkedList<>();
 		double remainingCost = 0.0;
 
-		for (CryptoTransaction transaction : transactions) {
+		for (Transaction transaction : transactions) {
 			if (transaction.isBuyTransaction()) {
 				Order newOrder = new Order(transaction.getOrderQuantity(), transaction.getOrderTotalCost());
 				fifoQueue.offer(newOrder);
@@ -140,7 +141,7 @@ public class ProfitCalculator {
 		return remainingCost;
 	}
 
-	public static String getBuySellRatio(List<CryptoTransaction> transactions) {
+	public static String buySellRatio(List<Transaction> transactions) {
 		if (transactions == null || transactions.isEmpty())
 			return "N/A";
 
@@ -154,35 +155,35 @@ public class ProfitCalculator {
 	}
 
     //region CALCULATION METHODS
-    public static double totalCostForBuyTransactions(List<CryptoTransaction> transactions) {
+    public static double totalCostForBuyTransactions(List<Transaction> transactions) {
         return transactions.stream()
-                .filter(CryptoTransaction::isBuyTransaction)
-                .mapToDouble(CryptoTransaction::getOrderTotalCost)
+                .filter(Transaction::isBuyTransaction)
+                .mapToDouble(Transaction::getOrderTotalCost)
                 .sum();
     }
 
-    public static double totalCostForSellTransactions(List<CryptoTransaction> transactions) {
+    public static double totalCostForSellTransactions(List<Transaction> transactions) {
         return transactions.stream()
-                .filter(CryptoTransaction::isSellTransaction)
-                .mapToDouble(CryptoTransaction::getOrderTotalCost)
+                .filter(Transaction::isSellTransaction)
+                .mapToDouble(Transaction::getOrderTotalCost)
                 .sum();
     }
 
-    public static double totalQuantityForBuyTransactions(List<CryptoTransaction> transactions) {
+    public static double totalQuantityForBuyTransactions(List<Transaction> transactions) {
         return transactions.stream()
-                .filter(CryptoTransaction::isBuyTransaction)
-                .mapToDouble(CryptoTransaction::getOrderQuantity)
+                .filter(Transaction::isBuyTransaction)
+                .mapToDouble(Transaction::getOrderQuantity)
                 .sum();
     }
 
-    public static double totalQuantityForSellTransactions(List<CryptoTransaction> transactions) {
+    public static double totalQuantityForSellTransactions(List<Transaction> transactions) {
         return transactions.stream()
-                .filter(CryptoTransaction::isSellTransaction)
-                .mapToDouble(CryptoTransaction::getOrderQuantity)
+                .filter(Transaction::isSellTransaction)
+                .mapToDouble(Transaction::getOrderQuantity)
                 .sum();
     }
 
-    public static double getAmountOfRemainingTokens(List<CryptoTransaction> transactions) {
+    public static double getAmountOfRemainingTokens(List<Transaction> transactions) {
         return totalQuantityForBuyTransactions(transactions) - totalQuantityForSellTransactions(transactions);
     }
 
@@ -190,10 +191,9 @@ public class ProfitCalculator {
         return MathUtils.safeDivision(totalCost, totalQuantity);
     }
 
-    private static long getHoldingTimeInDays(CryptoTransaction buyTransaction, CryptoTransaction sellTransaction) {
+    private static long getHoldingTimeInDays(Transaction buyTransaction, Transaction sellTransaction) {
         return DateUtils.daysBetween(buyTransaction.getDateTime(), sellTransaction.getDateTime());
     }
-
 	//endregion
 
 }

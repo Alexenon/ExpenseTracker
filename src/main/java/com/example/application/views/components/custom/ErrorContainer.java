@@ -16,7 +16,8 @@ public class ErrorContainer extends Div {
 
     private final H2 errorTitle;
     private final Paragraph errorDescription;
-    private final Image errorImage;
+	private final Image errorImage;
+	private final Div buttonContainer = new Div();
 
     public ErrorContainer() {
         addClassName("error-container");
@@ -36,11 +37,12 @@ public class ErrorContainer extends Div {
         goHomeBtn.addClassName("return-btn");
         goHomeBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         goHomeBtn.addClickListener(event -> getUI().ifPresent(ui -> ui.navigate(HomeView.class)));
+		buttonContainer.add(goHomeBtn);
 
         Div detailsContainer = new Div();
-        detailsContainer.add(errorTitle, errorDescription, goHomeBtn);
+        detailsContainer.add(errorTitle, errorDescription);
 
-        add(errorImage, detailsContainer);
+        add(errorImage, detailsContainer, buttonContainer);
     }
 
     public void setErrorTitle(String title) {
@@ -54,5 +56,9 @@ public class ErrorContainer extends Div {
     public void setImageSource(String src) {
         errorImage.setSrc(src);
     }
+
+	public Div getButtonContainer() {
+		return buttonContainer;
+	}
 
 }

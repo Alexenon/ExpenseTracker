@@ -2,7 +2,8 @@ package com.example.application.views.pages.crypto.calculator.tabs;
 
 import com.example.application.entities.common.TransactionType;
 import com.example.application.entities.crypto.Asset;
-import com.example.application.entities.crypto.CryptoTransaction;
+import com.example.application.entities.crypto.Portfolio;
+import com.example.application.entities.crypto.Transaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.utils.investment.ProfitCalculator;
@@ -31,21 +32,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 /*
-	TODO: Add dropdown stats component
+    TODO: Work on styling table
+        - https://colorlib.com/wp/css3-table-templates/
+        - Fix table is not displayed
+
+	TODO: Add dropdown-details with stats component
+	    - Posibility to open and close some details (as there are a lot of them)
 
 	TODO: Add buySellRatio with details:
 			- 30 : 70
 			- 4 buys ($340) : 9 sold ($1120)
-			The TradingVolume + BuySellRatio can be merged into one stat
+			===> The TradingVolume + BuySellRatio can be merged into one stat
 
 	TODO: Add Trading Volume with details:
 			-  BUY "3496 ARB = $220", avg buy ...
 			-  SELL "3496 ARB = $220", avg sell ...
 			-  TOTAL VOLUME: "3496 ARB = $220"
 			(maybe without decimal points for trading $ amount)
-
-	TODO: Add AvgBuy/Sell details
-			- 20 ARB / $220.00      (display average buy amount and average buy price)
 * */
 
 /*
@@ -58,6 +61,7 @@ import java.util.List;
 @Slf4j
 public class ProfitEmulatorTab extends BaseCalculatorTab {
 
+	private final Portfolio portfolio;
 	private final InstrumentsFacadeService instrumentsFacadeService;
 	private final PortfolioPerformanceTracker portfolioPerformanceTracker;
 
@@ -74,6 +78,7 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
 		this.instrumentsFacadeService = instrumentsFacadeService;
 		this.portfolioPerformanceTracker = portfolioPerformanceTracker;
 		this.assetSymbolField = new AssetComboBox(instrumentsFacadeService);
+		this.portfolio = instrumentsFacadeService.getMainPortfolio();
 	}
 
 	@Override
@@ -83,16 +88,13 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
 
 	private void buildTab() {
 		assetSymbolField.addValueChangeListener(field -> {
-			if (field.getHasValue().isEmpty()) {
+			if (field.getHasValue().isEmpty())
 				return;
-			}
 
 			Asset selectedAsset = field.getValue();
 			transactionalLayouts.forEach(layout -> layout.setValue(selectedAsset));
 			updateVisibilityForMetaData(selectedAsset);
 		});
-
-		add(metadataDetailsContainer);
 
 		assetSymbolField.getElement().getStyle()
 				.set("width", "350px")
@@ -105,10 +107,11 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
 		addNewLayoutBtn.addClickListener(e -> createNewLayout());
 		addNewLayoutBtn.addClassName("add-entity-btn");
 
-		TransactionalLayout defaultLayout = new TransactionalLayout(instrumentsFacadeService, portfolioPerformanceTracker);
+		TransactionalLayout defaultLayout = new TransactionalLayout(portfolio, instrumentsFacadeService, portfolioPerformanceTracker);
 		defaultLayout.addClassName("buy-sell-layout");
 		transactionalLayouts.add(defaultLayout);
 		layoutsContainer.add(defaultLayout);
+		add(metadataDetailsContainer);
 
 		return new Div(assetSymbolField, layoutsContainer, addNewLayoutBtn);
 	}
@@ -117,13 +120,13 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
 	protected Button createDisplayResultsBtn() {
 		Button button = new Button("Calculate", e -> {
 			String symbol = assetSymbolField.getSymbol();
-			List<CryptoTransaction> transactions = getListOfTransactions();
+			List<Transaction> transactions = getListOfTransactions();
 
 			double price = assetSymbolField.getSelectedAsset().getMarketPrice();
-			double avgBuy = ProfitCalculator.getAverageBuyPrice(transactions);
-			double avgSell = ProfitCalculator.getAverageSellPrice(transactions);
+			double avgBuy = ProfitCalculator.averageBuyPrice(transactions);
+			double avgSell = ProfitCalculator.averageSellPrice(transactions);
 			double amountOfRemainingTokens = ProfitCalculator.getAmountOfRemainingTokens(transactions);
-			double realizedProfit = ProfitCalculator.getRealizedProfit(transactions);  // TODO: HERE IS SOMETHING STRANGE
+			double realizedProfit = ProfitCalculator.realizedProfit(transactions);
 			double unrealizedProfit = amountOfRemainingTokens * assetSymbolField.getMarketPrice();
 			double totalProfit = realizedProfit + unrealizedProfit;
 
@@ -133,7 +136,7 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
 
 			String buyVolumeInfo = currencyFormatter.format(ProfitCalculator.totalCostForBuyTransactions(transactions));
 			String sellVolumeInfo = currencyFormatter.format(ProfitCalculator.totalCostForSellTransactions(transactions));
-			String remainingCostInfo = currencyFormatter.format(ProfitCalculator.getRemainingTokensCost(transactions));
+			String remainingCostInfo = currencyFormatter.format(ProfitCalculator.remainingTokensCost(transactions));
 
 			// COLOR:
 			//  - Total Profit (green)
@@ -153,7 +156,6 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
 					.addComponent(new Span(symbol))
 					.build();
 			ProfitStatsDisplay tokensLeft = new ProfitStatsDisplay("Amount of tokens left:", tokensLeftContainer);
-
 
 			resultsContainer.removeAll();
 			resultsContainer.add(
@@ -181,7 +183,7 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
 			);
 
 			metadataDetailsContainer.removeAll();
-			metadataDetailsContainer.add(getTable(assetSymbolField.getSelectedAsset(), avgBuy, avgSell));
+			metadataDetailsContainer.add(createTable(assetSymbolField.getSelectedAsset(), avgBuy, avgSell));
 		});
 		button.addClassName("add-entity-btn");
 		return button;
@@ -196,7 +198,7 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
 	}
 
 	private void createNewLayout() {
-		TransactionalLayout newLayout = new TransactionalLayout(instrumentsFacadeService, portfolioPerformanceTracker);
+		TransactionalLayout newLayout = new TransactionalLayout(portfolio, instrumentsFacadeService, portfolioPerformanceTracker);
 		newLayout.addClassName("buy-sell-layout");
 
 		MonoIcon deleteBtn = PictogramIcon.TRASH_CAN_OUTLINE.create();
@@ -210,7 +212,7 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
 		layoutsContainer.add(newLayout);
 	}
 
-	private List<CryptoTransaction> getListOfTransactions() {
+	private List<Transaction> getListOfTransactions() {
 		return transactionalLayouts.stream()
 				.map(layout -> {
 					Asset selectedAsset = assetSymbolField.getSelectedAsset();
@@ -218,12 +220,12 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
 					double orderTotalCost = layout.getTotalCostField().doubleValue();
 					TransactionType type = layout.getTypeField().getValue();
 
-					return new CryptoTransaction(selectedAsset, marketPrice, orderTotalCost, type);
+					return new Transaction(selectedAsset, marketPrice, orderTotalCost, type);
 				}).toList();
 	}
 
 	// TODO: Update this
-	private Html getTable(Asset asset, double averageBuyPrice, double averageSellPrice) {
+	private Html createTable(Asset asset, double averageBuyPrice, double averageSellPrice) {
 		double currentPrice = asset.getMarketPrice();
 
 		BigInteger totalMarketSupply = asset.getTotalSupply();

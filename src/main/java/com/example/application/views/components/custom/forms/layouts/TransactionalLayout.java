@@ -2,6 +2,7 @@ package com.example.application.views.components.custom.forms.layouts;
 
 import com.example.application.entities.common.TransactionType;
 import com.example.application.entities.crypto.Asset;
+import com.example.application.entities.crypto.Portfolio;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.utils.common.lang.MathUtils;
@@ -13,6 +14,7 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 
 public class TransactionalLayout extends Div {
 
+    private final Portfolio portfolio;
     private final InstrumentsFacadeService instrumentsFacadeService;
     private final PortfolioPerformanceTracker portfolioPerformanceTracker;
 
@@ -21,8 +23,10 @@ public class TransactionalLayout extends Div {
     private final CurrencyField totalCostField = new CurrencyField("Total");
     private final Select<TransactionType> typeField = new Select<>();
 
-    public TransactionalLayout(InstrumentsFacadeService instrumentsFacadeService,
+    public TransactionalLayout(Portfolio portfolio,
+                               InstrumentsFacadeService instrumentsFacadeService,
                                PortfolioPerformanceTracker portfolioPerformanceTracker) {
+        this.portfolio = portfolio;
         this.instrumentsFacadeService = instrumentsFacadeService;
         this.portfolioPerformanceTracker = portfolioPerformanceTracker;
         initializeFields();
@@ -69,7 +73,7 @@ public class TransactionalLayout extends Div {
             return;
         }
 
-        double amountOfTokens = instrumentsFacadeService.getAmountOfTokens(asset);
+        double amountOfTokens = instrumentsFacadeService.getAmountOfTokens(portfolio, asset);
         amountField.setValue(amountOfTokens);
         marketPriceField.setValue(getAvgPriceByType(asset));
         totalCostField.setValue(amountOfTokens * marketPriceField.doubleValue());
@@ -78,12 +82,12 @@ public class TransactionalLayout extends Div {
     // TODO: Dont use avg price for marketPrice, use current price
     //  - But add another field with average buy, current amount
     private double getAvgPriceByType(Asset asset) {
-        if(instrumentsFacadeService.getTransactionsByAsset(asset).isEmpty())
+        if(instrumentsFacadeService.getTransactionsByAsset(portfolio, asset).isEmpty())
             return asset.getMarketPrice();
 
-        return typeField.getValue().equals(TransactionType.BUY)
-                ? portfolioPerformanceTracker.getAverageBuyPrice(asset)
-                : portfolioPerformanceTracker.getAverageSellPrice(asset);
+        return typeField.getValue().isBuyTransaction()
+                ? portfolioPerformanceTracker.getAverageBuyPrice(portfolio, asset)
+                : portfolioPerformanceTracker.getAverageSellPrice(portfolio, asset);
     }
 
     public Select<TransactionType> getTypeField() {

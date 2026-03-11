@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 public final class TextFieldValidationSupport implements Serializable {
 
     private final HasValue<?, String> field;
-    private boolean required;
+    private boolean required = true;
     private Integer minLength;
     private Integer maxLength;
     private Pattern pattern;

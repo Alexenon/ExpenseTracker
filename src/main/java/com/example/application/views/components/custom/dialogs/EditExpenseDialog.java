@@ -131,7 +131,7 @@ public class EditExpenseDialog extends Dialog implements HasNotifications {
 
         binder.forField(amountField)
                 .asRequired("Please fill this field")
-                .withValidator(new DoubleRangeValidator("Invalid decimal value", (double) 0, Double.MAX_VALUE))
+                .withValidator(new DoubleRangeValidator("Invalid decimal value", 0.0, Double.MAX_VALUE))
                 .withValidator(amount -> amount >= 0, "Amount should be greater or equal to 0")
                 .bind(ExpenseRequest::getAmount, ExpenseRequest::setAmount);
 

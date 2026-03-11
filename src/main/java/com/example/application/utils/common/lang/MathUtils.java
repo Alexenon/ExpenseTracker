@@ -11,6 +11,10 @@ import static com.example.application.utils.investment.ProfitUtils.ONE_HUNDRED_P
 
 public class MathUtils {
 
+    private MathUtils() {
+        /* Hidden constructor */
+    }
+
     /**
      * @return a number that is either positive or negative depending on the provided {@code isPositive} value
      * */

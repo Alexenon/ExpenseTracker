@@ -7,6 +7,10 @@ import java.time.temporal.TemporalAdjusters;
 
 public class DateUtils {
 
+    private DateUtils() {
+        /* Hidden constructor */
+    }
+
     public static boolean isInSameMonthAndYear(LocalDate dateToCheck, LocalDate currentDate) {
         return dateToCheck.getYear() == currentDate.getYear() && dateToCheck.getMonth() == currentDate.getMonth();
     }

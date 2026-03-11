@@ -1,7 +1,8 @@
 package com.example.application.views.components.custom.dialogs.transactions.export;
 
 import com.example.application.data.dtos.migration.TransactionModel;
-import com.example.application.entities.crypto.CryptoTransaction;
+import com.example.application.entities.crypto.Portfolio;
+import com.example.application.entities.crypto.Transaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.utils.common.parsers.CSVParser;
 import com.example.application.views.components.core.Container;
@@ -28,9 +29,11 @@ public class ExportTransactionDialog extends Dialog implements HasNotifications 
     private final DatePicker to = new DatePicker("To");
     private final Download download = new Download();
 
-    private List<CryptoTransaction> transactions;
+    private final Portfolio portfolio;
+    private List<Transaction> transactions;
 
-    public ExportTransactionDialog(InstrumentsFacadeService instrumentsFacadeService) {
+    public ExportTransactionDialog(Portfolio portfolio, InstrumentsFacadeService instrumentsFacadeService) {
+        this.portfolio = portfolio;
         this.instrumentsFacadeService = instrumentsFacadeService;
         initialize();
     }
@@ -52,7 +55,7 @@ public class ExportTransactionDialog extends Dialog implements HasNotifications 
             to.setVisible(value.equals("Custom"));
 
             switch (value) {
-                case "All" -> updateDownloadedItems(instrumentsFacadeService.getAllTransactions());
+                case "All" -> updateDownloadedItems(instrumentsFacadeService.getTransactions(portfolio));
                 case "Last month" -> updateDownloadedItems(currentDate.minusMonths(1));
                 case "Last 3 months" -> updateDownloadedItems(currentDate.minusMonths(3));
                 case "Last 6 months" -> updateDownloadedItems(currentDate.minusMonths(6));
@@ -84,10 +87,10 @@ public class ExportTransactionDialog extends Dialog implements HasNotifications 
     }
 
     public void updateDownloadedItems(LocalDate from, LocalDate to) {
-        updateDownloadedItems(instrumentsFacadeService.getTransactions(from, to));
+        updateDownloadedItems(instrumentsFacadeService.getTransactions(portfolio, from, to));
     }
 
-    public void updateDownloadedItems(List<CryptoTransaction> transactions) {
+    public void updateDownloadedItems(List<Transaction> transactions) {
         List<TransactionModel> mappedTransactions = transactions.stream()
                 .map(TransactionModel::from)
                 .toList();

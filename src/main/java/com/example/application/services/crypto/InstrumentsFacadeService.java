@@ -1,9 +1,11 @@
 package com.example.application.services.crypto;
 
 import com.example.application.data.models.InstrumentsProvider;
+import com.example.application.entities.User;
 import com.example.application.entities.crypto.*;
 import com.example.application.services.SecurityService;
 import com.example.application.services.UserService;
+import com.example.application.utils.exceptions.InternalUnexpectedException;
 import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,10 +16,9 @@ import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /*
-    TODO: Rename
+    REFACTOR: Rename
         - Assets -> AssetServiceFacade         UserAssetsService
         - Expenses -> ExpensesServiceFacade    UserExpensesService
 */
@@ -43,83 +44,99 @@ public class InstrumentsFacadeService {
         this.instrumentsService = instrumentsService;
     }
 
+	//<editor-fold desc="USERS">
+	public User createNewUser(User user) {
+		return instrumentsService.createNewUser(user);
+	}
+
+	public boolean isUsernameTaken(String username) {
+		return instrumentsService.isUsernameTaken(username);
+	}
+
+	public boolean isEmailTaken(String email) {
+		return instrumentsService.isEmailTaken(email);
+	}
+	//</editor-fold>
+
     //<editor-fold desc="ASSET">
     public List<Asset> getAllAssets() {
         return instrumentsService.getAllAssets();
     }
 
-    public Optional<Asset> getAssetBySymbol(@Nullable String symbolName) {
+    public Optional<Asset> getAssetBySymbol(@NotNull String symbolName) {
         return instrumentsService.getAssetBySymbol(symbolName);
     }
 
-    public WalletBalance updateAssetComment(Asset asset, String comment) {
-        WalletBalance walletBalanceByAsset = getWalletBalanceByAsset(asset);
-        walletBalanceByAsset.setComment(comment);
-        return instrumentsService.saveWalletBalance(walletBalanceByAsset);
-    }
-
-    public WalletBalance markAssetAsFavorite(Asset asset, boolean isFavorite) {
-        WalletBalance walletBalanceByAsset = getWalletBalanceByAsset(asset);
-        walletBalanceByAsset.setMarkedAsFavorite(isFavorite);
-        return instrumentsService.saveWalletBalance(walletBalanceByAsset);
-    }
-
-    public double getAmountOfTokens(Asset asset) {
+    public double getAmountOfTokens(Portfolio portfolio, Asset asset) {
         return Optional.ofNullable(asset)
-                .map(this::getWalletBalanceByAsset)
-                .map(WalletBalance::getAmount)
-                .orElse(Double.NaN);
+                .flatMap(a -> getAssetBalanceByAsset(portfolio, asset))
+                .map(AssetBalance::getAmount)
+                .orElse(0.0);
     }
 
-    public List<Asset> getAssetsWithNonZeroAmount() {
-        return getWalletBalances()
-                .stream()
-                .filter(wb -> wb.getAmount() > 0)
-                .map(WalletBalance::getAsset)
-                .collect(Collectors.toList());
+    @Nullable
+    public String getAssetComment(Asset asset) {
+        return instrumentsService.getAssetComment(getAuthenticatedUser(), asset);
     }
 
-    public List<Asset> getAllAssetsEverBought() {
-        return getAllTransactions()
+    public boolean isAssetMarkedAsFavorite(Asset asset) {
+        return instrumentsService.isAssetMarkedAsFavorite(getAuthenticatedUser(), asset);
+    }
+
+    public void updateAssetComment(Asset asset, @Nullable String comment) {
+        instrumentsService.updateAssetComment(getAuthenticatedUser(), asset, comment);
+    }
+
+    public void updateMarkAssetAsFavorite(Asset asset, boolean markedAsFavorite) {
+        instrumentsService.updateMarkAssetAsFavorite(getAuthenticatedUser(), asset, markedAsFavorite);
+    }
+
+    public List<Asset> getAllAssetsEverBought(Portfolio portfolio) {
+        return getTransactions(portfolio)
                 .stream()
-                .filter(CryptoTransaction::isBuyTransaction)
-                .map(CryptoTransaction::getAsset)
+                .filter(Transaction::isBuyTransaction)
+                .map(Transaction::getAsset)
                 .distinct()
                 .toList();
     }
-
     //</editor-fold>
 
     //<editor-fold desc="TRANSACTIONS">
-    public List<CryptoTransaction> getAllTransactions() {
-        return instrumentsService.getTransactionsBy(getAuthenticatedUserWallet());
+    public List<Transaction> getTransactions(Portfolio portfolio) {
+        return instrumentsService.getTransactionsBy(portfolio);
     }
 
-    public List<CryptoTransaction> getTransactionsByAsset(Asset asset) {
-        return instrumentsService.getTransactionsBy(getAuthenticatedUserWallet(), asset);
+    public List<Transaction> getTransactions(Portfolio portfolio, LocalDate from) {
+        return getTransactions(portfolio, from, LocalDate.now());
     }
 
-    public List<CryptoTransaction> getTransactions(LocalDate from) {
-        return getTransactions(from, LocalDate.now());
+    public List<Transaction> getTransactions(Portfolio portfolio, LocalDate from, LocalDate to) {
+        return instrumentsService.getTransactionsBy(portfolio, from, to);
     }
 
-    public List<CryptoTransaction> getTransactions(LocalDate from, LocalDate to) {
-        return instrumentsService.getTransactionsBy(getAuthenticatedUserWallet(), from, to);
+    public List<Transaction> getTransactionsByAsset(Portfolio portfolio, Asset asset) {
+        return instrumentsService.getTransactionsBy(portfolio, asset);
     }
 
-    public CryptoTransaction saveTransaction(CryptoTransaction transaction) {
-        transaction.setWallet(getAuthenticatedUserWallet());
+	public Transaction transferTransaction(Transaction transaction, Portfolio portfolio, boolean replace) {
+		return instrumentsService.transferTransaction(transaction, portfolio, replace);
+	}
+
+    public Transaction saveTransaction(Transaction transaction) {
         return instrumentsService.saveTransaction(transaction);
     }
 
-    public void deleteTransaction(CryptoTransaction transaction) {
+	public void saveTransactions(List<Transaction> transactions) {
+		instrumentsService.saveTransactions(transactions);
+	}
+
+	public void deleteTransaction(Transaction transaction) {
         instrumentsService.deleteTransaction(transaction);
     }
     //</editor-fold>
 
     //<editor-fold desc="ASSET WATCHERS">
     public AssetWatcher saveAssetWatcher(AssetWatcher assetWatcher) {
-        assetWatcher.setWallet(getAuthenticatedUserWallet());
         return instrumentsService.saveAssetWatcher(assetWatcher);
     }
 
@@ -127,16 +144,16 @@ public class InstrumentsFacadeService {
         instrumentsService.deleteAssetWatcher(assetWatcher);
     }
 
-    public List<AssetWatcher> getAssetWatchersByAsset(Asset asset) {
-        return instrumentsService.getAssetWatchersByAsset(getAuthenticatedUserWallet(), asset);
+    public List<AssetWatcher> getAssetWatchersByAsset(Portfolio portfolio, Asset asset) {
+        return instrumentsService.getAssetWatchersByAsset(portfolio, asset);
     }
 
-    public List<AssetWatcher> getAssetWatchersByAssetAndActionType(Asset asset, AssetWatcher.ActionType actionType) {
-        return instrumentsService.getAssetWatchersByAssetAndActionType(getAuthenticatedUserWallet(), asset, actionType);
+    public List<AssetWatcher> getAssetWatchersByAssetAndActionType(Portfolio portfolio, Asset asset, AssetWatcher.ActionType actionType) {
+        return instrumentsService.getAssetWatchersByAssetAndActionType(portfolio, asset, actionType);
     }
 
-    public double getClosestBuyWatcherPrice(Asset asset) {
-        return getAssetWatchersByAssetAndActionType(asset, AssetWatcher.ActionType.BUY)
+    public double getClosestBuyWatcherPrice(Portfolio portfolio, Asset asset) {
+        return getAssetWatchersByAssetAndActionType(portfolio, asset, AssetWatcher.ActionType.BUY)
                 .stream()
                 .filter(assetWatcher -> !assetWatcher.isCompleted())
                 .map(AssetWatcher::getTarget)
@@ -144,30 +161,62 @@ public class InstrumentsFacadeService {
                 .orElse(0.0);
     }
 
-    public double getClosestSellWatcherPrice(Asset asset) {
-        return getAssetWatchersByAssetAndActionType(asset, AssetWatcher.ActionType.SELL)
+    public double getClosestSellWatcherPrice(Portfolio portfolio, Asset asset) {
+        return getAssetWatchersByAssetAndActionType(portfolio, asset, AssetWatcher.ActionType.SELL)
                 .stream()
                 .filter(assetWatcher -> !assetWatcher.isCompleted())
                 .map(AssetWatcher::getTarget)
                 .max(Comparator.naturalOrder())
                 .orElse(0.0);
     }
-
     //</editor-fold>
 
-    //<editor-fold desc="WALLET BALANCES">
-    public List<WalletBalance> getWalletBalances() {
-        return instrumentsService.getWalletBalancesByWallet(getAuthenticatedUserWallet());
+    //<editor-fold desc="ASSET BALANCES">
+    public List<AssetBalance> getAssetBalances(Portfolio portfolio) {
+        return instrumentsService.getAssetBalancesByPortfolio(portfolio);
     }
+
+    public Optional<AssetBalance> getAssetBalanceByAsset(Portfolio portfolio, Asset asset) {
+        return instrumentsService.getAssetBalancesByPortfolioAndAsset(portfolio, asset);
+    }
+    //</editor-fold>
+
+	//<editor-fold desc="PORTFOLIOS">
+	public Portfolio createPortfolio(String name) {
+        return instrumentsService.createNewPortfolio(name, getAuthenticatedUser());
+    }
+
+	@NotNull
+	public Portfolio getActivePortfolio() {
+		return getAuthenticatedUser().getActivePortfolio();
+	}
+
+    // TODO: [URGENT] -> FILTER BY MAIN PORTFOLIO
+    @NotNull
+    public Portfolio getMainPortfolio() {
+        return getUserPortfolios()
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new InternalUnexpectedException("User '%s' doesn't have any portfolios"
+                        .formatted(getAuthenticatedUser().getUsername())));
+    }
+
+	public Optional<Portfolio> getPortfolioByName(String name) {
+		return instrumentsService.getPortfolioByNameAndUser(name, getAuthenticatedUser());
+	}
+
+    public List<Portfolio> getUserPortfolios() {
+        return instrumentsService.getPortfoliosByUser(getAuthenticatedUser());
+    }
+
+	public Portfolio setPortfolioAsActive(Portfolio portfolio) {
+		return instrumentsService.setPortfolioAsActive(portfolio);
+	}
+	//</editor-fold>
 
     @NotNull
-    public WalletBalance getWalletBalanceByAsset(Asset asset) {
-        return instrumentsService.getWalletBalancesByWalletAndAsset(getAuthenticatedUserWallet(), asset);
-    }
-    //</editor-fold>
-
-    private Wallet getAuthenticatedUserWallet() {
-        return instrumentsService.getWalletByUser(securityService.getAuthenticatedUser());
+    public User getAuthenticatedUser() {
+        return securityService.getAuthenticatedUser();
     }
 
     public void updateAssetData() {

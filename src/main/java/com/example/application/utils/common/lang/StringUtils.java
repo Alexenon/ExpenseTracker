@@ -2,6 +2,18 @@ package com.example.application.utils.common.lang;
 
 public class StringUtils {
 
+    private StringUtils() {
+        /* Hidden constructor */
+    }
+
+    public static boolean isBlank(String value) {
+        return value == null || value.isBlank();
+    }
+
+    public static boolean isNotBlank(String value) {
+        return !isBlank(value);
+    }
+
     public static String uppercaseFirstLetter(String text) {
         return Character.toUpperCase(text.charAt(0)) + text.substring(1).toLowerCase();
     }

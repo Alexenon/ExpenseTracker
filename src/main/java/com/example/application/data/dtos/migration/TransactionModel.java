@@ -1,7 +1,7 @@
 package com.example.application.data.dtos.migration;
 
 import com.example.application.entities.common.TransactionType;
-import com.example.application.entities.crypto.CryptoTransaction;
+import com.example.application.entities.crypto.Transaction;
 import com.fasterxml.jackson.annotation.*;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
@@ -66,7 +66,7 @@ public class TransactionModel implements Serializable {
                || this.type != null;
     }
 
-    public static TransactionModel from(CryptoTransaction transaction) {
+    public static TransactionModel from(Transaction transaction) {
         TransactionModel transactionModel = new TransactionModel();
         transactionModel.setSymbol(transaction.getAsset().getSymbol());
         transactionModel.setType(transaction.getType());

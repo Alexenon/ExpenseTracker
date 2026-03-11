@@ -3,7 +3,7 @@ package com.example.application.utils.common.lang;
 public class NumberUtils {
 
     private NumberUtils() {
-        // Constructor not needed
+        /* Hidden constructor */
     }
 
     public static double checkDouble(double value) {
@@ -12,9 +12,6 @@ public class NumberUtils {
 
         if (Double.isInfinite(value))
             throw new IllegalArgumentException("Invalid number: value is inifite");
-
-        if (value >= Double.MAX_VALUE || value <= Double.MIN_VALUE)
-            throw new IllegalArgumentException("Invalid number: value exceeds the allowed DOUBLE range");
 
         return value;
     }

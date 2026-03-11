@@ -1,6 +1,7 @@
 package com.example.application.views.components.custom.fields;
 
 import com.example.application.entities.crypto.Asset;
+import com.example.application.entities.crypto.Portfolio;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.data.renderer.LitRenderer;
@@ -13,73 +14,74 @@ import java.util.function.Function;
 @Component
 public class AssetComboBox extends ComboBox<Asset> {
 
-    private final InstrumentsFacadeService instrumentsFacadeService;
+	private final InstrumentsFacadeService instrumentsFacadeService;
 
-    @Autowired
-    public AssetComboBox(InstrumentsFacadeService instrumentsFacadeService) {
-        this.instrumentsFacadeService = instrumentsFacadeService;
-        initialize();
-    }
+	@Autowired
+	public AssetComboBox(InstrumentsFacadeService instrumentsFacadeService) {
+		this.instrumentsFacadeService = instrumentsFacadeService;
+		initialize();
+	}
 
-    private void initialize() {
-        setLabel("Asset");
-        setItemsWithFilter();
-        setItemLabelGenerator(Asset::getFullName);
-        setRenderer(assetSymbolRenderer());
-    }
+	private void initialize() {
+		setLabel("Asset");
+		setItemsWithFilter();
+		setItemLabelGenerator(Asset::getFullName);
+		setRenderer(assetSymbolRenderer());
+	}
 
-    public void setValue(String symbol) {
-        Asset asset = instrumentsFacadeService.getAssetBySymbol(symbol)
-                .orElse(null);
-        setValue(asset);
-    }
+	public void setValue(String symbol) {
+		Asset asset = Optional.ofNullable(symbol)
+				.flatMap(a -> instrumentsFacadeService.getAssetBySymbol(symbol))
+				.orElse(null);
 
-    private void setItemsWithFilter() {
-        ComboBox.ItemFilter<Asset> defaultFilter = (asset, filterString) -> {
-            String lowercaseInput = filterString.toLowerCase();
-            String lowercaseSymbol = asset.getSymbol().toLowerCase();
-            String lowercaseName = asset.getFullName().toLowerCase();
+		setValue(asset);
+	}
 
-            return lowercaseSymbol.startsWith(lowercaseInput) || lowercaseName.startsWith(lowercaseInput);
-        };
+	private void setItemsWithFilter() {
+		ComboBox.ItemFilter<Asset> defaultFilter = (asset, filterString) -> {
+			String lowercaseInput = filterString.toLowerCase();
+			String lowercaseSymbol = asset.getSymbol().toLowerCase();
+			String lowercaseName = asset.getFullName().toLowerCase();
 
-        this.setItems(defaultFilter, instrumentsFacadeService.getAllAssets());
-    }
+			return lowercaseSymbol.startsWith(lowercaseInput) || lowercaseName.startsWith(lowercaseInput);
+		};
 
-    protected LitRenderer<Asset> assetSymbolRenderer() {
-        String templateExpression = """
-                <div class='coin-overview-name-container'>
-                  <img class='rounded coin-overview-image' src='${item.imgUrl}' alt='${item.fullName}'/>
-                  <span>${item.symbol}</span>
-                  <p>${item.fullName}</p>
-                </div>""";
-        return LitRenderer.<Asset>of(templateExpression)
-                .withProperty("imgUrl", Asset::getImageUrl)
-                .withProperty("symbol", Asset::getSymbol)
-                .withProperty("fullName", Asset::getFullName);
-    }
+		this.setItems(defaultFilter, instrumentsFacadeService.getAllAssets());
+	}
 
-    public Asset getSelectedAsset() {
-        return this.getValue();
-    }
+	protected LitRenderer<Asset> assetSymbolRenderer() {
+		String templateExpression = """
+				<div class='coin-overview-name-container'>
+				  <img class='rounded coin-overview-image' src='${item.imgUrl}' alt='${item.fullName}'/>
+				  <span>${item.symbol}</span>
+				  <p>${item.fullName}</p>
+				</div>""";
+		return LitRenderer.<Asset>of(templateExpression)
+				.withProperty("imgUrl", Asset::getImageUrl)
+				.withProperty("symbol", Asset::getSymbol)
+				.withProperty("fullName", Asset::getFullName);
+	}
 
-    public String getSymbol() {
-        return extract(Asset::getSymbol, "");
-    }
+	public Asset getSelectedAsset() {
+		return this.getValue();
+	}
 
-    public double getMarketPrice() {
-        return extract(Asset::getMarketPrice, 0.0);
-    }
+	public String getSymbol() {
+		return extract(Asset::getSymbol, "");
+	}
 
-    public double getAmountTokens() {
-        return extract(instrumentsFacadeService::getAmountOfTokens, 0.0);
-    }
+	public double getMarketPrice() {
+		return extract(Asset::getMarketPrice, 0.0);
+	}
 
-    public <R> R extract(Function<Asset, R> getter, R defaultValue) {
-        return Optional.ofNullable(this.getValue())
-                .map(getter)
-                .orElse(defaultValue);
-    }
+	public double getAmountTokens(Portfolio portfolio) {
+		return extract(asset -> instrumentsFacadeService.getAmountOfTokens(portfolio, asset), 0.0);
+	}
 
+	public <R> R extract(Function<Asset, R> getter, R defaultValue) {
+		return Optional.ofNullable(this.getValue())
+				.map(getter)
+				.orElse(defaultValue);
+	}
 
 }
