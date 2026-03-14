@@ -156,7 +156,7 @@ class UserServiceTest extends AbstractTest {
 
 		Portfolio secondPortfolio = createPortfolio("Second Portfolio", user.getId());
 		Asset asset = createAsset("BTC", 100_000);
-		Transaction transaction = createTransaction(asset.getSymbol(), 80_000, 1, secondPortfolio.getId());
+		Transaction transaction = createTransaction(asset, 80_000, 1, secondPortfolio.getId());
 
 		instrumentsFacadeService.deleteUser(user.getId());
 		Assertions.assertTrue(userRepository.findById(user.getId()).isEmpty(),

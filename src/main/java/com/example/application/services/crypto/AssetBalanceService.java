@@ -21,8 +21,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import static com.example.application.utils.investment.ProfitCalculator.calculateNewAvgPrice;
-
 @Slf4j
 @Service
 public class AssetBalanceService {
@@ -72,9 +70,15 @@ public class AssetBalanceService {
 	public AssetBalance update(@NotNull AssetBalance assetBalance, @NotNull Transaction transaction) {
 		validate(assetBalance);
 
-		updateAvgBuySellPrice(assetBalance, transaction);
+		assetBalance.setTotalBuyCost(calculateTotalBuyCost(assetBalance, transaction));
+		assetBalance.setTotalSellValue(calculateTotalSellValue(assetBalance, transaction));
+		assetBalance.setTotalBoughtQuantity(calculateTotalBoughtQuantity(assetBalance, transaction));
+		assetBalance.setTotalSoldQuantity(calculateTotalSoldQuantity(assetBalance, transaction));
+		assetBalance.setTotalRealizedProfit(calculateTotalRealizedProfit(assetBalance, transaction));
+		assetBalance.setAvgBuyPrice(calculateAvgBuyPrice(assetBalance));
+		assetBalance.setAvgSellPrice(calculateAvgSellPrice(assetBalance));
 		assetBalance.setAmount(calculateAmountAfterSupply(assetBalance, transaction));
-		assetBalance.setCost(calculateTotalCost(assetBalance, transaction));
+		assetBalance.setCost(calculateCost(assetBalance, transaction));
 
 		return save(assetBalance);
 	}
@@ -114,13 +118,40 @@ public class AssetBalanceService {
 		log.info("Deleted successfully {} assetBalances", size);
 	}
 
-	/**
-	 * @return totalCost calculated for provided transaction, that cannot be less than ZERO.
-	 */
-	private static double calculateTotalCost(@NotNull AssetBalance assetBalance, @NotNull Transaction transaction) {
-		double newCost = MathUtils.withSign(transaction.getOrderTotalCost(), transaction.isBuyTransaction());
-		double formatedCost = Math.max(0, assetBalance.getCost() + newCost);
-		return NumberUtils.checkDouble(formatedCost);
+	private static double calculateTotalRealizedProfit(@NotNull AssetBalance assetBalance, @NotNull Transaction transaction) {
+		if (transaction.isBuyTransaction())
+			return assetBalance.getTotalRealizedProfit();
+
+		double totalRealizedProfit = assetBalance.getTotalSellValue() - (assetBalance.getAvgBuyPrice() * assetBalance.getTotalSoldQuantity());
+		return NumberUtils.checkDouble(totalRealizedProfit);
+	}
+
+	private static double calculateTotalBoughtQuantity(@NotNull AssetBalance assetBalance, @NotNull Transaction transaction) {
+		if (transaction.isSellTransaction())
+			return assetBalance.getTotalBoughtQuantity();
+
+		return NumberUtils.checkDouble(assetBalance.getTotalBoughtQuantity() + transaction.getOrderQuantity());
+	}
+
+	private static double calculateTotalSoldQuantity(@NotNull AssetBalance assetBalance, @NotNull Transaction transaction) {
+		if (transaction.isBuyTransaction())
+			return assetBalance.getTotalSoldQuantity();
+
+		return NumberUtils.checkDouble(assetBalance.getTotalSoldQuantity() + transaction.getOrderQuantity());
+	}
+
+	private static double calculateTotalBuyCost(@NotNull AssetBalance assetBalance, @NotNull Transaction transaction) {
+		if (transaction.isSellTransaction())
+			return assetBalance.getTotalBuyCost();
+
+		return NumberUtils.checkDouble(assetBalance.getTotalBuyCost() + transaction.getOrderTotalCost());
+	}
+
+	private static double calculateTotalSellValue(@NotNull AssetBalance assetBalance, @NotNull Transaction transaction) {
+		if (transaction.isBuyTransaction())
+			return assetBalance.getTotalSellValue();
+
+		return NumberUtils.checkDouble(assetBalance.getTotalSellValue() + transaction.getOrderTotalCost());
 	}
 
 	/**
@@ -142,20 +173,27 @@ public class AssetBalanceService {
 		return NumberUtils.checkDouble(tokensAmountAfterSupply);
 	}
 
-	private static void updateAvgBuySellPrice(@NotNull AssetBalance assetBalance, @NotNull Transaction transaction) {
-		double marketPrice = transaction.getMarketPrice();
-		double previousAmount = assetBalance.getAmount();
-		double orderQuantity = transaction.getOrderQuantity();
+	private static double calculateCost(@NotNull AssetBalance assetBalance, @NotNull Transaction transaction) {
+		if (transaction.isBuyTransaction())
+			return NumberUtils.checkDouble(assetBalance.getCost() + transaction.getOrderTotalCost());
 
-		if (transaction.isBuyTransaction()) {
-			assetBalance.setAvgBuyPrice(
-					calculateNewAvgPrice(assetBalance.getAvgBuyPrice(), previousAmount, orderQuantity, marketPrice)
-			);
-		} else {
-			assetBalance.setAvgSellPrice(
-					calculateNewAvgPrice(assetBalance.getAvgSellPrice(), previousAmount, orderQuantity, marketPrice)
-			);
-		}
+		if (assetBalance.getAmount() == 0)
+			return 0;
+
+		double updatedCost = assetBalance.getCost() - (assetBalance.getAvgBuyPrice() * transaction.getOrderQuantity());
+		return Math.max(0, updatedCost);
+	}
+
+	private static double calculateAvgBuyPrice(@NotNull AssetBalance updatedAssetBalance) {
+		double totalBuyCost = updatedAssetBalance.getTotalBuyCost();
+		double totalBoughtQuantity = updatedAssetBalance.getTotalBoughtQuantity();
+		return totalBoughtQuantity == 0 ? 0 : totalBuyCost / totalBoughtQuantity;
+	}
+
+	private static double calculateAvgSellPrice(@NotNull AssetBalance updatedAssetBalance) {
+		double totalSellValue = updatedAssetBalance.getTotalSellValue();
+		double totalSoldQuantity = updatedAssetBalance.getTotalSoldQuantity();
+		return totalSoldQuantity == 0 ? 0 : totalSellValue / totalSoldQuantity;
 	}
 
 	private static void validate(AssetBalance assetBalance) {

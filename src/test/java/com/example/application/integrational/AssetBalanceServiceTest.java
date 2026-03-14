@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.util.Objects;
 import java.util.Optional;
 
 @SuppressWarnings("DataFlowIssue")
@@ -27,6 +28,8 @@ import java.util.Optional;
 @SpringBootTest(classes = Application.class)
 @ActiveProfiles("test")
 class AssetBalanceServiceTest extends AbstractTest {
+
+	private static final double DELTA = 0.01;
 
 	private final UserService userService;
 	private final PortfolioService portfolioService;
@@ -55,7 +58,7 @@ class AssetBalanceServiceTest extends AbstractTest {
 	void setupUserAndPortfolio() {
 		this.user = createUser("user", "test-email@email.com");
 		this.asset = createAsset("BTC", 100_000);
-		this.portfolio = user.getActivePortfolio();
+		this.portfolio = Objects.requireNonNull(user.getActivePortfolio(), "user default portfolio");
 	}
 
 	@AfterEach
@@ -63,8 +66,8 @@ class AssetBalanceServiceTest extends AbstractTest {
 		assetBalanceRepository.deleteAll();
 		transactionRepository.deleteAll();
 		portfolioRepository.deleteAll();
-
 		userService.delete(user.getId());
+
 		Assertions.assertTrue(userService.findById(user.getId()).isEmpty(), "User was not deleted");
 		Assertions.assertTrue(portfolioService.findByUserId(user.getId()).isEmpty(), "Portfolios are not deleted");
 		Assertions.assertTrue(assetBalanceService.findByPortfolio(portfolio.getId()).isEmpty(),
@@ -96,8 +99,7 @@ class AssetBalanceServiceTest extends AbstractTest {
 	@Test
 	void updateShouldModifyExistingBalance() {
 		Long portfolioId = portfolio.getId();
-		Asset asset = createAsset("BTC", 100_000);
-		Transaction transaction = createTransaction("BTC", 100_000, portfolioId);
+		Transaction transaction = createTransaction(asset, 100_000, portfolioId);
 
 		Assertions.assertTrue(transactionService.findById(transaction.getId()).isPresent(), "Transaction was not created");
 
@@ -143,7 +145,55 @@ class AssetBalanceServiceTest extends AbstractTest {
 	}
 
 	@Test
-	void checkAssetBalanceAfterSellOfAsset() {
+	void checkBalanceAfterOneBuy() {
+		CreateTransactionRequest buyRequest = buyTransaction(100_000, 1);
+
+		Assertions.assertDoesNotThrow(() -> instrumentsFacadeService.createTransaction(buyRequest));
+
+		AssetBalance assetBalance = assetBalanceService.findByPortfolioAndAsset(portfolio.getId(), asset.getId())
+				.orElseThrow(() -> new EntityNotFoundException("Asset Balance not found"));
+
+		Assertions.assertEquals(100_000, assetBalance.getCost(), "cost doesn't match");
+		Assertions.assertEquals(1, assetBalance.getAmount(), "tokens amount doesn't match");
+
+		Assertions.assertEquals(100_000, assetBalance.getAvgBuyPrice(), "avgBuyPrice doesn't match");
+		Assertions.assertEquals(100_000, assetBalance.getTotalBuyCost(), "totalBuyCost amount doesn't match");
+		Assertions.assertEquals(1, assetBalance.getTotalBoughtQuantity(), "totalBoughtQuantity amount doesn't match");
+
+		Assertions.assertEquals(0, assetBalance.getAvgSellPrice(), "avgSellPrice doesn't match");
+		Assertions.assertEquals(0, assetBalance.getTotalSellValue(), "totalSellValue amount doesn't match");
+		Assertions.assertEquals(0, assetBalance.getTotalSoldQuantity(), "totalSoldQuantity amount doesn't match");
+		Assertions.assertEquals(0, assetBalance.getTotalRealizedProfit(), "totalRealized doesn't match");
+	}
+
+	@Test
+	void checkBalanceAfterMultipleBuys() {
+		CreateTransactionRequest buyRequest1 = buyTransaction(100_000, 1);
+		CreateTransactionRequest buyRequest2 = buyTransaction(80_000, 1);
+		CreateTransactionRequest buyRequest3 = buyTransaction(60_000, 2);
+
+		Assertions.assertDoesNotThrow(() -> instrumentsFacadeService.createTransaction(buyRequest1));
+		Assertions.assertDoesNotThrow(() -> instrumentsFacadeService.createTransaction(buyRequest2));
+		Assertions.assertDoesNotThrow(() -> instrumentsFacadeService.createTransaction(buyRequest3));
+
+		AssetBalance assetBalance = assetBalanceService.findByPortfolioAndAsset(portfolio.getId(), asset.getId())
+				.orElseThrow(() -> new EntityNotFoundException("Asset Balance not found"));
+
+		Assertions.assertEquals(300_000, assetBalance.getCost(), "cost doesn't match");
+		Assertions.assertEquals(4, assetBalance.getAmount(), "tokens amount doesn't match");
+
+		Assertions.assertEquals(75_000, assetBalance.getAvgBuyPrice(), "avgBuyPrice doesn't match");
+		Assertions.assertEquals(300_000, assetBalance.getTotalBuyCost(), "totalBuyCost amount doesn't match");
+		Assertions.assertEquals(4, assetBalance.getTotalBoughtQuantity(), "totalBoughtQuantity amount doesn't match");
+
+		Assertions.assertEquals(0, assetBalance.getAvgSellPrice(), "avgSellPrice doesn't match");
+		Assertions.assertEquals(0, assetBalance.getTotalSellValue(), "totalSellValue amount doesn't match");
+		Assertions.assertEquals(0, assetBalance.getTotalSoldQuantity(), "totalSoldQuantity amount doesn't match");
+		Assertions.assertEquals(0, assetBalance.getTotalRealizedProfit(), "totalRealized doesn't match");
+	}
+
+	@Test
+	void checkAssetBalanceAfterPartialSellTest() {
 		CreateTransactionRequest buyRequest = buyTransaction(100_000, 1);
 		CreateTransactionRequest sellRequest = sellTransaction(120_000, 0.5);
 
@@ -155,9 +205,41 @@ class AssetBalanceServiceTest extends AbstractTest {
 
 		Assertions.assertEquals(50_000, assetBalance.getCost(), "cost doesn't match");
 		Assertions.assertEquals(0.5, assetBalance.getAmount(), "tokens amount doesn't match");
+
 		Assertions.assertEquals(100_000, assetBalance.getAvgBuyPrice(), "avgBuyPrice doesn't match");
+		Assertions.assertEquals(100_000, assetBalance.getTotalBuyCost(), "totalBuyCost amount doesn't match");
+		Assertions.assertEquals(1, assetBalance.getTotalBoughtQuantity(), "totalBoughtQuantity amount doesn't match");
+
 		Assertions.assertEquals(120_000, assetBalance.getAvgSellPrice(), "avgSellPrice doesn't match");
-		Assertions.assertEquals(10_000, assetBalance.getTotalRealized(), "totalRealized doesn't match");
+		Assertions.assertEquals(60_000, assetBalance.getTotalSellValue(), "totalSellValue amount doesn't match");
+		Assertions.assertEquals(0.5, assetBalance.getTotalSoldQuantity(), "totalSoldQuantity amount doesn't match");
+		Assertions.assertEquals(10_000, assetBalance.getTotalRealizedProfit(), "totalRealized doesn't match");
+
+	}
+
+	@Test
+	void checkAssetBalanceAfterEntireSellTest() {
+		CreateTransactionRequest buyRequest = buyTransaction(100_000, 1);
+		CreateTransactionRequest sellRequest = sellTransaction(120_000, 1);
+
+		Assertions.assertDoesNotThrow(() -> instrumentsFacadeService.createTransaction(buyRequest));
+		Assertions.assertDoesNotThrow(() -> instrumentsFacadeService.createTransaction(sellRequest));
+
+		AssetBalance assetBalance = assetBalanceService.findByPortfolioAndAsset(portfolio.getId(), asset.getId())
+				.orElseThrow(() -> new EntityNotFoundException("Asset Balance not found"));
+
+		Assertions.assertEquals(0, assetBalance.getCost(), "cost doesn't match");
+		Assertions.assertEquals(0, assetBalance.getAmount(), "tokens amount doesn't match");
+
+		Assertions.assertEquals(100_000, assetBalance.getAvgBuyPrice(), "avgBuyPrice doesn't match");
+		Assertions.assertEquals(100_000, assetBalance.getTotalBuyCost(), "totalBuyCost amount doesn't match");
+		Assertions.assertEquals(1, assetBalance.getTotalBoughtQuantity(), "totalBoughtQuantity amount doesn't match");
+
+		Assertions.assertEquals(120_000, assetBalance.getAvgSellPrice(), "avgSellPrice doesn't match");
+		Assertions.assertEquals(120_000, assetBalance.getTotalSellValue(), "totalSellValue amount doesn't match");
+		Assertions.assertEquals(1, assetBalance.getTotalSoldQuantity(), "totalSoldQuantity amount doesn't match");
+		Assertions.assertEquals(20_000, assetBalance.getTotalRealizedProfit(), "totalRealized doesn't match");
+
 	}
 
 	void checkMultipleTransactionsSoldPartialTest() {
@@ -178,16 +260,22 @@ class AssetBalanceServiceTest extends AbstractTest {
 		AssetBalance assetBalance = assetBalanceService.findByPortfolioAndAsset(portfolio.getId(), asset.getId())
 				.orElseThrow(() -> new EntityNotFoundException("Asset Balance not found"));
 
-		Assertions.assertEquals(90_000, assetBalance.getCost(), "cost doesn't match");
+		Assertions.assertEquals(173_333.33, assetBalance.getCost(), "cost doesn't match");
 		Assertions.assertEquals(2, assetBalance.getAmount(), "tokens amount doesn't match");
-		Assertions.assertEquals(86666.67, assetBalance.getAvgBuyPrice(), 1e-4, "avgBuyPrice doesn't match");
+
+		Assertions.assertEquals(86_666.67, assetBalance.getAvgBuyPrice(), "avgBuyPrice doesn't match");
+		Assertions.assertEquals(520_000, assetBalance.getTotalBuyCost(), "totalBuyCost amount doesn't match");
+		Assertions.assertEquals(6, assetBalance.getTotalBoughtQuantity(), "totalBoughtQuantity amount doesn't match");
+
 		Assertions.assertEquals(110_000, assetBalance.getAvgSellPrice(), "avgSellPrice doesn't match");
-		Assertions.assertEquals(10_000, assetBalance.getTotalRealized(), "totalRealized doesn't match");
+		Assertions.assertEquals(440_000, assetBalance.getTotalSellValue(), "totalSellValue amount doesn't match");
+		Assertions.assertEquals(4, assetBalance.getTotalSoldQuantity(), "totalSoldQuantity amount doesn't match");
+		Assertions.assertEquals(93_333.33, assetBalance.getTotalRealizedProfit(), "totalRealized doesn't match");
+
 	}
 
-
 	@Test
-	void checkMultipleTransactionsSoldAllTest() {
+	void checkMultipleTransactionsSoldEntireTest() {
 		CreateTransactionRequest buyRequest1 = buyTransaction(100_000, 1);
 		CreateTransactionRequest buyRequest2 = buyTransaction(90_000, 2);
 		CreateTransactionRequest buyRequest3 = buyTransaction(80_000, 3);
@@ -207,9 +295,15 @@ class AssetBalanceServiceTest extends AbstractTest {
 
 		Assertions.assertEquals(0, assetBalance.getCost(), "cost doesn't match");
 		Assertions.assertEquals(0, assetBalance.getAmount(), "tokens amount doesn't match");
-		Assertions.assertEquals(86666.67, assetBalance.getAvgBuyPrice(), 1e-4, "avgBuyPrice doesn't match");
+
+		Assertions.assertEquals(86666.67, assetBalance.getAvgBuyPrice(), DELTA, "avgBuyPrice doesn't match");
+		Assertions.assertEquals(520_000, assetBalance.getTotalBuyCost(), "totalBuyCost amount doesn't match");
+		Assertions.assertEquals(6, assetBalance.getTotalBoughtQuantity(), "totalBoughtQuantity amount doesn't match");
+
 		Assertions.assertEquals(110_000, assetBalance.getAvgSellPrice(), "avgSellPrice doesn't match");
-		Assertions.assertEquals(10_000, assetBalance.getTotalRealized(), "totalRealized doesn't match");
+		Assertions.assertEquals(660_000, assetBalance.getTotalSellValue(), "totalSellValue amount doesn't match");
+		Assertions.assertEquals(6, assetBalance.getTotalSoldQuantity(), "totalSoldQuantity amount doesn't match");
+		Assertions.assertEquals(140_000, assetBalance.getTotalRealizedProfit(), "totalRealized doesn't match");
 	}
 
 	@Test

@@ -69,9 +69,9 @@ public abstract class AbstractTest {
 		return Objects.requireNonNull(assetService.save(asset), "Asset was not created");
 	}
 
-	protected Transaction createTransaction(String assetSymbol, TransactionType type, double marketPrice, double orderQuantity, long portfolioId) {
+	protected Transaction createTransaction(Asset asset, TransactionType type, double marketPrice, double orderQuantity, long portfolioId) {
 		CreateTransactionRequest request = CreateTransactionRequest.builder()
-				.assetSymbol(assetSymbol)
+				.assetSymbol(asset.getSymbol())
 				.type(type)
 				.marketPrice(marketPrice)
 				.orderQuantity(orderQuantity)
@@ -83,12 +83,12 @@ public abstract class AbstractTest {
 				.orElseThrow(() -> new EntityNotFoundException("Transaction was not created"));
 	}
 
-	protected Transaction createTransaction(String assetSymbol, double marketPrice, double orderQuantity, long portfolioId) {
-		return createTransaction(assetSymbol, TransactionType.BUY, marketPrice, orderQuantity, portfolioId);
+	protected Transaction createTransaction(Asset asset, double marketPrice, double orderQuantity, long portfolioId) {
+		return createTransaction(asset, TransactionType.BUY, marketPrice, orderQuantity, portfolioId);
 	}
 
-	protected Transaction createTransaction(String assetSymbol, double marketPrice, long portfolioId) {
-		return createTransaction(assetSymbol, TransactionType.BUY, marketPrice, 1.0, portfolioId);
+	protected Transaction createTransaction(Asset asset, double marketPrice, long portfolioId) {
+		return createTransaction(asset, TransactionType.BUY, marketPrice, 1.0, portfolioId);
 	}
 
 	protected Portfolio createPortfolio(String name, long userId) {

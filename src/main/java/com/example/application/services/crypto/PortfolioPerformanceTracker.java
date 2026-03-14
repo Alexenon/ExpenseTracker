@@ -62,7 +62,7 @@ public class PortfolioPerformanceTracker {
 	public double getAssetRealizedProfit(PortfolioDTO portfolio, AssetDTO asset) {
 		return Optional.ofNullable(asset)
 				.flatMap(a -> instrumentsFacadeService.getAssetBalanceByAsset(portfolio.getId(), asset.getSymbol()))
-				.map(AssetBalanceDTO::getTotalRealized)
+				.map(AssetBalanceDTO::getTotalRealizedProfit)
 				.orElse(Double.NaN);
 	}
 
@@ -131,7 +131,7 @@ public class PortfolioPerformanceTracker {
 	public double getPortfolioRealizedProfit(PortfolioDTO portfolio) {
 		return instrumentsFacadeService.getPorfolioAssetBalances(portfolio.getId())
 				.stream()
-				.mapToDouble(AssetBalanceDTO::getTotalRealized)
+				.mapToDouble(AssetBalanceDTO::getTotalRealizedProfit)
 				.sum();
 	}
 
