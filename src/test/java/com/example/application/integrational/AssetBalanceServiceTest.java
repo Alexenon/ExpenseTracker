@@ -306,6 +306,141 @@ class AssetBalanceServiceTest extends AbstractTest {
 		Assertions.assertEquals(140_000, assetBalance.getTotalRealizedProfit(), "totalRealized doesn't match");
 	}
 
+//	@Test
+//	void updateAssetBalanceIfSingleTransactionWasUpdated() {
+//		CreateTransactionRequest createRequest = buyTransaction(100_000, 1);
+//		TransactionDTO originalTransaction = instrumentsFacadeService.createTransaction(createRequest);
+//
+//		UpdateTransactionRequest updateRequest = new UpdateTransactionRequest(originalTransaction);
+//		updateRequest.setMarketPrice(80_000);
+//		updateRequest.setOrderQuantity(2);
+//		TransactionDTO updatedTransaction = instrumentsFacadeService.updateTransaction(updateRequest);
+//
+//		AssetBalance assetBalance = assetBalanceService.findByPortfolioAndAsset(portfolio.getId(), asset.getId())
+//				.orElseThrow(() -> new EntityNotFoundException("Asset Balance not found"));
+//
+//		Assertions.assertEquals(80_000, assetBalance.getCost(), "cost doesn't match");
+//		Assertions.assertEquals(2, assetBalance.getAmount(), "tokens amount doesn't match");
+//		Assertions.assertEquals(80_000, assetBalance.getAvgBuyPrice(), DELTA, "avgBuyPrice doesn't match");
+//		Assertions.assertEquals(80_000, assetBalance.getTotalBuyCost(), "totalBuyCost amount doesn't match");
+//		Assertions.assertEquals(2, assetBalance.getTotalBoughtQuantity(), "totalBoughtQuantity amount doesn't match");
+//	}
+//
+//	@Test
+//	void updateAssetBalanceIfMultipleTransactionsWereUpdated() {
+//		CreateTransactionRequest createRequest1 = buyTransaction(100_000, 1);
+//		CreateTransactionRequest createRequest2 = buyTransaction(100_000, 1);
+//		CreateTransactionRequest createRequest3 = buyTransaction(80_000, 3);
+//
+//		TransactionDTO transaction1 = instrumentsFacadeService.createTransaction(createRequest1);
+//		TransactionDTO transaction2 = instrumentsFacadeService.createTransaction(createRequest2);
+//		TransactionDTO transaction3 = instrumentsFacadeService.createTransaction(createRequest3);
+//
+//		// Updating second transaction to have market price
+//		UpdateTransactionRequest updateRequest = new UpdateTransactionRequest(transaction2);
+//		updateRequest.setMarketPrice(80_000);
+//		updateRequest.setOrderQuantity(2);
+//		TransactionDTO updatedTransaction = instrumentsFacadeService.updateTransaction(updateRequest);
+//
+//		AssetBalance assetBalance = assetBalanceService.findByPortfolioAndAsset(portfolio.getId(), asset.getId())
+//				.orElseThrow(() -> new EntityNotFoundException("Asset Balance not found"));
+//
+//		Assertions.assertEquals(173_333.33, assetBalance.getCost(), "cost doesn't match");
+//		Assertions.assertEquals(2, assetBalance.getAmount(), "tokens amount doesn't match");
+//
+//		Assertions.assertEquals(86_666.67, assetBalance.getAvgBuyPrice(), "avgBuyPrice doesn't match");
+//		Assertions.assertEquals(520_000, assetBalance.getTotalBuyCost(), "totalBuyCost amount doesn't match");
+//		Assertions.assertEquals(6, assetBalance.getTotalBoughtQuantity(), "totalBoughtQuantity amount doesn't match");
+//
+//		Assertions.assertEquals(110_000, assetBalance.getAvgSellPrice(), "avgSellPrice doesn't match");
+//		Assertions.assertEquals(440_000, assetBalance.getTotalSellValue(), "totalSellValue amount doesn't match");
+//		Assertions.assertEquals(4, assetBalance.getTotalSoldQuantity(), "totalSoldQuantity amount doesn't match");
+//		Assertions.assertEquals(93_333.33, assetBalance.getTotalRealizedProfit(), "totalRealized doesn't match");
+//	}
+//
+//	@Test
+//	void deleteAssetBalanceIfOnlyRemainingTransactionWasDeleted() {
+//		CreateTransactionRequest createRequest = buyTransaction(100_000, 1);
+//		TransactionDTO transaction = instrumentsFacadeService.createTransaction(createRequest);
+//		instrumentsFacadeService.deleteTransaction(transaction.getId());
+//
+//		Optional<AssetBalance> assetBalance = assetBalanceService.findByPortfolioAndAsset(portfolio.getId(), asset.getId());
+//		Assertions.assertTrue(assetBalance.isEmpty(), "Asset Balance should be deleted, as the remaining transaction was deleted");
+//	}
+//
+//	@Test
+//	void updateAssetBalanceIfOnlyTransactionWasDeleted() {
+//		CreateTransactionRequest buyRequest1 = buyTransaction(100_000, 1);
+//		CreateTransactionRequest buyRequest2 = buyTransaction(120_000, 1);
+//		CreateTransactionRequest buyRequest3 = buyTransaction(200_000, 2);
+//
+//		TransactionDTO buyTransaction1 = instrumentsFacadeService.createTransaction(buyRequest1);
+//		TransactionDTO buyTransaction2 = instrumentsFacadeService.createTransaction(buyRequest2);
+//		TransactionDTO buyTransaction3 = instrumentsFacadeService.createTransaction(buyRequest3);
+//		instrumentsFacadeService.deleteTransaction(buyTransaction3.getId());
+//
+//		AssetBalance assetBalance = assetBalanceService.findByPortfolioAndAsset(portfolio.getId(), asset.getId())
+//				.orElseThrow(() -> new EntityNotFoundException("Asset Balance not found"));
+//
+//		Assertions.assertEquals(220_000, assetBalance.getCost(), "cost doesn't match");
+//		Assertions.assertEquals(2, assetBalance.getAmount(), "tokens amount doesn't match");
+//		Assertions.assertEquals(110_000, assetBalance.getAvgBuyPrice(), "avgBuyPrice doesn't match");
+//		Assertions.assertEquals(220_000, assetBalance.getTotalBuyCost(), "totalBuyCost amount doesn't match");
+//		Assertions.assertEquals(2, assetBalance.getTotalBoughtQuantity(), "totalBoughtQuantity amount doesn't match");
+//	}
+//
+//	@Test
+//	void updateAssetBalanceIfTransactionWasCopied() {
+//		Portfolio secondPortfolio = createPortfolio("Second Portfolio", user.getId());
+//
+//		CreateTransactionRequest createRequest = buyTransaction(100_000, 1);
+//		TransactionDTO originalTransaction = instrumentsFacadeService.createTransaction(createRequest);
+//		TransactionDTO copiedTransaction = instrumentsFacadeService.transferTransaction(originalTransaction.getId(), secondPortfolio.getId());
+//
+//		Optional<AssetBalance> assetBalanceDefaultPortfolio = assetBalanceService.findByPortfolioAndAsset(portfolio.getId(), asset.getId());
+//		Assertions.assertTrue(assetBalanceDefaultPortfolio.isEmpty(), "Asset Balance should be deleted, as the remaining transaction was deleted");
+//
+//		AssetBalance assetBalanceSecondPortfolio = assetBalanceService.findByPortfolioAndAsset(portfolio.getId(), asset.getId())
+//				.orElseThrow(() -> new EntityNotFoundException("Asset Balance not found for second portfolio"));
+//
+//		Assertions.assertEquals(100_000, assetBalanceSecondPortfolio.getCost(),
+//				"cost doesn't match for asset balance on second portfolio");
+//		Assertions.assertEquals(1, assetBalanceSecondPortfolio.getAmount(),
+//				"tokens amount doesn't match for asset balance on second portfolio");
+//		Assertions.assertEquals(100_000, assetBalanceSecondPortfolio.getAvgBuyPrice(),
+//				"avgBuyPrice doesn't match for asset balance on second portfolio");
+//		Assertions.assertEquals(100_000, assetBalanceSecondPortfolio.getTotalBuyCost(),
+//				"totalBuyCost amount doesn't match for asset balance on second portfolio");
+//		Assertions.assertEquals(1, assetBalanceSecondPortfolio.getTotalBoughtQuantity(),
+//				"totalBoughtQuantity amount doesn't match for asset balance on second portfolio");
+//	}
+//
+//	@Test
+//	void updateAssetBalanceIfTransactionWasReplaced() {
+//		Portfolio secondPortfolio = createPortfolio("Second Portfolio", user.getId());
+//
+//		CreateTransactionRequest createRequest = buyTransaction(100_000, 1);
+//		TransactionDTO originalTransaction = instrumentsFacadeService.createTransaction(createRequest);
+//		TransactionDTO copiedTransaction = instrumentsFacadeService.transferTransaction(originalTransaction.getId(), secondPortfolio.getId(), true);
+//
+//		Optional<AssetBalance> assetBalanceDefaultPortfolio = assetBalanceService.findByPortfolioAndAsset(portfolio.getId(), asset.getId());
+//
+//		Assertions.assertTrue(assetBalanceDefaultPortfolio.isEmpty(), "Asset Balance should be deleted, as it was only transaction");
+//
+//		AssetBalance assetBalanceSecondPortfolio = assetBalanceService.findByPortfolioAndAsset(portfolio.getId(), asset.getId())
+//				.orElseThrow(() -> new EntityNotFoundException("Asset Balance not found for second portfolio"));
+//		Assertions.assertEquals(100_000, assetBalanceSecondPortfolio.getCost(),
+//				"cost doesn't match for asset balance on second portfolio");
+//		Assertions.assertEquals(1, assetBalanceSecondPortfolio.getAmount(),
+//				"tokens amount doesn't match for asset balance on second portfolio");
+//		Assertions.assertEquals(100_000, assetBalanceSecondPortfolio.getAvgBuyPrice(),
+//				"avgBuyPrice doesn't match for asset balance on second portfolio");
+//		Assertions.assertEquals(100_000, assetBalanceSecondPortfolio.getTotalBuyCost(),
+//				"totalBuyCost amount doesn't match for asset balance on second portfolio");
+//		Assertions.assertEquals(1, assetBalanceSecondPortfolio.getTotalBoughtQuantity(),
+//				"totalBoughtQuantity amount doesn't match for asset balance on second portfolio");
+//	}
+
 	@Test
 	void findByNonExistentPortfolioShouldReturnEmpty() {
 		Assertions.assertTrue(assetBalanceService.findByPortfolio(999L).isEmpty(),

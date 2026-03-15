@@ -61,12 +61,13 @@ public class AssetService {
 	public Asset save(@NotNull Asset asset) {
 		try {
 			Asset saved = assetRepository.save(validatedAsset(asset));
-			log.info("Saved successfully {}", saved);
+			log.debug("Saved successfully {}", saved);
 			return saved;
 		} catch (InvalidDataException e) {
-			log.error("Failed to save {}", asset, e);
+			log.error("Failed to save invalid {}", asset, e);
 			return null;
 		} catch (Exception e) {
+			log.error("Failed to save {}", asset, e);
 			throw new InternalUnexpectedException(e);
 		}
 	}

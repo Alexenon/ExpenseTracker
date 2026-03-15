@@ -80,8 +80,8 @@ public class UserAssetService {
 
 	@Transactional
 	private UserAsset save(@NotNull UserAsset userAsset) {
+		validate(userAsset);
 		try {
-			validate(userAsset);
 			userAsset.setLastTimeUpdated(LocalDateTime.now());
 			UserAsset entity = userAssetRepository.save(userAsset);
 			log.info("Saved successfully {}", entity);
@@ -94,8 +94,6 @@ public class UserAssetService {
 
 	@Transactional
 	public void delete(@NotNull Long userAssetId) {
-		Objects.requireNonNull(userAssetId, "userAssetId");
-
 		UserAsset userAsset = findById(userAssetId)
 				.orElseThrow(() -> new IllegalArgumentException("Cannot find user asset by id: #" + userAssetId));
 
@@ -112,7 +110,6 @@ public class UserAssetService {
 		Objects.requireNonNull(userAsset, "userAsset");
 		Assert.isTrue(userAsset.getUser() != null, "user is missing");
 		Assert.isTrue(userAsset.getAsset() != null, "asset is missing");
-		Assert.isTrue(userAsset.getLastTimeUpdated() != null, "lastTimeUpdated is missing");
 	}
 
 }

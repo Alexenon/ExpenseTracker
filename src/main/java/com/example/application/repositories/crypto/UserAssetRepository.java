@@ -12,10 +12,11 @@ import java.util.Optional;
 public interface UserAssetRepository extends JpaRepository<UserAsset, Long> {
 
 	@Query(value = """
-			SELECT * FROM user_assets ua
-			INNER JOIN assets a ON a.id = ua.asset_id
-			WHERE a.symbol = :assetSymbol AND ua.user_id = :userId
-			""", nativeQuery = true)
+        SELECT ua.*
+        FROM user_assets ua
+        INNER JOIN assets a ON a.id = ua.asset_id
+        WHERE a.symbol = :assetSymbol AND ua.user_id = :userId
+        """, nativeQuery = true)
 	Optional<UserAsset> findByUserAndAsset(@Param("userId") Long userId,
 										   @Param("assetSymbol") String assetSymbol);
 

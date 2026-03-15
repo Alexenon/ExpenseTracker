@@ -175,6 +175,11 @@ public class InstrumentsFacadeService {
 	}
 
 	@Transactional
+	public void deleteTransaction(Long transactionId) {
+		transactionService.delete(transactionId);
+	}
+
+	@Transactional
 	public TransactionDTO transferTransaction(Long transactionId, Long portfolioId) {
 		return transferTransaction(transactionId, portfolioId, false);
 	}

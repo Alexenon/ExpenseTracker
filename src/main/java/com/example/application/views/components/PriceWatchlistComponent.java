@@ -39,20 +39,18 @@ public class PriceWatchlistComponent extends Div implements HasNotifications {
 			PortfolioDTO portfolio,
 			AssetDTO asset,
 			TransactionType transactionType,
-			InstrumentsFacadeService instrumentsFacadeService
-	)
+			InstrumentsFacadeService instrumentsFacadeService)
 	{
 		this.portfolio = portfolio;
 		this.asset = asset;
 		this.transactionType = transactionType;
 		this.instrumentsFacadeService = instrumentsFacadeService;
 
-		this.userWatchers =
-				instrumentsFacadeService.getAssetWatchersByAssetAndActionType(
-						portfolio.getId(),
-						asset.getSymbol(),
-						transactionType
-				);
+		this.userWatchers = instrumentsFacadeService.getAssetWatchersByAssetAndActionType(
+				portfolio.getId(),
+				asset.getSymbol(),
+				transactionType
+		);
 
 		add(priceLayoutContainer);
 		fillComponent();
@@ -92,7 +90,7 @@ public class PriceWatchlistComponent extends Div implements HasNotifications {
 		private final Button deleteBtn = new Button("Delete");
 		private final Button editBtn = new Button(LumoIcon.EDIT.create());
 
-		private final AssetWatcherDTO assetWatcher;
+		private AssetWatcherDTO assetWatcher;
 
 		private boolean isDraft;
 		private boolean isEditMode;
@@ -144,7 +142,7 @@ public class PriceWatchlistComponent extends Div implements HasNotifications {
 			editBtn.addClickListener(e -> toggleEditMode());
 
 			initBinder();
-			updateStatus();
+			updateComponentStatus();
 			setEditMode(isEditMode);
 		}
 
@@ -205,7 +203,7 @@ public class PriceWatchlistComponent extends Div implements HasNotifications {
 						.targetPrice(assetWatcher.getTargetPrice())
 						.build();
 
-				instrumentsFacadeService.createAssetWatcher(request);
+				assetWatcher = instrumentsFacadeService.createAssetWatcher(request);
 				isDraft = false;
 			} else {
 				UpdateAssetWatcherRequest request = new UpdateAssetWatcherRequest(assetWatcher);
@@ -213,7 +211,7 @@ public class PriceWatchlistComponent extends Div implements HasNotifications {
 			}
 
 			setEditMode(false);
-			updateStatus();
+			updateComponentStatus();
 			showSuccessfulNotification("Successfully saved");
 		}
 
@@ -234,7 +232,7 @@ public class PriceWatchlistComponent extends Div implements HasNotifications {
 			editBtn.setIcon(editMode ? LumoIcon.UNDO.create() : LumoIcon.EDIT.create());
 		}
 
-		private void updateStatus() {
+		private void updateComponentStatus() {
 			status.removeClassNames("draft", "completed", "ongoing");
 
 			String text =

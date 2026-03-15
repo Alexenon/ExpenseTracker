@@ -99,6 +99,7 @@ public class TransactionService {
 	public Transaction save(@NotNull Transaction transaction) {
 		log.info("Saving {}", transaction);
 		validate(transaction);
+		transaction.setLastTimeUpdated(LocalDateTime.now());
 		try {
 			Transaction savedTransaction = transactionRepository.save(transaction);
 			log.info("Saved successfully {}", savedTransaction);
