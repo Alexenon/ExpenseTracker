@@ -1,7 +1,7 @@
 package com.example.application.repositories;
 
 import com.example.application.data.dtos.ExpenseDTO;
-import com.example.application.data.dtos.projections.MonthlyExpensesProjection;
+import com.example.application.data.models.projections.MonthlyExpensesProjection;
 import com.example.application.entities.Expense;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

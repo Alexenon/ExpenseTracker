@@ -26,8 +26,9 @@ public class AssetService {
 	@Autowired
 	private AssetRepository assetRepository;
 
-	public List<Asset> findAll() {
-		return assetRepository.findAll();
+	public Optional<Asset> findById(Long assetId) {
+		Objects.requireNonNull(assetId, "assetId");
+		return assetRepository.findById(assetId);
 	}
 
 	public Optional<Asset> findBySymbol(@NotNull String symbolName) {
@@ -38,25 +39,35 @@ public class AssetService {
 				.flatMap(assetRepository::findBySymbol);
 	}
 
+	public List<Asset> findAll() {
+		return assetRepository.findAll();
+	}
+
 	public void delete(Asset asset) {
 		try {
 			assetRepository.delete(asset);
 			log.info("Deleted successfully {}", asset);
 		} catch (Exception e) {
-			log.error("Failed to delete {}, cause: {}", asset, e.getMessage());
+			log.error("Failed to delete {}", asset, e);
 			throw new InternalUnexpectedException(e);
 		}
 	}
 
-	public Optional<Asset> save(@NotNull Asset asset) {
+	/**
+	 * @throws InvalidDataException when validating an invalid asset that comes from external resources
+	 * @throws InternalUnexpectedException when there is any issue related to save the entity to the database
+	 * */
+	@Nullable
+	public Asset save(@NotNull Asset asset) {
 		try {
 			Asset saved = assetRepository.save(validatedAsset(asset));
-			log.info("Saved successfully {}", saved);
-			return Optional.of(saved);
+			log.debug("Saved successfully {}", saved);
+			return saved;
 		} catch (InvalidDataException e) {
-			log.error("Failed to save {}, cause: {}", asset, e.getMessage());
-			return Optional.empty();
+			log.error("Failed to save invalid {}", asset, e);
+			return null;
 		} catch (Exception e) {
+			log.error("Failed to save {}", asset, e);
 			throw new InternalUnexpectedException(e);
 		}
 	}
@@ -97,7 +108,8 @@ public class AssetService {
 		return target;
 	}
 
-	private <T> T validatedField(@NotNull Asset newAsset, @Nullable Asset oldAsset,
+	private <T> T validatedField(@NotNull Asset newAsset,
+								 @Nullable Asset oldAsset,
 								 Function<Asset, T> getter, Predicate<T> invalidCheck, String fieldName)
 	{
 		T newValue = getter.apply(newAsset);

@@ -1,7 +1,7 @@
 package com.example.application.views.components.custom.dialogs.transactions.transfer;
 
-import com.example.application.entities.crypto.Portfolio;
-import com.example.application.entities.crypto.Transaction;
+import com.example.application.data.dtos.PortfolioDTO;
+import com.example.application.data.dtos.TransactionDTO;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.views.components.custom.dialogs.transactions.TransactionDeletedEvent;
 import com.example.application.views.components.utils.HasNotifications;
@@ -28,10 +28,10 @@ import java.util.Objects;
 @SpringComponent
 public class TransferTransactionDialog extends Dialog implements HasNotifications {
 
-	private final Transaction transaction;
+	private final TransactionDTO transaction;
 	private final InstrumentsFacadeService instrumentsFacadeService;
 
-	private final Select<Portfolio> select = new Select<>();
+	private final Select<PortfolioDTO> select = new Select<>();
 	private final Checkbox replaceCheckbox = new Checkbox("Replace");
 
 	private final Button saveButton = new Button("Save");
@@ -39,7 +39,7 @@ public class TransferTransactionDialog extends Dialog implements HasNotification
 	private final Button closeBtn = new Button(LumoIcon.CROSS.create(), e -> this.close());
 
 	@Autowired
-	public TransferTransactionDialog(Transaction transaction,
+	public TransferTransactionDialog(TransactionDTO transaction,
 									 InstrumentsFacadeService instrumentsFacadeService)
 	{
 		this.transaction = Objects.requireNonNull(transaction, "transaction");
@@ -51,7 +51,7 @@ public class TransferTransactionDialog extends Dialog implements HasNotification
 		setHeaderTitle("Transfer transaction");
 		select.setLabel("Portfolio");
 		select.setItems(getPortfoliosWithoutCurrentOne());
-		select.setItemLabelGenerator(Portfolio::getName);
+		select.setItemLabelGenerator(PortfolioDTO::getName);
 		replaceCheckbox.setTooltipText("Moves the transaction to the selected portfolio instead of copying it");
 
 		closeBtn.addClickShortcut(Key.ESCAPE);
@@ -66,7 +66,7 @@ public class TransferTransactionDialog extends Dialog implements HasNotification
 				return;
 			}
 
-			Portfolio portfolio = select.getValue();
+			PortfolioDTO portfolio = select.getValue();
 			boolean isReplaced = replaceCheckbox.getValue();
 
 			if (!isReplaced) {
@@ -77,7 +77,7 @@ public class TransferTransactionDialog extends Dialog implements HasNotification
 			ConfirmDialog confirmationDialog = getConfirmationDialog(transaction);
 			confirmationDialog.open();
 			confirmationDialog.addConfirmListener(l -> {
-				Transaction replacedTransaction = manageSuccesfullTransferAction(portfolio, true);
+				TransactionDTO replacedTransaction = manageSuccesfullTransferAction(portfolio, true);
 				UI.getCurrent().access(() -> ComponentUtil.fireEvent(UI.getCurrent(), new TransactionDeletedEvent(this, replacedTransaction)));
 			});
 		});
@@ -93,26 +93,26 @@ public class TransferTransactionDialog extends Dialog implements HasNotification
 		return select.getValue() != null;
 	}
 
-	private Transaction manageSuccesfullTransferAction(Portfolio portfolio, boolean isReplaced) {
-		Transaction transferred = instrumentsFacadeService.transferTransaction(transaction, portfolio, isReplaced);
+	private TransactionDTO manageSuccesfullTransferAction(PortfolioDTO portfolio, boolean isReplaced) {
+		TransactionDTO transferred = instrumentsFacadeService.transferTransaction(transaction.getId(), portfolio.getId(), isReplaced);
 		displaySuccessfullNotification(isReplaced, portfolio);
 		this.close();
 		return transferred;
 	}
 
-	private void displaySuccessfullNotification(boolean replace, Portfolio portfolio) {
+	private void displaySuccessfullNotification(boolean replace, PortfolioDTO portfolio) {
 		String action = replace ? "transfered" : "copied";
 		showSuccessfulNotification("Transaction successfully %s to '%s' portfolio".formatted(action, portfolio.getName()));
 	}
 
-	private List<Portfolio> getPortfoliosWithoutCurrentOne() {
+	private List<PortfolioDTO> getPortfoliosWithoutCurrentOne() {
 		return instrumentsFacadeService.getUserPortfolios()
 				.stream()
-				.filter(p -> !transaction.getPortfolio().equals(p))
+				.filter(p -> !Objects.equals(p.getId(), transaction.getPortfolioId()))
 				.toList();
 	}
 
-	private ConfirmDialog getConfirmationDialog(Transaction replacedTransaction) {
+	private ConfirmDialog getConfirmationDialog(TransactionDTO replacedTransaction) {
 		ConfirmDialog dialog = new ConfirmDialog();
 		dialog.setHeader("Replace this transaction");
 		dialog.setText("Are you sure you want to permanently delete transaction from this portfolio, and move it to the '%s' portfolio?"

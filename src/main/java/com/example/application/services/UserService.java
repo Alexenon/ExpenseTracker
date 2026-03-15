@@ -2,14 +2,15 @@ package com.example.application.services;
 
 import com.example.application.data.requests.RegisterUserRequest;
 import com.example.application.entities.User;
+import com.example.application.entities.crypto.Portfolio;
 import com.example.application.repositories.UserRepository;
 import com.example.application.utils.common.lang.StringUtils;
 import com.example.application.utils.exceptions.InternalUnexpectedException;
 import com.example.application.utils.exceptions.auth.UsernameTakenException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -19,35 +20,34 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 
 /*
-    TODO:
+    TODO: [CRITICAL]
      [?] Don't allow spaces in the username / email  ->  pattern !!!
 * */
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class UserService implements UserDetailsService {
 
-	@Autowired
-	private UserRepository userRepository;
+	private final UserRepository userRepository;
+	private final PasswordEncoder passwordEncoder;
 
-	@Autowired
-	private PasswordEncoder passwordEncoder;
-
-	public Optional<User> findById(long id) {
-		return userRepository.findById(id);
+	//<editor-fold desc="SEARCH">
+	public Optional<User> findById(Long userId) {
+		return userRepository.findById(Objects.requireNonNull(userId, "userId"));
 	}
 
 	public Optional<User> findByUsername(@NotNull String username) {
-		return userRepository.findByUsernameIgnoreCase(Objects.requireNonNull(username, "username"));
+		return userRepository.findByUsernameIgnoreCase(Objects.requireNonNull(username, "username").trim());
 	}
 
 	public Optional<User> findByEmail(@NotNull String email) {
-		return userRepository.findByEmailIgnoreCase(Objects.requireNonNull(email, "email"));
+		return userRepository.findByEmailIgnoreCase(Objects.requireNonNull(email, "email").trim());
 	}
 
 	public Optional<User> findByUsernameOrEmail(@NotNull String usernameOrEmail) {
@@ -61,7 +61,7 @@ public class UserService implements UserDetailsService {
 	@NotNull
 	@Override
 	public UserDetails loadUserByUsername(String usernameOrEmail) {
-		User user = findByUsernameOrEmail(usernameOrEmail)
+		User user = findByUsername(usernameOrEmail)
 				.orElseThrow(() -> new UsernameNotFoundException(usernameOrEmail + " not found."));
 
 		return new org.springframework.security.core.userdetails.User(
@@ -70,46 +70,104 @@ public class UserService implements UserDetailsService {
 				user.getRoles().stream().map(role -> new SimpleGrantedAuthority(role.name())).toList()
 		);
 	}
+	//</editor-fold>
 
-	public User createNewUser(RegisterUserRequest request) {
+	@NotNull
+	@Transactional
+	public User createNewUser(@NotNull RegisterUserRequest request) {
+		log.info("Creating new user: {}", request);
+
 		if (!request.getPassword().equals(request.getConfirmPassword()))
 			throw new IllegalArgumentException("User register passwords does not match");
 
-		User user = new User();
-		user.setUsername(request.getUsername());
-		user.setEmail(request.getEmail());
-		user.setPassword(request.getPassword());
+		// TODO: [CRITICAL
+		// 	VERIFY EACH request what has valid data before passing it to entity
 
-		return createNewUser(user);
+		User user = new User();
+		user.setUsername(request.getUsername().trim().toLowerCase());
+		user.setEmail(request.getEmail().trim().toLowerCase());
+		user.setPassword(passwordEncoder.encode(request.getPassword()));
+		user.getRoles().add(User.Role.USER_ROLE);
+
+		return save(user);
 	}
 
 	@Transactional
-	public User createNewUser(User user) {
-		return userRepository.save(user);
+	public void addPortfolio(@NotNull Long userId, @NotNull Portfolio portfolio) {
+		log.info("Adding portfolio '{}' to user: #{}", portfolio.getName(), userId);
+		User user = findById(userId)
+				.orElseThrow(() -> new UsernameNotFoundException("User #" + userId + " not found."));
+
+		user.addPortfolio(portfolio);
+		log.info("Portfolio '{}' is added for user: #{}", portfolio.getName(), userId);
+	}
+
+	@Transactional
+	public void removePortfolio(@NotNull Long userId, @NotNull Portfolio portfolio) {
+		log.info("Removing portfolio '{}' from user: #{}", portfolio.getName(), userId);
+		User user = findById(userId)
+				.orElseThrow(() -> new UsernameNotFoundException("User #" + userId + " not found."));
+
+		user.removePortfolio(portfolio);
+		log.info("Portfolio '{}' is removed from user: #{}", portfolio.getName(), userId);
+	}
+
+	@Transactional
+	public void setPortfolioAsActive(@NotNull Long userId, @NotNull Portfolio portfolio) {
+		log.info("Setting portfolio '{}' as active for user: #{}", portfolio.getName(), userId);
+		User user = findById(userId)
+				.orElseThrow(() -> new UsernameNotFoundException("User #" + userId + " not found."));
+
+		user.setActivePortfolio(portfolio);
+		log.info("Portfolio '{}' is marked as active for user: #{}", portfolio.getName(), userId);
 	}
 
 	@NotNull
 	@Transactional
 	public User save(@NotNull User user) {
+		log.info("Saving {}", user);
+		validate(user);
 		try {
-			normalizeUserFields(user);
-			validate(user);
+			user.setLastTimeUpdated(LocalDateTime.now());
 			User savedUser = userRepository.save(user);
 			log.info("Saved successfully {}", savedUser);
 			return savedUser;
 		} catch (Exception e) {
-			log.error("Failed to save {}, cause: {}", user.toFullString(), e.getMessage());
+			log.error("Failed to save {}", user.toFullString(), e);
+			throw new InternalUnexpectedException(e);
+		}
+	}
+
+	@Transactional
+	public void delete(@NotNull Long userId) {
+		try {
+			log.info("Deleting user :#{}", userId);
+			userRepository.deleteById(userId);
+			log.info("Deleted successfully user: #{}", userId);
+		} catch (Exception e) {
+			log.error("Failed to delete user: #{}", userId, e);
+			throw new InternalUnexpectedException(e);
+		}
+	}
+
+	@Transactional
+	public void deleteAll(@NotNull List<User> users) {
+		int numberOfTransactions = users.size();
+		try {
+			log.info("Deleting {} users", numberOfTransactions);
+			userRepository.deleteAll(users);
+			log.info("Deleted successfully {} users", numberOfTransactions);
+		} catch (Exception e) {
+			log.error("Failed to delete {} users", numberOfTransactions, e);
 			throw new InternalUnexpectedException(e);
 		}
 	}
 
 	private void validate(User user) {
-		Objects.requireNonNull(user, "User cannot be null");
+		Objects.requireNonNull(user, "request cannot be null");
 		Assert.isTrue(StringUtils.isNotBlank(user.getUsername()), "User -> username is missing");
 		Assert.isTrue(StringUtils.isNotBlank(user.getEmail()), "User -> email is missing");
 		Assert.isTrue(StringUtils.isNotBlank(user.getPassword()), "User -> password is missing");
-		Assert.notNull(user.getLastTimeUpdated(), "User -> lastTimeUpdated is missing");
-		Assert.notNull(user.getTimeCreatedAt(), "User -> date creation is missing");
 
 		if (isUsernameTaken(user.getUsername()))
 			throw new UsernameTakenException("There is already a user with this username");
@@ -118,21 +176,14 @@ public class UserService implements UserDetailsService {
 			throw new UsernameTakenException("There is already a user with this email");
 	}
 
-	public boolean isUsernameTaken(String username) {
+	public boolean isUsernameTaken(@NotNull String username) {
+		Objects.requireNonNull(username, "username");
 		return userRepository.findByUsernameIgnoreCase(username).isPresent();
 	}
 
-	public boolean isEmailTaken(String email) {
+	public boolean isEmailTaken(@NotNull String email) {
+		Objects.requireNonNull(email, "email");
 		return userRepository.findByEmailIgnoreCase(email).isPresent();
-	}
-
-	private void normalizeUserFields(User user) {
-		if (user.isNew()) {
-			user.setPassword(passwordEncoder.encode(user.getPassword()));
-			user.setRoles(Set.of(User.Role.USER_ROLE));
-		}
-		user.setEmail(user.getEmail().trim().toLowerCase());
-		user.setLastTimeUpdated(LocalDateTime.now());
 	}
 
 }

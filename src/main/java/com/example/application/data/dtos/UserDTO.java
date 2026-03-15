@@ -1,17 +1,21 @@
 package com.example.application.data.dtos;
 
 import com.example.application.entities.User;
+import lombok.Data;
 
-import java.util.Set;
+@Data
+public class UserDTO {
 
-public interface UserDTO {
-    Long getId();
+	private Long id;
+	private String username;
+	private String email;
 
-    String getUsername();
+	public static UserDTO mappedFrom(User user) {
+		UserDTO dto = new UserDTO();
+		dto.setId(user.getId());
+		dto.setUsername(user.getUsername());
+		dto.setEmail(user.getEmail());
+		return dto;
+	}
 
-    String getPassword();
-
-    String getEmail();
-
-    Set<User.Role> getRoles();
 }

@@ -1,4 +1,4 @@
-package com.example.application.data.dtos.projections;
+package com.example.application.data.models.projections;
 
 import java.util.Optional;
 

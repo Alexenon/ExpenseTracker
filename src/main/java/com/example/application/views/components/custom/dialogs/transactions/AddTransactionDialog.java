@@ -1,9 +1,10 @@
 package com.example.application.views.components.custom.dialogs.transactions;
 
+import com.example.application.data.dtos.AssetDTO;
+import com.example.application.data.dtos.PortfolioDTO;
+import com.example.application.data.dtos.TransactionDTO;
+import com.example.application.data.requests.CreateTransactionRequest;
 import com.example.application.entities.common.TransactionType;
-import com.example.application.entities.crypto.Asset;
-import com.example.application.entities.crypto.Portfolio;
-import com.example.application.entities.crypto.Transaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.utils.common.formatters.CommonFormatters;
 import com.example.application.views.components.core.Container;
@@ -40,11 +41,10 @@ import java.util.Objects;
 * */
 public class AddTransactionDialog extends Dialog implements HasNotifications {
 
-	private final Asset asset;
-	private final Portfolio portfolio;
-	private final Transaction transaction;
+	private final AssetDTO asset;
+	private final PortfolioDTO portfolio;
 	private final InstrumentsFacadeService instrumentsFacadeService;
-	private final Binder<Transaction> binder = new Binder<>(Transaction.class);
+	private final Binder<CreateTransactionRequest> binder = new Binder<>(CreateTransactionRequest.class);
 
 	private final AssetComboBox assetSymbolField;
 	private final Select<TransactionType> typeField = new Select<>();
@@ -58,20 +58,19 @@ public class AddTransactionDialog extends Dialog implements HasNotifications {
 	private final Button cancelButton = new Button("Cancel");
 	private final Span symbolSuffix = new Span();
 
-	public AddTransactionDialog(Portfolio portfolio, InstrumentsFacadeService instrumentsFacadeService) {
+	public AddTransactionDialog(PortfolioDTO portfolio, InstrumentsFacadeService instrumentsFacadeService) {
 		this(portfolio, null, instrumentsFacadeService);
 	}
 
 	@Autowired
-	public AddTransactionDialog(@NotNull Portfolio portfolio,
-								@Nullable Asset asset,
+	public AddTransactionDialog(@NotNull PortfolioDTO portfolio,
+								@Nullable AssetDTO asset,
 								@NotNull InstrumentsFacadeService instrumentsFacadeService)
 	{
 		this.portfolio = Objects.requireNonNull(portfolio, "portfolio");
 		this.asset = asset;
 		this.instrumentsFacadeService = Objects.requireNonNull(instrumentsFacadeService, "instrumentsFacadeService");
 		this.assetSymbolField = new AssetComboBox(instrumentsFacadeService);
-		this.transaction = defaultTransaction();
 		buildForm();
 	}
 
@@ -154,7 +153,7 @@ public class AddTransactionDialog extends Dialog implements HasNotifications {
 		saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
 		saveButton.addClickListener(e -> {
 			if (binder.validate().isOk()) {
-				Transaction savedTransaction = instrumentsFacadeService.saveTransaction(binder.getBean());
+				TransactionDTO savedTransaction = instrumentsFacadeService.createTransaction(binder.getBean());
 				showSuccessfulNotification("The transaction was saved succesfully");
 				UI.getCurrent().access(() -> ComponentUtil.fireEvent(UI.getCurrent(), new TransactionCreatedOrUpdatedEvent(this, savedTransaction)));
 				this.close();
@@ -168,43 +167,44 @@ public class AddTransactionDialog extends Dialog implements HasNotifications {
 	}
 
 	private void initializeBinder() {
-		binder.setBean(transaction);
+		binder.setBean(defaultRequest());
 
 		binder.forField(assetSymbolField)
 				.asRequired("Please fill this field")
-				.bind(Transaction::getAsset, Transaction::setAsset);
+				.bind(req -> req.getAssetSymbol() == null ? null : instrumentsFacadeService.getAssetBySymbol(req.getAssetSymbol()).orElseThrow(),
+						(req, asset) -> req.setAssetSymbol(asset == null ? null : asset.getSymbol()));
 
 		binder.forField(typeField)
 				.asRequired("Please fill this field")
-				.bind(Transaction::getType, Transaction::setType);
+				.bind(CreateTransactionRequest::getType, CreateTransactionRequest::setType);
 
 		binder.forField(amountField)
 				.asRequired("Please fill this field")
 				.withConverter(new FlexibleAmountConvertor())
 				.withValidator(new DoubleRangeValidator("Invalid decimal value", 0.0, Double.MAX_VALUE))
 				.withValidator(amount -> amount > 0, "Amount should be bigger than 0")
-				.bind(Transaction::getOrderQuantity, Transaction::setOrderQuantity);
+				.bind(CreateTransactionRequest::getOrderQuantity, CreateTransactionRequest::setOrderQuantity);
 
 		binder.forField(marketPriceField)
 				.asRequired("Please fill this field")
 				.withConverter(new FlexiblePriceConvertor())
 				.withValidator(new DoubleRangeValidator("Invalid decimal value", 0.0, Double.MAX_VALUE))
 				.withValidator(price -> price > 0, "Market price should be bigger than 0")
-				.bind(Transaction::getMarketPrice, Transaction::setMarketPrice);
+				.bind(CreateTransactionRequest::getMarketPrice, CreateTransactionRequest::setMarketPrice);
 
 		binder.forField(totalCostField)
 				.asRequired("Please fill this field")
 				.withConverter(new FlexiblePriceConvertor())
 				.withValidator(new DoubleRangeValidator("Invalid decimal value", 0.0, Double.MAX_VALUE))
-				.withValidator(price -> price >= 1, "Total price should be at least one dollar")
-				.bind(Transaction::getOrderTotalCost, Transaction::setOrderTotalCost);
+				.withValidator(price -> price >= 1, "Total price should be at least one dollar");
 
 		binder.forField(notesField)
-				.bind(Transaction::getNote, Transaction::setNote);
+				.withValidator(s -> s.length() < 255, "Notes lenght cannot be bigger than 255 characters")
+				.bind(CreateTransactionRequest::getNote, CreateTransactionRequest::setNote);
 
 		binder.forField(datePicker)
 				.asRequired("Please fill this field")
-				.bind(Transaction::getDateTime, Transaction::setDateTime);
+				.bind(CreateTransactionRequest::getDateTime, CreateTransactionRequest::setDateTime);
 	}
 
 	private void displayHintMarketPrice() {
@@ -213,7 +213,7 @@ public class AddTransactionDialog extends Dialog implements HasNotifications {
 	}
 
 	private void displayHintAmountOfTokens() {
-		double amountTokens = assetSymbolField.getAmountTokens(portfolio);
+		double amountTokens = assetSymbolField.getAmountTokens(portfolio.getId());
 		String formatedAmount = CommonFormatters.AMOUNT.format(amountTokens);
 		String helperText = typeField.getValue().isBuyTransaction()
 				? null
@@ -222,10 +222,10 @@ public class AddTransactionDialog extends Dialog implements HasNotifications {
 		amountField.setHelperText(helperText);
 	}
 
-	private Transaction defaultTransaction() {
-		Transaction newTransaction = new Transaction();
-		newTransaction.setPortfolio(portfolio);
-		newTransaction.setAsset(asset);
+	private CreateTransactionRequest defaultRequest() {
+		CreateTransactionRequest newTransaction = new CreateTransactionRequest();
+		newTransaction.setPortfolioId(portfolio.getId());
+		newTransaction.setAssetSymbol(asset == null ? null : asset.getSymbol());
 		return newTransaction;
 	}
 

@@ -33,7 +33,7 @@ public class TransactionsView extends DefaultPage {
 	}
 
 	private void buildPage() {
-		transactionsGrid.setItems(instrumentsFacadeService.getTransactions(portfolio));
+		transactionsGrid.setItems(instrumentsFacadeService.getTransactions(portfolio.getId()));
 		add(transactionsGrid);
 	}
 

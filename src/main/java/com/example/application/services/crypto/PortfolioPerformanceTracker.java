@@ -1,8 +1,8 @@
 package com.example.application.services.crypto;
 
-import com.example.application.entities.crypto.Asset;
-import com.example.application.entities.crypto.AssetBalance;
-import com.example.application.entities.crypto.Portfolio;
+import com.example.application.data.dtos.AssetBalanceDTO;
+import com.example.application.data.dtos.AssetDTO;
+import com.example.application.data.dtos.PortfolioDTO;
 import com.example.application.utils.common.lang.MathUtils;
 import com.example.application.utils.investment.ProfitCalculator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,145 +24,152 @@ import static com.example.application.utils.investment.ProfitUtils.ONE_HUNDRED_P
 @Service
 public class PortfolioPerformanceTracker {
 
-    private final InstrumentsFacadeService instrumentsFacadeService;
+	private final InstrumentsFacadeService instrumentsFacadeService;
 
-    @Autowired
-    public PortfolioPerformanceTracker(InstrumentsFacadeService instrumentsFacadeService) {
-        this.instrumentsFacadeService = instrumentsFacadeService;
-    }
+	@Autowired
+	public PortfolioPerformanceTracker(InstrumentsFacadeService instrumentsFacadeService) {
+		this.instrumentsFacadeService = instrumentsFacadeService;
+	}
 
-    //region ASSET STATS
-    public double getAssetWorth(Portfolio portfolio, Asset asset) {
-        return Optional.ofNullable(asset)
-                .map(a -> instrumentsFacadeService.getAmountOfTokens(portfolio, asset) * a.getMarketPrice())
-                .orElse(Double.NaN);
-    }
+	//region ASSET STATS
+	public double getAssetWorth(PortfolioDTO portfolio, AssetDTO asset) {
+		return Optional.ofNullable(asset)
+				.map(a -> instrumentsFacadeService.getAmountOfTokens(portfolio.getId(), asset.getSymbol()) * a.getMarketPrice())
+				.orElse(Double.NaN);
+	}
 
-    public double getAverageBuyPrice(Portfolio portfolio, Asset asset) {
-        return Optional.ofNullable(asset)
-                .flatMap(a -> instrumentsFacadeService.getAssetBalanceByAsset(portfolio, asset))
-                .map(AssetBalance::getAvgBuyPrice)
-                .orElse(Double.NaN);
-    }
+	public double getAverageBuyPrice(PortfolioDTO portfolio, AssetDTO asset) {
+		return Optional.ofNullable(asset)
+				.flatMap(a -> instrumentsFacadeService.getAssetBalanceByAsset(portfolio.getId(), asset.getSymbol()))
+				.map(AssetBalanceDTO::getAvgBuyPrice)
+				.orElse(Double.NaN);
+	}
 
-    public double getAverageSellPrice(Portfolio portfolio, Asset asset) {
-        return Optional.ofNullable(asset)
-                .flatMap(a -> instrumentsFacadeService.getAssetBalanceByAsset(portfolio, asset))
-                .map(AssetBalance::getAvgSellPrice)
-                .orElse(Double.NaN);
-    }
+	public double getAverageSellPrice(PortfolioDTO portfolio, AssetDTO asset) {
+		return Optional.ofNullable(asset)
+				.flatMap(a -> instrumentsFacadeService.getAssetBalanceByAsset(portfolio.getId(), asset.getSymbol()))
+				.map(AssetBalanceDTO::getAvgSellPrice)
+				.orElse(Double.NaN);
+	}
 
-    public double getAssetRemainingTokensCost(Portfolio portfolio, Asset asset) {
-        return Optional.ofNullable(asset)
-                .flatMap(a -> instrumentsFacadeService.getAssetBalanceByAsset(portfolio, asset))
-                .map(AssetBalance::getCost)
-                .orElse(Double.NaN);
-    }
+	public double getAssetRemainingTokensCost(PortfolioDTO portfolio, AssetDTO asset) {
+		return Optional.ofNullable(asset)
+				.flatMap(a -> instrumentsFacadeService.getAssetBalanceByAsset(portfolio.getId(), asset.getSymbol()))
+				.map(AssetBalanceDTO::getCost)
+				.orElse(Double.NaN);
+	}
 
-    public double getAssetRealizedProfit(Portfolio portfolio, Asset asset) {
-        return Optional.ofNullable(asset)
-                .flatMap(a -> instrumentsFacadeService.getAssetBalanceByAsset(portfolio, asset))
-                .map(AssetBalance::getTotalRealized)
-                .orElse(Double.NaN);
-    }
+	public double getAssetRealizedProfit(PortfolioDTO portfolio, AssetDTO asset) {
+		return Optional.ofNullable(asset)
+				.flatMap(a -> instrumentsFacadeService.getAssetBalanceByAsset(portfolio.getId(), asset.getSymbol()))
+				.map(AssetBalanceDTO::getTotalRealizedProfit)
+				.orElse(Double.NaN);
+	}
 
-    public double getAssetTotalProfit(Portfolio portfolio, Asset asset) {
-        return getAssetRealizedProfit(portfolio, asset) + getAssetUnrealizedProfit(portfolio, asset);
-    }
+	public double getAssetTotalProfit(PortfolioDTO portfolio, AssetDTO asset) {
+		return getAssetRealizedProfit(portfolio, asset) + getAssetUnrealizedProfit(portfolio, asset);
+	}
 
-    public double getAssetUnrealizedProfit(Portfolio portfolio, Asset asset) {
-        return getAssetWorth(portfolio, asset) - getAssetRemainingTokensCost(portfolio, asset);
-    }
+	public double getAssetUnrealizedProfit(PortfolioDTO portfolio, AssetDTO asset) {
+		return getAssetWorth(portfolio, asset) - getAssetRemainingTokensCost(portfolio, asset);
+	}
 
-    public double getAssetNetProfitPercentage(Portfolio portfolio, Asset asset) {
-        return MathUtils.safeDivision(getAssetWorth(portfolio, asset), getAssetRemainingTokensCost(portfolio, asset));
-    }
+	public double getAssetNetProfitPercentage(PortfolioDTO portfolio, AssetDTO asset) {
+		return MathUtils.safeDivision(getAssetWorth(portfolio, asset), getAssetRemainingTokensCost(portfolio, asset));
+	}
 
-    public String getAssetBuySellRatio(Portfolio portfolio, Asset asset) {
-        return ProfitCalculator.buySellRatio(instrumentsFacadeService.getTransactionsByAsset(portfolio, asset));
-    }
+	public String getAssetBuySellRatio(PortfolioDTO portfolio, AssetDTO asset) {
+		return ProfitCalculator.buySellRatio(instrumentsFacadeService.getTransactionsByAsset(portfolio.getId(), asset.getSymbol()));
+	}
 
-    public double getAssetHoldingDays(Portfolio portfolio, Asset asset) {
-        return instrumentsFacadeService.getAssetBalanceByAsset(portfolio, asset)
-                .map(AssetBalance::getHoldingDays)
-                .orElse(Double.NaN);
-    }
+	public double getAssetHoldingDays(PortfolioDTO portfolio, AssetDTO asset) {
+		return instrumentsFacadeService.getAssetBalanceByAsset(portfolio.getId(), asset.getSymbol())
+				.map(AssetBalanceDTO::getHoldingDays)
+				.orElse(Double.NaN);
+	}
 
-    /**
-     * @return the asset diversity percentage in the portfolio, range (0 - 100)%
-     */
-    public int getAssetDiversityPercentage(Portfolio portfolio, Asset asset) {
-        return Math.toIntExact(Math.round(getAssetWorth(portfolio, asset) / getPortfolioWorth(portfolio) * ONE_HUNDRED_PERCENT));
-    }
-    //endregion
+	/**
+	 * @return the asset diversity percentage in the portfolio, range (0 - 100)%
+	 */
+	public int getAssetDiversityPercentage(PortfolioDTO portfolio, AssetDTO asset) {
+		return Math.toIntExact(Math.round(getAssetWorth(portfolio, asset) / getPortfolioWorth(portfolio) * ONE_HUNDRED_PERCENT));
+	}
+	//endregion
 
-    //region PORTFOLIO STATS
+	//region PORTFOLIO STATS
 
-    /**
-     * How much was invested in all holding assets at this moment
-     */
-    public double getPortfolioCost(Portfolio portfolio) {
-        return instrumentsFacadeService.getAssetBalances(portfolio)
-                .stream()
-                .mapToDouble(AssetBalance::getCost)
-                .sum();
-    }
+	/**
+	 * How much was invested in all holding assets at this moment
+	 */
+	public double getPortfolioCost(PortfolioDTO portfolio) {
+		return instrumentsFacadeService.getPorfolioAssetBalances(portfolio.getId())
+				.stream()
+				.mapToDouble(AssetBalanceDTO::getCost)
+				.sum();
+	}
 
-    /**
-     * How much is estimated the worth of all holding assets (Overall Unrealized profit)
-     */
-    public double getPortfolioWorth(Portfolio portfolio) {
-        return instrumentsFacadeService.getAssetBalances(portfolio)
-                .stream()
-                .mapToDouble(balance -> balance.getAmount() * balance.getAsset().getMarketPrice())
-                .sum();
-    }
+	/**
+	 * How much is estimated the worth of all holding assets (Overall Unrealized profit)
+	 */
+	public double getPortfolioWorth(PortfolioDTO portfolio) {
+		return instrumentsFacadeService.getPorfolioAssetBalances(portfolio.getId())
+				.stream()
+				.mapToDouble(balance -> {
+					double assetCurrentPrice = instrumentsFacadeService.getAssetBySymbol(balance.getAssetSymbol())
+							.orElseThrow()
+							.getMarketPrice();
 
-    public double getPortfolioUnrealizedProfit(Portfolio portfolio) {
-        return getPortfolioWorth(portfolio);
-    }
+					return balance.getAmount() * assetCurrentPrice;
+				})
+				.sum();
+	}
 
-    public double getPortfolioRealizedProfit(Portfolio portfolio) {
-        return instrumentsFacadeService.getAssetBalances(portfolio)
-                .stream()
-                .mapToDouble(AssetBalance::getTotalRealized)
-                .sum();
-    }
+	public double getPortfolioUnrealizedProfit(PortfolioDTO portfolio) {
+		return getPortfolioWorth(portfolio);
+	}
 
-    /**
-     * Represents the total profit, realized + unrealized
-     */
-    public double getPortfolioTotalProfit(Portfolio portfolio) {
-        return getPortfolioUnrealizedProfit(portfolio) + getPortfolioRealizedProfit(portfolio);
-    }
+	public double getPortfolioRealizedProfit(PortfolioDTO portfolio) {
+		return instrumentsFacadeService.getPorfolioAssetBalances(portfolio.getId())
+				.stream()
+				.mapToDouble(AssetBalanceDTO::getTotalRealizedProfit)
+				.sum();
+	}
 
-    /**
-     * @return average number of days holding across all assets
-     * */
-    public double getPortfolioAverageHoldingDays(Portfolio portfolio) {
-        return instrumentsFacadeService.getAllAssetsEverBought(portfolio)
-                .stream()
-                .mapToDouble(a -> getAssetHoldingDays(portfolio, a))
-                .average()
-                .orElse(0);
-    }
+	/**
+	 * Represents the total profit, realized + unrealized
+	 */
+	public double getPortfolioTotalProfit(PortfolioDTO portfolio) {
+		return getPortfolioUnrealizedProfit(portfolio) + getPortfolioRealizedProfit(portfolio);
+	}
 
-    public String getPortfolioBuySellRatio(Portfolio portfolio) {
-        return ProfitCalculator.buySellRatio(instrumentsFacadeService.getTransactions(portfolio));
-    }
+	/**
+	 * @return average number of days holding across all assets
+	 */
+	public double getPortfolioAverageHoldingDays(PortfolioDTO portfolio) {
+		return instrumentsFacadeService.getAllAssetsEverBought(portfolio)
+				.stream()
+				.mapToDouble(a -> getAssetHoldingDays(portfolio, a))
+				.average()
+				.orElse(0);
+	}
 
-    public double getPortfolioProfitPercentage(Portfolio portfolio) {
-        return getPortfolioWorth(portfolio) / getPortfolioCost(portfolio) * ONE_HUNDRED_PERCENT - ONE_HUNDRED_PERCENT;
-    }
+	public String getPortfolioBuySellRatio(PortfolioDTO portfolio) {
+		return ProfitCalculator.buySellRatio(instrumentsFacadeService.getTransactions(portfolio.getId()));
+	}
 
-    public Map<Asset, Double> getMostProfitableAssetsByProfit(Portfolio portfolio) {
-        return instrumentsFacadeService.getAssetBalances(portfolio)
-                .stream()
-                .map(AssetBalance::getAsset)
-                .collect(Collectors.toMap(asset -> asset,
-                        asset -> getAssetTotalProfit(portfolio, asset),
-                        (a, b) -> b));
-    }
-    //endregion
+	public double getPortfolioProfitPercentage(PortfolioDTO portfolio) {
+		return getPortfolioWorth(portfolio) / getPortfolioCost(portfolio) * ONE_HUNDRED_PERCENT - ONE_HUNDRED_PERCENT;
+	}
+
+	public Map<AssetDTO, Double> getMostProfitableAssetsByProfit(PortfolioDTO portfolio) {
+		return instrumentsFacadeService.getPorfolioAssetBalances(portfolio.getId())
+				.stream()
+				.map(AssetBalanceDTO::getAssetSymbol)
+				.map(s -> instrumentsFacadeService.getAssetBySymbol(s).orElseThrow())
+				.collect(Collectors.toMap(asset -> asset,
+						asset -> getAssetTotalProfit(portfolio, asset),
+						(a, b) -> b));
+	}
+	//endregion
 
 }

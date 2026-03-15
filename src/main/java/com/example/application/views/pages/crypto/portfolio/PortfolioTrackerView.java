@@ -1,6 +1,6 @@
 package com.example.application.views.pages.crypto.portfolio;
 
-import com.example.application.entities.crypto.Portfolio;
+import com.example.application.data.dtos.PortfolioDTO;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.views.components.PriceChangeNotifier;
@@ -8,6 +8,7 @@ import com.example.application.views.components.portfolio.dialogs.AddPortfolioDi
 import com.example.application.views.components.portfolio.dialogs.PortfolioCreatedOrUpdatedEvent;
 import com.example.application.views.layouts.MainLayout;
 import com.example.application.views.pages.DefaultPage;
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.UI;
@@ -39,7 +40,7 @@ public class PortfolioTrackerView extends DefaultPage {
 
 	private final UI ui;
 	private final Button addPortfolioBtn = new Button(LumoIcon.PLUS.create());
-	private final Select<Portfolio> portfolioSelector = new Select<>();
+	private final Select<PortfolioDTO> portfolioSelector = new Select<>();
 
 	private PortfolioPanel portfolioPanel;
 
@@ -56,9 +57,14 @@ public class PortfolioTrackerView extends DefaultPage {
 	}
 
 	private void initializePage() {
+		log.info("Initializing page");
 		getStyle().set("margin-top", "100px");
 		intializeFields();
-		buildPage(instrumentsFacadeService.getMainPortfolio());
+	}
+
+	@Override
+	protected void onAttach(AttachEvent attachEvent) {
+		buildPage(instrumentsFacadeService.getActivePortfolio());
 
 		ComponentUtil.addListener(UI.getCurrent(), PortfolioCreatedOrUpdatedEvent.class,
 				event -> ui.access(() -> rebuildPage(event.getPortfolio())));
@@ -66,35 +72,36 @@ public class PortfolioTrackerView extends DefaultPage {
 
 	private void intializeFields() {
 		portfolioSelector.setLabel("Portfolio");
-		portfolioSelector.setItemLabelGenerator(Portfolio::getName);
+		portfolioSelector.setItemLabelGenerator(PortfolioDTO::getName);
 		portfolioSelector.setEmptySelectionAllowed(false);
 		portfolioSelector.addValueChangeListener(event -> {
-			Portfolio selectedPortfolio = event.getValue();
+			PortfolioDTO selectedPortfolio = event.getValue();
 
-			if(selectedPortfolio == null)
+			if (selectedPortfolio == null)
 				return;
 
-			instrumentsFacadeService.setPortfolioAsActive(selectedPortfolio);
+			instrumentsFacadeService.setPortfolioAsActive(selectedPortfolio.getId());
 			ui.access(() -> updatePortfolioPanel(selectedPortfolio));
 		});
 
 		addPortfolioBtn.addClickListener(e -> new AddPortfolioDialog(instrumentsFacadeService).open());
 	}
 
-	private void buildPage(Portfolio portfolio) {
-		List<Portfolio> updatedPortfolioList = instrumentsFacadeService.getUserPortfolios();
+	private void buildPage(PortfolioDTO portfolio) {
+		log.info("Building page");
+		List<PortfolioDTO> updatedPortfolioList = instrumentsFacadeService.getUserPortfolios();
 		portfolioSelector.setItems(updatedPortfolioList);
 		portfolioSelector.setValue(portfolio);
 		updatePortfolioPanel(portfolio);
 		add(addPortfolioBtn, portfolioSelector);
 	}
 
-	private void rebuildPage(Portfolio portfolio) {
+	private void rebuildPage(PortfolioDTO portfolio) {
 		this.removeAll();
 		buildPage(portfolio);
 	}
 
-	private void updatePortfolioPanel(Portfolio portfolio) {
+	private void updatePortfolioPanel(PortfolioDTO portfolio) {
 		Optional.ofNullable(portfolioPanel).ifPresent(Component::removeFromParent);
 		portfolioPanel = new PortfolioPanel(portfolio, instrumentsFacadeService, portfolioPerformanceTracker, priceChangeNotifier);
 		add(portfolioPanel);

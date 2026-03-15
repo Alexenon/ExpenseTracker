@@ -1,9 +1,10 @@
 package com.example.application.repositories.crypto;
 
-import com.example.application.entities.crypto.Asset;
+import com.example.application.entities.common.TransactionType;
 import com.example.application.entities.crypto.AssetWatcher;
-import com.example.application.entities.crypto.Portfolio;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -11,12 +12,34 @@ import java.util.List;
 @Repository
 public interface AssetWatcherRepository extends JpaRepository<AssetWatcher, Long> {
 
-    List<AssetWatcher> findByPortfolio(Portfolio portfolio);
+	@Query(value = """
+			SELECT aw.* FROM asset_watchers aw
+			WHERE aw.portfolio_id = :portfolioId
+			""", nativeQuery = true)
+	List<AssetWatcher> findByPortfolio(@Param("portfolioId") Long portfolioId);
 
-    List<AssetWatcher> findByAsset(Asset asset);
+	@Query(value = """
+			SELECT aw.* FROM asset_watchers aw
+			INNER JOIN assets a ON a.id = aw.asset_id
+			WHERE a.symbol = :assetSymbol
+			""", nativeQuery = true)
+	List<AssetWatcher> findByAsset(@Param("assetSymbol") String assetSymbol);
 
-    List<AssetWatcher> findByPortfolioAndAsset(Portfolio portfolio, Asset asset);
+	@Query(value = """
+			SELECT aw.* FROM asset_watchers aw
+			INNER JOIN assets a ON a.id = aw.asset_id
+			WHERE a.symbol = :assetSymbol AND aw.portfolio_id = :portfolioId
+			""", nativeQuery = true)
+	List<AssetWatcher> findByPortfolioAndAsset(@Param("portfolioId") Long portfolioId,
+											   @Param("assetSymbol") String assetSymbol);
 
-    List<AssetWatcher> findByPortfolioAndAssetAndActionType(Portfolio portfolio, Asset asset, AssetWatcher.ActionType actionType);
+	@Query(value = """
+			SELECT aw.* FROM asset_watchers aw
+			INNER JOIN assets a ON a.id = aw.asset_id
+			WHERE a.symbol = :assetSymbol AND aw.portfolio_id = :portfolioId AND aw.transaction_type = :transactionType
+			""", nativeQuery = true)
+	List<AssetWatcher> findByPortfolioAndAssetAndTransactionType(@Param("portfolioId") Long portfolioId,
+																 @Param("assetSymbol") String assetSymbol,
+																 @Param("transactionType") TransactionType transactionType);
 
 }

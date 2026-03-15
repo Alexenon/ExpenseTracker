@@ -1,7 +1,7 @@
 package com.example.application.views.pages.crypto.calculator.tabs;
 
-import com.example.application.entities.crypto.Asset;
-import com.example.application.entities.crypto.Portfolio;
+import com.example.application.data.dtos.AssetDTO;
+import com.example.application.data.dtos.PortfolioDTO;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.utils.common.formatters.number.PercentageFormatter;
@@ -50,7 +50,7 @@ import java.math.BigInteger;
 
 public class SellProfitTab extends BaseCalculatorTab {
 
-    private final Portfolio portfolio;
+    private final PortfolioDTO portfolio;
     private final PortfolioPerformanceTracker portfolioPerformanceTracker;
 
     private final AssetComboBox assetSymbolField;
@@ -64,9 +64,7 @@ public class SellProfitTab extends BaseCalculatorTab {
         super("Sell profit calculator", instrumentsFacadeService);
         this.portfolioPerformanceTracker = portfolioPerformanceTracker;
         this.assetSymbolField = new AssetComboBox(instrumentsFacadeService);
-        // TODO: {?} Maybe here should be the latest portfolio selected
-        //  or here can be information collected across all portfolios - slower performance btw
-        this.portfolio = instrumentsFacadeService.getMainPortfolio();
+        this.portfolio = instrumentsFacadeService.getActivePortfolio();
     }
 
     @Override
@@ -80,9 +78,9 @@ public class SellProfitTab extends BaseCalculatorTab {
     }
 
     private void initializeFieldsValues() {
-        Asset selectedAsset = assetSymbolField.getValue();
+        AssetDTO selectedAsset = assetSymbolField.getValue();
         double averageBuyPrice = portfolioPerformanceTracker.getAverageBuyPrice(portfolio, selectedAsset);
-        double amountOfTokens = assetSymbolField.getAmountTokens(portfolio);
+        double amountOfTokens = assetSymbolField.getAmountTokens(portfolio.getId());
         amountField.setValue(amountOfTokens);
         buyPriceField.setValue(averageBuyPrice);
         sellPriceField.setValue(assetSymbolField.getMarketPrice());
@@ -183,7 +181,7 @@ public class SellProfitTab extends BaseCalculatorTab {
         return new Paragraph(String.format("%s %s ≈ $%.2f", amountFormatter.format(profitTokens), selectedSymbol, profitTokensValue));
     }
 
-    private Div marketCapStatsWrapper(Asset asset, double buyPrice, double sellPrice) {
+    private Div marketCapStatsWrapper(AssetDTO asset, double buyPrice, double sellPrice) {
         BigInteger circulationSupply = asset.getCirculationSupply();
         double prevMarketCap = ProfitUtils.marketCap(circulationSupply, buyPrice);
         double newMarketCap = ProfitUtils.marketCap(circulationSupply, sellPrice);
@@ -195,7 +193,7 @@ public class SellProfitTab extends BaseCalculatorTab {
         return new Container("centered-row", previousMarketCap, arrowIcon, followingMarketCap);
     }
 
-    private Div fdvStatsWrapper(Asset asset, double buyPrice, double sellPrice) {
+    private Div fdvStatsWrapper(AssetDTO asset, double buyPrice, double sellPrice) {
         BigInteger totalSupply = asset.getTotalSupply();
         double currentValueFDV = ProfitUtils.fdv(totalSupply, buyPrice);
         double followingValueFDV = ProfitUtils.fdv(totalSupply, sellPrice);

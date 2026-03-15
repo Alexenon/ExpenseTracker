@@ -2,7 +2,10 @@ package com.example.application.entities;
 
 import com.example.application.entities.crypto.Portfolio;
 import com.example.application.utils.exceptions.InternalUnexpectedException;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
+import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -14,22 +17,30 @@ import java.util.*;
 @Entity(name = "users")
 public class User {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Long id;
+	@Nullable
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "id")
+	private Long id;
 
-    @Column(name = "username", unique = true, nullable = false)
-    private String username;
+	@NotNull
+	@Column(name = "username", unique = true, nullable = false)
+	private String username;
 
-    @Column(name = "password", nullable = false)
-    private String password;
+	@NotNull
+	@Column(name = "password", nullable = false)
+	private String password;
 
-    @Column(name = "email", unique = true, nullable = false)
-    private String email;
+	@NotNull
+	@Column(name = "email", unique = true, nullable = false)
+	private String email;
 
-	@OneToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "active_portfolio_id")
+	@Nullable
+	@OneToOne(
+			fetch = FetchType.LAZY,
+			cascade = {CascadeType.PERSIST, CascadeType.MERGE}
+	)
+	@JoinColumn(name = "active_portfolio_id", unique = true)
 	private Portfolio activePortfolio;
 
 	@OneToMany(
@@ -37,19 +48,19 @@ public class User {
 			cascade = CascadeType.ALL,
 			orphanRemoval = true
 	)
-    private List<Portfolio> portfolios = new ArrayList<>();
+	private List<Portfolio> portfolios = new ArrayList<>();
 
-    @Column(name = "role", nullable = false)
-    @Enumerated(EnumType.STRING)
-    @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
-    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
-    private Set<Role> roles = new HashSet<>();
+	@Column(name = "role", nullable = false)
+	@Enumerated(EnumType.STRING)
+	@ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
+	@CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+	private Set<Role> roles = new HashSet<>();
 
-    public enum Role {
-        USER_ROLE,
-        ADMIN_ROLE,
-        SUPER_ADMIN_ROLE
-    }
+	public enum Role {
+		USER_ROLE,
+		ADMIN_ROLE,
+		SUPER_ADMIN_ROLE
+	}
 
 	@Column(name = "last_time_updated", nullable = false)
 	private LocalDateTime lastTimeUpdated = LocalDateTime.now();
@@ -57,12 +68,16 @@ public class User {
 	@Column(name = "time_created_at", nullable = false, updatable = false)
 	private final LocalDateTime timeCreatedAt = LocalDateTime.now();
 
+	//<editor-fold desc="UTILS">
 	public boolean isNew() {
-		return id != null;
+		return id == null;
 	}
 
-	public void addPortfolio(Portfolio portfolio) {
+	public void addPortfolio(@NotNull Portfolio portfolio) {
 		Objects.requireNonNull(portfolio, "portfolio");
+
+		if (portfolio.getUser() != null && portfolio.getUser() != this)
+			throw new IllegalStateException("Portfolio already belongs to another user");
 
 		portfolio.setUser(this);
 		portfolios.add(portfolio);
@@ -72,7 +87,9 @@ public class User {
 		}
 	}
 
-	public void removePortfolio(Portfolio portfolio) {
+	public void removePortfolio(@NotNull Portfolio portfolio) {
+		Objects.requireNonNull(portfolio, "portfolio");
+
 		if (!portfolios.contains(portfolio))
 			throw new InternalUnexpectedException("Portfolio does not belong to user");
 
@@ -87,17 +104,20 @@ public class User {
 		}
 	}
 
-	public void setActivePortfolio(Portfolio portfolio) {
-		if (!portfolios.contains(portfolio))
-			throw new InternalUnexpectedException("Portfolio must belong to user");
+	@Transactional
+	public void setActivePortfolio(@NotNull Portfolio portfolio) {
+		Objects.requireNonNull(portfolio, "portfolio");
+
+		if (!portfolios.isEmpty() && !portfolios.contains(portfolio))
+			throw new InternalUnexpectedException("Cannot set portfolio as active, because user doesn't have such portfolio");
 
 		this.activePortfolio = portfolio;
 	}
 
-    @Override
-    public String toString() {
-        return "User{username='%s', email='%s', roles=%s, id=%d}".formatted(username, email, roles, id);
-    }
+	@Override
+	public String toString() {
+		return "User{username='%s', email='%s', roles=%s, id=%d}".formatted(username, email, roles, id);
+	}
 
 	public String toFullString() {
 		return new StringJoiner(", ", User.class.getSimpleName() + "[", "]")
@@ -112,4 +132,5 @@ public class User {
 				.add("lastTimeUpdated=" + lastTimeUpdated)
 				.toString();
 	}
+	//</editor-fold>
 }

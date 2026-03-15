@@ -1,7 +1,7 @@
 package com.example.application.services;
 
 import com.example.application.data.dtos.ExpenseDTO;
-import com.example.application.data.dtos.projections.MonthlyExpensesProjection;
+import com.example.application.data.models.projections.MonthlyExpensesProjection;
 import com.example.application.data.requests.ExpenseRequest;
 import com.example.application.entities.Expense;
 import com.example.application.entities.User;
@@ -29,7 +29,7 @@ import java.util.Objects;
 public class ExpenseService {
 
     @Autowired
-    private ExpenseRepository repository;
+    private ExpenseRepository expenseRepository;
 
     @Autowired
     private SecurityService securityService;
@@ -39,13 +39,13 @@ public class ExpenseService {
 
     @NotNull
     public List<ExpenseDTO> getAllExpenses() {
-        return repository.getAll();
+        return expenseRepository.getAll();
     }
 
     @NotNull
     public List<ExpenseDTO> getAllExpensesByUser(@NotNull String userEmailOrUsername) {
         Objects.requireNonNull(userEmailOrUsername, "user email or username");
-        return repository.getAll(userEmailOrUsername);
+        return expenseRepository.getAll(userEmailOrUsername);
     }
 
     @NotNull
@@ -64,7 +64,7 @@ public class ExpenseService {
         replaceExpireDateForOneTimeExpenses(expense);
         System.out.println("Saving " + expense);
 
-        return repository.save(expense);
+        return expenseRepository.save(expense);
     }
 
     public void saveExpenses(@NotNull List<Expense> expenseList) {
@@ -75,7 +75,7 @@ public class ExpenseService {
     @Nullable
     public Expense updateExpense(@NotNull Expense expense) {
         Objects.requireNonNull(expense, "expense");
-        Expense expenseToUpdate = repository.findById(expense.getId())
+        Expense expenseToUpdate = expenseRepository.findById(expense.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Expense not found"));
 
         expenseToUpdate.setName(expense.getName());
@@ -88,7 +88,7 @@ public class ExpenseService {
 
         replaceExpireDateForOneTimeExpenses(expense);
 
-        return repository.save(expenseToUpdate);
+        return expenseRepository.save(expenseToUpdate);
     }
 
     /**
@@ -104,30 +104,30 @@ public class ExpenseService {
     }
 
     public void deleteExpense(Expense expense) {
-        repository.delete(expense);
+        expenseRepository.delete(expense);
     }
 
     public void deleteExpenseById(long expenseId) {
-        repository.deleteById(expenseId);
+        expenseRepository.deleteById(expenseId);
     }
 
     public void deleteAllExpanses() {
-        repository.deleteAll();
+        expenseRepository.deleteAll();
     }
 
     @NotNull
     public List<ExpenseDTO> getExpensesByCategory(String categoryName) {
-        return repository.findByCategory(categoryName);
+        return expenseRepository.findByCategory(categoryName);
     }
 
     @NotNull
     public List<ExpenseDTO> getExpensesByMonth(int month) {
-        return repository.findExpensesPerMonth(month);
+        return expenseRepository.findExpensesPerMonth(month);
     }
 
     @NotNull
     public List<ExpenseDTO> getExpensesByYear(int year) {
-        return repository.findExpensesPerYear(year);
+        return expenseRepository.findExpensesPerYear(year);
     }
 
     @NotNull
@@ -162,7 +162,7 @@ public class ExpenseService {
                     : DateUtils.firstDayOfMonth(date);
         }
 
-        return repository.findMonthlyExpenses(user.getUsername(), date);
+        return expenseRepository.findMonthlyExpenses(user.getUsername(), date);
     }
 
     public Expense convertToExpense(ExpenseRequest expenseRequest) {

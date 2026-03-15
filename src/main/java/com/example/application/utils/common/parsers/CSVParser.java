@@ -1,6 +1,6 @@
 package com.example.application.utils.common.parsers;
 
-import com.example.application.data.dtos.migration.TransactionModel;
+import com.example.application.data.models.crypto.migration.TransactionModel;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvParser;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;

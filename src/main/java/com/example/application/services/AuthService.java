@@ -1,7 +1,7 @@
 package com.example.application.services;
 
 import com.example.application.data.requests.AuthRequest;
-import com.example.application.data.response.JwtResponse;
+import com.example.application.data.responses.JwtResponse;
 import com.example.application.entities.User;
 import com.example.application.utils.JwtTokenUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
 /**
- * Service that manages basic login authentication, API and OAuth2 authentication
+ * Service that manages basic login authentication, JWT and OAuth2 authentication
  * */
 @Service
 public class AuthService {

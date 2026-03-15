@@ -33,9 +33,8 @@ public enum SymbolIndentifier {
     SOL("Solana"),
 
     /*
-        TODO:
+        TODO: [NEXT]
             Add deposits
-            Add export from one portfolio to another
             For transaction mention that it required extraction from deposit or not, will be necessary when exporting
     */
 

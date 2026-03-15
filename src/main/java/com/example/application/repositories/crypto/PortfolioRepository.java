@@ -1,6 +1,5 @@
 package com.example.application.repositories.crypto;
 
-import com.example.application.entities.User;
 import com.example.application.entities.crypto.Portfolio;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -13,7 +12,11 @@ import java.util.Optional;
 @Repository
 public interface PortfolioRepository extends JpaRepository<Portfolio, Long> {
 
-	List<Portfolio> findByUser(User user);
+	@Query(value = """
+			         SELECT * FROM portfolios P
+			         WHERE P.user_id = :userId
+			""", nativeQuery = true)
+	List<Portfolio> findByUser(@Param("userId") long userId);
 
 	@Query(value = """
 			         SELECT * FROM portfolios P

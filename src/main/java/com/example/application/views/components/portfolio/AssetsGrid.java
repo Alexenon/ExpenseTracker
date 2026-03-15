@@ -1,7 +1,7 @@
 package com.example.application.views.components.portfolio;
 
-import com.example.application.entities.crypto.Asset;
-import com.example.application.entities.crypto.Portfolio;
+import com.example.application.data.dtos.AssetDTO;
+import com.example.application.data.dtos.PortfolioDTO;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.utils.common.formatters.CommonFormatters;
@@ -58,7 +58,7 @@ public class AssetsGrid extends Div {
 	private static final String MISSING_DATA_SIGN = "-";
 	private static final int DEFAULT_NUMBER_OF_COLUMNS_VISIBLE = 8;
 
-	private final Portfolio portfolio;
+	private final PortfolioDTO portfolio;
 	private final InstrumentsFacadeService instrumentsFacadeService;
 	private final PortfolioPerformanceTracker portfolioPerformanceTracker;
 
@@ -69,7 +69,7 @@ public class AssetsGrid extends Div {
 	private final Grid<AssetGridItem> grid = new Grid<>();
 	private final Span hiddenRowsCounterField = new Span();
 	private GridListDataView<AssetGridItem> dataView;
-	private List<Asset> assets = new ArrayList<>();
+	private List<AssetDTO> assets = new ArrayList<>();
 
 	private Grid.Column<AssetGridItem> changes24hCol;
 	private Grid.Column<AssetGridItem> totalWorthCol;
@@ -77,7 +77,7 @@ public class AssetsGrid extends Div {
 	private Grid.Column<AssetGridItem> realizedCol;
 	private Grid.Column<AssetGridItem> unrealizedCol;
 
-	public AssetsGrid(Portfolio portfolio,
+	public AssetsGrid(PortfolioDTO portfolio,
 					  InstrumentsFacadeService instrumentsFacadeService,
 					  PortfolioPerformanceTracker portfolioPerformanceTracker)
 	{
@@ -389,7 +389,7 @@ public class AssetsGrid extends Div {
 		hideAssetsCheckbox.setValue(false);
 	}
 
-	public void setItems(List<Asset> assets) {
+	public void setItems(List<AssetDTO> assets) {
 		this.assets = assets;
 		dataView = grid.setItems(getConvertedGridItems());
 	}
@@ -413,10 +413,10 @@ public class AssetsGrid extends Div {
 							.name(asset.getFullName())
 							.imageUrl(asset.getImageUrl())
 							.price(currentPrice)
-							.tokenAmount(instrumentsFacadeService.getAmountOfTokens(portfolio, asset))
+							.tokenAmount(instrumentsFacadeService.getAmountOfTokens(portfolio.getId(), asset.getSymbol()))
 							.priceChangesPercentage24h(asset.getChangePercentage())
-							.closestBuy(instrumentsFacadeService.getClosestBuyWatcherPrice(portfolio, asset))
-							.closestSell(instrumentsFacadeService.getClosestSellWatcherPrice(portfolio, asset))
+							.closestBuy(instrumentsFacadeService.getClosestBuyWatcherPrice(portfolio.getId(), asset.getSymbol()))
+							.closestSell(instrumentsFacadeService.getClosestSellWatcherPrice(portfolio.getId(), asset.getSymbol()))
 							.avgBuy(avgBuy)
 							.avgSell(avgSell)
 							.avgBuyCompareWithCurrentPrice(avgPriceComparedCurrentPrice(avgBuy, currentPrice))

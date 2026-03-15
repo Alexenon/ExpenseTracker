@@ -1,0 +1,105 @@
+package com.example.application.integrational;
+
+import com.example.application.data.dtos.PortfolioDTO;
+import com.example.application.data.dtos.TransactionDTO;
+import com.example.application.data.dtos.UserDTO;
+import com.example.application.data.requests.CreateTransactionRequest;
+import com.example.application.data.requests.RegisterUserRequest;
+import com.example.application.data.requests.portfolio.CreatePortfolioRequest;
+import com.example.application.entities.User;
+import com.example.application.entities.common.TransactionType;
+import com.example.application.entities.crypto.Asset;
+import com.example.application.entities.crypto.Portfolio;
+import com.example.application.entities.crypto.Transaction;
+import com.example.application.repositories.UserRepository;
+import com.example.application.repositories.crypto.AssetBalanceRepository;
+import com.example.application.repositories.crypto.AssetRepository;
+import com.example.application.repositories.crypto.PortfolioRepository;
+import com.example.application.repositories.crypto.TransactionRepository;
+import com.example.application.services.crypto.AssetService;
+import com.example.application.services.crypto.InstrumentsFacadeService;
+import jakarta.persistence.EntityNotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.math.BigInteger;
+import java.util.Objects;
+
+public abstract class AbstractTest {
+
+	@Autowired
+	protected UserRepository userRepository;
+	@Autowired
+	protected AssetRepository assetRepository;
+	@Autowired
+	protected PortfolioRepository portfolioRepository;
+	@Autowired
+	protected TransactionRepository transactionRepository;
+	@Autowired
+	protected AssetBalanceRepository assetBalanceRepository;
+	@Autowired
+	protected InstrumentsFacadeService instrumentsFacadeService;
+	@Autowired
+	protected AssetService assetService;
+
+	protected User createUser(String username, String email) {
+		RegisterUserRequest request = RegisterUserRequest.builder()
+				.username(username)
+				.email(email)
+				.password("password")
+				.confirmPassword("password")
+				.build();
+
+		UserDTO dto = instrumentsFacadeService.createNewUser(request);
+		return userRepository.findById(dto.getId())
+				.orElseThrow(() -> new EntityNotFoundException("User was not created"));
+	}
+
+	protected User createUser() {
+		return createUser("test", "test-email@test.com");
+	}
+
+	protected Asset createAsset(String symbol, double price) {
+		Asset asset = new Asset();
+		asset.setSymbol(symbol);
+		asset.setMarketPrice(price);
+		asset.setFullName("Some full name");
+		asset.setTotalMarketCap(BigInteger.ZERO);
+		asset.setTotalSupply(BigInteger.ZERO);
+
+		return Objects.requireNonNull(assetService.save(asset), "Asset was not created");
+	}
+
+	protected Transaction createTransaction(Asset asset, TransactionType type, double marketPrice, double orderQuantity, long portfolioId) {
+		CreateTransactionRequest request = CreateTransactionRequest.builder()
+				.assetSymbol(asset.getSymbol())
+				.type(type)
+				.marketPrice(marketPrice)
+				.orderQuantity(orderQuantity)
+				.portfolioId(portfolioId)
+				.build();
+
+		TransactionDTO dto = instrumentsFacadeService.createTransaction(request);
+		return transactionRepository.findById(dto.getId())
+				.orElseThrow(() -> new EntityNotFoundException("Transaction was not created"));
+	}
+
+	protected Transaction createTransaction(Asset asset, double marketPrice, double orderQuantity, long portfolioId) {
+		return createTransaction(asset, TransactionType.BUY, marketPrice, orderQuantity, portfolioId);
+	}
+
+	protected Transaction createTransaction(Asset asset, double marketPrice, long portfolioId) {
+		return createTransaction(asset, TransactionType.BUY, marketPrice, 1.0, portfolioId);
+	}
+
+	protected Portfolio createPortfolio(String name, long userId) {
+		CreatePortfolioRequest request = CreatePortfolioRequest.builder()
+				.portfolioName("Crypto")
+				.userId(userId)
+				.build();
+
+		PortfolioDTO dto = instrumentsFacadeService.createPortfolio(request);
+		return portfolioRepository.findById(dto.getId())
+				.orElseThrow(() -> new EntityNotFoundException("Portfolio was not created"));
+	}
+
+}

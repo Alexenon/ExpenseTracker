@@ -1,10 +1,9 @@
 package com.example.application.views.components.custom.dialogs.transactions.export;
 
-import com.example.application.data.dtos.migration.TransactionModel;
+import com.example.application.data.dtos.PortfolioDTO;
+import com.example.application.data.models.crypto.migration.TransactionModel;
+import com.example.application.data.requests.CreateTransactionRequest;
 import com.example.application.entities.common.TransactionType;
-import com.example.application.entities.crypto.Asset;
-import com.example.application.entities.crypto.Portfolio;
-import com.example.application.entities.crypto.Transaction;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.utils.common.formatters.CommonFormatters;
 import com.example.application.utils.common.parsers.CSVParser;
@@ -63,10 +62,10 @@ public class ImportTransactionsDialog extends Dialog implements HasNotifications
 	private final Button cancelButton = new Button("Cancel", e -> this.close());
 	private final Button closeBtn = new Button(LumoIcon.CROSS.create(), e -> this.close());
 
-	private final Portfolio portfolio;
-	private Map<TransactionModel, Transaction> mappedTransactions = new HashMap<>();
+	private final PortfolioDTO portfolio;
+	private Map<TransactionModel, CreateTransactionRequest> mappedTransactions = new HashMap<>();
 
-	public ImportTransactionsDialog(Portfolio portfolio, InstrumentsFacadeService instrumentsFacadeService) {
+	public ImportTransactionsDialog(PortfolioDTO portfolio, InstrumentsFacadeService instrumentsFacadeService) {
 		this.portfolio = portfolio;
 		this.instrumentsFacadeService = instrumentsFacadeService;
 		initialize();
@@ -179,10 +178,11 @@ public class ImportTransactionsDialog extends Dialog implements HasNotifications
 		saveButton.addClickShortcut(Key.ENTER);
 		saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
 		saveButton.addClickListener(e -> {
-			List<Transaction> transactions = mappedTransactions.values()
+			List<CreateTransactionRequest> transactionRequests = mappedTransactions.values()
 					.stream()
 					.toList();
-			instrumentsFacadeService.saveTransactions(transactions);
+
+			transactionRequests.forEach(instrumentsFacadeService::createTransaction);
 		});
 		getFooter().add(saveButton, cancelButton);
 	}
@@ -249,18 +249,16 @@ public class ImportTransactionsDialog extends Dialog implements HasNotifications
 		});
 	}
 
-	private Transaction mapped(TransactionModel model) {
-		Transaction transaction = new Transaction();
-		Asset assetBySymbol = instrumentsFacadeService.getAssetBySymbol(model.getSymbol())
-				.orElseThrow();
-		transaction.setAsset(assetBySymbol);
-		transaction.setPortfolio(portfolio);
-		transaction.setOrderQuantity(model.getAmount());
-		transaction.setMarketPrice(model.getPrice());
-		transaction.setType(model.getType());
-		transaction.setDateTime(model.getDateTime());
-		transaction.setNote(model.getNote());
-		return transaction;
+	private CreateTransactionRequest mapped(TransactionModel model) {
+		CreateTransactionRequest request = new CreateTransactionRequest();
+		request.setAssetSymbol(model.getSymbol());
+		request.setPortfolioId(portfolio.getId());
+		request.setOrderQuantity(model.getAmount());
+		request.setMarketPrice(model.getPrice());
+		request.setType(model.getType());
+		request.setDateTime(model.getDateTime());
+		request.setNote(model.getNote());
+		return request;
 	}
 
 }

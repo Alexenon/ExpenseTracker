@@ -77,7 +77,11 @@ public class Transaction {
 	private String note;
 
 	@NotNull
-	@Column(nullable = false)
+	@Column(name = "last_time_updated", nullable = false)
+	private LocalDateTime lastTimeUpdated = LocalDateTime.now();
+
+	@NotNull
+	@Column(name = "date_time", nullable = false)
 	private LocalDateTime dateTime;
 
 	public Transaction(Asset asset, double marketPrice, double orderTotalCost, TransactionType type) {
