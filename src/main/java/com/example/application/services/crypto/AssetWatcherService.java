@@ -62,8 +62,8 @@ public class AssetWatcherService {
 	@NotNull
 	@Transactional
 	public AssetWatcher save(@NotNull AssetWatcher assetWatcher) {
+		validate(assetWatcher);
 		try {
-			validate(assetWatcher);
 			return assetWatcherRepository.save(assetWatcher);
 		} catch (Exception e) {
 			throw new InternalUnexpectedException(e);
@@ -87,8 +87,8 @@ public class AssetWatcherService {
 		Assert.notNull(assetWatcher.getAsset(), "Asset is missing");
 		Assert.notNull(assetWatcher.getPortfolio(), "Portfolio is missing");
 		Assert.notNull(assetWatcher.getTransactionType(), "ActionType is missing");
-		Assert.isTrue(assetWatcher.getTargetPrice() >= 0, "price cannot be negative");
-		Assert.isTrue(assetWatcher.getTargetAmount() >= 0, "amount cannot be negative");
+		Assert.isTrue(assetWatcher.getTargetPrice().signum() > 0, "price should be greater than 0");
+		Assert.isTrue(assetWatcher.getTargetAmount().signum() > 0, "amount should be greater than 0");
 	}
 
 }

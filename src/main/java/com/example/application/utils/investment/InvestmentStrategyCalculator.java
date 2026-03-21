@@ -4,6 +4,8 @@ import com.example.application.utils.common.lang.MathUtils;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -67,12 +69,18 @@ public class InvestmentStrategyCalculator {
         AtomicReference<Double> totalProfit = new AtomicReference<>(0.0);
 
         IntStream.range(0, pricesToBuy.size()).forEach(i -> {
-            double buyPrice = pricesToBuy.get(i);
-            double investedAmount = amountToBuy.get(i);
-            double investPercentage = investedAmount * 100 / totalInvestAmount;
-            double profitPercentage = ProfitUtils.growthPercentage(buyPrice, sellPrice);
-            double profit = ProfitUtils.netProfit(buyPrice, sellPrice, investedAmount);
-            totalProfit.updateAndGet(v -> v + profit);
+            BigDecimal buyPrice = BigDecimal.valueOf(pricesToBuy.get(i));
+            BigDecimal investedAmount = BigDecimal.valueOf(amountToBuy.get(i));
+			BigDecimal sellPriceUpdated = BigDecimal.valueOf(sellPrice);
+
+			BigDecimal investPercentage = investedAmount
+					.multiply(BigDecimal.valueOf(100))
+					.divide(BigDecimal.valueOf(totalInvestAmount), 2, RoundingMode.HALF_UP);
+
+            BigDecimal profitPercentage = ProfitUtils.growthPercentage(buyPrice, sellPriceUpdated);
+			BigDecimal profit = ProfitUtils.netProfit(buyPrice, sellPriceUpdated, investedAmount);
+
+            totalProfit.updateAndGet(v -> profit.add(BigDecimal.valueOf(v)).doubleValue());
             System.out.printf("At $%.2f -> invest: $%.2f investRate: %.2f%% -> profitRate: %.2f%% profit: $%.2f\n",
                     buyPrice, investedAmount, investPercentage, profitPercentage, profit);
         });

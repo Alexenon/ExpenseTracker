@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -149,8 +150,8 @@ public class TransactionService {
 		Assert.notNull(transaction.getType(), "Type is missing");
 		Assert.notNull(transaction.getPortfolio(), "Portfolio is missing");
 		Assert.notNull(transaction.getDateTime(), "DateTime is missing");
-		Assert.isTrue(transaction.getMarketPrice() > 0, "Price should be above 0");
-		Assert.isTrue(transaction.getOrderTotalCost() > 0, "Order cost should be above 0");
+		Assert.isTrue(transaction.getMarketPrice().compareTo(BigDecimal.ZERO) > 0, "Price should be above 0");
+		Assert.isTrue(transaction.getOrderTotalCost().compareTo(BigDecimal.ZERO) > 0, "Order cost should be above 0");
 	}
 
 }

@@ -2,6 +2,8 @@ package com.example.application.utils.common.formatters.number;
 
 import lombok.SneakyThrows;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -27,7 +29,15 @@ public class DecimalFormatter {
         return numberFormat.format(d);
     }
 
-    @SneakyThrows
+	public String format(BigDecimal d) {
+		return numberFormat.format(d);
+	}
+
+	public String format(BigInteger d) {
+		return numberFormat.format(d);
+	}
+
+	@SneakyThrows
     public Number parse(String s) {
         return numberFormat.parse(s);
     }

@@ -9,6 +9,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.math.BigDecimal;
+
 /*
 	TODO: [LONG-TEM]
 		- @param targetType      represents the type of the target - price / percentage
@@ -44,11 +46,11 @@ public class AssetWatcher {
 
 	@NotNull
 	@Column(name = "target_price", nullable = false)
-	private double targetPrice;
+	private BigDecimal targetPrice;
 
 	@NotNull
 	@Column(name = "target_amount", nullable = false)
-	private double targetAmount;
+	private BigDecimal targetAmount;
 
 	@NotNull
 	@Column(name = "transaction_type", nullable = false)

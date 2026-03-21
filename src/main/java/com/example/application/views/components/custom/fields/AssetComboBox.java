@@ -7,6 +7,7 @@ import com.vaadin.flow.data.renderer.LitRenderer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -69,12 +70,12 @@ public class AssetComboBox extends ComboBox<AssetDTO> {
 		return extract(AssetDTO::getSymbol, "");
 	}
 
-	public double getMarketPrice() {
-		return extract(AssetDTO::getMarketPrice, 0.0);
+	public BigDecimal getMarketPrice() {
+		return extract(AssetDTO::getMarketPrice, BigDecimal.ZERO);
 	}
 
-	public double getAmountTokens(Long portfolioId) {
-		return extract(asset -> instrumentsFacadeService.getAmountOfTokens(portfolioId, asset.getSymbol()), 0.0);
+	public BigDecimal getAmountTokens(Long portfolioId) {
+		return extract(asset -> instrumentsFacadeService.getAmountOfTokens(portfolioId, asset.getSymbol()), BigDecimal.ZERO);
 	}
 
 	public <R> R extract(Function<AssetDTO, R> getter, R defaultValue) {

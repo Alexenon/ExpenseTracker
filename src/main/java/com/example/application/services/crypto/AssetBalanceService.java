@@ -4,8 +4,8 @@ import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.AssetBalance;
 import com.example.application.entities.crypto.Portfolio;
 import com.example.application.entities.crypto.Transaction;
+import com.example.application.finance.FinancialConstants;
 import com.example.application.repositories.crypto.AssetBalanceRepository;
-import com.example.application.utils.common.lang.MathUtils;
 import com.example.application.utils.common.lang.NumberUtils;
 import com.example.application.utils.exceptions.InternalUnexpectedException;
 import com.example.application.utils.exceptions.InvalidBalanceAmountException;
@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -118,82 +120,87 @@ public class AssetBalanceService {
 		log.info("Deleted successfully {} assetBalances", size);
 	}
 
-	private static double calculateTotalRealizedProfit(@NotNull AssetBalance assetBalance, @NotNull Transaction transaction) {
+	private static BigDecimal calculateTotalRealizedProfit(@NotNull AssetBalance assetBalance, @NotNull Transaction transaction) {
 		if (transaction.isBuyTransaction())
 			return assetBalance.getTotalRealizedProfit();
 
-		double totalRealizedProfit = assetBalance.getTotalSellValue() - (assetBalance.getAvgBuyPrice() * assetBalance.getTotalSoldQuantity());
-		return NumberUtils.checkDouble(totalRealizedProfit);
+		BigDecimal avgSoldPrice = assetBalance.getAvgBuyPrice().multiply(assetBalance.getTotalSoldQuantity());
+		return assetBalance.getTotalSellValue().subtract(avgSoldPrice);
 	}
 
-	private static double calculateTotalBoughtQuantity(@NotNull AssetBalance assetBalance, @NotNull Transaction transaction) {
+	private static BigDecimal calculateTotalBoughtQuantity(@NotNull AssetBalance assetBalance, @NotNull Transaction transaction) {
 		if (transaction.isSellTransaction())
 			return assetBalance.getTotalBoughtQuantity();
 
-		return NumberUtils.checkDouble(assetBalance.getTotalBoughtQuantity() + transaction.getOrderQuantity());
+		return assetBalance.getTotalBoughtQuantity().add(transaction.getOrderQuantity());
 	}
 
-	private static double calculateTotalSoldQuantity(@NotNull AssetBalance assetBalance, @NotNull Transaction transaction) {
+	private static BigDecimal calculateTotalSoldQuantity(@NotNull AssetBalance assetBalance, @NotNull Transaction transaction) {
 		if (transaction.isBuyTransaction())
 			return assetBalance.getTotalSoldQuantity();
 
-		return NumberUtils.checkDouble(assetBalance.getTotalSoldQuantity() + transaction.getOrderQuantity());
+		return assetBalance.getTotalSoldQuantity().add(transaction.getOrderQuantity());
 	}
 
-	private static double calculateTotalBuyCost(@NotNull AssetBalance assetBalance, @NotNull Transaction transaction) {
+	private static BigDecimal calculateTotalBuyCost(@NotNull AssetBalance assetBalance, @NotNull Transaction transaction) {
 		if (transaction.isSellTransaction())
 			return assetBalance.getTotalBuyCost();
 
-		return NumberUtils.checkDouble(assetBalance.getTotalBuyCost() + transaction.getOrderTotalCost());
+		return assetBalance.getTotalBuyCost().add(transaction.getOrderTotalCost());
 	}
 
-	private static double calculateTotalSellValue(@NotNull AssetBalance assetBalance, @NotNull Transaction transaction) {
+	private static BigDecimal calculateTotalSellValue(@NotNull AssetBalance assetBalance, @NotNull Transaction transaction) {
 		if (transaction.isBuyTransaction())
 			return assetBalance.getTotalSellValue();
 
-		return NumberUtils.checkDouble(assetBalance.getTotalSellValue() + transaction.getOrderTotalCost());
+		return assetBalance.getTotalSellValue().add(transaction.getOrderTotalCost());
 	}
 
 	/**
 	 * @return amount of tokens that should be in the asset balance after transaction is commited.
 	 * Cannot be less than ZERO.
 	 */
-	private static double calculateAmountAfterSupply(@NotNull AssetBalance assetBalance, @NotNull Transaction transaction) {
-		double transactionAmount = NumberUtils.checkDouble(transaction.getOrderQuantity());
+	private static BigDecimal calculateAmountAfterSupply(@NotNull AssetBalance assetBalance, @NotNull Transaction transaction) {
+		BigDecimal transactionAmount = transaction.getOrderQuantity();
 
-		if (transactionAmount <= 0)
+		if (transactionAmount.signum() <= 0)
 			throw new InvalidBalanceAmountException("Invalid transaction amount. Transaction amount should be greater than 0");
 
-		double quantityToAdd = MathUtils.withSign(transactionAmount, transaction.isBuyTransaction());
-		double tokensAmountAfterSupply = assetBalance.getAmount() + quantityToAdd;
+		BigDecimal quantityToAdd = NumberUtils.applySign(transactionAmount, transaction.isBuyTransaction());
+		BigDecimal tokensAmountAfterSupply = assetBalance.getAmount().add(quantityToAdd);
 
-		if (tokensAmountAfterSupply < 0)
+		if (tokensAmountAfterSupply.signum() < 0)
 			throw new InvalidBalanceAmountException("Invalid transaction amount. The amount of tokens after transaction is less than 0");
 
-		return NumberUtils.checkDouble(tokensAmountAfterSupply);
+		return tokensAmountAfterSupply;
 	}
 
-	private static double calculateCost(@NotNull AssetBalance assetBalance, @NotNull Transaction transaction) {
+	private static BigDecimal calculateCost(@NotNull AssetBalance assetBalance, @NotNull Transaction transaction) {
 		if (transaction.isBuyTransaction())
-			return NumberUtils.checkDouble(assetBalance.getCost() + transaction.getOrderTotalCost());
+			return assetBalance.getCost().add(transaction.getOrderTotalCost());
 
-		if (assetBalance.getAmount() == 0)
-			return 0;
+		if (assetBalance.getAmount().signum() == 0)
+			return BigDecimal.ZERO;
 
-		double updatedCost = assetBalance.getCost() - (assetBalance.getAvgBuyPrice() * transaction.getOrderQuantity());
-		return Math.max(0, updatedCost);
+		BigDecimal avgBoughtQuantity = assetBalance.getAvgBuyPrice().multiply(transaction.getOrderQuantity());
+		BigDecimal updatedCost = assetBalance.getCost().subtract(avgBoughtQuantity);
+		return updatedCost.max(BigDecimal.ZERO);
 	}
 
-	private static double calculateAvgBuyPrice(@NotNull AssetBalance updatedAssetBalance) {
-		double totalBuyCost = updatedAssetBalance.getTotalBuyCost();
-		double totalBoughtQuantity = updatedAssetBalance.getTotalBoughtQuantity();
-		return totalBoughtQuantity == 0 ? 0 : totalBuyCost / totalBoughtQuantity;
+	private static BigDecimal calculateAvgBuyPrice(@NotNull AssetBalance updatedAssetBalance) {
+		BigDecimal totalBuyCost = updatedAssetBalance.getTotalBuyCost();
+		BigDecimal totalBoughtQuantity = updatedAssetBalance.getTotalBoughtQuantity();
+		return totalBoughtQuantity.signum() == 0
+				? BigDecimal.ZERO
+				: totalBuyCost.divide(totalBoughtQuantity, FinancialConstants.PRICE_SCALE, RoundingMode.HALF_UP);
 	}
 
-	private static double calculateAvgSellPrice(@NotNull AssetBalance updatedAssetBalance) {
-		double totalSellValue = updatedAssetBalance.getTotalSellValue();
-		double totalSoldQuantity = updatedAssetBalance.getTotalSoldQuantity();
-		return totalSoldQuantity == 0 ? 0 : totalSellValue / totalSoldQuantity;
+	private static BigDecimal calculateAvgSellPrice(@NotNull AssetBalance updatedAssetBalance) {
+		BigDecimal totalSellValue = updatedAssetBalance.getTotalSellValue();
+		BigDecimal totalSoldQuantity = updatedAssetBalance.getTotalSoldQuantity();
+		return totalSoldQuantity.signum() == 0
+				? BigDecimal.ZERO
+				: totalSellValue.divide(totalSoldQuantity, FinancialConstants.PRICE_SCALE, RoundingMode.HALF_UP);
 	}
 
 	private static void validate(AssetBalance assetBalance) {
@@ -203,10 +210,10 @@ public class AssetBalanceService {
 		Assert.notNull(assetBalance.getTimeCreatedAt(), "assetBalance createdAt");
 		Assert.notNull(assetBalance.getLastTimeUpdated(), "assetBalance lastTimeUpdated");
 
-		Assert.isTrue(assetBalance.getAmount() >= 0, "amount cannot be negative");
+		Assert.isTrue(assetBalance.getAmount().signum() >= 0, "amount cannot be negative");
+		Assert.isTrue(assetBalance.getAvgBuyPrice().signum() >= 0, "avgBuyPrice cannot be negative");
+		Assert.isTrue(assetBalance.getAvgSellPrice().signum() >= 0, "avgSellPrice cannot be negative");
 		Assert.isTrue(assetBalance.getHoldingDays() >= 0, "holdingDays cannot be negative");
-		Assert.isTrue(assetBalance.getAvgBuyPrice() >= 0, "avgBuyPrice cannot be negative");
-		Assert.isTrue(assetBalance.getAvgSellPrice() >= 0, "avgSellPrice cannot be negative");
 	}
 
 }

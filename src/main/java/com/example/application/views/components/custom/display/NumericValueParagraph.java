@@ -5,30 +5,32 @@ import com.example.application.views.components.custom.fields.stats.HasColorfulV
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.html.Paragraph;
 
+import java.math.BigDecimal;
+
 @Tag(Tag.P)
 public class NumericValueParagraph extends Paragraph implements HasColorfulValue {
 
-    private double value;
+    private BigDecimal value;
     private boolean withColor;
     private DecimalFormatter formatter;
 
     public NumericValueParagraph() {
-        this(0.0, new DecimalFormatter());
+        this(BigDecimal.ZERO, new DecimalFormatter());
     }
 
-    public NumericValueParagraph(double value) {
+    public NumericValueParagraph(BigDecimal value) {
         this(value, new DecimalFormatter());
     }
 
-    public NumericValueParagraph(double value, boolean hasColor) {
+    public NumericValueParagraph(BigDecimal value, boolean hasColor) {
         this(value, new DecimalFormatter(), hasColor);
     }
 
-    public NumericValueParagraph(double value, DecimalFormatter formatter) {
+    public NumericValueParagraph(BigDecimal value, DecimalFormatter formatter) {
         this(value, formatter, false);
     }
 
-    public NumericValueParagraph(double value, DecimalFormatter formatter, boolean hasColor) {
+    public NumericValueParagraph(BigDecimal value, DecimalFormatter formatter, boolean hasColor) {
         this.value = value;
         this.formatter = formatter;
         setText(formatter.format(value));
@@ -36,7 +38,7 @@ public class NumericValueParagraph extends Paragraph implements HasColorfulValue
             setColorClassName(value);
     }
 
-    public void setValue(double value) {
+    public void setValue(BigDecimal value) {
         this.value = value;
     }
 

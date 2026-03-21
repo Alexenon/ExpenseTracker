@@ -2,16 +2,16 @@ package com.example.application.views.pages.crypto.calculator.tabs;
 
 import com.example.application.data.dtos.AssetDTO;
 import com.example.application.data.dtos.PortfolioDTO;
+import com.example.application.finance.FinancialConstants;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.utils.common.formatters.number.PercentageFormatter;
-import com.example.application.utils.common.lang.MathUtils;
 import com.example.application.utils.investment.ProfitUtils;
 import com.example.application.views.components.core.Container;
 import com.example.application.views.components.custom.display.NumericValueParagraph;
 import com.example.application.views.components.custom.fields.AmountField;
 import com.example.application.views.components.custom.fields.AssetComboBox;
-import com.example.application.views.components.custom.fields.CurrencyField;
+import com.example.application.views.components.custom.fields.MoneyField;
 import com.example.application.views.components.custom.fields.PricePercentageWrapper;
 import com.example.application.views.components.custom.icons.MonoIcon;
 import com.example.application.views.components.custom.icons.PictogramIcon;
@@ -25,7 +25,9 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 
 /*
     TODO:
@@ -55,9 +57,9 @@ public class SellProfitTab extends BaseCalculatorTab {
 
     private final AssetComboBox assetSymbolField;
     private final AmountField amountField = new AmountField("Amount of tokens");
-    private final CurrencyField buyPriceField = new CurrencyField("Buy Price");
-    private final CurrencyField totalCostField = new CurrencyField("Total Cost");
-    private final CurrencyField sellPriceField = new CurrencyField("Sell Price");
+    private final MoneyField buyPriceField = new MoneyField("Buy Price");
+    private final MoneyField totalCostField = new MoneyField("Total Cost");
+    private final MoneyField sellPriceField = new MoneyField("Sell Price");
 
     @Autowired
     public SellProfitTab(InstrumentsFacadeService instrumentsFacadeService, PortfolioPerformanceTracker portfolioPerformanceTracker) {
@@ -79,12 +81,12 @@ public class SellProfitTab extends BaseCalculatorTab {
 
     private void initializeFieldsValues() {
         AssetDTO selectedAsset = assetSymbolField.getValue();
-        double averageBuyPrice = portfolioPerformanceTracker.getAverageBuyPrice(portfolio, selectedAsset);
-        double amountOfTokens = assetSymbolField.getAmountTokens(portfolio.getId());
+        BigDecimal averageBuyPrice = portfolioPerformanceTracker.getAverageBuyPrice(portfolio, selectedAsset);
+        BigDecimal amountOfTokens = assetSymbolField.getAmountTokens(portfolio.getId());
         amountField.setValue(amountOfTokens);
         buyPriceField.setValue(averageBuyPrice);
         sellPriceField.setValue(assetSymbolField.getMarketPrice());
-        totalCostField.setValue(amountOfTokens * averageBuyPrice);
+        totalCostField.setValue(amountOfTokens.multiply(averageBuyPrice));
     }
 
     private void initializeFieldsListeners() {
@@ -95,20 +97,24 @@ public class SellProfitTab extends BaseCalculatorTab {
 
         amountField.setValueChangeMode(ValueChangeMode.EAGER);
         amountField.addKeyUpListener(e -> {
-            double totalPrice = amountField.doubleValue() * buyPriceField.doubleValue();
-            totalCostField.setValue(totalPrice);
+			BigDecimal amount = amountField.getAmount();
+			BigDecimal buyPrice = buyPriceField.getMoneyAmount();
+            totalCostField.setValue(amount.multiply(buyPrice));
         });
 
         buyPriceField.setValueChangeMode(ValueChangeMode.EAGER);
         buyPriceField.addKeyUpListener(e -> {
-            double totalPrice = amountField.doubleValue() * buyPriceField.doubleValue();
-            totalCostField.setValue(totalPrice);
+			BigDecimal amount = amountField.getAmount();
+			BigDecimal buyPrice = buyPriceField.getMoneyAmount();
+			totalCostField.setValue(amount.multiply(buyPrice));
         });
 
         totalCostField.setValueChangeMode(ValueChangeMode.EAGER);
         totalCostField.addKeyUpListener(e -> {
-            double amountValue = MathUtils.safeDivision(totalCostField.doubleValue(), buyPriceField.doubleValue());
-            amountField.setValue(amountValue);
+			BigDecimal totalCost = totalCostField.getMoneyAmount();
+			BigDecimal buyPrice = buyPriceField.getMoneyAmount();
+			BigDecimal amount = totalCost.divide(buyPrice, FinancialConstants.PRICE_SCALE, RoundingMode.HALF_UP);
+			amountField.setValue(amount);
         });
     }
 
@@ -122,18 +128,18 @@ public class SellProfitTab extends BaseCalculatorTab {
         Button calculateBtn = new Button("Calculate");
         calculateBtn.addClassName("add-entity-btn");
         calculateBtn.addClickListener(e -> {
-            double invested = totalCostField.doubleValue();
-            double buyPrice = buyPriceField.doubleValue();
-            double sellPrice = sellPriceField.doubleValue();
-            double amountTokens = amountField.doubleValue();
-            double profit = ProfitUtils.netProfit(buyPrice, sellPrice, invested);
-            double profitPercentage = ProfitUtils.profitPercentage(buyPrice, sellPrice, invested);
-            double totalWorth = profit + invested;
+            BigDecimal invested = totalCostField.getMoneyAmount();
+            BigDecimal buyPrice = buyPriceField.getMoneyAmount();
+            BigDecimal sellPrice = sellPriceField.getMoneyAmount();
+            BigDecimal amountTokens = amountField.getAmount();
+            BigDecimal profit = ProfitUtils.netProfit(buyPrice, sellPrice, invested);
+            BigDecimal profitPercentage = ProfitUtils.profitPercentage(buyPrice, sellPrice, invested);
+            BigDecimal totalWorth = profit.add(invested);
 
             PercentageFormatter percentageFormatter = new PercentageFormatter();
             percentageFormatter.setMaximumFractionDigits(0);
 
-            double netProfitPerUnit = MathUtils.safeDivision(profit, amountTokens);
+            BigDecimal netProfitPerUnit = profit.divide(amountTokens, FinancialConstants.PRICE_SCALE, RoundingMode.HALF_UP);
             NumericValueParagraph worthParagraph = new NumericValueParagraph(totalWorth, currencyFormatter, true);
             PricePercentageWrapper netProfitWrapper = new PricePercentageWrapper(profit, profitPercentage);
             netProfitWrapper.setPercentageFormatter(percentageFormatter);
@@ -168,23 +174,24 @@ public class SellProfitTab extends BaseCalculatorTab {
         return calculateBtn;
     }
 
-    private String zeroQuantitySellProfit(double invested, double sellPrice) {
-        double amountTokens = MathUtils.safeDivision(invested, sellPrice);
+    private String zeroQuantitySellProfit(BigDecimal invested, BigDecimal sellPrice) {
+        BigDecimal amountTokens = invested.divide(sellPrice, FinancialConstants.AMOUNT_SCALE, RoundingMode.HALF_UP);
         return "%s %s".formatted(amountFormatter.format(amountTokens), assetSymbolField.getSymbol());
     }
 
     private Paragraph getTokensProfitWrapper() {
         String selectedSymbol = assetSymbolField.getSymbol();
-        double tokensToSellToBeInZero = MathUtils.safeDivision(totalCostField.doubleValue(), sellPriceField.doubleValue());
-        double profitTokens = amountField.doubleValue() - tokensToSellToBeInZero;
-        double profitTokensValue = profitTokens * buyPriceField.doubleValue();
+		BigDecimal tokensToSellToBeInZero = totalCostField.getMoneyAmount()
+				.divide(sellPriceField.getMoneyAmount(), FinancialConstants.AMOUNT_SCALE, RoundingMode.HALF_UP);
+		BigDecimal profitTokens = amountField.getAmount().subtract(tokensToSellToBeInZero);
+        BigDecimal profitTokensValue = profitTokens.multiply(buyPriceField.getMoneyAmount());
         return new Paragraph(String.format("%s %s ≈ $%.2f", amountFormatter.format(profitTokens), selectedSymbol, profitTokensValue));
     }
 
-    private Div marketCapStatsWrapper(AssetDTO asset, double buyPrice, double sellPrice) {
+    private Div marketCapStatsWrapper(AssetDTO asset, BigDecimal buyPrice, BigDecimal sellPrice) {
         BigInteger circulationSupply = asset.getCirculationSupply();
-        double prevMarketCap = ProfitUtils.marketCap(circulationSupply, buyPrice);
-        double newMarketCap = ProfitUtils.marketCap(circulationSupply, sellPrice);
+        BigDecimal prevMarketCap = ProfitUtils.marketCap(circulationSupply, buyPrice);
+        BigDecimal newMarketCap = ProfitUtils.marketCap(circulationSupply, sellPrice);
 
         MonoIcon arrowIcon = PictogramIcon.ARROW_RIGHT_THIN.create();
         Paragraph previousMarketCap = new Paragraph(compactFormatter.format(prevMarketCap));
@@ -193,10 +200,10 @@ public class SellProfitTab extends BaseCalculatorTab {
         return new Container("centered-row", previousMarketCap, arrowIcon, followingMarketCap);
     }
 
-    private Div fdvStatsWrapper(AssetDTO asset, double buyPrice, double sellPrice) {
+    private Div fdvStatsWrapper(AssetDTO asset, BigDecimal buyPrice, BigDecimal sellPrice) {
         BigInteger totalSupply = asset.getTotalSupply();
-        double currentValueFDV = ProfitUtils.fdv(totalSupply, buyPrice);
-        double followingValueFDV = ProfitUtils.fdv(totalSupply, sellPrice);
+        BigDecimal currentValueFDV = ProfitUtils.fdv(totalSupply, buyPrice);
+        BigDecimal followingValueFDV = ProfitUtils.fdv(totalSupply, sellPrice);
 
         MonoIcon arrowIcon = PictogramIcon.ARROW_RIGHT_THIN.create();
         Paragraph previousFDV = new Paragraph(compactFormatter.format(currentValueFDV));

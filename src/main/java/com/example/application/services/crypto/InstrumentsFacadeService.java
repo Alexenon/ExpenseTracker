@@ -23,6 +23,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -113,10 +114,10 @@ public class InstrumentsFacadeService {
 		return assetService.findBySymbol(symbol).map(AssetDTO::mappedFrom);
 	}
 
-	public double getAmountOfTokens(Long portfolioId, String assetSymbol) {
+	public BigDecimal getAmountOfTokens(Long portfolioId, String assetSymbol) {
 		return getAssetBalanceByAsset(portfolioId, assetSymbol)
 				.map(AssetBalanceDTO::getAmount)
-				.orElse(Double.NaN);
+				.orElse(BigDecimal.ZERO);
 	}
 
 	@Nullable
@@ -293,22 +294,22 @@ public class InstrumentsFacadeService {
 				.toList();
 	}
 
-	public double getClosestBuyWatcherPrice(Long portfolioId, String assetSymbol) {
+	public BigDecimal getClosestBuyWatcherPrice(Long portfolioId, String assetSymbol) {
 		return getAssetWatchersByAssetAndActionType(portfolioId, assetSymbol, TransactionType.BUY)
 				.stream()
 				.filter(w -> !w.isCompleted())
 				.map(AssetWatcherDTO::getTargetPrice)
 				.min(Comparator.naturalOrder())
-				.orElse(0.0);
+				.orElse(BigDecimal.ZERO);
 	}
 
-	public double getClosestSellWatcherPrice(Long portfolioId, String assetSymbol) {
+	public BigDecimal getClosestSellWatcherPrice(Long portfolioId, String assetSymbol) {
 		return getAssetWatchersByAssetAndActionType(portfolioId, assetSymbol, TransactionType.SELL)
 				.stream()
 				.filter(w -> !w.isCompleted())
 				.map(AssetWatcherDTO::getTargetPrice)
 				.max(Comparator.naturalOrder())
-				.orElse(0.0);
+				.orElse(BigDecimal.ZERO);
 	}
 	//</editor-fold>
 

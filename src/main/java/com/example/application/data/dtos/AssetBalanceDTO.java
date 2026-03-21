@@ -3,21 +3,23 @@ package com.example.application.data.dtos;
 import com.example.application.entities.crypto.AssetBalance;
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 @Data
 public class AssetBalanceDTO {
 
 	private Long id;
 	private Long portfolioId;
 	private String assetSymbol;
-	private double amount = 0.0;
-	private double avgBuyPrice = 0.0;
-	private double avgSellPrice = 0.0;
-	private double cost = 0.0;
-	private double totalRealizedProfit = 0.0;
-	private double totalBoughtQuantity = 0.0;
-	private double totalSoldQuantity = 0.0;
-	private double totalBuyCost = 0.0;
-	private double totalSellValue = 0.0;
+	private BigDecimal amount = BigDecimal.ZERO;
+	private BigDecimal avgBuyPrice = BigDecimal.ZERO;
+	private BigDecimal avgSellPrice = BigDecimal.ZERO;
+	private BigDecimal cost = BigDecimal.ZERO;
+	private BigDecimal totalRealizedProfit = BigDecimal.ZERO;
+	private BigDecimal totalBoughtQuantity = BigDecimal.ZERO;
+	private BigDecimal totalSoldQuantity = BigDecimal.ZERO;
+	private BigDecimal totalBuyCost = BigDecimal.ZERO;
+	private BigDecimal totalSellValue = BigDecimal.ZERO;
 	private double holdingDays = 0.0;
 
 	public static AssetBalanceDTO mappedFrom(AssetBalance assetBalance) {

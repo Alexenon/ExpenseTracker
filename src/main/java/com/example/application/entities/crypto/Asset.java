@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.StringJoiner;
 
@@ -22,7 +23,7 @@ public class Asset {
 
 	@NotNull
 	@Size(min = 1, max = 12)
-	@Column(nullable = false, unique = true)
+	@Column(unique = true, nullable = false)
 	private String symbol;
 
 	@NotNull
@@ -30,27 +31,35 @@ public class Asset {
 	@Column(nullable = false)
 	private String fullName;
 
-	@Column(name = "market_price", nullable = false)
-	private double marketPrice;
-
-	@Column(name = "change_percentage", nullable = false)
-	private double changePercentage;
-
+	@NotNull
 	@Column(name = "summary_description", nullable = false, length = 1000)
 	private String summaryDescription = "";
 
+	@NotNull
+	@Column(name = "market_price", nullable = false, precision = 38, scale = 20)
+	private BigDecimal marketPrice;
+
+	@NotNull
+	@Column(name = "change_percentage", nullable = false)
+	private BigDecimal changePercentage;
+
+	@NotNull
 	@Column(name = "total_market_cap", nullable = false)
 	private BigInteger totalMarketCap;
 
+	@NotNull
 	@Column(name = "total_supply", nullable = false)
 	private BigInteger totalSupply;
 
+	@NotNull
 	@Column(name = "circulation_supply", nullable = false)
 	private BigInteger circulationSupply;
 
+	@NotNull
 	@Column(name = "today_volume", nullable = false)
-	private double todayVolume;
+	private BigInteger todayVolume;
 
+	@NotNull
 	@Column(name = "image_url", nullable = false)
 	private String imageUrl = "";
 

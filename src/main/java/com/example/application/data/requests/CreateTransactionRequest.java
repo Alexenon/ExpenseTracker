@@ -4,6 +4,7 @@ import com.example.application.entities.common.TransactionType;
 import lombok.Builder;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -12,8 +13,8 @@ public class CreateTransactionRequest {
 
 	private String assetSymbol;
 	private Long portfolioId;
-	private double marketPrice;
-	private double orderQuantity;
+	private BigDecimal marketPrice;
+	private BigDecimal orderQuantity;
 	private TransactionType type = TransactionType.BUY;
 	private String note;
 	private LocalDateTime dateTime = LocalDateTime.now();
@@ -21,7 +22,7 @@ public class CreateTransactionRequest {
 	public CreateTransactionRequest() {
 	}
 
-	private CreateTransactionRequest(String assetSymbol, Long portfolioId, double marketPrice, double orderQuantity, TransactionType type, String note, LocalDateTime dateTime) {
+	private CreateTransactionRequest(String assetSymbol, Long portfolioId, BigDecimal marketPrice, BigDecimal orderQuantity, TransactionType type, String note, LocalDateTime dateTime) {
 		this.assetSymbol = assetSymbol;
 		this.portfolioId = portfolioId;
 		this.marketPrice = marketPrice;
@@ -31,8 +32,8 @@ public class CreateTransactionRequest {
 		this.dateTime = dateTime;
 	}
 
-	public double getOrderTotalCost() {
-		return orderQuantity * marketPrice;
+	public BigDecimal getOrderTotalCost() {
+		return orderQuantity.multiply(marketPrice);
 	}
 
 }

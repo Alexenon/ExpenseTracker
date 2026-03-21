@@ -2,13 +2,15 @@ package com.example.application.views.components.custom.fields.stats;
 
 import com.vaadin.flow.component.HasStyle;
 
+import java.math.BigDecimal;
+
 public interface HasColorfulValue extends HasStyle {
 
     default void setColorClassName(String color) {
         getStyle().setColor(color);
     }
 
-    default void setColorClassName(double value) {
+    default void setColorClassName(BigDecimal value) {
         removeClassNames("value-increase", "value-decrease");
         String className = getClassNameByValue(value);
         if (className != null) {
@@ -16,9 +18,9 @@ public interface HasColorfulValue extends HasStyle {
         }
     }
 
-    private String getClassNameByValue(double value) {
-        return value == 0 ? null
-                : (value > 0) ? "value-increase" : "value-decrease";
+    private String getClassNameByValue(BigDecimal value) {
+        return value.signum() == 0 ? null
+                : (value.signum() > 0) ? "value-increase" : "value-decrease";
     }
 
 }

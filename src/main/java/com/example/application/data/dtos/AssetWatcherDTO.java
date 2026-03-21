@@ -4,14 +4,16 @@ import com.example.application.entities.common.TransactionType;
 import com.example.application.entities.crypto.AssetWatcher;
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 @Data
 public class AssetWatcherDTO {
 
 	private final Long id;
 	private Long portfolioId;
 	private String assetSymbol;
-	private double targetPrice;
-	private double targetAmount;
+	private BigDecimal targetPrice;
+	private BigDecimal targetAmount;
 	private TransactionType transactionType;
 	private boolean isCompleted;
 

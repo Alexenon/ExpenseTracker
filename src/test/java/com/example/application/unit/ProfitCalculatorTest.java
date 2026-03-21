@@ -3,6 +3,8 @@ package com.example.application.unit;
 import com.example.application.utils.investment.ProfitCalculator;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ProfitCalculatorTest {
@@ -23,20 +25,20 @@ public class ProfitCalculatorTest {
 	@Test
 	public void testAverageBuyPrice() {
 		// First buy: 15 tokens at $0.50
-		double avg1 = ProfitCalculator.calculateNewAvgPrice(0, 0, 15, 0.50);
-		assertEquals(0.50, avg1, PRICE_DELTA, "Avg after first DYDX buy");
+		BigDecimal avg1 = calculateAvgPrice(0, 0, 15, 0.50);
+		assertEquals(BigDecimal.valueOf(0.50), avg1, "Avg after first DYDX buy");
 
 		// Second buy: 10 tokens at $0.60 → avg = $0.54
-		double avg2 = ProfitCalculator.calculateNewAvgPrice(avg1, 15, 10, 0.60);
-		assertEquals(0.54, avg2, PRICE_DELTA, "Avg after second DYDX buy");
+		BigDecimal avg2 = calculateAvgPrice(avg1, 15, 10, 0.60);
+		assertEquals(BigDecimal.valueOf(0.54), avg2, "Avg after second DYDX buy");
 
 		// Third buy: 20 tokens at $0.55 → avg = $0.5444
-		double avg3 = ProfitCalculator.calculateNewAvgPrice(avg2, 25, 20, 0.55);
-		assertEquals(0.5444, avg3, PRICE_DELTA, "Avg after third DYDX buy");
+		BigDecimal avg3 = calculateAvgPrice(avg2, 25, 20, 0.55);
+		assertEquals(BigDecimal.valueOf(0.5444), avg3, "Avg after third DYDX buy");
 
 		// Fourth buy: 5 tokens at $0.40 → avg = $0.53
-		double avg4 = ProfitCalculator.calculateNewAvgPrice(avg3, 45, 5, 0.40);
-		assertEquals(0.53, avg4, PRICE_DELTA, "Avg after fourth DYDX buy");
+		BigDecimal avg4 = calculateAvgPrice(avg3, 45, 5, 0.40);
+		assertEquals(BigDecimal.valueOf(0.53), avg4, "Avg after fourth DYDX buy");
 	}
 
 
@@ -51,24 +53,41 @@ public class ProfitCalculatorTest {
 			| 4 	 | 10 	       | $0.68  | $0.6963 		 |
 			__________________________________________________
 	 */
+
 	@Test
 	public void testDydxAverageSellPriceIn4Steps() {
 		// Sell 1: 10 tokens at $0.70
-		double avgSell1 = ProfitCalculator.calculateNewAvgPrice(0, 0, 10, 0.70);
-		assertEquals(0.70, avgSell1, PRICE_DELTA, "Avg after 1st DYDX sell");
+		BigDecimal avgSell1 = calculateAvgPrice(0, 0, 10, 0.70);
+		assertEquals(BigDecimal.valueOf(0.70), avgSell1, "Avg after 1st DYDX sell");
 
 		// Sell 2: 5 tokens at $0.65 → avg = $0.6833
-		double avgSell2 = ProfitCalculator.calculateNewAvgPrice(avgSell1, 10, 5, 0.65);
-		assertEquals(0.6833, avgSell2, PRICE_DELTA, "Avg after 2nd DYDX sell");
+		BigDecimal avgSell2 = calculateAvgPrice(avgSell1, 10, 5, 0.65);
+		assertEquals(BigDecimal.valueOf(0.6833), avgSell2, "Avg after 2nd DYDX sell");
 
 		// Sell 3: 15 tokens at $0.72 → avg = $0.7017
-		double avgSell3 = ProfitCalculator.calculateNewAvgPrice(avgSell2, 15, 15, 0.72);
-		assertEquals(0.7017, avgSell3, PRICE_DELTA, "Avg after 3rd DYDX sell");
+		BigDecimal avgSell3 = calculateAvgPrice(avgSell2, 15, 15, 0.72);
+		assertEquals(BigDecimal.valueOf(0.7017), avgSell3, "Avg after 3rd DYDX sell");
 
 		// Sell 4: 10 tokens at $0.68 → avg = $0.6963
-		double avgSell4 = ProfitCalculator.calculateNewAvgPrice(avgSell3, 30, 10, 0.68);
-		assertEquals(0.6963, avgSell4, PRICE_DELTA, "Avg after 4th DYDX sell");
+		BigDecimal avgSell4 = calculateAvgPrice(avgSell3, 30, 10, 0.68);
+		assertEquals(BigDecimal.valueOf(0.6963), avgSell4, "Avg after 4th DYDX sell");
 	}
 
+	private static BigDecimal calculateAvgPrice(BigDecimal prevAvg, double prevAmount, double newAmount, double buyPrice) {
+		return ProfitCalculator.calculateNewAvgPrice(
+				prevAvg,
+				BigDecimal.valueOf(prevAmount),
+				BigDecimal.valueOf(newAmount),
+				BigDecimal.valueOf(buyPrice)
+		);
+	}
 
+	private static BigDecimal calculateAvgPrice(double prevAvg, double prevAmount, double newAmount, double buyPrice) {
+		return ProfitCalculator.calculateNewAvgPrice(
+				BigDecimal.valueOf(prevAvg),
+				BigDecimal.valueOf(prevAmount),
+				BigDecimal.valueOf(newAmount),
+				BigDecimal.valueOf(buyPrice)
+		);
+	}
 }

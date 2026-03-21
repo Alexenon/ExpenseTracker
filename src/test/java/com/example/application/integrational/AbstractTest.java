@@ -19,8 +19,10 @@ import com.example.application.repositories.crypto.TransactionRepository;
 import com.example.application.services.crypto.AssetService;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import jakarta.persistence.EntityNotFoundException;
+import org.junit.jupiter.api.Assertions;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Objects;
 
@@ -61,7 +63,7 @@ public abstract class AbstractTest {
 	protected Asset createAsset(String symbol, double price) {
 		Asset asset = new Asset();
 		asset.setSymbol(symbol);
-		asset.setMarketPrice(price);
+		asset.setMarketPrice(BigDecimal.valueOf(price));
 		asset.setFullName("Some full name");
 		asset.setTotalMarketCap(BigInteger.ZERO);
 		asset.setTotalSupply(BigInteger.ZERO);
@@ -73,8 +75,8 @@ public abstract class AbstractTest {
 		CreateTransactionRequest request = CreateTransactionRequest.builder()
 				.assetSymbol(asset.getSymbol())
 				.type(type)
-				.marketPrice(marketPrice)
-				.orderQuantity(orderQuantity)
+				.marketPrice(BigDecimal.valueOf(marketPrice))
+				.orderQuantity(BigDecimal.valueOf(orderQuantity))
 				.portfolioId(portfolioId)
 				.build();
 
@@ -100,6 +102,15 @@ public abstract class AbstractTest {
 		PortfolioDTO dto = instrumentsFacadeService.createPortfolio(request);
 		return portfolioRepository.findById(dto.getId())
 				.orElseThrow(() -> new EntityNotFoundException("Portfolio was not created"));
+	}
+
+
+	protected void assertBigDecimalEquals(BigDecimal expected, BigDecimal actual, String field) {
+		Assertions.assertEquals(
+				0,
+				actual.compareTo(expected),
+				field + " doesn't match. Expected: " + expected + " actual: " + actual
+		);
 	}
 
 }

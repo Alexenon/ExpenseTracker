@@ -2,6 +2,7 @@ package com.example.application.views.components.portfolio;
 
 import com.example.application.data.dtos.AssetDTO;
 import com.example.application.data.dtos.PortfolioDTO;
+import com.example.application.finance.FinancialConstants;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.utils.common.formatters.CommonFormatters;
@@ -31,9 +32,11 @@ import com.vaadin.flow.theme.lumo.LumoIcon;
 import lombok.Builder;
 import lombok.Data;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.ToDoubleFunction;
+import java.util.function.Function;
 
 /*
     TODO: [LONG TERM]
@@ -285,7 +288,7 @@ public class AssetsGrid extends Div {
 	}
 
 	private void hideZeroAmountAssets() {
-		dataView.setFilter(asset -> asset.getTokenAmount() > 0);
+		dataView.setFilter(asset -> asset.getTokenAmount().signum() > 0);
 	}
 
 	private LitRenderer<AssetGridItem> columnNameRenderer() {
@@ -403,9 +406,9 @@ public class AssetsGrid extends Div {
 	private List<AssetGridItem> getConvertedGridItems() {
 		return assets.stream()
 				.map(asset -> {
-					double currentPrice = asset.getMarketPrice();
-					double avgBuy = portfolioPerformanceTracker.getAverageBuyPrice(portfolio, asset);
-					double avgSell = portfolioPerformanceTracker.getAverageSellPrice(portfolio, asset);
+					BigDecimal currentPrice = asset.getMarketPrice();
+					BigDecimal avgBuy = portfolioPerformanceTracker.getAverageBuyPrice(portfolio, asset);
+					BigDecimal avgSell = portfolioPerformanceTracker.getAverageSellPrice(portfolio, asset);
 
 					// TODO: [LONG TERM] Add volume column for: today, this week, this month, this year, total
 					return AssetGridItem.builder()
@@ -425,7 +428,7 @@ public class AssetsGrid extends Div {
 							.unrealizedProfit(portfolioPerformanceTracker.getAssetUnrealizedProfit(portfolio, asset))
 							.totalCost(portfolioPerformanceTracker.getAssetRemainingTokensCost(portfolio, asset))
 							.totalWorth(portfolioPerformanceTracker.getAssetWorth(portfolio, asset))
-							.diversityPercentage(portfolioPerformanceTracker.getAssetDiversityPercentage(portfolio, asset))
+							.diversityPercentage(BigDecimal.valueOf(portfolioPerformanceTracker.getAssetDiversityPercentage(portfolio, asset)))
 							.build();
 				})
 				.toList();
@@ -434,24 +437,29 @@ public class AssetsGrid extends Div {
 	/**
 	 * @return comparation between any of avg buy/sell price and current price in the percentage format
 	 */
-	private double avgPriceComparedCurrentPrice(double avgPrice, double currentPrice) {
-		if (avgPrice == 0 || Double.isNaN(avgPrice))
-			return Double.NaN;
+	private BigDecimal avgPriceComparedCurrentPrice(BigDecimal avgPrice, BigDecimal currentPrice) {
+		if (avgPrice == null || avgPrice.signum() == 0)
+			return BigDecimal.ZERO;
 
-		return ((currentPrice - avgPrice) / avgPrice) * 100;
+		return currentPrice
+				.subtract(avgPrice)
+				.divide(avgPrice, FinancialConstants.PRICE_SCALE, RoundingMode.HALF_UP)
+				.multiply(BigDecimal.valueOf(100));
 	}
 
-	private double columnAverage(ToDoubleFunction<AssetGridItem> function) {
-		return dataView.getItems().toList().stream()
-				.mapToDouble(function)
-				.average()
-				.orElse(Double.NaN);
+	private BigDecimal columnAverage(Function<AssetGridItem, BigDecimal> function) {
+		List<AssetGridItem> gridItems = dataView.getItems().toList();
+
+		return gridItems.stream()
+				.map(function)
+				.reduce(BigDecimal.ZERO, BigDecimal::add)
+				.divide(BigDecimal.valueOf(gridItems.size()), FinancialConstants.PRICE_SCALE, RoundingMode.HALF_UP);
 	}
 
-	private double columnSum(ToDoubleFunction<AssetGridItem> function) {
+	private BigDecimal columnSum(Function<AssetGridItem, BigDecimal> function) {
 		return dataView.getItems().toList().stream()
-				.mapToDouble(function)
-				.sum();
+				.map(function)
+				.reduce(BigDecimal.ZERO, BigDecimal::add);
 	}
 
 	@Data
@@ -460,22 +468,22 @@ public class AssetsGrid extends Div {
 		private String name;
 		private String symbol;
 		private String imageUrl;
-		private double price;
-		private double priceChangesPercentage24h;
-		private double avgBuy;
-		private double avgSell;
-		private double avgBuyCompareWithCurrentPrice;
-		private double avgSellCompareWithCurrentPrice;
-		private double tokenAmount;
-		private double totalWorth;
-		private double totalCost;
-		private double diversityPercentage;
-		private double realizedProfit;
-		private double unrealizedProfit;
-		private double totalProfitUsd;
-		private double totalProfitPercentage;
-		private double closestBuy;
-		private double closestSell;
+		private BigDecimal price;
+		private BigDecimal priceChangesPercentage24h;
+		private BigDecimal avgBuy;
+		private BigDecimal avgSell;
+		private BigDecimal avgBuyCompareWithCurrentPrice;
+		private BigDecimal avgSellCompareWithCurrentPrice;
+		private BigDecimal tokenAmount;
+		private BigDecimal totalWorth;
+		private BigDecimal totalCost;
+		private BigDecimal diversityPercentage;
+		private BigDecimal realizedProfit;
+		private BigDecimal unrealizedProfit;
+		private BigDecimal totalProfitUsd;
+		private BigDecimal totalProfitPercentage;
+		private BigDecimal closestBuy;
+		private BigDecimal closestSell;
 	}
 
 	private static class ColumnToggleMenu extends MenuBar {

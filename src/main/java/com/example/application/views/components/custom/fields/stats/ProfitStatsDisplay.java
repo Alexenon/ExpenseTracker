@@ -4,6 +4,8 @@ import com.example.application.utils.common.formatters.number.DecimalFormatter;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Paragraph;
 
+import java.math.BigDecimal;
+
 public class ProfitStatsDisplay extends StatsComponent implements HasColorfulValue {
 
     public ProfitStatsDisplay(String label, String value) {
@@ -18,11 +20,11 @@ public class ProfitStatsDisplay extends StatsComponent implements HasColorfulVal
         this(new Paragraph(label), new Paragraph(value), tooltipText);
     }
 
-    public ProfitStatsDisplay(String label, double value, DecimalFormatter formatter) {
+    public ProfitStatsDisplay(String label, BigDecimal value, DecimalFormatter formatter) {
         this(new Paragraph(label), new Paragraph(formatter.format(value)), null);
     }
 
-    public ProfitStatsDisplay(String label, double value, DecimalFormatter formatter, boolean withColor) {
+    public ProfitStatsDisplay(String label, BigDecimal value, DecimalFormatter formatter, boolean withColor) {
         this(new Paragraph(label), new Paragraph(formatter.format(value)), null);
         if(withColor)
             setColorClassName(value);

@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /*
@@ -30,50 +31,50 @@ public class AssetBalance {
 	@JoinColumn(name = "asset_id", nullable = false)
 	private Asset asset;
 
-	@Column(name = "amount", nullable = false)
-	private double amount = 0.0;
+	@Column(name = "amount", nullable = false, precision = 38, scale = 18)
+	private BigDecimal amount = BigDecimal.ZERO;
 
-	@Column(name = "avg_buy_price", nullable = false)
-	private double avgBuyPrice = 0.0;
+	@Column(name = "avg_buy_price", nullable = false, precision = 38, scale = 20)
+	private BigDecimal avgBuyPrice = BigDecimal.ZERO;
 
-	@Column(name = "avg_sell_price", nullable = false)
-	private double avgSellPrice = 0.0;
+	@Column(name = "avg_sell_price", nullable = false, precision = 38, scale = 20)
+	private BigDecimal avgSellPrice = BigDecimal.ZERO;
 
 	/**
 	 * Total cost for the amount of tokens that are in the portfolio
 	 */
-	@Column(name = "cost", nullable = false)
-	private double cost = 0.0;
+	@Column(name = "cost", nullable = false, precision = 38, scale = 20)
+	private BigDecimal cost = BigDecimal.ZERO;
 
 	/**
 	 * Total amount of tokens that was bought across all transactions
 	 */
-	@Column(name = "total_bought_quantity", nullable = false)
-	private double totalBoughtQuantity = 0.0;
+	@Column(name = "total_bought_quantity", nullable = false, precision = 38, scale = 18)
+	private BigDecimal totalBoughtQuantity = BigDecimal.ZERO;
 
 	/**
 	 * Total amount of tokens that was sold across all transactions
 	 */
-	@Column(name = "total_sold_quantity", nullable = false)
-	private double totalSoldQuantity = 0.0;
+	@Column(name = "total_sold_quantity", nullable = false, precision = 38, scale = 18)
+	private BigDecimal totalSoldQuantity = BigDecimal.ZERO;
 
 	/**
 	 * Total money spent on all buy transactions.
 	 */
-	@Column(name = "total_buy_cost", nullable = false)
-	private double totalBuyCost = 0.0;
+	@Column(name = "total_buy_cost", nullable = false, precision = 38, scale = 20)
+	private BigDecimal totalBuyCost = BigDecimal.ZERO;
 
 	/**
 	 * Total money received from all sells.
 	 */
-	@Column(name = "total_sell_value", nullable = false)
-	private double totalSellValue = 0.0;
+	@Column(name = "total_sell_value", nullable = false, precision = 38, scale = 20)
+	private BigDecimal totalSellValue = BigDecimal.ZERO;
 
 	/**
 	 * Profit made from tokens that were already sold
 	 */
-	@Column(name = "total_realized_profit", nullable = false)
-	private double totalRealizedProfit = 0.0;
+	@Column(name = "total_realized_profit", nullable = false, precision = 38, scale = 20)
+	private BigDecimal totalRealizedProfit = BigDecimal.ZERO;
 
 	@Column(name = "holding_days", nullable = false)
 	private double holdingDays = 0.0;

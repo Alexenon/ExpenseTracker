@@ -4,6 +4,7 @@ import com.example.application.data.dtos.TransactionDTO;
 import com.example.application.entities.common.TransactionType;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -11,8 +12,8 @@ public class UpdateTransactionRequest {
 
 	private final Long id;
 	private String assetSymbol;
-	private double marketPrice;
-	private double orderQuantity;
+	private BigDecimal marketPrice;
+	private BigDecimal orderQuantity;
 	private TransactionType type;
 	private String note;
 	private LocalDateTime dateTime;
@@ -37,8 +38,8 @@ public class UpdateTransactionRequest {
 		this.dateTime = request.getDateTime();
 	}
 
-	public double getOrderTotalCost() {
-		return orderQuantity * marketPrice;
+	public BigDecimal getOrderTotalCost() {
+		return orderQuantity.multiply(marketPrice);
 	}
 
 }

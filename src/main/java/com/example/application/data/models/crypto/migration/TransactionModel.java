@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -41,12 +42,12 @@ public class TransactionModel implements Serializable {
 	@NotNull
 	@Positive
 	@JsonProperty(value = "Amount", required = true)
-	private Double amount;
+	private BigDecimal amount;
 
 	@NotNull
 	@Positive
 	@JsonProperty(value = "Price", required = true)
-	private Double price;
+	private BigDecimal price;
 
 	@NotNull
 	@JsonProperty(value = "Type", required = true)
@@ -59,11 +60,11 @@ public class TransactionModel implements Serializable {
 
 	@JsonIgnore
 	public boolean isValid() {
-		return this.dateTime != null
-			   || (this.symbol != null && !this.symbol.isBlank())
-			   || (this.amount != null && !this.amount.isNaN() && !this.amount.isInfinite())
-			   || (this.price != null && !this.price.isNaN() && !this.price.isInfinite())
-			   || this.type != null;
+		return type != null
+			   || (symbol != null && !symbol.isBlank())
+			   || (amount != null)
+			   || (price != null)
+			   || dateTime != null;
 	}
 
 	public static TransactionModel from(TransactionDTO transaction) {

@@ -3,6 +3,7 @@ package com.example.application.views.pages.crypto;
 import com.example.application.data.dtos.AssetDTO;
 import com.example.application.data.dtos.PortfolioDTO;
 import com.example.application.entities.common.TransactionType;
+import com.example.application.finance.FinancialConstants;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.utils.common.formatters.CommonFormatters;
@@ -20,7 +21,7 @@ import com.example.application.views.components.custom.dialogs.transactions.AddT
 import com.example.application.views.components.custom.dialogs.transactions.TransactionCreatedOrUpdatedEvent;
 import com.example.application.views.components.custom.display.NumericValueParagraph;
 import com.example.application.views.components.custom.fields.AmountField;
-import com.example.application.views.components.custom.fields.CurrencyField;
+import com.example.application.views.components.custom.fields.MoneyField;
 import com.example.application.views.components.custom.fields.PricePercentageWrapper;
 import com.example.application.views.components.custom.fields.stats.PortfolioStatsDisplay;
 import com.example.application.views.layouts.MainLayout;
@@ -43,7 +44,9 @@ import jakarta.annotation.security.PermitAll;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.util.Objects;
 
 /*
@@ -148,8 +151,8 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
 				.addComponent(new Span(asset.getSymbol()))
 				.build();
 
-		double price = asset.getMarketPrice();
-		double percentage = asset.getChangePercentage();
+		BigDecimal price = asset.getMarketPrice();
+		BigDecimal percentage = asset.getChangePercentage();
 		PricePercentageWrapper priceWrapper = new PricePercentageWrapper(price, percentage);
 		priceWrapper.addClassName("price-wrapper");
 
@@ -217,9 +220,9 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
 		inputImage.setClassName("coin-overview-image");
 
 		AmountField tokenAmountField = new AmountField();
-		tokenAmountField.setValue(1);
+		tokenAmountField.setValue("1");
 
-		CurrencyField usdAmountField = new CurrencyField();
+		MoneyField usdAmountField = new MoneyField();
 		usdAmountField.setPrefix(false);
 		usdAmountField.setValue(asset.getMarketPrice());
 
@@ -249,15 +252,15 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
 
 		tokenAmountField.setValueChangeMode(ValueChangeMode.EAGER);
 		tokenAmountField.addKeyUpListener(e -> {
-			double calculatedPrice = tokenAmountField.doubleValue() * asset.getMarketPrice();
+			BigDecimal calculatedPrice = tokenAmountField.getAmount().multiply(asset.getMarketPrice());
 			usdAmountField.setValue(calculatedPrice);
 		});
 
 		usdAmountField.setValueChangeMode(ValueChangeMode.EAGER);
 		usdAmountField.addKeyUpListener(e -> {
-			double amount = usdAmountField.doubleValue();
-			double price = asset.getMarketPrice();
-			tokenAmountField.setValue(MathUtils.safeDivision(amount, price));
+			BigDecimal amount = usdAmountField.getMoneyAmount();
+			BigDecimal price = asset.getMarketPrice();
+			tokenAmountField.setValue(amount.divide(price, FinancialConstants.PRICE_SCALE, RoundingMode.HALF_UP));
 		});
 
 		Section section = new Section(title, sectionBody);
@@ -280,12 +283,12 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
 				})
 				.build();
 
-		double assetCost = portfolioPerformanceTracker.getAssetRemainingTokensCost(portfolio, asset);
-		double assetWorth = portfolioPerformanceTracker.getAssetWorth(portfolio, asset);
-		double assetProfitLoss = portfolioPerformanceTracker.getAssetTotalProfit(portfolio, asset);
-		double assetRealized = portfolioPerformanceTracker.getAssetRealizedProfit(portfolio, asset);
-		double assetUnrealized = portfolioPerformanceTracker.getAssetUnrealizedProfit(portfolio, asset);
-		double profitLossPercentage = portfolioPerformanceTracker.getAssetNetProfitPercentage(portfolio, asset);
+		BigDecimal assetCost = portfolioPerformanceTracker.getAssetRemainingTokensCost(portfolio, asset);
+		BigDecimal assetWorth = portfolioPerformanceTracker.getAssetWorth(portfolio, asset);
+		BigDecimal assetProfitLoss = portfolioPerformanceTracker.getAssetTotalProfit(portfolio, asset);
+		BigDecimal assetRealized = portfolioPerformanceTracker.getAssetRealizedProfit(portfolio, asset);
+		BigDecimal assetUnrealized = portfolioPerformanceTracker.getAssetUnrealizedProfit(portfolio, asset);
+		BigDecimal profitLossPercentage = portfolioPerformanceTracker.getAssetNetProfitPercentage(portfolio, asset);
 		int assetDiversityPercentage = portfolioPerformanceTracker.getAssetDiversityPercentage(portfolio, asset);
 
 		NumericValueParagraph costValue = new NumericValueParagraph(assetCost, CommonFormatters.CURRENCY);
@@ -307,7 +310,7 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
 				new PortfolioStatsDisplay("Total Profit/Loss", profitLossContainer),
 				new PortfolioStatsDisplay("Realized Profit", new NumericValueParagraph(assetRealized, CommonFormatters.CURRENCY)),
 				new PortfolioStatsDisplay("Unrealized Profit", new NumericValueParagraph(assetUnrealized, CommonFormatters.CURRENCY)),
-				new PortfolioStatsDisplay("Portfolio Diversity", getAssetDiversityContainer(assetDiversityPercentage)),
+				new PortfolioStatsDisplay("Portfolio Diversity", getAssetDiversityContainer(BigDecimal.valueOf(assetDiversityPercentage))),
 				new PortfolioStatsDisplay("Buy/Sell Ratio", ratio,
 						String.format("%s%% of transactions are buys, %s%% are sells, in dollar equivalent", ratioParts[0].trim(), ratioParts[1])),
 				new PortfolioStatsDisplay("Avg Holding Time", avgTimeHolding, "Average holding time from the first buy")
@@ -324,7 +327,7 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
 
 		BigInteger assetTotalMarketCap = asset.getTotalMarketCap();
 		BigInteger assetTotalSupply = asset.getTotalSupply();
-		double asset24HourVolume = asset.getTodayVolume();
+		BigInteger asset24HourVolume = asset.getTodayVolume();
 		BigInteger circulationSupplyValue = asset.getCirculationSupply();
 		int percentageUseOfCirculationSupply = MathUtils.percentageOf(circulationSupplyValue, assetTotalSupply).intValue();
 
@@ -424,14 +427,18 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
 		return new Section(header, transactionsGrid);
 	}
 
-	private Container getAssetDiversityContainer(int assetDiversityPercentage) {
+	private Container getAssetDiversityContainer(BigDecimal assetDiversityPercentage) {
+		double percentageValue = assetDiversityPercentage
+				.setScale(2, RoundingMode.HALF_UP)
+				.doubleValue();
+
 		return Container.builder("portfolio-diversity")
 				.addComponent(() -> {
 					NumericValueParagraph p = new NumericValueParagraph(assetDiversityPercentage, CommonFormatters.PERCENTAGE);
 					p.getStyle().setColor("blue");
 					return p;
 				})
-				.addComponent(new ProgressBar(0, 100, assetDiversityPercentage))
+				.addComponent(new ProgressBar(0, 100, percentageValue))
 				.build();
 	}
 

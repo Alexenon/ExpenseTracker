@@ -4,13 +4,15 @@ import com.example.application.data.dtos.AssetWatcherDTO;
 import com.example.application.entities.common.TransactionType;
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 @Data
 public final class UpdateAssetWatcherRequest {
 
 	private final Long id;
 	private String assetSymbol;
-	private double targetPrice;
-	private double targetAmount;
+	private BigDecimal targetPrice;
+	private BigDecimal targetAmount;
 	private TransactionType transactionType;
 	private boolean isCompleted;
 

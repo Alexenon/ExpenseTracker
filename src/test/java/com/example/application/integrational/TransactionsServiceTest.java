@@ -21,9 +21,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@SuppressWarnings("SameParameterValue")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = Application.class)
 @ActiveProfiles("test")
@@ -76,8 +78,8 @@ class TransactionsServiceTest extends AbstractTest {
 		CreateTransactionRequest request = CreateTransactionRequest.builder()
 				.assetSymbol("BTC")
 				.type(TransactionType.BUY)
-				.marketPrice(100_000.00)
-				.orderQuantity(0.0001)
+				.marketPrice(BigDecimal.valueOf(100_000.00))
+				.orderQuantity(BigDecimal.valueOf(0.0001))
 				.portfolioId(portfolio.getId())
 				.build();
 
@@ -93,8 +95,8 @@ class TransactionsServiceTest extends AbstractTest {
 		CreateTransactionRequest request = CreateTransactionRequest.builder()
 				.assetSymbol("BTC")
 				.type(TransactionType.BUY)
-				.marketPrice(100_000.00)
-				.orderQuantity(0.0001)
+				.marketPrice(BigDecimal.valueOf(100_000.00))
+				.orderQuantity(BigDecimal.valueOf(0.0001))
 				.portfolioId(null)            // MISSING PORTFOLIO
 				.build();
 
@@ -160,8 +162,8 @@ class TransactionsServiceTest extends AbstractTest {
 				.getLastTimeUpdated();
 
 		UpdateTransactionRequest updateRequest = new UpdateTransactionRequest(originalTransaction);
-		updateRequest.setMarketPrice(80_000);
-		updateRequest.setOrderQuantity(2);
+		updateRequest.setMarketPrice(BigDecimal.valueOf(80_000));
+		updateRequest.setOrderQuantity(BigDecimal.valueOf(2));
 		updateRequest.setDateTime(LocalDateTime.MAX);
 
 		TransactionDTO updatedTransaction = instrumentsFacadeService.updateTransaction(updateRequest);
@@ -169,8 +171,8 @@ class TransactionsServiceTest extends AbstractTest {
 				.orElseThrow()
 				.getLastTimeUpdated();
 
-		Assertions.assertEquals(80_000, updatedTransaction.getMarketPrice(), "Market price was not updated");
-		Assertions.assertEquals(2, updatedTransaction.getOrderQuantity(), "orderQuantity was not updated");
+		Assertions.assertEquals(BigDecimal.valueOf(80_000), updatedTransaction.getMarketPrice(), "Market price was not updated");
+		Assertions.assertEquals(BigDecimal.valueOf(2), updatedTransaction.getOrderQuantity(), "orderQuantity was not updated");
 		Assertions.assertEquals(LocalDateTime.MAX, updatedTransaction.getDateTime(), "dateTime was not updated");
 		Assertions.assertTrue(timeCreated != timeUpdated && timeUpdated.isAfter(timeCreated), "lastTimeUpdated is not correct");
 	}
@@ -180,8 +182,8 @@ class TransactionsServiceTest extends AbstractTest {
 		return CreateTransactionRequest.builder()
 				.assetSymbol(asset.getSymbol())
 				.type(TransactionType.BUY)
-				.marketPrice(marketPrice)
-				.orderQuantity(orderQuantity)
+				.marketPrice(BigDecimal.valueOf(marketPrice))
+				.orderQuantity(BigDecimal.valueOf(orderQuantity))
 				.portfolioId(portfolio.getId())
 				.build();
 	}
@@ -190,8 +192,8 @@ class TransactionsServiceTest extends AbstractTest {
 		return CreateTransactionRequest.builder()
 				.assetSymbol(asset.getSymbol())
 				.type(TransactionType.SELL)
-				.marketPrice(marketPrice)
-				.orderQuantity(orderQuantity)
+				.marketPrice(BigDecimal.valueOf(marketPrice))
+				.orderQuantity(BigDecimal.valueOf(orderQuantity))
 				.portfolioId(portfolio.getId())
 				.build();
 	}

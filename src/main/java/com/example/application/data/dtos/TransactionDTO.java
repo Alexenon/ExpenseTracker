@@ -4,6 +4,7 @@ import com.example.application.entities.common.TransactionType;
 import com.example.application.entities.crypto.Transaction;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -12,9 +13,9 @@ public class TransactionDTO {
 	private final Long id;
 	private Long portfolioId;
 	private String assetSymbol;
-	private double marketPrice;
-	private double orderQuantity;
-	private double avgBuyPriceAtMoment;
+	private BigDecimal marketPrice;
+	private BigDecimal orderQuantity;
+	private BigDecimal avgBuyPriceAtMoment;
 	private TransactionType type;
 	private String note;
 	private LocalDateTime dateTime;
@@ -35,8 +36,8 @@ public class TransactionDTO {
 		dateTime = transaction.getDateTime();
 	}
 
-	public double getOrderTotalCost() {
-		return marketPrice * orderQuantity;
+	public BigDecimal getOrderTotalCost() {
+		return orderQuantity.multiply(marketPrice);
 	}
 
 	public boolean isBuyTransaction() {
@@ -46,6 +47,5 @@ public class TransactionDTO {
 	public boolean isSellTransaction() {
 		return type.isSellTransaction();
 	}
-
 
 }

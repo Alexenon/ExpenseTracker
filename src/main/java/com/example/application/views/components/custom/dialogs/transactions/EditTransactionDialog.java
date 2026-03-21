@@ -3,12 +3,13 @@ package com.example.application.views.components.custom.dialogs.transactions;
 import com.example.application.data.dtos.TransactionDTO;
 import com.example.application.data.requests.UpdateTransactionRequest;
 import com.example.application.entities.common.TransactionType;
+import com.example.application.finance.FinancialConstants;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.utils.common.formatters.CommonFormatters;
 import com.example.application.views.components.core.Container;
 import com.example.application.views.components.custom.fields.AmountField;
 import com.example.application.views.components.custom.fields.AssetComboBox;
-import com.example.application.views.components.custom.fields.CurrencyField;
+import com.example.application.views.components.custom.fields.MoneyField;
 import com.example.application.views.components.utils.HasNotifications;
 import com.example.application.views.components.utils.convertors.FlexibleAmountConvertor;
 import com.example.application.views.components.utils.convertors.FlexiblePriceConvertor;
@@ -24,10 +25,12 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.data.validator.DoubleRangeValidator;
+import com.vaadin.flow.data.validator.BigDecimalRangeValidator;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Objects;
 
 public class EditTransactionDialog extends Dialog implements HasNotifications {
@@ -42,8 +45,8 @@ public class EditTransactionDialog extends Dialog implements HasNotifications {
 	private final AssetComboBox assetSymbolField;
 	private final Select<TransactionType> typeField = new Select<>();
 	private final AmountField amountField = new AmountField("Amount");
-	private final CurrencyField marketPriceField = new CurrencyField("Price");
-	private final CurrencyField totalCostField = new CurrencyField("Total");
+	private final MoneyField marketPriceField = new MoneyField("Price");
+	private final MoneyField totalCostField = new MoneyField("Total");
 	private final DateTimePicker datePicker = new DateTimePicker("Date & Time");
 	private final TextArea notesField = new TextArea("Notes");
 
@@ -115,26 +118,25 @@ public class EditTransactionDialog extends Dialog implements HasNotifications {
 		amountField.setSuffixComponent(symbolSuffix);
 		amountField.setValueChangeMode(ValueChangeMode.EAGER);
 		amountField.addKeyUpListener(e -> {
-			double totalPrice = amountField.doubleValue() * marketPriceField.doubleValue();
+			BigDecimal totalPrice = amountField.getAmount().multiply(marketPriceField.getMoneyAmount());
 			totalCostField.setValue(totalPrice);
 			binder.validate();
 		});
 
 		marketPriceField.setValueChangeMode(ValueChangeMode.EAGER);
 		marketPriceField.addKeyUpListener(e -> {
-			double totalPrice = amountField.doubleValue() * marketPriceField.doubleValue();
+			BigDecimal totalPrice = amountField.getAmount().multiply(marketPriceField.getMoneyAmount());
 			totalCostField.setValue(totalPrice);
 			binder.validate();
 		});
 
 		totalCostField.setValueChangeMode(ValueChangeMode.EAGER);
 		totalCostField.addKeyUpListener(e -> {
-			double amount = 0;
-			if (marketPriceField.doubleValue() != 0) {
-				String textPrice = totalCostField.getValue().replaceAll(",", "");
-				double totalPrice = Double.parseDouble(textPrice.isEmpty() ? "0" : textPrice);
-				amount = totalPrice / marketPriceField.doubleValue();
-			}
+			BigDecimal marketPrice = marketPriceField.getMoneyAmount();
+			BigDecimal totalCost = totalCostField.getMoneyAmount();
+			BigDecimal amount = marketPrice.compareTo(BigDecimal.ZERO) == 0
+					? BigDecimal.ZERO
+					: totalCost.divide(marketPrice, FinancialConstants.AMOUNT_SCALE, RoundingMode.HALF_UP);
 
 			amountField.setValue(amount);
 			binder.validate();
@@ -166,22 +168,22 @@ public class EditTransactionDialog extends Dialog implements HasNotifications {
 		binder.forField(amountField)
 				.asRequired("Please fill this field")
 				.withConverter(new FlexibleAmountConvertor())
-				.withValidator(new DoubleRangeValidator("Invalid decimal value", 0.0, Double.MAX_VALUE))
-				.withValidator(amount -> amount > 0, "Amount should be bigger than 0")
+				.withValidator(new BigDecimalRangeValidator("Invalid decimal value", BigDecimal.ZERO, BigDecimal.valueOf(Integer.MAX_VALUE)))
+				.withValidator(amount -> amount.signum() > 0, "Amount should be bigger than 0")
 				.bind(UpdateTransactionRequest::getOrderQuantity, UpdateTransactionRequest::setOrderQuantity);
 
 		binder.forField(marketPriceField)
 				.asRequired("Please fill this field")
 				.withConverter(new FlexiblePriceConvertor())
-				.withValidator(new DoubleRangeValidator("Invalid decimal value", 0.0, Double.MAX_VALUE))
-				.withValidator(amount -> amount > 0, "Market price should be bigger than 0")
+				.withValidator(new BigDecimalRangeValidator("Invalid decimal value", BigDecimal.ZERO, BigDecimal.valueOf(Integer.MAX_VALUE)))
+				.withValidator(price -> price.signum() > 0, "Market price should be bigger than 0")
 				.bind(UpdateTransactionRequest::getMarketPrice, UpdateTransactionRequest::setMarketPrice);
 
 		binder.forField(totalCostField)
 				.asRequired("Please fill this field")
 				.withConverter(new FlexiblePriceConvertor())
-				.withValidator(new DoubleRangeValidator("Invalid decimal value", 0.0, Double.MAX_VALUE))
-				.withValidator(price -> price >= 1, "Total price should be at least one dollar");
+				.withValidator(new BigDecimalRangeValidator("Invalid decimal value", BigDecimal.ZERO, BigDecimal.valueOf(Integer.MAX_VALUE)))
+				.withValidator(price -> price.signum() > 0, "Total cost should be bigger than 0");
 
 		binder.forField(notesField)
 				.bind(UpdateTransactionRequest::getNote, UpdateTransactionRequest::setNote);
@@ -234,7 +236,7 @@ public class EditTransactionDialog extends Dialog implements HasNotifications {
 	}
 
 	private void displayHintAmountOfTokens() {
-		double amountTokens = assetSymbolField.getAmountTokens(transaction.getPortfolioId());
+		BigDecimal amountTokens = assetSymbolField.getAmountTokens(transaction.getPortfolioId());
 		String formatedAmount = CommonFormatters.AMOUNT.format(amountTokens);
 
 		String helperText = typeField.getOptionalValue()

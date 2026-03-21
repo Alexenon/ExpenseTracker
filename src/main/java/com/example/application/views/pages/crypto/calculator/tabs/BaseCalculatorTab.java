@@ -18,6 +18,9 @@ import com.vaadin.flow.component.shared.Tooltip;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.router.BeforeEnterObserver;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 public abstract class BaseCalculatorTab extends Tab implements BeforeEnterObserver {
 
     protected final InstrumentsFacadeService instrumentsFacadeService;
@@ -54,12 +57,12 @@ public abstract class BaseCalculatorTab extends Tab implements BeforeEnterObserv
 
     protected abstract Button createDisplayResultsBtn();
 
-    protected Div createResultItem(String labelText, double value) {
-        return createResultItem(labelText, String.format("$%.2f", value));
+    protected Div createResultItem(String labelText, BigDecimal value) {
+        return createResultItem(labelText, String.format("$%.2f", value.setScale(2, RoundingMode.HALF_UP)));
     }
 
-    protected Div createResultItem(String labelText, double value, String tooltipText) {
-        return createResultItem(labelText, String.format("$%.2f", value), tooltipText);
+    protected Div createResultItem(String labelText, BigDecimal value, String tooltipText) {
+        return createResultItem(labelText, String.format("$%.2f", value.setScale(2, RoundingMode.HALF_UP)), tooltipText);
     }
 
     protected Div createResultItem(String labelText, String valueText) {

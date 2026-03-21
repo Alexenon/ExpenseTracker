@@ -31,6 +31,7 @@ import com.vaadin.flow.router.BeforeLeaveObserver;
 import com.vaadin.flow.theme.lumo.LumoIcon;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -128,9 +129,9 @@ public class PortfolioPanel extends Div implements BeforeEnterObserver, BeforeLe
 		section.addClassName("asset-details-header");
 
 		H2 headerText = new H2(portfolio.getName());
-		double worth = portfolioPerformanceTracker.getPortfolioWorth(portfolio);
-		double profit = portfolioPerformanceTracker.getPortfolioTotalProfit(portfolio);
-		double percentage = portfolioPerformanceTracker.getPortfolioProfitPercentage(portfolio);
+		BigDecimal worth = portfolioPerformanceTracker.getPortfolioWorth(portfolio);
+		BigDecimal profit = portfolioPerformanceTracker.getPortfolioTotalProfit(portfolio);
+		BigDecimal percentage = portfolioPerformanceTracker.getPortfolioProfitPercentage(portfolio);
 
 		Container portfolioHeader = Container.builder("price-wrapper")
 				.addComponent(headerText)
@@ -177,7 +178,7 @@ public class PortfolioPanel extends Div implements BeforeEnterObserver, BeforeLe
 		H3 title = new H3("Portfolio Statistics");
 		title.setClassName("section-title");
 
-		double totalProfit = portfolioPerformanceTracker.getPortfolioTotalProfit(portfolio);
+		BigDecimal totalProfit = portfolioPerformanceTracker.getPortfolioTotalProfit(portfolio);
 		String nrOfAssets = String.valueOf(instrumentsFacadeService.getPorfolioAssetBalances(portfolio.getId()).size());
 		String realized = CommonFormatters.CURRENCY.format(portfolioPerformanceTracker.getPortfolioRealizedProfit(portfolio));
 		String unrealized = CommonFormatters.CURRENCY.format(portfolioPerformanceTracker.getPortfolioUnrealizedProfit(portfolio));
@@ -217,7 +218,7 @@ public class PortfolioPanel extends Div implements BeforeEnterObserver, BeforeLe
 	}
 
 	private Section performanceSection() {
-		Map<AssetDTO, Double> mostProfitableAssets = getMostProfitableAssetsByProfit();
+		Map<AssetDTO, BigDecimal> mostProfitableAssets = getMostProfitableAssetsByProfit();
 
 		if (mostProfitableAssets.isEmpty())
 			return new Section();
@@ -252,7 +253,7 @@ public class PortfolioPanel extends Div implements BeforeEnterObserver, BeforeLe
 		return section;
 	}
 
-	private Map<AssetDTO, Double> getMostProfitableAssetsByProfit() {
+	private Map<AssetDTO, BigDecimal> getMostProfitableAssetsByProfit() {
 		return instrumentsFacadeService.getPorfolioAssetBalances(portfolio.getId())
 				.stream()
 				.map(assetBalance -> instrumentsFacadeService.getAssetBySymbol(assetBalance.getAssetSymbol()).orElseThrow())
@@ -273,8 +274,8 @@ public class PortfolioPanel extends Div implements BeforeEnterObserver, BeforeLe
 		Image assetImage = new Image(asset.getImageUrl(), asset.getSymbol());
 		assetImage.addClassNames("coin-overview-image", "performance-asset-image");
 
-		double profit = portfolioPerformanceTracker.getAssetTotalProfit(portfolio, asset);
-		double percentageProfit = portfolioPerformanceTracker.getAssetNetProfitPercentage(portfolio, asset);
+		BigDecimal profit = portfolioPerformanceTracker.getAssetTotalProfit(portfolio, asset);
+		BigDecimal percentageProfit = portfolioPerformanceTracker.getAssetNetProfitPercentage(portfolio, asset);
 		PricePercentageWrapper pricePercentageWrapper = new PricePercentageWrapper(profit, percentageProfit);
 		pricePercentageWrapper.addClassName("performance-values");
 
