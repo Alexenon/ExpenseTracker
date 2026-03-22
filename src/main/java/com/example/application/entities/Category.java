@@ -1,7 +1,8 @@
 package com.example.application.entities;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.ToString;
 
@@ -10,18 +11,19 @@ import lombok.ToString;
 @ToString
 public class Category {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @Column(unique = true, nullable = false)
-    @JsonProperty(required = true)
-    private String name;
+	@NotNull
+	@Column(unique = true, nullable = false)
+	@Size(min = 4, max = 20, message = "Name should be between 4 and 20 characters")
+	private String name;
 
-    public Category() {
-    }
+	public Category() {
+	}
 
-    public Category(String name) {
-        this.name = name;
-    }
+	public Category(String name) {
+		this.name = name;
+	}
 }

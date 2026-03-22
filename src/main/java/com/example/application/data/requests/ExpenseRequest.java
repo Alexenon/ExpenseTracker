@@ -1,6 +1,6 @@
 package com.example.application.data.requests;
 
-import com.example.application.entities.Expense;
+import com.example.application.entities.ExpenseTimestamp;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
@@ -21,7 +21,7 @@ public class ExpenseRequest {
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate expireDate;
 
-    private Expense.Timestamp timestamp;
+    private ExpenseTimestamp timestamp;
 
     private String categoryName;
 

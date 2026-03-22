@@ -74,7 +74,7 @@ public class Transaction {
 	private TransactionType type;
 
 	@Nullable
-	@Column(name = "note", length = 250)
+	@Column(name = "note")
 	private String note;
 
 	@NotNull

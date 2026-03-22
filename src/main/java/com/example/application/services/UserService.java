@@ -2,6 +2,7 @@ package com.example.application.services;
 
 import com.example.application.data.requests.RegisterUserRequest;
 import com.example.application.entities.User;
+import com.example.application.entities.UserRole;
 import com.example.application.entities.crypto.Portfolio;
 import com.example.application.repositories.UserRepository;
 import com.example.application.utils.common.lang.StringUtils;
@@ -87,7 +88,7 @@ public class UserService implements UserDetailsService {
 		user.setUsername(request.getUsername().trim().toLowerCase());
 		user.setEmail(request.getEmail().trim().toLowerCase());
 		user.setPassword(passwordEncoder.encode(request.getPassword()));
-		user.getRoles().add(User.Role.USER_ROLE);
+		user.getRoles().add(UserRole.USER_ROLE);
 
 		return save(user);
 	}

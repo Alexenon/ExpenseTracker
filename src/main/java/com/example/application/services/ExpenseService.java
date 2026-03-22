@@ -4,6 +4,7 @@ import com.example.application.data.dtos.ExpenseDTO;
 import com.example.application.data.models.projections.MonthlyExpensesProjection;
 import com.example.application.data.requests.ExpenseRequest;
 import com.example.application.entities.Expense;
+import com.example.application.entities.ExpenseTimestamp;
 import com.example.application.entities.User;
 import com.example.application.repositories.ExpenseRepository;
 import com.example.application.utils.ExpenseConvertor;
@@ -95,7 +96,7 @@ public class ExpenseService {
      * Updates the expireDate to be startDate + 1 day, if the expense timestamp is ONCE
      */
     private void replaceExpireDateForOneTimeExpenses(Expense expense) {
-        if (!expense.getTimestamp().equals(Expense.Timestamp.ONCE)) {
+        if (!expense.getTimestamp().equals(ExpenseTimestamp.ONCE)) {
             return;
         }
 

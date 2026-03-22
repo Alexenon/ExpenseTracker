@@ -351,6 +351,15 @@ public class InstrumentsFacadeService {
 		AssetBalance assetBalance = new AssetBalance();
 		assetBalance.setPortfolio(portfolio);
 		assetBalance.setAsset(asset);
+		assetBalance.setAmount(BigDecimal.ZERO);
+		assetBalance.setCost(BigDecimal.ZERO);
+		assetBalance.setTotalBuyCost(BigDecimal.ZERO);
+		assetBalance.setTotalBoughtQuantity(BigDecimal.ZERO);
+		assetBalance.setTotalSellValue(BigDecimal.ZERO);
+		assetBalance.setTotalSoldQuantity(BigDecimal.ZERO);
+		assetBalance.setAvgSellPrice(BigDecimal.ZERO);
+		assetBalance.setAvgBuyPrice(BigDecimal.ZERO);
+		assetBalance.setTotalRealizedProfit(BigDecimal.ZERO);
 		return assetBalanceService.save(assetBalance);
 	}
 	//</editor-fold>

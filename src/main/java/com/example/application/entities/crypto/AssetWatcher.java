@@ -3,6 +3,7 @@ package com.example.application.entities.crypto;
 import com.example.application.entities.common.TransactionType;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -46,10 +47,12 @@ public class AssetWatcher {
 
 	@NotNull
 	@Column(name = "target_price", nullable = false)
+	@DecimalMin(value = "0.0", inclusive = false, message = "Target price value must be greater than 0")
 	private BigDecimal targetPrice;
 
 	@NotNull
 	@Column(name = "target_amount", nullable = false)
+	@DecimalMin(value = "0.0", inclusive = false, message = "Target amount must be greater than 0")
 	private BigDecimal targetAmount;
 
 	@NotNull

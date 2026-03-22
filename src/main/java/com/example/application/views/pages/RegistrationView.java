@@ -92,20 +92,19 @@ public class RegistrationView extends DefaultPage implements HasNotifications {
 		binder.setBean(new RegisterUserRequest());
 		binder.forField(registerForm.getUsername())
 				.asRequired("Please fill this field")
-				.withValidator(s -> s.length() > 3, "Username must contain at least 4 characters")
-				.withValidator(s -> s.length() < 12, "Username must contain less than 12 characters")
+				.withValidator(s -> s.length() >= 4, "Username must contain at least 4 characters")
+				.withValidator(s -> s.length() <= 255, "Username must not exceed 255 characters")
 				.withValidator(s -> !instrumentsFacadeService.isUsernameTaken(s), "Username already exists")
 				.bind(RegisterUserRequest::getUsername, RegisterUserRequest::setUsername);
 
 		binder.forField(registerForm.getPassword())
 				.asRequired("Please fill this field")
-				.withValidator(t -> t.length() > 3, "Password must contain at least 4 characters")
-				.withValidator(s -> s.length() < 20, "Password must contain less than 20 characters")
+				.withValidator(t -> t.length() >= 4, "Password must contain at least 4 characters")
+				.withValidator(s -> s.length() <= 128, "Password must contain less than 128 characters")
 				.bind(RegisterUserRequest::getPassword, RegisterUserRequest::setPassword);
 
 		binder.forField(registerForm.getConfirmPassword())
 				.asRequired("Please fill this field")
-				.withValidator(s -> s.length() > 3, "Password must contain at least 4 characters")
 				.withValidator(s -> s.equals(registerForm.getPassword().getValue()), "Passwords don't match")
 				.bind(RegisterUserRequest::getConfirmPassword, RegisterUserRequest::setConfirmPassword);
 
@@ -113,7 +112,7 @@ public class RegistrationView extends DefaultPage implements HasNotifications {
 				.asRequired("Please fill this field")
 				.withValidator(new EmailValidator("Please enter a valid email address"))
 				.withValidator(s -> !instrumentsFacadeService.isEmailTaken(s), "This email is already used")
-				.withValidator(s -> s.length() < 30, "Email must contain less than 30 characters")
+				.withValidator(s -> s.length() <= 320, "Email must must not exceed 320 characters")
 				.bind(RegisterUserRequest::getEmail, RegisterUserRequest::setEmail);
 	}
 

@@ -6,6 +6,7 @@ import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -25,14 +26,17 @@ public class User {
 
 	@NotNull
 	@Column(name = "username", unique = true, nullable = false)
+	@Size(min = 4, max = 255, message = "Portfolio name should be between 4 and 20 characters")
 	private String username;
 
 	@NotNull
 	@Column(name = "password", nullable = false)
+	@Size(min = 4, max = 128, message = "Portfolio name should be between 4 and 20 characters")
 	private String password;
 
 	@NotNull
 	@Column(name = "email", unique = true, nullable = false)
+	@Size(min = 4, max = 320, message = "Portfolio email should be between 4 and 320 characters")
 	private String email;
 
 	@Nullable
@@ -52,15 +56,9 @@ public class User {
 
 	@Column(name = "role", nullable = false)
 	@Enumerated(EnumType.STRING)
-	@ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
+	@ElementCollection(targetClass = UserRole.class, fetch = FetchType.EAGER)
 	@CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
-	private Set<Role> roles = new HashSet<>();
-
-	public enum Role {
-		USER_ROLE,
-		ADMIN_ROLE,
-		SUPER_ADMIN_ROLE
-	}
+	private Set<UserRole> roles = new HashSet<>();
 
 	@Column(name = "last_time_updated", nullable = false)
 	private LocalDateTime lastTimeUpdated = LocalDateTime.now();

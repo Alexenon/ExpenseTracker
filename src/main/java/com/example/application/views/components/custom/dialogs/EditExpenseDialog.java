@@ -3,6 +3,7 @@ package com.example.application.views.components.custom.dialogs;
 import com.example.application.data.dtos.ExpenseDTO;
 import com.example.application.data.requests.ExpenseRequest;
 import com.example.application.entities.Expense;
+import com.example.application.entities.ExpenseTimestamp;
 import com.example.application.services.CategoryService;
 import com.example.application.services.ExpenseService;
 import com.example.application.views.components.utils.HasNotifications;
@@ -45,7 +46,7 @@ public class EditExpenseDialog extends Dialog implements HasNotifications {
     private final TextField nameField = new TextField("Expense Name");
     private final TextArea descriptionField = new TextArea("Description");
     private final NumberField amountField = new NumberField("Amount");
-    private final Select<Expense.Timestamp> timestampField = new Select<>();
+    private final Select<ExpenseTimestamp> timestampField = new Select<>();
     private final ComboBox<String> categoryField = new ComboBox<>("Category");
     private final DatePicker startDateField = new DatePicker("Start Date");
     private final DatePicker expireDateField = new DatePicker("Expire Date");
@@ -85,10 +86,10 @@ public class EditExpenseDialog extends Dialog implements HasNotifications {
 
     private void initFields() {
         timestampField.setLabel("Interval");
-        timestampField.setItems(Expense.Timestamp.values());
+        timestampField.setItems(ExpenseTimestamp.values());
         timestampField.setHelperText("Select how often this expense will be triggered");
         timestampField.addValueChangeListener(timestamp -> {
-            boolean timestampIsOnce = timestamp.getValue().equals(Expense.Timestamp.ONCE);
+            boolean timestampIsOnce = timestamp.getValue().equals(ExpenseTimestamp.ONCE);
 
             if (timestampIsOnce)
                 expireDateField.setValue(null);
@@ -156,7 +157,7 @@ public class EditExpenseDialog extends Dialog implements HasNotifications {
                         expireDate -> {
                             if (expireDate == null || startDateField.getValue() == null) return true;
 
-                            return !timestampField.getValue().equals(Expense.Timestamp.WEEKLY)
+                            return !timestampField.getValue().equals(ExpenseTimestamp.WEEKLY)
                                    || DAYS.between(startDateField.getValue(), expireDate) >= 7;
                         }, "Should pass at least 7 days to end subscription"
                 )
@@ -165,7 +166,7 @@ public class EditExpenseDialog extends Dialog implements HasNotifications {
                             if (expireDate == null || startDateField.getValue() == null)
                                 return true;
 
-                            return !timestampField.getValue().equals(Expense.Timestamp.MONTHLY)
+                            return !timestampField.getValue().equals(ExpenseTimestamp.MONTHLY)
                                    || MONTHS.between(startDateField.getValue(), expireDate) >= 1;
                         }, "Should pass at least 1 month to end subscription"
                 )
