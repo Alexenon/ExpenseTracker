@@ -5,6 +5,7 @@ import com.example.application.utils.exceptions.InternalUnexpectedException;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
@@ -35,6 +36,7 @@ public class User {
 	private String password;
 
 	@NotNull
+	@Email
 	@Column(name = "email", unique = true, nullable = false)
 	@Size(min = 4, max = 320, message = "Portfolio email should be between 4 and 320 characters")
 	private String email;

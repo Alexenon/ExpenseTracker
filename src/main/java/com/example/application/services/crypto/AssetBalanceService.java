@@ -1,5 +1,6 @@
 package com.example.application.services.crypto;
 
+import com.example.application.components.EntityValidator;
 import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.AssetBalance;
 import com.example.application.entities.crypto.Portfolio;
@@ -9,12 +10,12 @@ import com.example.application.repositories.crypto.AssetBalanceRepository;
 import com.example.application.utils.common.lang.NumberUtils;
 import com.example.application.utils.exceptions.InternalUnexpectedException;
 import com.example.application.utils.exceptions.InvalidBalanceAmountException;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.NotNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -25,15 +26,11 @@ import java.util.Optional;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class AssetBalanceService {
 
+	private final EntityValidator validator;
 	private final AssetBalanceRepository assetBalanceRepository;
-
-	@Autowired
-	public AssetBalanceService(AssetBalanceRepository repository)
-	{
-		this.assetBalanceRepository = repository;
-	}
 
 	public Optional<AssetBalance> findById(@NotNull Long assetBalanceId) {
 		Objects.requireNonNull(assetBalanceId, "assetBalanceId");
@@ -70,8 +67,6 @@ public class AssetBalanceService {
 
 	@Transactional
 	public AssetBalance update(@NotNull AssetBalance assetBalance, @NotNull Transaction transaction) {
-		validate(assetBalance);
-
 		assetBalance.setTotalBuyCost(calculateTotalBuyCost(assetBalance, transaction));
 		assetBalance.setTotalSellValue(calculateTotalSellValue(assetBalance, transaction));
 		assetBalance.setTotalBoughtQuantity(calculateTotalBoughtQuantity(assetBalance, transaction));
@@ -88,7 +83,7 @@ public class AssetBalanceService {
 	@Transactional
 	public AssetBalance save(@NotNull AssetBalance assetBalance) {
 		assetBalance.setLastTimeUpdated(LocalDateTime.now());
-		validate(assetBalance);
+		validator.validate(assetBalance);
 		try {
 			return assetBalanceRepository.save(assetBalance);
 		} catch (Exception e) {
@@ -98,11 +93,14 @@ public class AssetBalanceService {
 
 	@Transactional
 	public void delete(@NotNull Long assetBalanceId) {
+		AssetBalance assetBalance = findById(assetBalanceId)
+				.orElseThrow(() -> new EntityNotFoundException("Cannot delete an unexistent assetBalace: #" + assetBalanceId));
+
 		try {
-			assetBalanceRepository.deleteById(assetBalanceId);
-			log.info("Deleted successfully transaction: #{}", assetBalanceId);
+			assetBalanceRepository.delete(assetBalance);
+			log.info("Deleted successfully asset balance: #{}", assetBalanceId);
 		} catch (Exception e) {
-			log.error("Failed to delete transaction: #{}", assetBalanceId, e);
+			log.error("Failed to delete asset balance: #{}", assetBalanceId, e);
 			throw new InternalUnexpectedException(e);
 		}
 	}
@@ -201,19 +199,6 @@ public class AssetBalanceService {
 		return totalSoldQuantity.signum() == 0
 				? BigDecimal.ZERO
 				: totalSellValue.divide(totalSoldQuantity, FinancialConstants.PRICE_SCALE, RoundingMode.HALF_UP);
-	}
-
-	private static void validate(AssetBalance assetBalance) {
-		Objects.requireNonNull(assetBalance, "assetBalance");
-		Assert.notNull(assetBalance.getAsset(), "assetBalance asset");
-		Assert.notNull(assetBalance.getPortfolio(), "assetBalance portfolio");
-		Assert.notNull(assetBalance.getTimeCreatedAt(), "assetBalance createdAt");
-		Assert.notNull(assetBalance.getLastTimeUpdated(), "assetBalance lastTimeUpdated");
-
-		Assert.isTrue(assetBalance.getAmount().signum() >= 0, "amount cannot be negative");
-		Assert.isTrue(assetBalance.getAvgBuyPrice().signum() >= 0, "avgBuyPrice cannot be negative");
-		Assert.isTrue(assetBalance.getAvgSellPrice().signum() >= 0, "avgSellPrice cannot be negative");
-		Assert.isTrue(assetBalance.getHoldingDays() >= 0, "holdingDays cannot be negative");
 	}
 
 }
