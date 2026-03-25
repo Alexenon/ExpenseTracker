@@ -16,6 +16,7 @@ import com.example.application.services.SecurityService;
 import com.example.application.services.UserService;
 import com.example.application.utils.exceptions.InternalUnexpectedException;
 import com.example.application.utils.fetchers.crypto_compare.response.AssetMetadata;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,7 +73,7 @@ public class InstrumentsFacadeService {
 
 	//<editor-fold desc="USERS">
 	@Transactional(rollbackFor = Exception.class)
-	public UserDTO createNewUser(RegisterUserRequest request) {
+	public UserDTO createNewUser(@Valid RegisterUserRequest request) {
 		User userEntity = userService.createNewUser(request);
 
 		CreatePortfolioRequest defaultPortfolio = CreatePortfolioRequest.builder()
@@ -194,7 +195,7 @@ public class InstrumentsFacadeService {
 	}
 
 	@Transactional
-	public TransactionDTO createTransaction(CreateTransactionRequest request) {
+	public TransactionDTO createTransaction(@Valid CreateTransactionRequest request) {
 		log.info("Creating new transaction: {}", request);
 		Transaction transaction = new Transaction();
 
@@ -219,7 +220,7 @@ public class InstrumentsFacadeService {
 	}
 
 	@Transactional
-	public TransactionDTO updateTransaction(UpdateTransactionRequest request) {
+	public TransactionDTO updateTransaction(@Valid UpdateTransactionRequest request) {
 		log.info("Updating transaction: {}", request);
 		Transaction transaction = transactionService.findById(request.getId())
 				.orElseThrow(() -> new IllegalArgumentException("Cannot find transaction with id: #" + request.getId()));
@@ -243,7 +244,7 @@ public class InstrumentsFacadeService {
 
 	//<editor-fold desc="ASSET WATCHERS">
 	@Transactional
-	public AssetWatcherDTO createAssetWatcher(CreateAssetWatcherRequest request) {
+	public AssetWatcherDTO createAssetWatcher(@Valid CreateAssetWatcherRequest request) {
 		Asset asset = assetService.findBySymbol(request.getAssetSymbol())
 				.orElseThrow(() -> new IllegalArgumentException("Cannot find asset: " + request.getAssetSymbol()));
 
@@ -263,7 +264,7 @@ public class InstrumentsFacadeService {
 	}
 
 	@Transactional
-	public AssetWatcherDTO updateAssetWatcher(UpdateAssetWatcherRequest request) {
+	public AssetWatcherDTO updateAssetWatcher(@Valid UpdateAssetWatcherRequest request) {
 		AssetWatcher entity = assetWatcherService.findById(request.getId())
 				.orElseThrow(() -> new IllegalArgumentException("Cannot find assetWatcher: #" + request.getId() + " (deleted ?)"));
 
@@ -368,7 +369,7 @@ public class InstrumentsFacadeService {
 
 	@NotNull
 	@Transactional
-	public PortfolioDTO createPortfolio(@NotNull CreatePortfolioRequest request) {
+	public PortfolioDTO createPortfolio(@Valid CreatePortfolioRequest request) {
 		User user = userService.findById(request.getUserId())
 				.orElseThrow(() -> new IllegalArgumentException("User #" + request.getUserId() + " not found. (deleted ?)"));
 

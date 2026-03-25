@@ -1,6 +1,10 @@
 package com.example.application.data.requests;
 
 import com.example.application.entities.common.TransactionType;
+import jakarta.annotation.Nullable;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
 
@@ -11,12 +15,27 @@ import java.time.LocalDateTime;
 @Builder
 public class CreateTransactionRequest {
 
+	@NotBlank
 	private String assetSymbol;
+
+	@NotNull
 	private Long portfolioId;
+
+	@NotNull
+	@DecimalMin(value = "0.0", inclusive = false, message = "Market price must be greater than 0")
 	private BigDecimal marketPrice;
+
+	@NotNull
+	@DecimalMin(value = "0.0", inclusive = false, message = "Quantity must be greater than 0")
 	private BigDecimal orderQuantity;
+
+	@NotNull
 	private TransactionType type = TransactionType.BUY;
+
+	@Nullable
 	private String note;
+
+	@NotNull
 	private LocalDateTime dateTime = LocalDateTime.now();
 
 	public CreateTransactionRequest() {

@@ -1,6 +1,9 @@
 package com.example.application.data.requests.asset_watchers;
 
 import com.example.application.entities.common.TransactionType;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
 
@@ -10,11 +13,23 @@ import java.math.BigDecimal;
 @Builder
 public final class CreateAssetWatcherRequest {
 
-    private Long portfolioId;
-    private String assetSymbol;
-    private TransactionType transactionType;
-    private BigDecimal targetPrice;
-    private BigDecimal targetAmount;
-    private boolean isCompleted;
+	@NotNull
+	private Long portfolioId;
+
+	@NotBlank
+	private String assetSymbol;
+
+	@NotNull
+	private TransactionType transactionType;
+
+	@NotNull
+	@DecimalMin(value = "0.0", inclusive = false, message = "Price must be greater than 0")
+	private BigDecimal targetPrice;
+
+	@NotNull
+	@DecimalMin(value = "0.0", inclusive = false, message = "Amount must be greater than 0")
+	private BigDecimal targetAmount;
+
+	private boolean isCompleted;
 
 }

@@ -6,6 +6,7 @@ import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
@@ -25,20 +26,20 @@ public class User {
 	@Column(name = "id")
 	private Long id;
 
-	@NotNull
+	@NotBlank
 	@Column(name = "username", unique = true, nullable = false)
-	@Size(min = 4, max = 255, message = "Portfolio name should be between 4 and 20 characters")
+	@Size(min = 4, max = 255, message = "Username should be between 4 and 20 characters")
 	private String username;
 
-	@NotNull
+	@NotBlank
 	@Column(name = "password", nullable = false)
-	@Size(min = 4, max = 128, message = "Portfolio name should be between 4 and 20 characters")
+	@Size(min = 4, max = 128, message = "Password should be between 4 and 20 characters")
 	private String password;
 
-	@NotNull
+	@NotBlank
 	@Email
 	@Column(name = "email", unique = true, nullable = false)
-	@Size(min = 4, max = 320, message = "Portfolio email should be between 4 and 320 characters")
+	@Size(min = 4, max = 320, message = "Email should be between 4 and 320 characters")
 	private String email;
 
 	@Nullable
