@@ -26,6 +26,7 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.theme.lumo.LumoIcon;
 import lombok.extern.slf4j.Slf4j;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -122,17 +123,17 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
 			String symbol = assetSymbolField.getSymbol();
 			List<TransactionDTO> transactions = getListOfTransactions();
 
-			double price = assetSymbolField.getSelectedAsset().getMarketPrice();
-			double avgBuy = ProfitCalculator.averageBuyPrice(transactions);
-			double avgSell = ProfitCalculator.averageSellPrice(transactions);
-			double amountOfRemainingTokens = ProfitCalculator.getAmountOfRemainingTokens(transactions);
-			double realizedProfit = ProfitCalculator.realizedProfit(transactions);
-			double unrealizedProfit = amountOfRemainingTokens * assetSymbolField.getMarketPrice();
-			double totalProfit = realizedProfit + unrealizedProfit;
+			BigDecimal price = assetSymbolField.getSelectedAsset().getMarketPrice();
+			BigDecimal avgBuy = ProfitCalculator.averageBuyPrice(transactions);
+			BigDecimal avgSell = ProfitCalculator.averageSellPrice(transactions);
+			BigDecimal amountOfRemainingTokens = ProfitCalculator.getAmountOfRemainingTokens(transactions);
+			BigDecimal realizedProfit = ProfitCalculator.realizedProfit(transactions);
+			BigDecimal unrealizedProfit = amountOfRemainingTokens.multiply(assetSymbolField.getMarketPrice());
+			BigDecimal totalProfit = realizedProfit.add(unrealizedProfit);
 
-			double totalCost = ProfitCalculator.totalCostForBuyTransactions(transactions);
-			double worthRemainingTokens = amountOfRemainingTokens * price;
-			double netProfit = worthRemainingTokens - totalProfit;
+			BigDecimal totalCost = ProfitCalculator.totalCostForBuyTransactions(transactions);
+			BigDecimal worthRemainingTokens = amountOfRemainingTokens.multiply(price);
+			BigDecimal netProfit = worthRemainingTokens.subtract(totalProfit);
 
 			String buyVolumeInfo = currencyFormatter.format(ProfitCalculator.totalCostForBuyTransactions(transactions));
 			String sellVolumeInfo = currencyFormatter.format(ProfitCalculator.totalCostForSellTransactions(transactions));
@@ -216,9 +217,9 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
 		return transactionalLayouts.stream()
 				.map(layout -> {
 					AssetDTO selectedAsset = assetSymbolField.getSelectedAsset();
-					double marketPrice = layout.getMarketPriceField().doubleValue();
-					double orderQuantity = layout.getAmountField().doubleValue();
-					double orderTotalCost = layout.getTotalCostField().doubleValue();
+					BigDecimal marketPrice = layout.getMarketPriceField().getMoneyAmount();
+					BigDecimal orderQuantity = layout.getAmountField().getAmount();
+					BigDecimal orderTotalCost = layout.getTotalCostField().getMoneyAmount();
 					TransactionType type = layout.getTypeField().getValue();
 
 					TransactionDTO dto = new TransactionDTO();
@@ -230,18 +231,18 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
 				}).toList();
 	}
 
-	private Html createTable(AssetDTO asset, double averageBuyPrice, double averageSellPrice) {
-		double currentPrice = asset.getMarketPrice();
+	private Html createTable(AssetDTO asset, BigDecimal averageBuyPrice, BigDecimal averageSellPrice) {
+		BigDecimal currentPrice = asset.getMarketPrice();
 
 		BigInteger totalMarketSupply = asset.getTotalSupply();
-		double currentFDV = ProfitUtils.fdv(totalMarketSupply, currentPrice);
-		double avgBuyFDV = ProfitUtils.fdv(totalMarketSupply, averageBuyPrice);
-		double avgSellFDV = ProfitUtils.fdv(totalMarketSupply, averageSellPrice);
+		BigDecimal currentFDV = ProfitUtils.fdv(totalMarketSupply, currentPrice);
+		BigDecimal avgBuyFDV = ProfitUtils.fdv(totalMarketSupply, averageBuyPrice);
+		BigDecimal avgSellFDV = ProfitUtils.fdv(totalMarketSupply, averageSellPrice);
 
 		BigInteger circulationSupply = asset.getCirculationSupply();
-		double currentMarketCap = ProfitUtils.marketCap(circulationSupply, currentPrice);
-		double avgBuyMarketCap = ProfitUtils.marketCap(circulationSupply, averageBuyPrice);
-		double avgSellMarketCap = ProfitUtils.marketCap(circulationSupply, averageSellPrice);
+		BigDecimal currentMarketCap = ProfitUtils.marketCap(circulationSupply, currentPrice);
+		BigDecimal avgBuyMarketCap = ProfitUtils.marketCap(circulationSupply, averageBuyPrice);
+		BigDecimal avgSellMarketCap = ProfitUtils.marketCap(circulationSupply, averageSellPrice);
 
 		return new Html(MessageFormat.format("""
 						<table class="inside-border">

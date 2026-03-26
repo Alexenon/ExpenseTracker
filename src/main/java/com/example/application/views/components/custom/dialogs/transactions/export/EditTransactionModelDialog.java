@@ -6,7 +6,7 @@ import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.views.components.core.Container;
 import com.example.application.views.components.custom.fields.AmountField;
 import com.example.application.views.components.custom.fields.AssetComboBox;
-import com.example.application.views.components.custom.fields.CurrencyField;
+import com.example.application.views.components.custom.fields.MoneyField;
 import com.example.application.views.components.utils.HasNotifications;
 import com.example.application.views.components.utils.convertors.FlexibleAmountConvertor;
 import com.example.application.views.components.utils.convertors.FlexiblePriceConvertor;
@@ -19,9 +19,10 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.data.validator.DoubleRangeValidator;
+import com.vaadin.flow.data.validator.BigDecimalRangeValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.math.BigDecimal;
 import java.util.function.Consumer;
 
 public class EditTransactionModelDialog extends Dialog implements HasNotifications {
@@ -33,7 +34,7 @@ public class EditTransactionModelDialog extends Dialog implements HasNotificatio
 	private final AssetComboBox assetSymbolField;
 	private final Select<TransactionType> typeField = new Select<>();
 	private final AmountField amountField = new AmountField("Amount");
-	private final CurrencyField marketPriceField = new CurrencyField("Price");
+	private final MoneyField marketPriceField = new MoneyField("Price");
 	private final DateTimePicker dateTimePicker = new DateTimePicker("Date");
 	private final TextArea notesField = new TextArea("Notes");
 
@@ -119,15 +120,15 @@ public class EditTransactionModelDialog extends Dialog implements HasNotificatio
 		binder.forField(amountField)
 				.asRequired("Please fill this field")
 				.withConverter(new FlexibleAmountConvertor())
-				.withValidator(new DoubleRangeValidator("Invalid decimal value", 0.0, Double.MAX_VALUE))
-				.withValidator(amount -> amount > 0, "Amount should be bigger than 0")
+				.withValidator(new BigDecimalRangeValidator("Invalid decimal value", BigDecimal.ZERO, BigDecimal.valueOf(Integer.MAX_VALUE)))
+				.withValidator(amount -> amount.signum() > 0, "Amount should be bigger than 0")
 				.bind(TransactionModel::getAmount, TransactionModel::setAmount);
 
 		binder.forField(marketPriceField)
 				.asRequired("Please fill this field")
 				.withConverter(new FlexiblePriceConvertor())
-				.withValidator(new DoubleRangeValidator("Invalid decimal value", 0.0, Double.MAX_VALUE))
-				.withValidator(amount -> amount > 0, "Market price should be bigger than 0")
+				.withValidator(new BigDecimalRangeValidator("Invalid decimal value", BigDecimal.ZERO, BigDecimal.valueOf(Integer.MAX_VALUE)))
+				.withValidator(price -> price.signum() > 0, "Market price should be bigger than 0")
 				.bind(TransactionModel::getPrice, TransactionModel::setPrice);
 
 		binder.forField(notesField)

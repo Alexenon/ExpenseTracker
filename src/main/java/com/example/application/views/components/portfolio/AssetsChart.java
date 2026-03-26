@@ -5,7 +5,6 @@ import com.example.application.data.dtos.AssetDTO;
 import com.example.application.data.dtos.PortfolioDTO;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
-import com.example.application.utils.common.lang.MathUtils;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.select.Select;
 import elemental.json.Json;
@@ -14,6 +13,8 @@ import elemental.json.JsonObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
@@ -64,7 +65,7 @@ public class AssetsChart extends Div {
 		getChartItems().forEach((assetName, diversityPercentage) -> {
 			JsonObject jsonObject = Json.createObject();
 			jsonObject.put("name", assetName);
-			jsonObject.put("value", MathUtils.twoDecimal(diversityPercentage));
+			jsonObject.put("value", diversityPercentage.setScale(2, RoundingMode.HALF_UP).toString());
 			jsonOptionData.set(index.get(), jsonObject);
 			index.addAndGet(1);
 		});
@@ -73,7 +74,7 @@ public class AssetsChart extends Div {
 		log.info("Created assets pie chart with {} elements", index.intValue());
 	}
 
-	private Map<String, Double> getChartItems() {
+	private Map<String, BigDecimal> getChartItems() {
 		return instrumentsFacadeService.getPorfolioAssetBalances(portfolio.getId())
 				.stream()
 				.map(AssetBalanceDTO::getAssetSymbol)
@@ -81,7 +82,7 @@ public class AssetsChart extends Div {
 				.collect(Collectors.toMap(AssetDTO::getSymbol, chartMapper(), (a, b) -> b));
 	}
 
-	private Function<AssetDTO, Double> chartMapper() {
+	private Function<AssetDTO, BigDecimal> chartMapper() {
 		return switch (options.getValue()) {
 			case WORTH -> asset -> portfolioPerformanceTracker.getAssetWorth(portfolio, asset);
 			case INVESTED -> asset -> portfolioPerformanceTracker.getAssetRemainingTokensCost(portfolio, asset);

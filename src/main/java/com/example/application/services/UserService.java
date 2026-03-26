@@ -1,12 +1,14 @@
 package com.example.application.services;
 
+import com.example.application.components.EntityValidator;
 import com.example.application.data.requests.RegisterUserRequest;
 import com.example.application.entities.User;
+import com.example.application.entities.UserRole;
 import com.example.application.entities.crypto.Portfolio;
 import com.example.application.repositories.UserRepository;
-import com.example.application.utils.common.lang.StringUtils;
 import com.example.application.utils.exceptions.InternalUnexpectedException;
 import com.example.application.utils.exceptions.auth.UsernameTakenException;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +19,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -36,6 +37,7 @@ public class UserService implements UserDetailsService {
 
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
+	private final EntityValidator validator;
 
 	//<editor-fold desc="SEARCH">
 	public Optional<User> findById(Long userId) {
@@ -87,7 +89,7 @@ public class UserService implements UserDetailsService {
 		user.setUsername(request.getUsername().trim().toLowerCase());
 		user.setEmail(request.getEmail().trim().toLowerCase());
 		user.setPassword(passwordEncoder.encode(request.getPassword()));
-		user.getRoles().add(User.Role.USER_ROLE);
+		user.getRoles().add(UserRole.USER_ROLE);
 
 		return save(user);
 	}
@@ -126,7 +128,14 @@ public class UserService implements UserDetailsService {
 	@Transactional
 	public User save(@NotNull User user) {
 		log.info("Saving {}", user);
-		validate(user);
+		validator.validate(user);
+
+		if (isUsernameTaken(user.getUsername()))
+			throw new UsernameTakenException("There is already a user with this username");
+
+		if (isEmailTaken(user.getEmail()))
+			throw new UsernameTakenException("There is already a user with this email");
+
 		try {
 			user.setLastTimeUpdated(LocalDateTime.now());
 			User savedUser = userRepository.save(user);
@@ -140,9 +149,12 @@ public class UserService implements UserDetailsService {
 
 	@Transactional
 	public void delete(@NotNull Long userId) {
+		log.info("Deleting user :#{}", userId);
+		User user = findById(userId)
+				.orElseThrow(() -> new EntityNotFoundException("Cannot delete an unexistent user: #" + userId));
+
 		try {
-			log.info("Deleting user :#{}", userId);
-			userRepository.deleteById(userId);
+			userRepository.delete(user);
 			log.info("Deleted successfully user: #{}", userId);
 		} catch (Exception e) {
 			log.error("Failed to delete user: #{}", userId, e);
@@ -161,19 +173,6 @@ public class UserService implements UserDetailsService {
 			log.error("Failed to delete {} users", numberOfTransactions, e);
 			throw new InternalUnexpectedException(e);
 		}
-	}
-
-	private void validate(User user) {
-		Objects.requireNonNull(user, "request cannot be null");
-		Assert.isTrue(StringUtils.isNotBlank(user.getUsername()), "User -> username is missing");
-		Assert.isTrue(StringUtils.isNotBlank(user.getEmail()), "User -> email is missing");
-		Assert.isTrue(StringUtils.isNotBlank(user.getPassword()), "User -> password is missing");
-
-		if (isUsernameTaken(user.getUsername()))
-			throw new UsernameTakenException("There is already a user with this username");
-
-		if (isEmailTaken(user.getEmail()))
-			throw new UsernameTakenException("There is already a user with this email");
 	}
 
 	public boolean isUsernameTaken(@NotNull String username) {

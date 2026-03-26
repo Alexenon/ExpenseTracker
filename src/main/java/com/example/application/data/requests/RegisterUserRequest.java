@@ -1,6 +1,7 @@
 package com.example.application.data.requests;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Data;
@@ -11,20 +12,21 @@ import java.util.StringJoiner;
 @Builder
 public class RegisterUserRequest {
 
-	@NotNull
-	@Size(min = 4, max = 20)
+	@NotBlank
+	@Size(min = 4, max = 255, message = "Username should be between 4 and 20 characters")
 	private String username;
 
-	@NotNull
-	@Size(min = 4, max = 20)
+	@NotBlank
+	@Email
+	@Size(min = 4, max = 320, message = "Email should be between 4 and 320 characters")
 	private String email;
 
-	@NotNull
-	@Size(min = 4, max = 20)
+	@NotBlank
+	@Size(min = 4, max = 128, message = "Password should be between 4 and 20 characters")
 	private String password;
 
-	@NotNull
-	@Size(min = 4, max = 20)
+	@NotBlank
+	@Size(min = 4, max = 128, message = "Confirm password should be between 4 and 20 characters")
 	private String confirmPassword;
 
 	public RegisterUserRequest() {

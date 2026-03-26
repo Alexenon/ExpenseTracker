@@ -36,6 +36,7 @@ import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 import com.vaadin.flow.data.renderer.NumberRenderer;
 import com.vaadin.flow.function.ValueProvider;
 
+import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
@@ -131,7 +132,7 @@ public class TransactionsGrid extends Div {
 		return LitRenderer.<TransactionDTO>of("<p class='${item.className}'> ${item.quantity} ${item.symbol}</p>")
 				.withProperty("className", t -> t.isBuyTransaction() ? "value-increase" : "value-decrease")
 				.withProperty("quantity", t -> {
-					double quantity = t.getOrderQuantity();
+					BigDecimal quantity = t.getOrderQuantity();
 					String sign = t.isBuyTransaction() ? "+" : "-";
 					return String.format("%s %s", sign, amountFormatter.format(quantity));
 				})
@@ -145,13 +146,13 @@ public class TransactionsGrid extends Div {
 											  "</div>")
 				.withProperty("className", this::getProfitLossClassName)
 				.withProperty("profit", transaction -> {
-					double currentPrice = getAssetMarketPrice(transaction);
-					double profit = ProfitUtils.netProfit(transaction, currentPrice);
+					BigDecimal currentPrice = getAssetMarketPrice(transaction);
+					BigDecimal profit = ProfitUtils.netProfit(transaction, currentPrice);
 					return CurrencyFormatter.withDefaults().format(profit);
 				})
 				.withProperty("profitPercentage", transaction -> {
-					double currentPrice = getAssetMarketPrice(transaction);
-					double percentage = ProfitUtils.growthPercentage(transaction.getMarketPrice(), currentPrice);
+					BigDecimal currentPrice = getAssetMarketPrice(transaction);
+					BigDecimal percentage = ProfitUtils.growthPercentage(transaction.getMarketPrice(), currentPrice);
 					return PercentageFormatter.withDefaults().format(percentage);
 				});
 	}
@@ -161,14 +162,14 @@ public class TransactionsGrid extends Div {
 	}
 
 	private String getProfitLossClassName(TransactionDTO transaction) {
-		double currentPrice = getAssetMarketPrice(transaction);
-		double profit = ProfitUtils.netProfit(transaction, currentPrice);
+		BigDecimal currentPrice = getAssetMarketPrice(transaction);
+		BigDecimal profit = ProfitUtils.netProfit(transaction, currentPrice);
 
-		if (profit == 0)
+		if (profit.signum() == 0)
 			return "";
 
 		// FIXME: EMMM??? -> REFACTOR
-		return profit > 0 ? "value-increase" : "value-decrease";
+		return profit.signum() > 0 ? "value-increase" : "value-decrease";
 	}
 
 	public void rebuildTable() {
@@ -176,7 +177,7 @@ public class TransactionsGrid extends Div {
 		initializeGridColumns();
 	}
 
-	private double getAssetMarketPrice(TransactionDTO transaction) {
+	private BigDecimal getAssetMarketPrice(TransactionDTO transaction) {
 		return instrumentsFacadeService.getAssetBySymbol(transaction.getAssetSymbol())
 				.orElseThrow()
 				.getMarketPrice();

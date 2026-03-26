@@ -7,29 +7,31 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.theme.lumo.LumoIcon;
 
+import java.math.BigDecimal;
+
 @Tag(Tag.DIV)
 public class PercentageBadge extends Div {
 
     private final NumericValueParagraph textField;
 
-    private double value;
+    private BigDecimal value;
     private boolean hasColor;
     private boolean hasBackground;
     private Icon icon;
 
-    public PercentageBadge(double value) {
+    public PercentageBadge(BigDecimal value) {
         this(value, true, true, new PercentageFormatter());
     }
 
-    public PercentageBadge(double value, DecimalFormatter formatter) {
+    public PercentageBadge(BigDecimal value, DecimalFormatter formatter) {
         this(value, true, true, formatter);
     }
 
-    public PercentageBadge(double value, boolean hasColor, boolean hasBackground) {
+    public PercentageBadge(BigDecimal value, boolean hasColor, boolean hasBackground) {
         this(value, true, true, new PercentageFormatter());
     }
 
-    public PercentageBadge(double value, boolean hasColor, boolean hasBackground, DecimalFormatter formatter) {
+    public PercentageBadge(BigDecimal value, boolean hasColor, boolean hasBackground, DecimalFormatter formatter) {
         this.value = value;
         this.hasColor = hasColor;
         this.hasBackground = hasBackground;
@@ -42,7 +44,7 @@ public class PercentageBadge extends Div {
         setHasBackground(hasBackground);
     }
 
-    public void setValue(double value) {
+    public void setValue(BigDecimal value) {
         this.value = value;
         if (hasColor)
             textField.setColorClassName(value);
@@ -70,20 +72,20 @@ public class PercentageBadge extends Div {
     }
 
     private String getBackgroundClassByValue() {
-        if (value == 0)
+        if (value.signum() == 0)
             return "";
 
-        return (value > 0) ? "value-increase-bg" : "value-decrease-bg";
+        return (value.signum() > 0) ? "value-increase-bg" : "value-decrease-bg";
     }
 
     private Icon getIconByValue() {
-        if (value < 0) {
+        if (value.signum() < 0) {
             Icon icon = LumoIcon.CHEVRON_DOWN.create();
             icon.getStyle().set("margin-bottom", "5px");
             return icon;
         }
 
-        if (value > 0)
+        if (value.signum() > 0)
             return LumoIcon.CHEVRON_UP.create();
 
         return LumoIcon.MINUS.create();

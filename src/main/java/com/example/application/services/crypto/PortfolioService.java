@@ -1,10 +1,10 @@
 package com.example.application.services.crypto;
 
+import com.example.application.components.EntityValidator;
 import com.example.application.data.requests.portfolio.CreatePortfolioRequest;
 import com.example.application.entities.User;
 import com.example.application.entities.crypto.Portfolio;
 import com.example.application.repositories.crypto.PortfolioRepository;
-import com.example.application.utils.common.lang.StringUtils;
 import com.example.application.utils.exceptions.InternalUnexpectedException;
 import com.example.application.utils.exceptions.InvalidDataException;
 import jakarta.validation.constraints.NotNull;
@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,6 +24,7 @@ import java.util.Optional;
 public class PortfolioService {
 
 	private final PortfolioRepository portfolioRepository;
+	private final EntityValidator validator;
 
 	//<editor-fold desc="SEARCH">
 	public Optional<Portfolio> findById(@NotNull Long portfolioId) {
@@ -87,9 +87,10 @@ public class PortfolioService {
 
 	@Transactional
 	public Portfolio save(@NotNull Portfolio portfolio) {
-		portfolio.setLastTimeUpdated(LocalDateTime.now());
-		preValidation(portfolio);
+		validator.validate(portfolio);
+
 		try {
+			portfolio.setLastTimeUpdated(LocalDateTime.now());
 			Portfolio savedPortfolio = portfolioRepository.save(portfolio);
 			log.info("Saved successfully {}", savedPortfolio);
 			return savedPortfolio;
@@ -140,20 +141,6 @@ public class PortfolioService {
 	@Transactional
 	public void deleteAllUserPortfolios(Long userId) {
 		deleteAll(findByUserId(userId));
-	}
-
-	private void preValidation(Portfolio portfolio) {
-		Objects.requireNonNull(portfolio, "portfolio");
-		User user = portfolio.getUser();
-		String portfolioName = portfolio.getName();
-
-		Assert.isTrue(StringUtils.isNotBlank(portfolioName), "Portfolio -> name is missing");
-		Assert.notNull(user, "Portfolio -> user is missing");
-		Assert.notNull(portfolio.getLastTimeUpdated(), "Portfolio -> lastTimeUpdated is missing");
-		Assert.notNull(portfolio.getTimeCreatedAt(), "Portfolio -> date creation is missing");
-
-		if (findByNameAndUser(portfolioName, user.getId()).isPresent())
-			throw new IllegalArgumentException("Duplicate portfolio name for %s".formatted(user));
 	}
 
 }

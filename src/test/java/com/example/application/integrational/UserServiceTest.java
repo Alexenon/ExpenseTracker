@@ -139,7 +139,7 @@ class UserServiceTest extends AbstractTest {
 
 	@Test
 	void deleteUserTest() {
-		User user = createUser("test", "test-email.com");
+		User user = createUser("test", "test-email@domain.com");
 		Long defaultUserPortfolioId = user.getActivePortfolio().getId();
 
 		instrumentsFacadeService.deleteUser(user.getId());
@@ -152,7 +152,7 @@ class UserServiceTest extends AbstractTest {
 
 	@Test
 	void deleteUserWithPortfolioAndTransactionsTest() {
-		User user = createUser("test", "test-email.com");
+		User user = createUser("test", "test-email@domain.com");
 
 		Portfolio secondPortfolio = createPortfolio("Second Portfolio", user.getId());
 		Asset asset = createAsset("BTC", 100_000);

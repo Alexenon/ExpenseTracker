@@ -9,7 +9,7 @@ import com.example.application.entities.common.TransactionType;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.utils.common.lang.StringUtils;
 import com.example.application.views.components.core.Container;
-import com.example.application.views.components.custom.fields.CurrencyField;
+import com.example.application.views.components.custom.fields.MoneyField;
 import com.example.application.views.components.utils.HasNotifications;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -18,10 +18,11 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.data.converter.StringToDoubleConverter;
+import com.vaadin.flow.data.converter.StringToBigDecimalConverter;
 import com.vaadin.flow.theme.lumo.LumoIcon;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public class PriceWatchlistComponent extends Div implements HasNotifications {
@@ -80,8 +81,8 @@ public class PriceWatchlistComponent extends Div implements HasNotifications {
 		private final Binder<AssetWatcherDTO> binder = new Binder<>(AssetWatcherDTO.class);
 
 		private final Paragraph status = new Paragraph();
-		private final CurrencyField target = new CurrencyField("Price");
-		private final CurrencyField targetAmount = new CurrencyField("Amount in USD");
+		private final MoneyField target = new MoneyField("Price");
+		private final MoneyField targetAmount = new MoneyField("Amount in USD");
 		private final Checkbox markAsCompleted = new Checkbox();
 		private final Container checkboxContainer =
 				new Container("centered-row", markAsCompleted, new Span("Mark as completed"));
@@ -162,8 +163,8 @@ public class PriceWatchlistComponent extends Div implements HasNotifications {
 		private void initBinder() {
 			binder.forField(target)
 					.asRequired("Please fill this field")
-					.withConverter(new StringToDoubleConverter(0.0, "Invalid number"))
-					.withValidator(v -> v > 0, "Must be greater than 0")
+					.withConverter(new StringToBigDecimalConverter(BigDecimal.ZERO, "Invalid number"))
+					.withValidator(v -> v.signum() > 0, "Must be greater than 0")
 					.bind(
 							AssetWatcherDTO::getTargetPrice,
 							AssetWatcherDTO::setTargetPrice
@@ -171,8 +172,8 @@ public class PriceWatchlistComponent extends Div implements HasNotifications {
 
 			binder.forField(targetAmount)
 					.asRequired("Please fill this field")
-					.withConverter(new StringToDoubleConverter(0.0, "Invalid number"))
-					.withValidator(v -> v > 0, "Must be greater than 0")
+					.withConverter(new StringToBigDecimalConverter(BigDecimal.ZERO, "Invalid number"))
+					.withValidator(v -> v.signum() > 0, "Must be greater than 0")
 					.bind(
 							AssetWatcherDTO::getTargetAmount,
 							AssetWatcherDTO::setTargetAmount

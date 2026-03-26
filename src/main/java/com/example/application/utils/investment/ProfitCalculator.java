@@ -1,10 +1,11 @@
 package com.example.application.utils.investment;
 
 import com.example.application.data.dtos.TransactionDTO;
+import com.example.application.finance.FinancialConstants;
 import com.example.application.utils.common.lang.DateUtils;
-import com.example.application.utils.common.lang.MathUtils;
-import com.example.application.utils.common.lang.NumberUtils;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -17,10 +18,12 @@ import static com.example.application.utils.investment.ProfitUtils.ONE_HUNDRED_P
  */
 public class ProfitCalculator {
 
-	public static double calculateNewAvgPrice(double prevAvg, double prevAmount, double newAmount, double buyPrice) {
-		double totalValue = (prevAmount * prevAvg) + (newAmount * buyPrice);
-		double totalAmount = NumberUtils.checkDouble(prevAmount + newAmount);
-		return MathUtils.safeDivision(totalValue, totalAmount);
+	public static BigDecimal calculateNewAvgPrice(BigDecimal prevAvg, BigDecimal prevAmount, BigDecimal newAmount, BigDecimal buyPrice) {
+		BigDecimal prevCost = prevAmount.multiply(prevAvg);
+		BigDecimal newCost = newAmount.multiply(buyPrice);
+		BigDecimal totalValue = prevCost.add(newCost);
+		BigDecimal totalAmount = prevAmount.add(newAmount);
+		return totalValue.divide(totalAmount, FinancialConstants.PRICE_SCALE, RoundingMode.HALF_UP);
 	}
 
 	/**
@@ -31,19 +34,21 @@ public class ProfitCalculator {
 	 * @param tokensSoldNow    The number of tokens being sold in the current sell
 	 * @return The realized profit for the current sell transaction
 	 */
-	public static double calculateRealizedProfit(double avgBuyPrice, double currentSellPrice, double tokensSoldNow) {
-		return (currentSellPrice - avgBuyPrice) * tokensSoldNow;
+	public static BigDecimal calculateRealizedProfit(BigDecimal avgBuyPrice, BigDecimal currentSellPrice, BigDecimal tokensSoldNow) {
+		return currentSellPrice
+				.subtract(avgBuyPrice)
+				.multiply(tokensSoldNow);
 	}
 
-	public static double averageBuyPrice(List<TransactionDTO> transactions) {
-		double totalCost = totalCostForBuyTransactions(transactions);
-		double totalQuantity = totalQuantityForBuyTransactions(transactions);
+	public static BigDecimal averageBuyPrice(List<TransactionDTO> transactions) {
+		BigDecimal totalCost = totalCostForBuyTransactions(transactions);
+		BigDecimal totalQuantity = totalQuantityForBuyTransactions(transactions);
 		return calculateAveragePrice(totalCost, totalQuantity);
 	}
 
-	public static double averageSellPrice(List<TransactionDTO> transactions) {
-		double totalSellCost = totalCostForSellTransactions(transactions);
-		double totalQuantitySold = totalQuantityForSellTransactions(transactions);
+	public static BigDecimal averageSellPrice(List<TransactionDTO> transactions) {
+		BigDecimal totalSellCost = totalCostForSellTransactions(transactions);
+		BigDecimal totalQuantitySold = totalQuantityForSellTransactions(transactions);
 		return calculateAveragePrice(totalSellCost, totalQuantitySold);
 	}
 
@@ -53,45 +58,50 @@ public class ProfitCalculator {
 	 * -----------------------------------------------------------------
 	 * */
 
-    private static class Order {
-        double quantity;
-        double cost;
+	private static class Order {
+		BigDecimal quantity;
+		BigDecimal cost;
 
-        Order(double quantity, double cost) {
-            this.quantity = quantity;
-            this.cost = cost;
-        }
-    }
+		Order(BigDecimal quantity, BigDecimal cost) {
+			this.quantity = quantity;
+			this.cost = cost;
+		}
+	}
 
-    // FIXME: TODO: [URGENT] HERE IS SOMETHING STRANGE
+	// FIXME: TODO: [URGENT] HERE IS SOMETHING STRANGE
+
 	/**
 	 * Calculates the total realized profit from provided transactions
 	 *
 	 * <p>If there are just BUYS transactions, then the value will be {@code 0}
 	 */
-	public static double realizedProfit(List<TransactionDTO> transactions) {
-		double totalCost = 0.0;
-		double remainingQuantity = 0.0;
-		double realizedProfit = 0.0;
+	public static BigDecimal realizedProfit(List<TransactionDTO> transactions) {
+		BigDecimal totalCost = BigDecimal.ZERO;
+		BigDecimal remainingQuantity = BigDecimal.ZERO;
+		BigDecimal realizedProfit = BigDecimal.ZERO;
 
 		for (TransactionDTO transaction : transactions) {
 			if (transaction.isBuyTransaction()) {
-				totalCost += transaction.getOrderTotalCost();
-				remainingQuantity += transaction.getOrderQuantity();
+				totalCost = totalCost.add(transaction.getOrderTotalCost());
+				remainingQuantity = remainingQuantity.add(transaction.getOrderQuantity());
 			} else {
-				double sellQuantity = transaction.getOrderQuantity();
-				if (sellQuantity > remainingQuantity) {
+				BigDecimal sellQuantity = transaction.getOrderQuantity();
+
+				if (sellQuantity.compareTo(remainingQuantity) > 0) {
 					throw new IllegalArgumentException("Selling more than owned");
 				}
 
-				// Calculate proportional cost of sold tokens
-				double averageCostPerUnit = MathUtils.safeDivision(totalCost, remainingQuantity);
-				double costOfSoldTokens = averageCostPerUnit * sellQuantity;
-				realizedProfit += transaction.getOrderTotalCost() - costOfSoldTokens;
+				BigDecimal averageCostPerUnit = totalCost.divide(remainingQuantity, FinancialConstants.PRICE_SCALE, RoundingMode.HALF_UP);
 
-				// Update remaining portfolio cost and quantity
-				totalCost -= costOfSoldTokens;
-				remainingQuantity -= sellQuantity;
+				BigDecimal costOfSoldTokens =
+						averageCostPerUnit.multiply(sellQuantity);
+
+				realizedProfit = realizedProfit
+						.add(transaction.getOrderTotalCost()
+								.subtract(costOfSoldTokens));
+
+				totalCost = totalCost.subtract(costOfSoldTokens);
+				remainingQuantity = remainingQuantity.subtract(sellQuantity);
 			}
 		}
 
@@ -102,39 +112,48 @@ public class ProfitCalculator {
 	 * Calculates the cost of remaining tokens, where if contains SELL transactions, then the cost value
 	 * is substracted confirming with transaction order cost
 	 */
-	public static double remainingTokensCost(List<TransactionDTO> transactions) {
+	public static BigDecimal remainingTokensCost(List<TransactionDTO> transactions) {
 		Queue<Order> fifoQueue = new LinkedList<>();
-		double remainingCost = 0.0;
+		BigDecimal remainingCost = BigDecimal.ZERO;
 
 		for (TransactionDTO transaction : transactions) {
 			if (transaction.isBuyTransaction()) {
-				Order newOrder = new Order(transaction.getOrderQuantity(), transaction.getOrderTotalCost());
+				Order newOrder = new Order(
+						transaction.getOrderQuantity(),
+						transaction.getOrderTotalCost()
+				);
 				fifoQueue.offer(newOrder);
-				remainingCost += transaction.getOrderTotalCost();
+				remainingCost = remainingCost.add(transaction.getOrderTotalCost());
 			} else {
-				double sellQuantity = transaction.getOrderQuantity();
-				double sellCost = 0.0;
+				BigDecimal sellQuantity = transaction.getOrderQuantity();
+				BigDecimal sellCost = BigDecimal.ZERO;
 
-				while (sellQuantity > 0) {
+				while (sellQuantity.compareTo(BigDecimal.ZERO) > 0) {
 					if (fifoQueue.isEmpty()) {
 						throw new IllegalArgumentException("Selling more than owned");
 					}
 
 					Order oldestOrder = fifoQueue.peek();
-					if (sellQuantity >= oldestOrder.quantity) {
-						sellCost += oldestOrder.cost;
-						sellQuantity -= oldestOrder.quantity;
-						fifoQueue.poll(); // Remove the order from the queue
+
+					if (sellQuantity.compareTo(oldestOrder.quantity) >= 0) {
+						sellCost = sellCost.add(oldestOrder.cost);
+						sellQuantity = sellQuantity.subtract(oldestOrder.quantity);
+						fifoQueue.poll();
 					} else {
-						double proportion = sellQuantity / oldestOrder.quantity;
-						sellCost += proportion * oldestOrder.cost;
-						oldestOrder.cost -= proportion * oldestOrder.cost;
-						oldestOrder.quantity -= sellQuantity;
-						sellQuantity = 0;
+						BigDecimal proportion = sellQuantity.divide(oldestOrder.quantity, FinancialConstants.AMOUNT_SCALE, RoundingMode.HALF_UP);
+
+						BigDecimal partialCost = oldestOrder.cost.multiply(proportion);
+
+						sellCost = sellCost.add(partialCost);
+
+						oldestOrder.cost = oldestOrder.cost.subtract(partialCost);
+						oldestOrder.quantity = oldestOrder.quantity.subtract(sellQuantity);
+
+						sellQuantity = BigDecimal.ZERO;
 					}
 				}
 
-				remainingCost -= sellCost;
+				remainingCost = remainingCost.subtract(sellCost);
 			}
 		}
 
@@ -145,55 +164,63 @@ public class ProfitCalculator {
 		if (transactions == null || transactions.isEmpty())
 			return "N/A";
 
-		double buyCost = totalCostForBuyTransactions(transactions);
-		double sellCost = totalCostForSellTransactions(transactions);
-		double totalCost = buyCost + sellCost;
+		BigDecimal buyCost = totalCostForBuyTransactions(transactions);
+		BigDecimal sellCost = totalCostForSellTransactions(transactions);
+		BigDecimal totalCost = buyCost.add(sellCost);
 
-		double buyRatio = buyCost / totalCost * ONE_HUNDRED_PERCENT;
-		double sellRatio = sellCost / totalCost * ONE_HUNDRED_PERCENT;
-		return String.format("%d : %d", Math.round(buyRatio), Math.round(sellRatio));
+		BigDecimal buyRatio = buyCost
+				.divide(totalCost, 0, RoundingMode.HALF_UP)
+				.multiply(ONE_HUNDRED_PERCENT);
+
+		BigDecimal sellRatio = sellCost
+				.divide(totalCost, 0, RoundingMode.HALF_UP)
+				.multiply(ONE_HUNDRED_PERCENT);
+
+		return String.format("%f : %f", buyRatio, sellRatio);
 	}
 
-    //region CALCULATION METHODS
-    public static double totalCostForBuyTransactions(List<TransactionDTO> transactions) {
-        return transactions.stream()
-                .filter(TransactionDTO::isBuyTransaction)
-                .mapToDouble(TransactionDTO::getOrderTotalCost)
-                .sum();
-    }
+	//region CALCULATION METHODS
+	public static BigDecimal totalCostForBuyTransactions(List<TransactionDTO> transactions) {
+		return transactions.stream()
+				.filter(TransactionDTO::isBuyTransaction)
+				.map(TransactionDTO::getOrderTotalCost)
+				.reduce(BigDecimal.ZERO, BigDecimal::add);
+	}
 
-    public static double totalCostForSellTransactions(List<TransactionDTO> transactions) {
-        return transactions.stream()
-                .filter(TransactionDTO::isSellTransaction)
-                .mapToDouble(TransactionDTO::getOrderTotalCost)
-                .sum();
-    }
+	public static BigDecimal totalCostForSellTransactions(List<TransactionDTO> transactions) {
+		return transactions.stream()
+				.filter(TransactionDTO::isSellTransaction)
+				.map(TransactionDTO::getOrderTotalCost)
+				.reduce(BigDecimal.ZERO, BigDecimal::add);
+	}
 
-    public static double totalQuantityForBuyTransactions(List<TransactionDTO> transactions) {
-        return transactions.stream()
-                .filter(TransactionDTO::isBuyTransaction)
-                .mapToDouble(TransactionDTO::getOrderQuantity)
-                .sum();
-    }
+	public static BigDecimal totalQuantityForBuyTransactions(List<TransactionDTO> transactions) {
+		return transactions.stream()
+				.filter(TransactionDTO::isBuyTransaction)
+				.map(TransactionDTO::getOrderQuantity)
+				.reduce(BigDecimal.ZERO, BigDecimal::add);
+	}
 
-    public static double totalQuantityForSellTransactions(List<TransactionDTO> transactions) {
-        return transactions.stream()
-                .filter(TransactionDTO::isSellTransaction)
-                .mapToDouble(TransactionDTO::getOrderQuantity)
-                .sum();
-    }
+	public static BigDecimal totalQuantityForSellTransactions(List<TransactionDTO> transactions) {
+		return transactions.stream()
+				.filter(TransactionDTO::isSellTransaction)
+				.map(TransactionDTO::getOrderQuantity)
+				.reduce(BigDecimal.ZERO, BigDecimal::add);
+	}
 
-    public static double getAmountOfRemainingTokens(List<TransactionDTO> transactions) {
-        return totalQuantityForBuyTransactions(transactions) - totalQuantityForSellTransactions(transactions);
-    }
+	public static BigDecimal getAmountOfRemainingTokens(List<TransactionDTO> transactions) {
+		BigDecimal boughtAmount = totalQuantityForBuyTransactions(transactions);
+		BigDecimal soldAmount = totalQuantityForSellTransactions(transactions);
+		return boughtAmount.subtract(soldAmount);
+	}
 
-    public static double calculateAveragePrice(double totalCost, double totalQuantity) {
-        return MathUtils.safeDivision(totalCost, totalQuantity);
-    }
+	public static BigDecimal calculateAveragePrice(BigDecimal totalCost, BigDecimal totalQuantity) {
+		return totalCost.divide(totalQuantity, FinancialConstants.PRICE_SCALE, RoundingMode.HALF_UP);
+	}
 
-    private static long getHoldingTimeInDays(TransactionDTO buyTransaction, TransactionDTO sellTransaction) {
-        return DateUtils.daysBetween(buyTransaction.getDateTime(), sellTransaction.getDateTime());
-    }
+	private static long getHoldingTimeInDays(TransactionDTO buyTransaction, TransactionDTO sellTransaction) {
+		return DateUtils.daysBetween(buyTransaction.getDateTime(), sellTransaction.getDateTime());
+	}
 	//endregion
 
 }

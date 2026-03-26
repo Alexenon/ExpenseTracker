@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -51,21 +52,21 @@ public class Transaction {
 	private Asset asset;
 
 	@NotNull
-	@Column(name = "market_price", nullable = false)
+	@Column(name = "market_price", nullable = false, precision = 38, scale = 20)
 	@DecimalMin(value = "0.0", inclusive = false, message = "Market price must be greater than 0")
-	private double marketPrice;
+	private BigDecimal marketPrice;
 
-	@Column(name = "order_total_cost", nullable = false)
+	@Column(name = "order_total_cost", nullable = false, precision = 38, scale = 20)
 	@DecimalMin(value = "0.0", inclusive = false, message = "Order total cost must be greater than 0")
-	private double orderTotalCost;
+	private BigDecimal orderTotalCost;
 
-	@Column(name = "order_quantity", nullable = false)
+	@Column(name = "order_quantity", nullable = false, precision = 38, scale = 18)
 	@DecimalMin(value = "0.0", inclusive = false, message = "Order quantity must be greater than 0")
-	private double orderQuantity;
+	private BigDecimal orderQuantity;
 
-	@Column(name = "avg_buy_price_at_moment", nullable = false)
+	@Column(name = "avg_buy_price_at_moment", nullable = false, precision = 38, scale = 20)
 	@DecimalMin(value = "0.0", message = "Average buy price cannot be negative")
-	private double avgBuyPriceAtMoment;
+	private BigDecimal avgBuyPriceAtMoment;
 
 	@NotNull
 	@Column(name = "type", nullable = false)
@@ -73,7 +74,7 @@ public class Transaction {
 	private TransactionType type;
 
 	@Nullable
-	@Column(name = "note", length = 250)
+	@Column(name = "note")
 	private String note;
 
 	@NotNull
@@ -83,27 +84,6 @@ public class Transaction {
 	@NotNull
 	@Column(name = "date_time", nullable = false)
 	private LocalDateTime dateTime;
-
-	public Transaction(Asset asset, double marketPrice, double orderTotalCost, TransactionType type) {
-		this(asset, marketPrice, orderTotalCost, 0.0, type);
-	}
-
-	public Transaction(Asset asset, double marketPrice, double orderTotalCost, double avgBuyPriceAtMoment, TransactionType type) {
-		this(asset, marketPrice, orderTotalCost, avgBuyPriceAtMoment, type, null, LocalDateTime.now());
-	}
-
-	public Transaction(Asset asset, double marketPrice, double orderTotalCost, double avgBuyPriceAtMoment,
-					   TransactionType type, String note, LocalDateTime dateTime)
-	{
-		this.asset = asset;
-		this.marketPrice = marketPrice;
-		this.orderTotalCost = orderTotalCost;
-		this.orderQuantity = orderTotalCost / marketPrice;
-		this.avgBuyPriceAtMoment = avgBuyPriceAtMoment;
-		this.type = type;
-		this.note = note;
-		this.dateTime = dateTime;
-	}
 
 	public Transaction(Transaction transaction) {
 		Objects.requireNonNull(transaction, "transaction");
@@ -116,6 +96,7 @@ public class Transaction {
 		this.avgBuyPriceAtMoment = transaction.avgBuyPriceAtMoment;
 		this.type = transaction.type;
 		this.note = transaction.note;
+		this.lastTimeUpdated = transaction.lastTimeUpdated;
 		this.dateTime = transaction.dateTime;
 	}
 

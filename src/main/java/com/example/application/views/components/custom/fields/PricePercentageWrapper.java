@@ -6,31 +6,33 @@ import com.example.application.views.components.custom.display.NumericValueParag
 import com.example.application.views.components.custom.display.PercentageBadge;
 import com.vaadin.flow.component.html.Div;
 
+import java.math.BigDecimal;
+
 /**
  * Component to display both Price and Percentage values using a single component
  */
 public class PricePercentageWrapper extends Div {
 
-    private final NumericValueParagraph price;
-    private final PercentageBadge percentage;
+	private final NumericValueParagraph price;
+	private final PercentageBadge percentage;
 
-    public PricePercentageWrapper(double priceValue, double percentageValue) {
-        price = new NumericValueParagraph(priceValue, CurrencyFormatter.withDefaults(), true);
-        percentage = new PercentageBadge(percentageValue);
-        add(price, percentage);
-        addClassName("price-profit-wrapper");
-    }
+	public PricePercentageWrapper(BigDecimal priceValue, BigDecimal percentageValue) {
+		price = new NumericValueParagraph(priceValue, CurrencyFormatter.withDefaults(), true);
+		percentage = new PercentageBadge(percentageValue);
+		add(price, percentage);
+		addClassName("price-profit-wrapper");
+	}
 
-    public void setPercentageBadgeBackground(boolean shouldBeColored) {
-        percentage.setHasBackground(shouldBeColored);
-    }
+	public void setPercentageBadgeBackground(boolean shouldBeColored) {
+		percentage.setHasBackground(shouldBeColored);
+	}
 
-    public void setPriceFormatter(DecimalFormatter formatter) {
-        price.setFormatter(formatter);
-    }
+	public void setPriceFormatter(DecimalFormatter formatter) {
+		price.setFormatter(formatter);
+	}
 
-    public void setPercentageFormatter(DecimalFormatter formatter) {
-        percentage.setFormatter(formatter);
-    }
+	public void setPercentageFormatter(DecimalFormatter formatter) {
+		percentage.setFormatter(formatter);
+	}
 
 }

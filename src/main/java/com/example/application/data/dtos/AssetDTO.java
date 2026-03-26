@@ -3,6 +3,7 @@ package com.example.application.data.dtos;
 import com.example.application.entities.crypto.Asset;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 
 @Data
@@ -12,12 +13,12 @@ public class AssetDTO {
 	private String symbol;
 	private String fullName;
 	private String description;
-	private double marketPrice;
-	private double changePercentage;
+	private BigDecimal marketPrice;
+	private BigDecimal changePercentage;
 	private BigInteger totalMarketCap;
 	private BigInteger totalSupply;
 	private BigInteger circulationSupply;
-	private double todayVolume;
+	private BigInteger todayVolume;
 	private String imageUrl;
 
 	public static AssetDTO mappedFrom(Asset asset) {

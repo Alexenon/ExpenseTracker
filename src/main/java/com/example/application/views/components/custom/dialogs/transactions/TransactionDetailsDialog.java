@@ -22,6 +22,7 @@ import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.theme.lumo.LumoIcon;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -128,12 +129,12 @@ public class TransactionDetailsDialog extends Dialog {
 
 	private Div detailsProfitLoss() {
 		AssetDTO asset = instrumentsFacadeService.getAssetBySymbol(transaction.getAssetSymbol()).orElseThrow();
-		double buyPrice = transaction.getMarketPrice();
-		double sellPrice = asset.getMarketPrice();
-		double totalCost = transaction.getOrderTotalCost();
+		BigDecimal buyPrice = transaction.getMarketPrice();
+		BigDecimal sellPrice = asset.getMarketPrice();
+		BigDecimal totalCost = transaction.getOrderTotalCost();
 
-		double usdProfit = ProfitUtils.netProfit(buyPrice, sellPrice, totalCost);
-		double percentageProfit = ProfitUtils.growthPercentage(buyPrice, sellPrice) - 100;
+		BigDecimal usdProfit = ProfitUtils.netProfit(buyPrice, sellPrice, totalCost);
+		BigDecimal percentageProfit = ProfitUtils.growthPercentage(buyPrice, sellPrice).subtract(BigDecimal.valueOf(100));
 
 		Div profitLossContainer = Container.builder()
 				.addComponent(() -> {
@@ -145,7 +146,7 @@ public class TransactionDetailsDialog extends Dialog {
 				.addComponent(new PricePercentageWrapper(usdProfit, percentageProfit))
 				.build();
 
-		double tokensAmount = instrumentsFacadeService.getAmountOfTokens(transaction.getPortfolioId(), asset.getSymbol());
+		BigDecimal tokensAmount = instrumentsFacadeService.getAmountOfTokens(transaction.getPortfolioId(), asset.getSymbol());
 
 		return Container.builder("transaction-details-card")
 				.addComponents(profitLossContainer)

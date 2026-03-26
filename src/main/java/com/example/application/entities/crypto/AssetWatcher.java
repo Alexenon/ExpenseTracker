@@ -3,11 +3,14 @@ package com.example.application.entities.crypto;
 import com.example.application.entities.common.TransactionType;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+
+import java.math.BigDecimal;
 
 /*
 	TODO: [LONG-TEM]
@@ -44,11 +47,13 @@ public class AssetWatcher {
 
 	@NotNull
 	@Column(name = "target_price", nullable = false)
-	private double targetPrice;
+	@DecimalMin(value = "0.0", inclusive = false, message = "Target price value must be greater than 0")
+	private BigDecimal targetPrice;
 
 	@NotNull
 	@Column(name = "target_amount", nullable = false)
-	private double targetAmount;
+	@DecimalMin(value = "0.0", inclusive = false, message = "Target amount must be greater than 0")
+	private BigDecimal targetAmount;
 
 	@NotNull
 	@Column(name = "transaction_type", nullable = false)

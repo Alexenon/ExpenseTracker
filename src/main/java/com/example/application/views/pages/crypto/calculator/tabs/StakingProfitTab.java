@@ -1,19 +1,22 @@
 package com.example.application.views.pages.crypto.calculator.tabs;
 
 import com.example.application.data.dtos.PortfolioDTO;
+import com.example.application.finance.FinancialConstants;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.utils.common.formatters.number.AmountFormatter;
 import com.example.application.utils.common.formatters.number.CurrencyFormatter;
-import com.example.application.utils.common.lang.MathUtils;
 import com.example.application.views.components.custom.fields.AmountField;
 import com.example.application.views.components.custom.fields.AssetComboBox;
-import com.example.application.views.components.custom.fields.CurrencyField;
+import com.example.application.views.components.custom.fields.MoneyField;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 import static com.example.application.utils.investment.EarnCalculator.*;
 
@@ -26,7 +29,7 @@ public final class StakingProfitTab extends BaseCalculatorTab {
 
 	private final AssetComboBox assetSymbolField;
 	private final AmountField amountField = new AmountField("Amount of tokens");
-	private final CurrencyField worthField = new CurrencyField("Current total worth");
+	private final MoneyField worthField = new MoneyField("Current total worth");
 	private final AmountField aprField = new AmountField("APR");
 
 	@Autowired
@@ -47,24 +50,32 @@ public final class StakingProfitTab extends BaseCalculatorTab {
 	}
 
 	private void initializeFieldsValues() {
-		aprField.setValue(1);
+		aprField.setValue("1");
 		aprField.setSuffixComponent(new Span("%"));
 	}
 
 	private void initializeFieldsListeners() {
 		assetSymbolField.addValueChangeListener(field -> {
-			double amountTokens = assetSymbolField.getAmountTokens(portfolio.getId());
+			BigDecimal amountTokens = assetSymbolField.getAmountTokens(portfolio.getId());
 			amountField.setValue(amountTokens);
 			amountField.setSuffixComponent(new Span(assetSymbolField.getSymbol()));
-			worthField.setValue(amountTokens * assetSymbolField.getMarketPrice());
+
+			BigDecimal worth = amountTokens.multiply(assetSymbolField.getMarketPrice());
+			worthField.setValue(worth);
 		});
 
 		amountField.setValueChangeMode(ValueChangeMode.EAGER);
-		amountField.addKeyUpListener(e -> worthField.setValue(amountField.doubleValue() * assetSymbolField.getMarketPrice()));
+		amountField.addKeyUpListener(e ->  {
+			BigDecimal amount = amountField.getAmount();
+			BigDecimal marketPrice = assetSymbolField.getMarketPrice();
+			worthField.setValue(amount.multiply(marketPrice));
+		});
 
 		worthField.setValueChangeMode(ValueChangeMode.EAGER);
 		worthField.addKeyUpListener(e -> {
-			double amountOfTokens = MathUtils.safeDivision(worthField.doubleValue(), assetSymbolField.getMarketPrice());
+			BigDecimal worth = worthField.getMoneyAmount();
+			BigDecimal marketPrice = assetSymbolField.getMarketPrice();
+			BigDecimal amountOfTokens = worth.divide(marketPrice, FinancialConstants.AMOUNT_SCALE, RoundingMode.HALF_UP);
 			amountField.setValue(amountOfTokens);
 		});
 	}
@@ -79,9 +90,9 @@ public final class StakingProfitTab extends BaseCalculatorTab {
 		Button calculateBtn = new Button("Calculate");
 		calculateBtn.addClassName("add-entity-btn");
 		calculateBtn.addClickListener(e -> {
-			double apr = aprField.doubleValue();
-			double worth = worthField.doubleValue();
-			double amount = amountField.doubleValue();
+			BigDecimal apr = aprField.getAmount();
+			BigDecimal worth = worthField.getMoneyAmount();
+			BigDecimal amount = amountField.getAmount();
 
 			String daily = stakedAmount(earnDaily(amount, apr), earnDaily(worth, apr));
 			String weekly = stakedAmount(earnWeekly(amount, apr), earnWeekly(worth, apr));
@@ -100,7 +111,7 @@ public final class StakingProfitTab extends BaseCalculatorTab {
 		return calculateBtn;
 	}
 
-	private String stakedAmount(double amountTokens, double worthEquivalent) {
+	private String stakedAmount(BigDecimal amountTokens, BigDecimal worthEquivalent) {
 		return "+ %s %s ≈ %s".formatted(
 				amountFormatter.format(amountTokens),
 				assetSymbolField.getSymbol(),

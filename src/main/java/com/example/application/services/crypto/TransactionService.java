@@ -1,5 +1,6 @@
 package com.example.application.services.crypto;
 
+import com.example.application.components.EntityValidator;
 import com.example.application.entities.common.TransactionType;
 import com.example.application.entities.crypto.Portfolio;
 import com.example.application.entities.crypto.Transaction;
@@ -11,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -35,6 +35,7 @@ import java.util.Optional;
 public class TransactionService {
 
 	private final TransactionRepository transactionRepository;
+	private final EntityValidator validator;
 
 	//<editor-fold desc="SEARCH">
 	public Optional<Transaction> findById(@NotNull Long transactionId) {
@@ -98,7 +99,7 @@ public class TransactionService {
 	@Transactional
 	public Transaction save(@NotNull Transaction transaction) {
 		log.info("Saving {}", transaction);
-		validate(transaction);
+		validator.validate(transaction);
 		transaction.setLastTimeUpdated(LocalDateTime.now());
 		try {
 			Transaction savedTransaction = transactionRepository.save(transaction);
@@ -141,16 +142,6 @@ public class TransactionService {
 	public void deleteAllPorfolioTransactions(@NotNull Long portfolioId) {
 		log.info("Deleting all transactions for poftfolio #{}", portfolioId);
 		deleteAll(findBy(portfolioId));
-	}
-
-	private void validate(Transaction transaction) {
-		Objects.requireNonNull(transaction, "Transaction is missing");
-		Assert.notNull(transaction.getAsset(), "Asset is missing");
-		Assert.notNull(transaction.getType(), "Type is missing");
-		Assert.notNull(transaction.getPortfolio(), "Portfolio is missing");
-		Assert.notNull(transaction.getDateTime(), "DateTime is missing");
-		Assert.isTrue(transaction.getMarketPrice() > 0, "Price should be above 0");
-		Assert.isTrue(transaction.getOrderTotalCost() > 0, "Order cost should be above 0");
 	}
 
 }

@@ -1,115 +1,74 @@
 package com.example.application.utils.investment;
 
 import com.example.application.data.dtos.TransactionDTO;
-import com.example.application.utils.common.lang.MathUtils;
+import com.example.application.finance.FinancialConstants;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.List;
+import java.math.RoundingMode;
 
 public class ProfitUtils {
 
-    public static final int ONE_HUNDRED_PERCENT = 100;
+	public static final BigDecimal ONE_HUNDRED_PERCENT = new BigDecimal("100");
 
-    public static double coinsBought(double buyPrice, double investedAmount) {
-        return MathUtils.safeDivision(investedAmount, buyPrice);
-    }
+	public static BigDecimal coinsBought(BigDecimal buyPrice, BigDecimal investedAmount) {
+		return investedAmount.divide(buyPrice, FinancialConstants.AMOUNT_SCALE, RoundingMode.HALF_UP);
+	}
 
-    public static double worth(double buyPrice, double investedAmount) {
-        return coinsBought(buyPrice, investedAmount) * buyPrice;
-    }
+	public static BigDecimal worth(BigDecimal buyPrice, BigDecimal investedAmount) {
+		return coinsBought(buyPrice, investedAmount)
+				.multiply(buyPrice);
+	}
 
-    public static double netProfit(double buyPrice, double sellPrice, double investedAmount) {
-        return (sellPrice - buyPrice) * coinsBought(buyPrice, investedAmount);
-    }
+	public static BigDecimal netProfit(BigDecimal buyPrice, BigDecimal sellPrice, BigDecimal investedAmount) {
+		BigDecimal coinsBought = coinsBought(buyPrice, investedAmount);
+		BigDecimal difference = sellPrice.subtract(buyPrice);
+		return difference.multiply(coinsBought);
+	}
 
-    public static double netProfit(TransactionDTO transaction, double currentPrice) {
-        return netProfit(transaction.getMarketPrice(), currentPrice, transaction.getOrderTotalCost());
-    }
+	public static BigDecimal netProfit(TransactionDTO transaction, BigDecimal currentPrice) {
+		return netProfit(transaction.getMarketPrice(), currentPrice, transaction.getOrderTotalCost());
+	}
 
-    /**
-     * @return percentage profit relative to the investment amount (monetary perspective)
-     */
-    public static double profitPercentage(double buyPrice, double sellPrice, double investedAmount) {
-        return MathUtils.safeDivision(netProfit(buyPrice, sellPrice, investedAmount), investedAmount) * ONE_HUNDRED_PERCENT;
-    }
+	/**
+	 * @return percentage profit relative to the investment amount (monetary perspective)
+	 */
+	public static BigDecimal profitPercentage(BigDecimal buyPrice, BigDecimal sellPrice, BigDecimal investedAmount) {
+		return netProfit(buyPrice, sellPrice, investedAmount)
+				.divide(investedAmount, 2, RoundingMode.HALF_UP)
+				.multiply(ONE_HUNDRED_PERCENT);
+	}
 
-    /**
-     * @return percentage increase or decrease in the price of the asset (token price perspective)
-     */
-    public static double growthPercentage(double buyPrice, double sellPrice) {
-        return MathUtils.safeDivision(sellPrice - buyPrice, buyPrice) * ONE_HUNDRED_PERCENT;
-    }
+	/**
+	 * @return percentage increase or decrease in the price of the asset (token price perspective)
+	 */
+	public static BigDecimal growthPercentage(BigDecimal buyPrice, BigDecimal sellPrice) {
+		return sellPrice
+				.subtract(buyPrice)
+				.divide(buyPrice, 2, RoundingMode.HALF_UP)
+				.multiply(ONE_HUNDRED_PERCENT);
+	}
 
-    public static double buyPricePerUnit(double totalBuyPrice, double amountTokens) {
-        return totalBuyPrice / amountTokens;
-    }
+	public static BigDecimal buyPricePerUnit(BigDecimal totalBuyPrice, BigDecimal amountTokens) {
+		return totalBuyPrice.divide(amountTokens, FinancialConstants.PRICE_SCALE, RoundingMode.HALF_UP);
+	}
 
-    public static double sellPricePerUnit(double totalSellPrice, double amountTokens) {
-        return totalSellPrice / amountTokens;
-    }
+	public static BigDecimal sellPricePerUnit(BigDecimal totalSellPrice, BigDecimal amountTokens) {
+		return totalSellPrice.divide(amountTokens, FinancialConstants.PRICE_SCALE, RoundingMode.HALF_UP);
+	}
 
-    public static double profitPerUnit(double buyPrice, double sellPrice, int amountTokens) {
-        return buyPricePerUnit(buyPrice, amountTokens) - sellPricePerUnit(sellPrice, amountTokens);
-    }
+	public static BigDecimal profitPerUnit(BigDecimal buyPrice, BigDecimal sellPrice, BigDecimal amountTokens) {
+		BigDecimal buyPricePerUnit = buyPricePerUnit(buyPrice, amountTokens);
+		BigDecimal sellPricePerUnit = sellPricePerUnit(sellPrice, amountTokens);
+		return buyPricePerUnit.subtract(sellPricePerUnit);
+	}
 
-    public static double marketCap(BigInteger circulationSupply, double tokenPrice) {
-        return new BigDecimal(circulationSupply)
-                .multiply(BigDecimal.valueOf(tokenPrice))
-                .doubleValue();
-    }
+	public static BigDecimal marketCap(BigInteger circulationSupply, BigDecimal tokenPrice) {
+		return new BigDecimal(circulationSupply).multiply(tokenPrice);
+	}
 
-    public static double fdv(BigInteger totalSupply, double tokenPrice) {
-        return new BigDecimal(totalSupply)
-                .multiply(BigDecimal.valueOf(tokenPrice))
-                .doubleValue();
-    }
-
-    /**
-     * Calculates how much the price has recovered after a drop.
-     */
-    public static double recoveryPercentage(double currentPrice, double lowestPrice) {
-        return MathUtils.safeDivision(currentPrice - lowestPrice, lowestPrice) * ONE_HUNDRED_PERCENT;
-    }
-
-    /**
-     * Indicates how much % the price needs to increase to recover the initial investment (if at a loss).
-     */
-    public static double breakEvenPercentage(double buyPrice, double currentPrice) {
-        return MathUtils.safeDivision(buyPrice - currentPrice, buyPrice) * ONE_HUNDRED_PERCENT;
-    }
-
-    /**
-     * Calculates the total realized profit from provided transactions
-     */
-    public static double getTransactionsRealizedProfit(List<TransactionDTO> transactions) {
-        double totalCost = 0.0;
-        double remainingQuantity = 0.0;
-        double realizedProfit = 0.0;
-
-        for (TransactionDTO transaction : transactions) {
-            if (transaction.isBuyTransaction()) {
-                totalCost += transaction.getOrderTotalCost();
-                remainingQuantity += transaction.getOrderQuantity();
-            } else {
-                double sellQuantity = transaction.getOrderQuantity();
-                if (sellQuantity > remainingQuantity) {
-                    throw new IllegalArgumentException("Selling more than owned");
-                }
-
-                // Calculate proportional cost of sold tokens
-                double averageCostPerUnit = MathUtils.safeDivision(totalCost, remainingQuantity);
-                double costOfSoldTokens = averageCostPerUnit * sellQuantity;
-                realizedProfit += transaction.getOrderTotalCost() - costOfSoldTokens;
-
-                // Update remaining portfolio cost and quantity
-                totalCost -= costOfSoldTokens;
-                remainingQuantity -= sellQuantity;
-            }
-        }
-
-        return realizedProfit;
-    }
-
+	public static BigDecimal fdv(BigInteger totalSupply, BigDecimal tokenPrice) {
+		return new BigDecimal(totalSupply).multiply(tokenPrice);
+	}
 
 }

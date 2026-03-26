@@ -16,6 +16,7 @@ import com.example.application.services.SecurityService;
 import com.example.application.services.UserService;
 import com.example.application.utils.exceptions.InternalUnexpectedException;
 import com.example.application.utils.fetchers.crypto_compare.response.AssetMetadata;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -71,7 +73,7 @@ public class InstrumentsFacadeService {
 
 	//<editor-fold desc="USERS">
 	@Transactional(rollbackFor = Exception.class)
-	public UserDTO createNewUser(RegisterUserRequest request) {
+	public UserDTO createNewUser(@Valid RegisterUserRequest request) {
 		User userEntity = userService.createNewUser(request);
 
 		CreatePortfolioRequest defaultPortfolio = CreatePortfolioRequest.builder()
@@ -113,10 +115,10 @@ public class InstrumentsFacadeService {
 		return assetService.findBySymbol(symbol).map(AssetDTO::mappedFrom);
 	}
 
-	public double getAmountOfTokens(Long portfolioId, String assetSymbol) {
+	public BigDecimal getAmountOfTokens(Long portfolioId, String assetSymbol) {
 		return getAssetBalanceByAsset(portfolioId, assetSymbol)
 				.map(AssetBalanceDTO::getAmount)
-				.orElse(Double.NaN);
+				.orElse(BigDecimal.ZERO);
 	}
 
 	@Nullable
@@ -193,7 +195,7 @@ public class InstrumentsFacadeService {
 	}
 
 	@Transactional
-	public TransactionDTO createTransaction(CreateTransactionRequest request) {
+	public TransactionDTO createTransaction(@Valid CreateTransactionRequest request) {
 		log.info("Creating new transaction: {}", request);
 		Transaction transaction = new Transaction();
 
@@ -218,7 +220,7 @@ public class InstrumentsFacadeService {
 	}
 
 	@Transactional
-	public TransactionDTO updateTransaction(UpdateTransactionRequest request) {
+	public TransactionDTO updateTransaction(@Valid UpdateTransactionRequest request) {
 		log.info("Updating transaction: {}", request);
 		Transaction transaction = transactionService.findById(request.getId())
 				.orElseThrow(() -> new IllegalArgumentException("Cannot find transaction with id: #" + request.getId()));
@@ -242,7 +244,7 @@ public class InstrumentsFacadeService {
 
 	//<editor-fold desc="ASSET WATCHERS">
 	@Transactional
-	public AssetWatcherDTO createAssetWatcher(CreateAssetWatcherRequest request) {
+	public AssetWatcherDTO createAssetWatcher(@Valid CreateAssetWatcherRequest request) {
 		Asset asset = assetService.findBySymbol(request.getAssetSymbol())
 				.orElseThrow(() -> new IllegalArgumentException("Cannot find asset: " + request.getAssetSymbol()));
 
@@ -262,7 +264,7 @@ public class InstrumentsFacadeService {
 	}
 
 	@Transactional
-	public AssetWatcherDTO updateAssetWatcher(UpdateAssetWatcherRequest request) {
+	public AssetWatcherDTO updateAssetWatcher(@Valid UpdateAssetWatcherRequest request) {
 		AssetWatcher entity = assetWatcherService.findById(request.getId())
 				.orElseThrow(() -> new IllegalArgumentException("Cannot find assetWatcher: #" + request.getId() + " (deleted ?)"));
 
@@ -293,22 +295,22 @@ public class InstrumentsFacadeService {
 				.toList();
 	}
 
-	public double getClosestBuyWatcherPrice(Long portfolioId, String assetSymbol) {
+	public BigDecimal getClosestBuyWatcherPrice(Long portfolioId, String assetSymbol) {
 		return getAssetWatchersByAssetAndActionType(portfolioId, assetSymbol, TransactionType.BUY)
 				.stream()
 				.filter(w -> !w.isCompleted())
 				.map(AssetWatcherDTO::getTargetPrice)
 				.min(Comparator.naturalOrder())
-				.orElse(0.0);
+				.orElse(BigDecimal.ZERO);
 	}
 
-	public double getClosestSellWatcherPrice(Long portfolioId, String assetSymbol) {
+	public BigDecimal getClosestSellWatcherPrice(Long portfolioId, String assetSymbol) {
 		return getAssetWatchersByAssetAndActionType(portfolioId, assetSymbol, TransactionType.SELL)
 				.stream()
 				.filter(w -> !w.isCompleted())
 				.map(AssetWatcherDTO::getTargetPrice)
 				.max(Comparator.naturalOrder())
-				.orElse(0.0);
+				.orElse(BigDecimal.ZERO);
 	}
 	//</editor-fold>
 
@@ -350,6 +352,15 @@ public class InstrumentsFacadeService {
 		AssetBalance assetBalance = new AssetBalance();
 		assetBalance.setPortfolio(portfolio);
 		assetBalance.setAsset(asset);
+		assetBalance.setAmount(BigDecimal.ZERO);
+		assetBalance.setCost(BigDecimal.ZERO);
+		assetBalance.setTotalBuyCost(BigDecimal.ZERO);
+		assetBalance.setTotalBoughtQuantity(BigDecimal.ZERO);
+		assetBalance.setTotalSellValue(BigDecimal.ZERO);
+		assetBalance.setTotalSoldQuantity(BigDecimal.ZERO);
+		assetBalance.setAvgSellPrice(BigDecimal.ZERO);
+		assetBalance.setAvgBuyPrice(BigDecimal.ZERO);
+		assetBalance.setTotalRealizedProfit(BigDecimal.ZERO);
 		return assetBalanceService.save(assetBalance);
 	}
 	//</editor-fold>
@@ -358,7 +369,7 @@ public class InstrumentsFacadeService {
 
 	@NotNull
 	@Transactional
-	public PortfolioDTO createPortfolio(@NotNull CreatePortfolioRequest request) {
+	public PortfolioDTO createPortfolio(@Valid CreatePortfolioRequest request) {
 		User user = userService.findById(request.getUserId())
 				.orElseThrow(() -> new IllegalArgumentException("User #" + request.getUserId() + " not found. (deleted ?)"));
 

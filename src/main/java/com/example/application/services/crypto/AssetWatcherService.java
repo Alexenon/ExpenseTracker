@@ -1,14 +1,15 @@
 package com.example.application.services.crypto;
 
+import com.example.application.components.EntityValidator;
 import com.example.application.entities.common.TransactionType;
 import com.example.application.entities.crypto.AssetWatcher;
 import com.example.application.repositories.crypto.AssetWatcherRepository;
 import com.example.application.utils.exceptions.InternalUnexpectedException;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 
 import java.util.List;
 import java.util.Objects;
@@ -21,10 +22,11 @@ import java.util.Optional;
  * */
 
 @Service
+@RequiredArgsConstructor
 public class AssetWatcherService {
 
-	@Autowired
 	private AssetWatcherRepository assetWatcherRepository;
+	private EntityValidator validator;
 
 	//<editor-fold desc="SEARCH">
 	public Optional<AssetWatcher> findById(@NotNull Long assetWatcherId) {
@@ -62,8 +64,8 @@ public class AssetWatcherService {
 	@NotNull
 	@Transactional
 	public AssetWatcher save(@NotNull AssetWatcher assetWatcher) {
+		validator.validate(assetWatcher);
 		try {
-			validate(assetWatcher);
 			return assetWatcherRepository.save(assetWatcher);
 		} catch (Exception e) {
 			throw new InternalUnexpectedException(e);
@@ -72,23 +74,13 @@ public class AssetWatcherService {
 
 	@Transactional
 	public void delete(@NotNull Long assetWatcherId) {
-		Objects.requireNonNull(assetWatcherId, "assetWatcherId");
 		AssetWatcher assetWatcher = findById(assetWatcherId)
-				.orElseThrow(() -> new IllegalArgumentException("Cannot delete an unexistent transaction: #" + assetWatcherId));
+				.orElseThrow(() -> new EntityNotFoundException("Cannot delete an unexistent asset watcher: #" + assetWatcherId));
 		try {
 			assetWatcherRepository.delete(assetWatcher);
 		} catch (Exception e) {
 			throw new InternalUnexpectedException(e);
 		}
-	}
-
-	private void validate(AssetWatcher assetWatcher) {
-		Objects.requireNonNull(assetWatcher, "assetWatcher");
-		Assert.notNull(assetWatcher.getAsset(), "Asset is missing");
-		Assert.notNull(assetWatcher.getPortfolio(), "Portfolio is missing");
-		Assert.notNull(assetWatcher.getTransactionType(), "ActionType is missing");
-		Assert.isTrue(assetWatcher.getTargetPrice() >= 0, "price cannot be negative");
-		Assert.isTrue(assetWatcher.getTargetAmount() >= 0, "amount cannot be negative");
 	}
 
 }

@@ -18,9 +18,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.math.BigDecimal;
 import java.util.List;
 
-@SuppressWarnings("DataFlowIssue")
+@SuppressWarnings({"DataFlowIssue", "SameParameterValue"})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = Application.class)
 @ActiveProfiles("test")
@@ -181,8 +182,8 @@ class PortfolioServiceTest extends AbstractTest {
 		return CreateTransactionRequest.builder()
 				.assetSymbol(asset.getSymbol())
 				.type(TransactionType.BUY)
-				.marketPrice(marketPrice)
-				.orderQuantity(orderQuantity)
+				.marketPrice(BigDecimal.valueOf(marketPrice))
+				.orderQuantity(BigDecimal.valueOf(orderQuantity))
 				.portfolioId(portfolioId)
 				.build();
 	}

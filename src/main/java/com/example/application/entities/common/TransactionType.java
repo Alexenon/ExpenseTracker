@@ -1,16 +1,16 @@
 package com.example.application.entities.common;
 
 public enum TransactionType {
-    BUY,
-    SELL;
+	BUY,
+	SELL;
 
-    public boolean isBuyTransaction() {
-        return this == TransactionType.BUY;
-    }
+	public boolean isBuyTransaction() {
+		return this == TransactionType.BUY;
+	}
 
-    public boolean isSellTransaction() {
-        return this == TransactionType.SELL;
-    }
+	public boolean isSellTransaction() {
+		return this == TransactionType.SELL;
+	}
 
 }
 
