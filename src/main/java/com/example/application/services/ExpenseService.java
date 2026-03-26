@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Objects;
 
 /*
-    TODO: Add Facade Service
+    TODO:
         - Fix convertToExpense
         - Fix updateExpense
         - Remove old implementations of monthly expenses

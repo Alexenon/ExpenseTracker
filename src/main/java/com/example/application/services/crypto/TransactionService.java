@@ -20,9 +20,6 @@ import java.util.Objects;
 import java.util.Optional;
 
 /*
-	TODO: [NEXT]
-		[!] Store the images from external sources into the project or somewhere else
-			in case the images got deleted, then we have instances
 
 	TODO: [CRITICAL]
 		[!] After deletion -> profit, realized, ... should be reverted

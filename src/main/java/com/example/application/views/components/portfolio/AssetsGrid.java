@@ -410,7 +410,6 @@ public class AssetsGrid extends Div {
 					BigDecimal avgBuy = portfolioPerformanceTracker.getAverageBuyPrice(portfolio, asset);
 					BigDecimal avgSell = portfolioPerformanceTracker.getAverageSellPrice(portfolio, asset);
 
-					// TODO: [LONG TERM] Add volume column for: today, this week, this month, this year, total
 					return AssetGridItem.builder()
 							.symbol(asset.getSymbol())
 							.name(asset.getFullName())

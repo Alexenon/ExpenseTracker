@@ -32,12 +32,6 @@ public enum SymbolIndentifier {
     ETH("Ethereum"),
     SOL("Solana"),
 
-    /*
-        TODO: [NEXT]
-            Add deposits
-            For transaction mention that it required extraction from deposit or not, will be necessary when exporting
-    */
-
     // STABLECOINS
     USDT("Tether"),
     USDC("USD Coin"),

@@ -19,16 +19,12 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-
-/*
-    TODO: [CRITICAL]
-     [?] Don't allow spaces in the username / email  ->  pattern !!!
-* */
 
 @Slf4j
 @Service
@@ -60,6 +56,14 @@ public class UserService implements UserDetailsService {
 				: userRepository.findByEmailIgnoreCase(usernameOrEmail);
 	}
 
+	public boolean isUsernameTaken(@NotNull String username) {
+		return userRepository.findByUsernameIgnoreCase(username).isPresent();
+	}
+
+	public boolean isEmailTaken(@NotNull String email) {
+		return userRepository.findByEmailIgnoreCase(email).isPresent();
+	}
+
 	@NotNull
 	@Override
 	public UserDetails loadUserByUsername(String usernameOrEmail) {
@@ -76,14 +80,11 @@ public class UserService implements UserDetailsService {
 
 	@NotNull
 	@Transactional
-	public User createNewUser(@NotNull RegisterUserRequest request) {
+	public User createNewUser(@Validated @NotNull RegisterUserRequest request) {
 		log.info("Creating new user: {}", request);
 
 		if (!request.getPassword().equals(request.getConfirmPassword()))
 			throw new IllegalArgumentException("User register passwords does not match");
-
-		// TODO: [CRITICAL
-		// 	VERIFY EACH request what has valid data before passing it to entity
 
 		User user = new User();
 		user.setUsername(request.getUsername().trim().toLowerCase());
@@ -173,16 +174,6 @@ public class UserService implements UserDetailsService {
 			log.error("Failed to delete {} users", numberOfTransactions, e);
 			throw new InternalUnexpectedException(e);
 		}
-	}
-
-	public boolean isUsernameTaken(@NotNull String username) {
-		Objects.requireNonNull(username, "username");
-		return userRepository.findByUsernameIgnoreCase(username).isPresent();
-	}
-
-	public boolean isEmailTaken(@NotNull String email) {
-		Objects.requireNonNull(email, "email");
-		return userRepository.findByEmailIgnoreCase(email).isPresent();
 	}
 
 }

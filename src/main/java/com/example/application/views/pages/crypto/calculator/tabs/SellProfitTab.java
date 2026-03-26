@@ -30,11 +30,6 @@ import java.math.BigInteger;
 import java.math.RoundingMode;
 
 /*
-    TODO:
-        - Wanted Profit: To gain a $50,000 profit from $50,000, BTC needs to hit 50,000 + 50,000 = 100,000 (n %)
-        - Inflation: If inflation is 3%, the inflation-adjusted profit would be  20,000 / (1+0.03) = 19,417.47.
-        - Compound Growth: Reinvesting $20,000 at a 15% annual return for 5 years yields 20,000 * ( 1 + 0.15 ) 5 = 40,228.86
-        - Market Cap: What market cap will be at that sell price -> which top will enter
 
     FIXME:
         - When user don't have amount of such tokens then:

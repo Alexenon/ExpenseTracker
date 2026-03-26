@@ -30,7 +30,7 @@ import java.time.temporal.ChronoField;
 
 /*
 	TODO: [CRITICAL]	---> IS THIS FINISHED ???
-		- WHATS THE DIFFERENCE BETWEEN TRANSFARED AND UPDATED TRANSACTION IN TERMS OF WHAT TO DO IF EVENT IS FIRED, I THINK ITS NOTHING
+		- WHATS THE DIFFERENCE BETWEEN TRANSFERED AND UPDATED TRANSACTION IN TERMS OF WHAT TO DO IF EVENT IS FIRED, I THINK ITS NOTHING
 		- Add button for transaction deletion
 			- Add confirm dialog here in case its deleted or removed
 	 	- What if transfered transaction is removed ?

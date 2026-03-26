@@ -40,16 +40,6 @@ import java.util.List;
 	TODO: Add dropdown-details with stats component
 	    - Posibility to open and close some details (as there are a lot of them)
 
-	TODO: Add buySellRatio with details:
-			- 30 : 70
-			- 4 buys ($340) : 9 sold ($1120)
-			===> The TradingVolume + BuySellRatio can be merged into one stat
-
-	TODO: Add Trading Volume with details:
-			-  BUY "3496 ARB = $220", avg buy ...
-			-  SELL "3496 ARB = $220", avg sell ...
-			-  TOTAL VOLUME: "3496 ARB = $220"
-			(maybe without decimal points for trading $ amount)
 * */
 
 /*
