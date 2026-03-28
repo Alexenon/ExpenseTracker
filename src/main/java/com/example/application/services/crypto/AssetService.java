@@ -60,14 +60,15 @@ public class AssetService {
 	@Nullable
 	public Asset save(@NotNull Asset asset) {
 		try {
+			log.debug("Saving {}", asset.toFullString());
 			Asset saved = assetRepository.save(validatedAsset(asset));
 			log.debug("Saved successfully {}", saved);
 			return saved;
 		} catch (InvalidDataException e) {
-			log.error("Failed to save invalid {}", asset, e);
+			log.error("Failed to save invalid {}", asset.toFullString(), e);
 			return null;
 		} catch (Exception e) {
-			log.error("Failed to save {}", asset, e);
+			log.error("Failed to save {}", asset.toFullString(), e);
 			throw new InternalUnexpectedException(e);
 		}
 	}

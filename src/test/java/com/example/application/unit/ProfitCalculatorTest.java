@@ -1,15 +1,18 @@
 package com.example.application.unit;
 
+import com.example.application.data.dtos.TransactionDTO;
+import com.example.application.entities.common.TransactionType;
 import com.example.application.utils.investment.ProfitCalculator;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class ProfitCalculatorTest {
-
-	public static final double PRICE_DELTA = 0.0001;
 
 	/*
 		Buy Transactions Summary
@@ -24,23 +27,26 @@ public class ProfitCalculatorTest {
 	 */
 	@Test
 	public void testAverageBuyPrice() {
-		// First buy: 15 tokens at $0.50
 		BigDecimal avg1 = calculateAvgPrice(0, 0, 15, 0.50);
-		assertEquals(BigDecimal.valueOf(0.50), avg1, "Avg after first DYDX buy");
+		assertThat(avg1)
+				.as("Avg after first DYDX buy")
+				.isEqualByComparingTo("0.50");
 
-		// Second buy: 10 tokens at $0.60 → avg = $0.54
 		BigDecimal avg2 = calculateAvgPrice(avg1, 15, 10, 0.60);
-		assertEquals(BigDecimal.valueOf(0.54), avg2, "Avg after second DYDX buy");
+		assertThat(avg2)
+				.as("Avg after second DYDX buy")
+				.isEqualByComparingTo("0.54");
 
-		// Third buy: 20 tokens at $0.55 → avg = $0.5444
 		BigDecimal avg3 = calculateAvgPrice(avg2, 25, 20, 0.55);
-		assertEquals(BigDecimal.valueOf(0.5444), avg3, "Avg after third DYDX buy");
+		assertThat(avg3)
+				.as("Avg after third DYDX buy")
+				.isEqualByComparingTo("0.5444");
 
-		// Fourth buy: 5 tokens at $0.40 → avg = $0.53
 		BigDecimal avg4 = calculateAvgPrice(avg3, 45, 5, 0.40);
-		assertEquals(BigDecimal.valueOf(0.53), avg4, "Avg after fourth DYDX buy");
+		assertThat(avg4)
+				.as("Avg after fourth DYDX buy")
+				.isEqualByComparingTo("0.53");
 	}
-
 
 	/*
 	 	Sell Transactions Summary
@@ -56,21 +62,119 @@ public class ProfitCalculatorTest {
 
 	@Test
 	public void testDydxAverageSellPriceIn4Steps() {
-		// Sell 1: 10 tokens at $0.70
 		BigDecimal avgSell1 = calculateAvgPrice(0, 0, 10, 0.70);
-		assertEquals(BigDecimal.valueOf(0.70), avgSell1, "Avg after 1st DYDX sell");
+		assertThat(avgSell1)
+				.as("Avg after 1st DYDX sell")
+				.isEqualByComparingTo("0.70");
 
-		// Sell 2: 5 tokens at $0.65 → avg = $0.6833
 		BigDecimal avgSell2 = calculateAvgPrice(avgSell1, 10, 5, 0.65);
-		assertEquals(BigDecimal.valueOf(0.6833), avgSell2, "Avg after 2nd DYDX sell");
+		assertThat(avgSell2)
+				.as("Avg after 2nd DYDX sell")
+				.isEqualByComparingTo("0.6833");
 
-		// Sell 3: 15 tokens at $0.72 → avg = $0.7017
 		BigDecimal avgSell3 = calculateAvgPrice(avgSell2, 15, 15, 0.72);
-		assertEquals(BigDecimal.valueOf(0.7017), avgSell3, "Avg after 3rd DYDX sell");
+		assertThat(avgSell3)
+				.as("Avg after 3rd DYDX sell")
+				.isEqualByComparingTo("0.7017");
 
-		// Sell 4: 10 tokens at $0.68 → avg = $0.6963
 		BigDecimal avgSell4 = calculateAvgPrice(avgSell3, 30, 10, 0.68);
-		assertEquals(BigDecimal.valueOf(0.6963), avgSell4, "Avg after 4th DYDX sell");
+		assertThat(avgSell4)
+				.as("Avg after 4th DYDX sell")
+				.isEqualByComparingTo("0.6963");
+	}
+
+	@Test
+	void realizedProfit_shouldReturnZero_whenOnlyBuys() {
+		List<TransactionDTO> transactions = List.of(
+				buy(10, 100),
+				buy(5, 200)
+		);
+
+		BigDecimal result = ProfitCalculator.realizedProfit(transactions);
+
+		assertThat(result).isEqualByComparingTo("0");
+	}
+
+	@Test
+	void realizedProfit_shouldCalculateProfit_forSingleBuySell() {
+		List<TransactionDTO> transactions = List.of(
+				buy(10, 100),
+				sell(10, 150)
+		);
+
+		BigDecimal result = ProfitCalculator.realizedProfit(transactions);
+
+		assertThat(result).isEqualByComparingTo("500.00000000");
+	}
+
+	@Test
+	void realizedProfit_shouldUseAverageCost_whenMultipleBuys() {
+		List<TransactionDTO> transactions = List.of(
+				buy(10, 100),
+				buy(10, 200),
+				sell(10, 300)
+		);
+
+		BigDecimal result = ProfitCalculator.realizedProfit(transactions);
+
+		assertThat(result).isEqualByComparingTo("1500.00000000");
+	}
+
+	@Test
+	void realizedProfit_shouldHandlePartialSell() {
+		List<TransactionDTO> transactions = List.of(
+				buy(10, 100),
+				sell(5, 200)
+		);
+
+		BigDecimal result = ProfitCalculator.realizedProfit(transactions);
+
+		assertThat(result).isEqualByComparingTo("500.00000000");
+	}
+
+	@Test
+	void realizedProfit_shouldHandleMultipleSells() {
+		List<TransactionDTO> transactions = List.of(
+				buy(10, 100),
+				sell(5, 200),
+				sell(5, 300)
+		);
+
+		BigDecimal result = ProfitCalculator.realizedProfit(transactions);
+
+		assertThat(result).isEqualByComparingTo("1500.00000000");
+	}
+
+	@Test
+	void realizedProfit_shouldThrowException_whenSellingMoreThanOwned() {
+		List<TransactionDTO> transactions = List.of(
+				buy(5, 100),
+				sell(10, 200)
+		);
+
+		assertThatThrownBy(() -> ProfitCalculator.realizedProfit(transactions))
+				.isInstanceOf(IllegalArgumentException.class)
+				.hasMessageContaining("Selling more than owned");
+	}
+
+	// -------- helper builders --------
+
+	private TransactionDTO buy(double qty, double price) {
+		TransactionDTO dto = new TransactionDTO();
+		dto.setType(TransactionType.BUY);
+		dto.setOrderQuantity(BigDecimal.valueOf(qty));
+		dto.setMarketPrice(BigDecimal.valueOf(price));
+		dto.setDateTime(LocalDateTime.now());
+		return dto;
+	}
+
+	private TransactionDTO sell(double qty, double price) {
+		TransactionDTO dto = new TransactionDTO();
+		dto.setType(TransactionType.SELL);
+		dto.setOrderQuantity(BigDecimal.valueOf(qty));
+		dto.setMarketPrice(BigDecimal.valueOf(price));
+		dto.setDateTime(LocalDateTime.now());
+		return dto;
 	}
 
 	private static BigDecimal calculateAvgPrice(BigDecimal prevAvg, double prevAmount, double newAmount, double buyPrice) {

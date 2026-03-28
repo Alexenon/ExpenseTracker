@@ -19,16 +19,6 @@ import java.util.Objects;
         [!] DEPOSIT / TRANSFER - Add asset amount from external sources
         [!] CONVERT  - Switch from one asset to another
 
-
-    TODO: [NEXT]
-        [!] store avgBuyPrice at the moment
-            [-] for sell transaction to display then aproximateProfit at the moment
-            [-] for buy transaction to display then how good was buy compared with:
-            	[-] current price
-            	[-] previous avgBuyPrice (which is avgBuyPrice - avgBuyPrice of the current transaction)
-        [!] Add profit
-        	[-] compared with current price, that should be not stored here but just displayed
-
 */
 
 @Data
