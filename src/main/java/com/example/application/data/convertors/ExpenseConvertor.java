@@ -1,4 +1,4 @@
-package com.example.application.utils;
+package com.example.application.data.convertors;
 
 import com.example.application.data.requests.ExpenseRequest;
 import com.example.application.entities.Category;

@@ -5,7 +5,7 @@ import com.example.application.utils.fetchers.BinanceFetcher;
 import com.example.application.utils.fetchers.crypto_compare.CryptoCompareFetcher;
 import com.example.application.utils.fetchers.crypto_compare.response.AssetMetaDataApiResp;
 import com.example.application.utils.fetchers.crypto_compare.response.AssetMetadata;
-import jakarta.validation.constraints.NotNull;
+import jakarta.annotation.Nonnull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -44,7 +44,7 @@ public class InstrumentsProvider {
 						if (metadata != null) {
 							metadataMap.put(symbolName, metadata);
 						} else {
-							log.warn("Missing asset metadata, cause: {}", response.getError());
+							log.info("Missing asset metadata, cause: {}", response.getError());
 						}
 					} catch (Exception e) {
 						log.warn("Missing asset metadata", e);
@@ -55,12 +55,12 @@ public class InstrumentsProvider {
 		return metadataMap;
 	}
 
-	@NotNull
+	@Nonnull
 	public Map<String, AssetMetadata> getMetadata() {
 		return metadataPerAsset;
 	}
 
-	@NotNull
+	@Nonnull
 	public Map<String, AssetMetadata> getUpdatedMetadata() {
 		metadataPerAsset = fetchMetadata();
 		return metadataPerAsset;

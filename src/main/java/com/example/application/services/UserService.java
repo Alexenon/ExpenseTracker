@@ -8,6 +8,7 @@ import com.example.application.entities.crypto.Portfolio;
 import com.example.application.repositories.UserRepository;
 import com.example.application.utils.exceptions.InternalUnexpectedException;
 import com.example.application.utils.exceptions.auth.UsernameTakenException;
+import jakarta.annotation.Nonnull;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
@@ -64,7 +65,7 @@ public class UserService implements UserDetailsService {
 		return userRepository.findByEmailIgnoreCase(email).isPresent();
 	}
 
-	@NotNull
+	@Nonnull
 	@Override
 	public UserDetails loadUserByUsername(String usernameOrEmail) {
 		User user = findByUsername(usernameOrEmail)
@@ -78,7 +79,7 @@ public class UserService implements UserDetailsService {
 	}
 	//</editor-fold>
 
-	@NotNull
+	@Nonnull
 	@Transactional
 	public User createNewUser(@Validated @NotNull RegisterUserRequest request) {
 		log.info("Creating new user: {}", request);
