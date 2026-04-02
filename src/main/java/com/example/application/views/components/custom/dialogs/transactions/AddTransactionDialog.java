@@ -143,7 +143,7 @@ public class AddTransactionDialog extends Dialog implements HasNotifications {
 		totalCostField.addKeyUpListener(e -> {
 			BigDecimal marketPrice = marketPriceField.getMoneyAmount();
 			BigDecimal totalCost = totalCostField.getMoneyAmount();
-			BigDecimal amount = marketPrice.compareTo(BigDecimal.ZERO) == 0
+			BigDecimal amount = marketPrice.signum() == 0
 					? BigDecimal.ZERO
 					: totalCost.divide(marketPrice, FinancialConstants.AMOUNT_SCALE, RoundingMode.HALF_UP);
 

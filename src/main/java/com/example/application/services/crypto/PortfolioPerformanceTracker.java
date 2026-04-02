@@ -159,8 +159,13 @@ public class PortfolioPerformanceTracker {
 	}
 
 	public BigDecimal getPortfolioProfitPercentage(PortfolioDTO portfolio) {
+		BigDecimal portfolioCost = getPortfolioCost(portfolio);
+
+		if(portfolioCost.signum() == 0)
+			return BigDecimal.ZERO;
+
 		BigDecimal totalPercentage = getPortfolioWorth(portfolio)
-				.divide(getPortfolioCost(portfolio), FinancialConstants.PRICE_SCALE, RoundingMode.HALF_UP);
+				.divide(portfolioCost, FinancialConstants.PRICE_SCALE, RoundingMode.HALF_UP);
 
 		return totalPercentage.multiply(ONE_HUNDRED_PERCENT)
 				.subtract(ONE_HUNDRED_PERCENT);

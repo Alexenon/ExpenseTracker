@@ -61,7 +61,6 @@ public class AssetWatcherService {
 	}
 	//</editor-fold>
 
-	@NotNull
 	@Transactional
 	public AssetWatcher save(@NotNull AssetWatcher assetWatcher) {
 		validator.validate(assetWatcher);

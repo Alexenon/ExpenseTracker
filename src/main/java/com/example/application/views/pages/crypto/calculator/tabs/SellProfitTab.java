@@ -39,6 +39,10 @@ import java.math.RoundingMode;
             4. Total = don't touch, automatically will be calculated
             5. Force user to add SellPrice
 
+	TODO: [URGENT]
+		- Add input field validation that triggers on calculateBtn click
+		- Same for other calculators
+
     TODO: Ideally, move as two separate features into 2 different calculators:
         - Profit sell calculator
         - What happens when achieve such price, without having amount of tokens
@@ -134,7 +138,7 @@ public class SellProfitTab extends BaseCalculatorTab {
             PercentageFormatter percentageFormatter = new PercentageFormatter();
             percentageFormatter.setMaximumFractionDigits(0);
 
-            BigDecimal netProfitPerUnit = profit.divide(amountTokens, FinancialConstants.PRICE_SCALE, RoundingMode.HALF_UP);
+            BigDecimal netProfitPerUnit = ProfitUtils.netProfitPerToken(profit, amountTokens);
             NumericValueParagraph worthParagraph = new NumericValueParagraph(totalWorth, currencyFormatter, true);
             PricePercentageWrapper netProfitWrapper = new PricePercentageWrapper(profit, profitPercentage);
             netProfitWrapper.setPercentageFormatter(percentageFormatter);

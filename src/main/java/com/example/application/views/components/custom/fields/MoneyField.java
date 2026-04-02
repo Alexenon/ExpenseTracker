@@ -43,7 +43,13 @@ public class MoneyField extends AbstractNumberTextField {
 	}
 
 	public BigDecimal getMoneyAmount() {
-		return new BigDecimal(getValue());
+		String rawValue = getValue();
+
+		if(rawValue == null || rawValue.isEmpty())
+			return BigDecimal.ZERO;
+
+		String parsedAmount = rawValue.replaceAll(",", "");
+		return new BigDecimal(parsedAmount);
 	}
 
 	private String parse(BigDecimal value) {

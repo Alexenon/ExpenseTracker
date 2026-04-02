@@ -23,10 +23,10 @@ import java.util.stream.Stream;
 @Service
 public class InstrumentsProvider {
 
-	private Map<String, AssetMetadata> metadataPerAsset;
+	private Map<String, AssetMetadata> assetMetadata;
 
 	private InstrumentsProvider() {
-		metadataPerAsset = getUpdatedMetadata();
+		assetMetadata = getUpdatedAssetMetadata();
 	}
 
 	private Map<String, AssetMetadata> fetchMetadata() {
@@ -56,14 +56,14 @@ public class InstrumentsProvider {
 	}
 
 	@Nonnull
-	public Map<String, AssetMetadata> getMetadata() {
-		return metadataPerAsset;
+	public Map<String, AssetMetadata> getAssetMetadata() {
+		return assetMetadata;
 	}
 
 	@Nonnull
-	public Map<String, AssetMetadata> getUpdatedMetadata() {
-		metadataPerAsset = fetchMetadata();
-		return metadataPerAsset;
+	public Map<String, AssetMetadata> getUpdatedAssetMetadata() {
+		assetMetadata = fetchMetadata();
+		return assetMetadata;
 	}
 
 }

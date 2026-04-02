@@ -449,6 +449,9 @@ public class AssetsGrid extends Div {
 	private BigDecimal columnAverage(Function<AssetGridItem, BigDecimal> function) {
 		List<AssetGridItem> gridItems = dataView.getItems().toList();
 
+		if (gridItems.isEmpty())
+			return BigDecimal.ZERO;
+
 		return gridItems.stream()
 				.map(function)
 				.reduce(BigDecimal.ZERO, BigDecimal::add)

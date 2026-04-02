@@ -437,7 +437,7 @@ public class InstrumentsFacadeService {
 
 	//<editor-fold desc="ASSET METADATA">
 	public void updateAssetData() {
-		Map<String, AssetMetadata> metadataMap = instrumentsProvider.getUpdatedMetadata();
+		Map<String, AssetMetadata> metadataMap = instrumentsProvider.getUpdatedAssetMetadata();
 
 		metadataMap.forEach((symbol, metadata) -> {
 					try {
