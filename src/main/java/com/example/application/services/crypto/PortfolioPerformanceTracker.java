@@ -16,6 +16,12 @@ import java.util.stream.Collectors;
 
 import static com.example.application.utils.investment.ProfitUtils.ONE_HUNDRED_PERCENT;
 
+/*
+	TODO: [CRITICAL] EXTREME
+		- After updating a transaction, totalCost doesnt display value right
+*/
+
+
 @Service
 public class PortfolioPerformanceTracker {
 
@@ -160,7 +166,7 @@ public class PortfolioPerformanceTracker {
 	public BigDecimal getPortfolioProfitPercentage(PortfolioDTO portfolio) {
 		BigDecimal portfolioCost = getPortfolioCost(portfolio);
 
-		if(portfolioCost.signum() == 0)
+		if (portfolioCost.signum() == 0)
 			return BigDecimal.ZERO;
 
 		BigDecimal totalPercentage = getPortfolioWorth(portfolio)

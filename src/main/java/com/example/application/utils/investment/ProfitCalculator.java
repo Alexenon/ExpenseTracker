@@ -170,11 +170,13 @@ public class ProfitCalculator {
 
 		BigDecimal buyRatio = buyCost
 				.divide(totalCost, 0, RoundingMode.HALF_UP)
-				.multiply(ONE_HUNDRED_PERCENT);
+				.multiply(ONE_HUNDRED_PERCENT)
+				.stripTrailingZeros();
 
 		BigDecimal sellRatio = sellCost
 				.divide(totalCost, 0, RoundingMode.HALF_UP)
-				.multiply(ONE_HUNDRED_PERCENT);
+				.multiply(ONE_HUNDRED_PERCENT)
+				.stripTrailingZeros();
 
 		return String.format("%f : %f", buyRatio, sellRatio);
 	}
