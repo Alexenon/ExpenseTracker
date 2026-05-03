@@ -25,8 +25,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class AssetWatcherService {
 
-	private AssetWatcherRepository assetWatcherRepository;
-	private EntityValidator validator;
+	private final AssetWatcherRepository assetWatcherRepository;
+	private final EntityValidator validator;
 
 	//<editor-fold desc="SEARCH">
 	public Optional<AssetWatcher> findById(@NotNull Long assetWatcherId) {

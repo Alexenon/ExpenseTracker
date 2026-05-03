@@ -110,7 +110,8 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
 	@Override
 	protected Button createDisplayResultsBtn() {
 		Button button = new Button("Calculate", e -> {
-			String symbol = assetSymbolField.getSymbol();
+			String symbol = assetSymbolField.getSymbol().orElse("");
+			BigDecimal marketPrice = assetSymbolField.getMarketPrice().orElse(BigDecimal.ZERO);
 			List<TransactionDTO> transactions = getListOfTransactions();
 
 			BigDecimal price = assetSymbolField.getSelectedAsset().getMarketPrice();
@@ -118,7 +119,7 @@ public class ProfitEmulatorTab extends BaseCalculatorTab {
 			BigDecimal avgSell = ProfitCalculator.averageSellPrice(transactions);
 			BigDecimal amountOfRemainingTokens = ProfitCalculator.getAmountOfRemainingTokens(transactions);
 			BigDecimal realizedProfit = ProfitCalculator.realizedProfit(transactions);
-			BigDecimal unrealizedProfit = amountOfRemainingTokens.multiply(assetSymbolField.getMarketPrice());
+			BigDecimal unrealizedProfit = amountOfRemainingTokens.multiply(marketPrice);
 			BigDecimal totalProfit = realizedProfit.add(unrealizedProfit);
 
 			BigDecimal totalCost = ProfitCalculator.totalCostForBuyTransactions(transactions);

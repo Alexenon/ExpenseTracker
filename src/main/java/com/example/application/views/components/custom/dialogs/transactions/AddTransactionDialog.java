@@ -105,19 +105,26 @@ public class AddTransactionDialog extends Dialog implements HasNotifications {
 	}
 
 	private void initializeFieldValues() {
+		BigDecimal assetPrice = assetSymbolField.getMarketPrice()
+				.orElse(BigDecimal.ZERO);
+
 		assetSymbolField.setValue(asset);
 		typeField.setValue(TransactionType.BUY);
 		amountField.setValue("");
-		marketPriceField.setValue(assetSymbolField.getMarketPrice());
+		marketPriceField.setValue(assetPrice);
 		totalCostField.setValue("0");
 		datePicker.setValue(LocalDateTime.now());
 	}
 
 	private void initializeFieldListeners() {
 		assetSymbolField.addValueChangeListener(l -> {
+			BigDecimal assetPrice = assetSymbolField.getMarketPrice()
+					.orElse(BigDecimal.ZERO);
+			String assetSymbol = assetSymbolField.getSymbol()
+					.orElse("");
 			binder.setValidatorsDisabled(false);
-			marketPriceField.setValue(assetSymbolField.getMarketPrice());
-			symbolSuffix.setText(assetSymbolField.getSymbol());
+			marketPriceField.setValue(assetPrice);
+			symbolSuffix.setText(assetSymbol);
 			displayHintMarketPrice();
 			displayHintAmountOfTokens();
 		});
@@ -210,12 +217,15 @@ public class AddTransactionDialog extends Dialog implements HasNotifications {
 	}
 
 	private void displayHintMarketPrice() {
-		String formatedPrice = CommonFormatters.CURRENCY.format(assetSymbolField.getMarketPrice());
+		BigDecimal assetPrice = assetSymbolField.getMarketPrice()
+				.orElse(BigDecimal.ZERO);
+		String formatedPrice = CommonFormatters.CURRENCY.format(assetPrice);
 		marketPriceField.setHelperText("Current price: %s".formatted(formatedPrice));
 	}
 
 	private void displayHintAmountOfTokens() {
-		BigDecimal amountTokens = assetSymbolField.getAmountTokens(portfolio.getId());
+		BigDecimal amountTokens = assetSymbolField.getAmountTokens(portfolio.getId())
+				.orElse(BigDecimal.ZERO);
 		String formatedAmount = CommonFormatters.AMOUNT.format(amountTokens);
 		String helperText = typeField.getValue().isBuyTransaction()
 				? null

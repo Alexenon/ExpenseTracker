@@ -107,8 +107,8 @@ public class EditTransactionDialog extends Dialog implements HasNotifications {
 	private void initializeFieldListeners() {
 		assetSymbolField.addValueChangeListener(l -> {
 			binder.setValidatorsDisabled(false);
-			marketPriceField.setValue(assetSymbolField.getMarketPrice());
-			symbolSuffix.setText(assetSymbolField.getSymbol());
+			marketPriceField.setValue(assetSymbolField.getMarketPrice().orElse(BigDecimal.ZERO));
+			symbolSuffix.setText(assetSymbolField.getSymbol().orElse(""));
 			displayHintMarketPrice();
 			displayHintAmountOfTokens();
 		});
@@ -231,12 +231,15 @@ public class EditTransactionDialog extends Dialog implements HasNotifications {
 	}
 
 	private void displayHintMarketPrice() {
-		String formatedPrice = CommonFormatters.CURRENCY.format(assetSymbolField.getMarketPrice());
+		BigDecimal assetPrice = assetSymbolField.getMarketPrice()
+				.orElse(BigDecimal.ZERO);
+		String formatedPrice = CommonFormatters.CURRENCY.format(assetPrice);
 		marketPriceField.setHelperText("Current price: %s".formatted(formatedPrice));
 	}
 
 	private void displayHintAmountOfTokens() {
-		BigDecimal amountTokens = assetSymbolField.getAmountTokens(transaction.getPortfolioId());
+		BigDecimal amountTokens = assetSymbolField.getAmountTokens(transaction.getPortfolioId())
+				.orElse(BigDecimal.ZERO);
 		String formatedAmount = CommonFormatters.AMOUNT.format(amountTokens);
 
 		String helperText = typeField.getOptionalValue()

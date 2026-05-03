@@ -1,5 +1,6 @@
 package com.example.application.services.crypto;
 
+import com.example.application.components.EntityValidator;
 import com.example.application.data.convertors.AssetConvertor;
 import com.example.application.data.dtos.*;
 import com.example.application.data.enums.SymbolIndentifier;
@@ -51,6 +52,8 @@ public class InstrumentsFacadeService {
 	private final AssetWatcherService assetWatcherService;
 	private final AssetBalanceService assetBalanceService;
 
+	private final EntityValidator validator;
+
 	@Autowired
 	public InstrumentsFacadeService(
 			SecurityService securityService,
@@ -61,7 +64,8 @@ public class InstrumentsFacadeService {
 			UserAssetService userAssetService,
 			TransactionService transactionService,
 			AssetWatcherService assetWatcherService,
-			AssetBalanceService assetBalanceService
+			AssetBalanceService assetBalanceService,
+			EntityValidator entityValidator
 	)
 	{
 		this.securityService = securityService;
@@ -73,6 +77,7 @@ public class InstrumentsFacadeService {
 		this.transactionService = transactionService;
 		this.assetWatcherService = assetWatcherService;
 		this.assetBalanceService = assetBalanceService;
+		this.validator = entityValidator;
 	}
 
 	//<editor-fold desc="USERS">
@@ -374,6 +379,7 @@ public class InstrumentsFacadeService {
 	@Nonnull
 	@Transactional
 	public PortfolioDTO createPortfolio(@Valid CreatePortfolioRequest request) {
+		validator.validate(request);
 		User user = userService.findById(request.getUserId())
 				.orElseThrow(() -> new IllegalArgumentException("User #" + request.getUserId() + " not found. (deleted ?)"));
 

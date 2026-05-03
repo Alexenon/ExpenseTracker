@@ -69,8 +69,12 @@ public class EditTransactionModelDialog extends Dialog implements HasNotificatio
 
 		assetSymbolField.addValueChangeListener(l -> {
 			binder.setValidatorsDisabled(false);
-			marketPriceField.setValue(assetSymbolField.getMarketPrice());
-			symbolSuffix.setText(assetSymbolField.getSymbol());
+
+			String symbol = assetSymbolField.getSymbol().orElse("");
+			BigDecimal marketPrice = assetSymbolField.getMarketPrice().orElse(BigDecimal.ZERO);
+
+			symbolSuffix.setText(symbol);
+			marketPriceField.setValue(marketPrice);
 		});
 
 		amountField.setSuffixComponent(symbolSuffix);
@@ -88,7 +92,11 @@ public class EditTransactionModelDialog extends Dialog implements HasNotificatio
 	}
 
 	private void initializeFields() {
-		assetSymbolField.addValueChangeListener(l -> marketPriceField.setValue(assetSymbolField.getMarketPrice()));
+		assetSymbolField.addValueChangeListener(l -> {
+			BigDecimal marketPrice = assetSymbolField.getMarketPrice()
+					.orElse(BigDecimal.ZERO);
+			marketPriceField.setValue(marketPrice);
+		});
 		typeField.setLabel("Transaction Type");
 		typeField.setItems(TransactionType.values());
 	}

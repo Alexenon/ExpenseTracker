@@ -407,8 +407,8 @@ public class AssetsGrid extends Div {
 		return assets.stream()
 				.map(asset -> {
 					BigDecimal currentPrice = asset.getMarketPrice();
-					BigDecimal avgBuy = portfolioPerformanceTracker.getAverageBuyPrice(portfolio, asset);
-					BigDecimal avgSell = portfolioPerformanceTracker.getAverageSellPrice(portfolio, asset);
+					BigDecimal avgBuy = portfolioPerformanceTracker.getAverageBuyPrice(portfolio, asset).orElse(BigDecimal.ZERO);
+					BigDecimal avgSell = portfolioPerformanceTracker.getAverageSellPrice(portfolio, asset).orElse(BigDecimal.ZERO);
 
 					return AssetGridItem.builder()
 							.symbol(asset.getSymbol())
@@ -423,9 +423,9 @@ public class AssetsGrid extends Div {
 							.avgSell(avgSell)
 							.avgBuyCompareWithCurrentPrice(avgPriceComparedCurrentPrice(avgBuy, currentPrice))
 							.avgSellCompareWithCurrentPrice(avgPriceComparedCurrentPrice(avgSell, currentPrice))
-							.realizedProfit(portfolioPerformanceTracker.getAssetRealizedProfit(portfolio, asset))
+							.realizedProfit(portfolioPerformanceTracker.getAssetRealizedProfit(portfolio, asset).orElse(BigDecimal.ZERO))
 							.unrealizedProfit(portfolioPerformanceTracker.getAssetUnrealizedProfit(portfolio, asset))
-							.totalCost(portfolioPerformanceTracker.getAssetRemainingTokensCost(portfolio, asset))
+							.totalCost(portfolioPerformanceTracker.getAssetRemainingTokensCost(portfolio, asset).orElse(BigDecimal.ZERO))
 							.totalWorth(portfolioPerformanceTracker.getAssetWorth(portfolio, asset))
 							.diversityPercentage(BigDecimal.valueOf(portfolioPerformanceTracker.getAssetDiversityPercentage(portfolio, asset)))
 							.build();

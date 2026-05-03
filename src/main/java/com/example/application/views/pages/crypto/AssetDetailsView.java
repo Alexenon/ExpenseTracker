@@ -283,10 +283,10 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
 				})
 				.build();
 
-		BigDecimal assetCost = portfolioPerformanceTracker.getAssetRemainingTokensCost(portfolio, asset);
+		BigDecimal assetCost = portfolioPerformanceTracker.getAssetRemainingTokensCost(portfolio, asset).orElse(BigDecimal.ZERO);
 		BigDecimal assetWorth = portfolioPerformanceTracker.getAssetWorth(portfolio, asset);
 		BigDecimal assetProfitLoss = portfolioPerformanceTracker.getAssetTotalProfit(portfolio, asset);
-		BigDecimal assetRealized = portfolioPerformanceTracker.getAssetRealizedProfit(portfolio, asset);
+		BigDecimal assetRealized = portfolioPerformanceTracker.getAssetRealizedProfit(portfolio, asset).orElse(BigDecimal.ZERO);
 		BigDecimal assetUnrealized = portfolioPerformanceTracker.getAssetUnrealizedProfit(portfolio, asset);
 		BigDecimal profitLossPercentage = portfolioPerformanceTracker.getAssetNetProfitPercentage(portfolio, asset);
 		int assetDiversityPercentage = portfolioPerformanceTracker.getAssetDiversityPercentage(portfolio, asset);

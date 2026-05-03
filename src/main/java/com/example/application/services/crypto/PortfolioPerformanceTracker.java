@@ -33,49 +33,48 @@ public class PortfolioPerformanceTracker {
 				.orElse(BigDecimal.ZERO);
 	}
 
-	public BigDecimal getAverageBuyPrice(PortfolioDTO portfolio, AssetDTO asset) {
+	public Optional<BigDecimal> getAverageBuyPrice(PortfolioDTO portfolio, AssetDTO asset) {
 		return Optional.ofNullable(asset)
 				.flatMap(a -> instrumentsFacadeService.getAssetBalanceByAsset(portfolio.getId(), asset.getSymbol()))
-				.map(AssetBalanceDTO::getAvgBuyPrice)
-				.orElse(BigDecimal.ZERO);
+				.map(AssetBalanceDTO::getAvgBuyPrice);
 	}
 
-	public BigDecimal getAverageSellPrice(PortfolioDTO portfolio, AssetDTO asset) {
+	public Optional<BigDecimal> getAverageSellPrice(PortfolioDTO portfolio, AssetDTO asset) {
 		return Optional.ofNullable(asset)
 				.flatMap(a -> instrumentsFacadeService.getAssetBalanceByAsset(portfolio.getId(), asset.getSymbol()))
-				.map(AssetBalanceDTO::getAvgSellPrice)
-				.orElse(BigDecimal.ZERO);
+				.map(AssetBalanceDTO::getAvgSellPrice);
 	}
 
-	public BigDecimal getAssetRemainingTokensCost(PortfolioDTO portfolio, AssetDTO asset) {
+	public Optional<BigDecimal> getAssetRemainingTokensCost(PortfolioDTO portfolio, AssetDTO asset) {
 		return Optional.ofNullable(asset)
 				.flatMap(a -> instrumentsFacadeService.getAssetBalanceByAsset(portfolio.getId(), asset.getSymbol()))
-				.map(AssetBalanceDTO::getCost)
-				.orElse(BigDecimal.ZERO);
+				.map(AssetBalanceDTO::getCost);
 	}
 
-	public BigDecimal getAssetRealizedProfit(PortfolioDTO portfolio, AssetDTO asset) {
+	public Optional<BigDecimal> getAssetRealizedProfit(PortfolioDTO portfolio, AssetDTO asset) {
 		return Optional.ofNullable(asset)
 				.flatMap(a -> instrumentsFacadeService.getAssetBalanceByAsset(portfolio.getId(), asset.getSymbol()))
-				.map(AssetBalanceDTO::getTotalRealizedProfit)
-				.orElse(BigDecimal.ZERO);
+				.map(AssetBalanceDTO::getTotalRealizedProfit);
 	}
 
 	public BigDecimal getAssetTotalProfit(PortfolioDTO portfolio, AssetDTO asset) {
-		BigDecimal realizedProfit = getAssetRealizedProfit(portfolio, asset);
+		BigDecimal realizedProfit = getAssetRealizedProfit(portfolio, asset)
+				.orElse(BigDecimal.ZERO);
 		BigDecimal unrealizedProfit = getAssetUnrealizedProfit(portfolio, asset);
 		return realizedProfit.add(unrealizedProfit);
 	}
 
 	public BigDecimal getAssetUnrealizedProfit(PortfolioDTO portfolio, AssetDTO asset) {
 		BigDecimal worth = getAssetWorth(portfolio, asset);
-		BigDecimal remainingTokensCost = getAssetRemainingTokensCost(portfolio, asset);
+		BigDecimal remainingTokensCost = getAssetRemainingTokensCost(portfolio, asset)
+				.orElse(BigDecimal.ZERO);
 		return worth.subtract(remainingTokensCost);
 	}
 
 	public BigDecimal getAssetNetProfitPercentage(PortfolioDTO portfolio, AssetDTO asset) {
 		BigDecimal worth = getAssetWorth(portfolio, asset);
-		BigDecimal remainingTokensCost = getAssetRemainingTokensCost(portfolio, asset);
+		BigDecimal remainingTokensCost = getAssetRemainingTokensCost(portfolio, asset)
+				.orElse(BigDecimal.ZERO);
 		return worth.divide(remainingTokensCost, FinancialConstants.PRICE_SCALE, RoundingMode.HALF_UP);
 	}
 

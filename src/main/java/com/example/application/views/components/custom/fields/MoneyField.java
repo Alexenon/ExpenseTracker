@@ -37,6 +37,11 @@ public class MoneyField extends AbstractNumberTextField {
 	}
 
 	public void setValue(BigDecimal value) {
+		if (value == null) {
+			super.setValue("");
+			return;
+		}
+
 		String parsedValue = parse(value);
 		String formatedValue = StringUtils.stripTrailingZeroes(parsedValue);
 		super.setValue(formatedValue);
@@ -45,7 +50,7 @@ public class MoneyField extends AbstractNumberTextField {
 	public BigDecimal getMoneyAmount() {
 		String rawValue = getValue();
 
-		if(rawValue == null || rawValue.isEmpty())
+		if (rawValue == null || rawValue.isEmpty())
 			return BigDecimal.ZERO;
 
 		String parsedAmount = rawValue.replaceAll(",", "");

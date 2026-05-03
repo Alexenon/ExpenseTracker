@@ -56,25 +56,29 @@ public final class StakingProfitTab extends BaseCalculatorTab {
 
 	private void initializeFieldsListeners() {
 		assetSymbolField.addValueChangeListener(field -> {
-			BigDecimal amountTokens = assetSymbolField.getAmountTokens(portfolio.getId());
-			amountField.setValue(amountTokens);
-			amountField.setSuffixComponent(new Span(assetSymbolField.getSymbol()));
+			String symbol = assetSymbolField.getSymbol().orElse("");
+			BigDecimal amountTokens = assetSymbolField.getAmountTokens(portfolio.getId()).orElse(BigDecimal.ZERO);
+			BigDecimal marketPrice = assetSymbolField.getMarketPrice().orElse(BigDecimal.ZERO);
 
-			BigDecimal worth = amountTokens.multiply(assetSymbolField.getMarketPrice());
+			amountField.setValue(amountTokens);
+			amountField.setSuffixComponent(new Span(symbol));
+
+			BigDecimal worth = amountTokens.multiply(marketPrice);
 			worthField.setValue(worth);
 		});
 
 		amountField.setValueChangeMode(ValueChangeMode.EAGER);
-		amountField.addKeyUpListener(e ->  {
+		amountField.addKeyUpListener(e -> {
 			BigDecimal amount = amountField.getAmount();
-			BigDecimal marketPrice = assetSymbolField.getMarketPrice();
+			BigDecimal marketPrice = assetSymbolField.getMarketPrice().orElse(BigDecimal.ZERO);
+
 			worthField.setValue(amount.multiply(marketPrice));
 		});
 
 		worthField.setValueChangeMode(ValueChangeMode.EAGER);
 		worthField.addKeyUpListener(e -> {
 			BigDecimal worth = worthField.getMoneyAmount();
-			BigDecimal marketPrice = assetSymbolField.getMarketPrice();
+			BigDecimal marketPrice = assetSymbolField.getMarketPrice().orElse(BigDecimal.ZERO);
 			BigDecimal amountOfTokens = worth.divide(marketPrice, FinancialConstants.AMOUNT_SCALE, RoundingMode.HALF_UP);
 			amountField.setValue(amountOfTokens);
 		});

@@ -49,7 +49,7 @@ public class RegistrationView extends DefaultPage implements HasNotifications {
 		Div registerContainer = new Div(registerForm);
 		registerContainer.addClassName("register-container");
 
-		add(registerContainer, getPanelContainer());
+		add(registerContainer, getRightPanel());
 	}
 
 	private void addSubmitListener() {
@@ -67,7 +67,7 @@ public class RegistrationView extends DefaultPage implements HasNotifications {
 		});
 	}
 
-	private Div getPanelContainer() {
+	private Div getRightPanel() {
 		H3 h3 = new H3("Welcome Back!");
 		Paragraph p = new Paragraph("To keep connected with us please login with your personal info");
 		Button btn = new Button("Log in", e -> getUI().ifPresent(ui -> ui.navigate(LoginView.class)));
@@ -75,6 +75,7 @@ public class RegistrationView extends DefaultPage implements HasNotifications {
 
 		btn.addClassNames("btn", "transparent");
 		image.addClassName("image");
+		image.getStyle().set("width", "70vh");
 
 		Div content = new Div(h3, p, btn);
 		content.addClassNames("content");

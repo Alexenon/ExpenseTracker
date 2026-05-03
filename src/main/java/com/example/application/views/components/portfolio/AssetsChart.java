@@ -85,7 +85,8 @@ public class AssetsChart extends Div {
 	private Function<AssetDTO, BigDecimal> chartMapper() {
 		return switch (options.getValue()) {
 			case WORTH -> asset -> portfolioPerformanceTracker.getAssetWorth(portfolio, asset);
-			case INVESTED -> asset -> portfolioPerformanceTracker.getAssetRemainingTokensCost(portfolio, asset);
+			case INVESTED -> asset -> portfolioPerformanceTracker.getAssetRemainingTokensCost(portfolio, asset)
+					.orElse(BigDecimal.ZERO);
 		};
 	}
 

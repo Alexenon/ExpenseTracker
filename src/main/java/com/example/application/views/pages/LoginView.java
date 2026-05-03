@@ -26,10 +26,10 @@ public class LoginView extends DefaultPage implements BeforeEnterObserver {
 		loginComponent = new LoginComponent();
 		loginComponent.addClassName("login-container");
 
-		add(loginComponent, getPanelContainer());
+		add(loginComponent, getLeftPanel());
 	}
 
-	private Div getPanelContainer() {
+	private Div getLeftPanel() {
 		H3 h3 = new H3("Welcome to IncomeMate!");
 		Paragraph p = new Paragraph("Enter your personal details and start journey with us!");
 		Button btn = new Button("Register", e -> getUI().ifPresent(ui -> ui.navigate(RegistrationView.class)));
@@ -37,6 +37,7 @@ public class LoginView extends DefaultPage implements BeforeEnterObserver {
 
 		btn.addClassNames("btn", "transparent");
 		image.addClassName("image");
+		image.getStyle().set("width", "70vh");
 
 		Div content = new Div(h3, p, btn);
 		content.addClassNames("content");
