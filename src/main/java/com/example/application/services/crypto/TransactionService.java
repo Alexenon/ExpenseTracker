@@ -21,7 +21,7 @@ import java.util.Optional;
 
 /*
 
-	TODO: [CRITICAL]
+	TODO: [CRITICAL] EXTREME
 		[!] After deletion -> profit, realized, ... should be reverted  -> Requires transaction snapshot feature to be added firstly
 			[-] Rollback should also cover the avgBuyPrice for all transactions that are after the deleted transaction
 * */

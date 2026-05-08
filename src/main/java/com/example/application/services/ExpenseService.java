@@ -14,20 +14,12 @@ import jakarta.annotation.Nonnull;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
-
-/*
-    TODO:
-        - Fix convertToExpense
-        - Fix updateExpense
-        - Remove old implementations of monthly expenses
-* */
 
 @Service
 @RequiredArgsConstructor
@@ -75,7 +67,6 @@ public class ExpenseService {
 				.forEach(this::saveExpense);
 	}
 
-	@Nullable
 	public Expense updateExpense(@NotNull Expense expense) {
 		Objects.requireNonNull(expense, "expense");
 		Expense expenseToUpdate = expenseRepository.findById(expense.getId())

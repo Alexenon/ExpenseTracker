@@ -1,15 +1,5 @@
 package com.example.application.views.components;
 
-/*
-    TODO: [LONG TERM]
-     - [!] Add Edit/Delete btn, directly in the grid, and in the display itself
-     - [?] Add sync button functionality(don't forget about checkbox value)
-    _______________________________________________________________________________________________________________________________________
-    | Name | Price  | Total Cost  | Amount | Edit | Delete |
-    | BTC  | $64000 | $450        | 0.0034 | [⚒]  |  [❌]  |
-    _______________________________________________________________________________________________________________________________________
-*/
-
 import com.example.application.data.dtos.AssetDTO;
 import com.example.application.data.dtos.TransactionDTO;
 import com.example.application.entities.common.TransactionType;
@@ -75,8 +65,8 @@ public class TransactionsGrid extends Div {
 		grid.addColumn(TransactionDTO::getAssetSymbol).setHeader("Name").setFrozen(true);
 		grid.addColumn(quantityColumnRenderer()).setHeader("Quantity");
 		grid.addColumn(priceColumnRenderer()).setHeader("Price");
-		grid.addColumn(priceColumnRenderer(TransactionDTO::getOrderTotalCost)).setHeader("Total");
-		grid.addColumn(new LocalDateTimeRenderer<>(TransactionDTO::getDateTime, CommonFormatters.DATE_FRIENDLY_FORMAT)).setHeader("Date");
+		grid.addColumn(priceColumnRenderer(TransactionDTO::getOrderTotalCost)).setHeader("Cost");
+		grid.addColumn(dateTimeRenderer()).setHeader("Date");
 		grid.addColumn(profitLossColumnRenderer()).setHeader("Profit/Loss").setFrozenToEnd(true);
 		grid.getColumns().forEach(column -> {
 			column.setSortable(true);
@@ -161,6 +151,10 @@ public class TransactionsGrid extends Div {
 		return new NumberRenderer<>(priceProvider, NumberFormat.getCurrencyInstance(Locale.US), "$0.00");
 	}
 
+	private LocalDateTimeRenderer<TransactionDTO> dateTimeRenderer() {
+		return new LocalDateTimeRenderer<>(TransactionDTO::getDateTime, CommonFormatters.DATE_FRIENDLY_FORMAT);
+	}
+
 	private String getProfitLossClassName(TransactionDTO transaction) {
 		BigDecimal currentPrice = getAssetMarketPrice(transaction);
 		BigDecimal profit = ProfitUtils.netProfit(transaction, currentPrice);
@@ -168,7 +162,6 @@ public class TransactionsGrid extends Div {
 		if (profit.signum() == 0)
 			return "";
 
-		// FIXME: EMMM??? -> REFACTOR
 		return profit.signum() > 0 ? "value-increase" : "value-decrease";
 	}
 

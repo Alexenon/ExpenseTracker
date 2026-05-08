@@ -21,6 +21,8 @@ import java.util.Objects;
  * <h3>Features:</h3>
  * <ul>
  *  <li>Wanted price</li>
+ *  </ul>
+ *  <ul>
  * Optional:
  *  <li>Amount of Tokens</li>
  *  <li>Amount in USDT</li>
@@ -29,143 +31,142 @@ import java.util.Objects;
  */
 public class PriceMonitorContainer extends Div {
 
-    private final Button addNewPriceLayoutBtn = new Button(LumoIcon.PLUS.create());
-    private final Div priceLayoutContainer = new Div();
+	private final Button addNewPriceLayoutBtn = new Button(LumoIcon.PLUS.create());
+	private final Div priceLayoutContainer = new Div();
 
-    public PriceMonitorContainer() {
-        initialize();
-    }
+	public PriceMonitorContainer() {
+		initialize();
+	}
 
-    private void initialize() {
-        addNewPriceLayoutBtn.addClickListener(e -> priceLayoutContainer.add(new PriceLayout()));
-        priceLayoutContainer.add(new PriceLayout());
-        add(addNewPriceLayoutBtn, priceLayoutContainer);
-    }
+	private void initialize() {
+		addNewPriceLayoutBtn.addClickListener(e -> priceLayoutContainer.add(new PriceLayout()));
+		priceLayoutContainer.add(new PriceLayout());
+		add(addNewPriceLayoutBtn, priceLayoutContainer);
+	}
 
-    /*
-     * PriceLayout used for tracking wanted sell/buy prices
-     * */
-    private static class PriceLayout extends Div {
+	/*
+	 * PriceLayout used for tracking wanted sell/buy prices
+	 * */
+	private static class PriceLayout extends Div {
 
-        private static final int INDEX_OF_AMOUNT_FIELD = 2;
+		private static final int INDEX_OF_AMOUNT_FIELD = 2;
 
-        private final RadioButtonGroup<String> radioButtonGroup = new RadioButtonGroup<>();
+		private final RadioButtonGroup<String> radioButtonGroup = new RadioButtonGroup<>();
 
-        private final NumberField price = new NumberField("Price");
-        private final NumberField tokenAmount = new NumberField("Amount in Tokens");
-        private final NumberField usdtAmount = new NumberField("Amount in USDT");
-        private final NumberField percentAmount = new NumberField("Percentage amount");
-        private final Span amountHelperSpan = new Span("≈");
+		private final NumberField price = new NumberField("Price");
+		private final NumberField tokenAmount = new NumberField("Amount in Tokens");
+		private final NumberField usdtAmount = new NumberField("Amount in USDT");
+		private final NumberField percentAmount = new NumberField("Percentage amount");
+		private final Span amountHelperSpan = new Span("≈");
 
-        private final Button removeIcon = new Button(LumoIcon.CROSS.create());
-        private final Checkbox markAsBought = new Checkbox("Mark as bought");
-        private final Button editBtn = new Button(LumoIcon.EDIT.create());
-        private boolean isEditMode;
+		private final Button removeIcon = new Button(LumoIcon.CROSS.create());
+		private final Checkbox markAsBought = new Checkbox("Mark as bought");
+		private final Button editBtn = new Button(LumoIcon.EDIT.create());
+		private boolean isEditMode;
 
-        public PriceLayout() {
-            init();
-            Div amountHelper = new Div(amountHelperSpan);
-            add(radioButtonGroup, price, tokenAmount, amountHelper, markAsBought, removeIcon);
-        }
+		public PriceLayout() {
+			init();
+			Div amountHelper = new Div(amountHelperSpan);
+			add(radioButtonGroup, price, tokenAmount, amountHelper, markAsBought, removeIcon);
+		}
 
-        private void init() {
-            removeIcon.addClickListener(event -> this.removeFromParent());
-            tokenAmount.setSuffixComponent(new Paragraph("BTC"));
-            price.setPrefixComponent(new Paragraph("$"));
-            usdtAmount.setPrefixComponent(new Paragraph("$"));
-            percentAmount.setSuffixComponent(new Paragraph("%"));
-            tokenAmount.setMin(0);
-            price.setMin(0);
-            percentAmount.setMin(0);
-            percentAmount.setMax(100);
-            setup();
-        }
+		private void init() {
+			removeIcon.addClickListener(event -> this.removeFromParent());
+			tokenAmount.setSuffixComponent(new Paragraph("BTC"));
+			price.setPrefixComponent(new Paragraph("$"));
+			usdtAmount.setPrefixComponent(new Paragraph("$"));
+			percentAmount.setSuffixComponent(new Paragraph("%"));
+			tokenAmount.setMin(0);
+			price.setMin(0);
+			percentAmount.setMin(0);
+			percentAmount.setMax(100);
+			setup();
+		}
 
-        // TODO: Percentage should be allowed just for SELL type
-        private void setup() {
-            radioButtonGroup.setLabel("Additional providers");
-            radioButtonGroup.setItems("None", "Token Amount", "USDT Amount", "Percentage");
-            radioButtonGroup.setValue("None");
-            radioButtonGroup.addValueChangeListener(e -> onRadioButtonChange());
+		private void setup() {
+			radioButtonGroup.setLabel("Additional providers");
+			radioButtonGroup.setItems("None", "Token Amount", "USDT Amount", "Percentage");
+			radioButtonGroup.setValue("None");
+			radioButtonGroup.addValueChangeListener(e -> onRadioButtonChange());
 
-            price.setValue(0.0);
-            price.setValueChangeMode(ValueChangeMode.EAGER);
+			price.setValue(0.0);
+			price.setValueChangeMode(ValueChangeMode.EAGER);
 
-            tokenAmount.setValue(0.0);
-            tokenAmount.setVisible(false);
-            tokenAmount.setValueChangeMode(ValueChangeMode.EAGER);
-            tokenAmount.addValueChangeListener(l -> amountHelperSpan.setText(getTokenAmountListenerValue()));
+			tokenAmount.setValue(0.0);
+			tokenAmount.setVisible(false);
+			tokenAmount.setValueChangeMode(ValueChangeMode.EAGER);
+			tokenAmount.addValueChangeListener(l -> amountHelperSpan.setText(getTokenAmountListenerValue()));
 
-            usdtAmount.setValue(0.0);
-            usdtAmount.setValueChangeMode(ValueChangeMode.EAGER);
-            usdtAmount.addValueChangeListener(l -> amountHelperSpan.setText(getUSDTAmountListenerValue()));
+			usdtAmount.setValue(0.0);
+			usdtAmount.setValueChangeMode(ValueChangeMode.EAGER);
+			usdtAmount.addValueChangeListener(l -> amountHelperSpan.setText(getUSDTAmountListenerValue()));
 
-            editBtn.addClickListener(e -> toggleEditMode());
-        }
+			editBtn.addClickListener(e -> toggleEditMode());
+		}
 
-        private void onRadioButtonChange() {
-            switch (radioButtonGroup.getValue()) {
-                case "Token Amount" -> handleTokenAmountSelection();
-                case "USDT Amount" -> handleUsdtAmountSelection();
-                case "Percentage" -> handlePercentageSelection();
-                default -> getComponentAt(INDEX_OF_AMOUNT_FIELD).setVisible(false);
-            }
-        }
+		private void onRadioButtonChange() {
+			switch (radioButtonGroup.getValue()) {
+				case "Token Amount" -> handleTokenAmountSelection();
+				case "USDT Amount" -> handleUsdtAmountSelection();
+				case "Percentage" -> handlePercentageSelection();
+				default -> getComponentAt(INDEX_OF_AMOUNT_FIELD).setVisible(false);
+			}
+		}
 
-        private void handleTokenAmountSelection() {
-            amountHelperSpan.setText(getTokenAmountListenerValue());
-            price.addValueChangeListener(l -> amountHelperSpan.setText(getTokenAmountListenerValue()));
-            replaceAmountField(tokenAmount);
-        }
+		private void handleTokenAmountSelection() {
+			amountHelperSpan.setText(getTokenAmountListenerValue());
+			price.addValueChangeListener(l -> amountHelperSpan.setText(getTokenAmountListenerValue()));
+			replaceAmountField(tokenAmount);
+		}
 
-        private void handleUsdtAmountSelection() {
-            amountHelperSpan.setText(getUSDTAmountListenerValue());
-            price.addValueChangeListener(l -> amountHelperSpan.setText(getUSDTAmountListenerValue()));
-            replaceAmountField(usdtAmount);
-        }
+		private void handleUsdtAmountSelection() {
+			amountHelperSpan.setText(getUSDTAmountListenerValue());
+			price.addValueChangeListener(l -> amountHelperSpan.setText(getUSDTAmountListenerValue()));
+			replaceAmountField(usdtAmount);
+		}
 
-        private void handlePercentageSelection() {
-            replaceAmountField(percentAmount);
-        }
+		private void handlePercentageSelection() {
+			replaceAmountField(percentAmount);
+		}
 
-        private void toggleEditMode() {
-            isEditMode = !isEditMode;
-            radioButtonGroup.setVisible(isEditMode);
-            editBtn.setIcon(isEditMode ? LumoIcon.CHECKMARK.create() : LumoIcon.EDIT.create());
+		private void toggleEditMode() {
+			isEditMode = !isEditMode;
+			radioButtonGroup.setVisible(isEditMode);
+			editBtn.setIcon(isEditMode ? LumoIcon.CHECKMARK.create() : LumoIcon.EDIT.create());
 
-            price.setReadOnly(!isEditMode);
-            tokenAmount.setReadOnly(!isEditMode);
-            usdtAmount.setReadOnly(!isEditMode);
-            percentAmount.setReadOnly(!isEditMode);
-            markAsBought.setVisible(isEditMode);
-            removeIcon.setVisible(isEditMode);
-        }
+			price.setReadOnly(!isEditMode);
+			tokenAmount.setReadOnly(!isEditMode);
+			usdtAmount.setReadOnly(!isEditMode);
+			percentAmount.setReadOnly(!isEditMode);
+			markAsBought.setVisible(isEditMode);
+			removeIcon.setVisible(isEditMode);
+		}
 
-        private String getTokenAmountListenerValue() {
-            double priceValue = Objects.requireNonNullElse(price.getValue(), 0.0);
-            double tokenAmountValue = Objects.requireNonNullElse(tokenAmount.getValue(), 0.0);
+		private String getTokenAmountListenerValue() {
+			double priceValue = Objects.requireNonNullElse(price.getValue(), 0.0);
+			double tokenAmountValue = Objects.requireNonNullElse(tokenAmount.getValue(), 0.0);
 
-            NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(Locale.US);
-            currencyFormat.setMaximumFractionDigits(0);
+			NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(Locale.US);
+			currencyFormat.setMaximumFractionDigits(0);
 
-            return "≈" + currencyFormat.format(priceValue * tokenAmountValue);
-        }
+			return "≈" + currencyFormat.format(priceValue * tokenAmountValue);
+		}
 
-        private String getUSDTAmountListenerValue() {
-            double priceValue = Objects.requireNonNullElse(price.getValue(), 0.0);
-            double usdtAmountValue = Objects.requireNonNullElse(usdtAmount.getValue(), 0.0);
-            double amountTokens = usdtAmountValue / priceValue;
+		private String getUSDTAmountListenerValue() {
+			double priceValue = Objects.requireNonNullElse(price.getValue(), 0.0);
+			double usdtAmountValue = Objects.requireNonNullElse(usdtAmount.getValue(), 0.0);
+			double amountTokens = usdtAmountValue / priceValue;
 
-            return "≈" + amountTokens + "BTC";
-        }
+			return "≈" + amountTokens + "BTC";
+		}
 
-        public void replaceAmountField(NumberField newComponent) {
-            NumberField oldComponent = (NumberField) getComponentAt(INDEX_OF_AMOUNT_FIELD);
-            newComponent.setValue(oldComponent.getValue());
-            replace(oldComponent, newComponent);
-            newComponent.setVisible(true);
-        }
+		public void replaceAmountField(NumberField newComponent) {
+			NumberField oldComponent = (NumberField) getComponentAt(INDEX_OF_AMOUNT_FIELD);
+			newComponent.setValue(oldComponent.getValue());
+			replace(oldComponent, newComponent);
+			newComponent.setVisible(true);
+		}
 
-    }
+	}
 
 }

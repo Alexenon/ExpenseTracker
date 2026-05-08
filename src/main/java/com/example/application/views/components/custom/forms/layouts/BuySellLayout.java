@@ -18,8 +18,8 @@ public class BuySellLayout extends Div {
 
 	private final AmountField amountField = new AmountField("Amount");
 	private final MoneyField buyPriceField = new MoneyField("Buy Price");
-	private final MoneyField totalCostField = new MoneyField("Total");
 	private final MoneyField sellPriceField = new MoneyField("Sell Price");
+	private final MoneyField totalCostField = new MoneyField("Total Cost");
 
 	public BuySellLayout() {
 		initializeFieldsListeners();
@@ -45,7 +45,9 @@ public class BuySellLayout extends Div {
 		totalCostField.addKeyUpListener(e -> {
 			BigDecimal totalCost = totalCostField.getMoneyAmount();
 			BigDecimal buyPrice = buyPriceField.getMoneyAmount();
-			BigDecimal amountValue = totalCost.divide(buyPrice, FinancialConstants.AMOUNT_SCALE, RoundingMode.HALF_UP);
+			BigDecimal amountValue = buyPrice.signum() == 0
+					? BigDecimal.ZERO
+					: totalCost.divide(buyPrice, FinancialConstants.AMOUNT_SCALE, RoundingMode.HALF_UP);
 			amountField.setValue(amountValue);
 		});
 	}

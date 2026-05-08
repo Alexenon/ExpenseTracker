@@ -7,6 +7,7 @@ import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.utils.common.formatters.CommonFormatters;
 import com.example.application.views.components.core.Container;
+import com.example.application.views.components.custom.dialogs.transactions.AddTransactionDialog;
 import com.example.application.views.components.custom.display.PercentageBadge;
 import com.example.application.views.components.utils.common.GridUtils;
 import com.example.application.views.pages.crypto.AssetDetailsView;
@@ -239,8 +240,12 @@ public class AssetsGrid extends Div {
 		ColumnToggleMenu columnToggleMenu = new ColumnToggleMenu();
 		grid.addColumn(new ComponentRenderer<>(this::threeDotsBtn))
 				.setHeader(columnToggleMenu)
-				.setTextAlign(ColumnTextAlign.CENTER)
-				.setFrozenToEnd(true);
+				.setFrozenToEnd(true)
+				.getStyle()
+				.setWidth("40px")
+				.set("display", "flex")
+				.set("justify-content", "center");
+		// TODO: The button should be placed in the middle of the cell
 
 		List<Grid.Column<AssetGridItem>> columnsWithData = grid.getColumns().subList(0, grid.getColumns().size() - 1);
 
@@ -352,7 +357,7 @@ public class AssetsGrid extends Div {
 	}
 
 	private Button threeDotsBtn() {
-		return new Button(); // TODO: SHOULD BE IMPLEMENTED SOMETHING
+		return new Button(LumoIcon.PLUS.create(), e -> new AddTransactionDialog(portfolio, instrumentsFacadeService).open());
 	}
 
 	private Div hiddenRowsContainer() {

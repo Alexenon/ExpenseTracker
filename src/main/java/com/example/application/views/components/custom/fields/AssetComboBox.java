@@ -28,7 +28,7 @@ public class AssetComboBox extends ComboBox<AssetDTO> {
 		setRenderer(assetSymbolRenderer());
 	}
 
-	public void setValue(String symbol) {
+	public void setValueBySymbol(String symbol) {
 		AssetDTO asset = Optional.ofNullable(symbol)
 				.flatMap(a -> instrumentsFacadeService.getAssetBySymbol(symbol))
 				.orElse(null);

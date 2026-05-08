@@ -29,33 +29,14 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.validator.BigDecimalRangeValidator;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 
-/*
-
-    FIXME:
-        - When user don't have amount of such tokens then:
-            1. BuyPriceField = current price
-            2. SellPriceField = empty
-            3. AmountField = empty
-            4. Total = don't touch, automatically will be calculated
-            5. Force user to add SellPrice
-
-	TODO: [URGENT]
-		- Add input field validation that triggers on calculateBtn click
-		- Same for other calculators
-
-    TODO: Ideally, move as two separate features into 2 different calculators:
-        - Profit sell calculator
-        - What happens when achieve such price, without having amount of tokens
-        * [Maybe add a checkbox to give user to exclude placing amount/total cost]
-* */
-
-public class SellProfitTab extends BaseCalculatorTab implements HasNotifications {
+public class ProfitSellTab extends BaseCalculatorTab implements HasNotifications, BeforeEnterObserver {
 
 	private final PortfolioDTO portfolio;
 	private final PortfolioPerformanceTracker portfolioPerformanceTracker;
@@ -69,7 +50,7 @@ public class SellProfitTab extends BaseCalculatorTab implements HasNotifications
 	private final Binder<CreateTransactionRequest> binder = new Binder<>(CreateTransactionRequest.class);
 
 	@Autowired
-	public SellProfitTab(InstrumentsFacadeService instrumentsFacadeService, PortfolioPerformanceTracker portfolioPerformanceTracker) {
+	public ProfitSellTab(InstrumentsFacadeService instrumentsFacadeService, PortfolioPerformanceTracker portfolioPerformanceTracker) {
 		super("Sell profit calculator", instrumentsFacadeService);
 		this.portfolioPerformanceTracker = portfolioPerformanceTracker;
 		this.assetSymbolField = new AssetComboBox(instrumentsFacadeService);
@@ -82,9 +63,9 @@ public class SellProfitTab extends BaseCalculatorTab implements HasNotifications
 	}
 
 	private void buildForm() {
-		initBinder();
-//		initializeFieldsValues();
+		initializeFieldsValues();
 		initializeFieldsListeners();
+		initializeBinder();
 	}
 
 	private void initializeFieldsValues() {
@@ -99,12 +80,9 @@ public class SellProfitTab extends BaseCalculatorTab implements HasNotifications
 		BigDecimal avgBuyPrice = portfolioPerformanceTracker.getAverageBuyPrice(portfolio, selectedAsset)
 				.orElse(marketPrice);
 
-		BigDecimal avgSellPrice = portfolioPerformanceTracker.getAverageBuyPrice(portfolio, selectedAsset)
-				.orElse(null);
-
 		amountField.setValue(amountOfTokens);
 		buyPriceField.setValue(avgBuyPrice);
-		sellPriceField.setValue(avgSellPrice);
+		sellPriceField.setValue("");
 		totalCostField.setValue(amountOfTokens.multiply(avgBuyPrice));
 	}
 
@@ -133,7 +111,9 @@ public class SellProfitTab extends BaseCalculatorTab implements HasNotifications
 		totalCostField.addKeyUpListener(e -> {
 			BigDecimal totalCost = totalCostField.getMoneyAmount();
 			BigDecimal buyPrice = buyPriceField.getMoneyAmount();
-			BigDecimal amount = totalCost.divide(buyPrice, FinancialConstants.PRICE_SCALE, RoundingMode.HALF_UP);
+			BigDecimal amount = buyPrice.signum() == 0
+					? BigDecimal.ZERO
+					: totalCost.divide(buyPrice, FinancialConstants.PRICE_SCALE, RoundingMode.HALF_UP);
 			amountField.setValue(amount);
 		});
 	}
@@ -201,15 +181,23 @@ public class SellProfitTab extends BaseCalculatorTab implements HasNotifications
 
 	private String zeroQuantitySellProfit(BigDecimal invested, BigDecimal sellPrice) {
 		String symbol = assetSymbolField.getSymbol().orElse("");
-		BigDecimal amountTokens = invested.divide(sellPrice, FinancialConstants.AMOUNT_SCALE, RoundingMode.HALF_UP);
+		BigDecimal amountTokens = sellPrice.signum() == 0
+				? BigDecimal.ZERO
+				: invested.divide(sellPrice, FinancialConstants.AMOUNT_SCALE, RoundingMode.HALF_UP);
+
 		return "%s %s".formatted(amountFormatter.format(amountTokens), symbol);
 	}
 
 	private Paragraph getTokensProfitWrapper() {
 		String selectedSymbol = assetSymbolField.getSymbol().orElse("");
-		BigDecimal tokensToSellToBeInZero = totalCostField.getMoneyAmount()
-				.divide(sellPriceField.getMoneyAmount(), FinancialConstants.AMOUNT_SCALE, RoundingMode.HALF_UP);
-		BigDecimal profitTokens = amountField.getAmount().subtract(tokensToSellToBeInZero);
+		BigDecimal sellPrice = sellPriceField.getMoneyAmount();
+		BigDecimal totalCost = totalCostField.getMoneyAmount();
+
+		BigDecimal tokensToSellToBeInZero = sellPrice.signum() == 0
+				? BigDecimal.ZERO
+				: totalCost.divide(sellPrice, FinancialConstants.AMOUNT_SCALE, RoundingMode.HALF_UP);
+
+		BigDecimal profitTokens = amountField.getAmount().subtract(tokensToSellToBeInZero).abs();
 		BigDecimal profitTokensValue = profitTokens.multiply(buyPriceField.getMoneyAmount());
 		return new Paragraph(String.format("%s %s ≈ $%.2f", amountFormatter.format(profitTokens), selectedSymbol, profitTokensValue));
 	}
@@ -238,7 +226,7 @@ public class SellProfitTab extends BaseCalculatorTab implements HasNotifications
 		return new Container("centered-row", previousFDV, arrowIcon, followingFDV);
 	}
 
-	private void initBinder() {
+	private void initializeBinder() {
 		binder.readBean(null);
 		binder.forField(amountField)
 				.asRequired("Please fill this field")

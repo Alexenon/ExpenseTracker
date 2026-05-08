@@ -121,7 +121,8 @@ public class InstrumentsFacadeService {
 	}
 
 	public Optional<AssetDTO> getAssetBySymbol(@NotNull String symbol) {
-		return assetService.findBySymbol(symbol).map(AssetDTO::mappedFrom);
+		return assetService.findBySymbol(symbol)
+				.map(AssetDTO::mappedFrom);
 	}
 
 	public BigDecimal getAmountOfTokens(Long portfolioId, String assetSymbol) {
@@ -155,11 +156,9 @@ public class InstrumentsFacadeService {
 				.filter(TransactionDTO::isBuyTransaction)
 				.map(TransactionDTO::getAssetSymbol)
 				.distinct()
-				.map(symbol ->
-						getAssetBySymbol(symbol)
-								.orElseThrow(() ->
-										new InternalUnexpectedException("No asset with symbol " + symbol)))
-				.toList();
+				.map(symbol -> getAssetBySymbol(symbol)
+						.orElseThrow(() -> new InternalUnexpectedException("No asset with symbol " + symbol))
+				).toList();
 	}
 	//</editor-fold>
 

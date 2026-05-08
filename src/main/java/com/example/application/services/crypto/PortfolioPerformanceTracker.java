@@ -21,7 +21,6 @@ import static com.example.application.utils.investment.ProfitUtils.ONE_HUNDRED_P
 		- After updating a transaction, totalCost doesnt display value right
 */
 
-
 @Service
 public class PortfolioPerformanceTracker {
 
@@ -81,7 +80,10 @@ public class PortfolioPerformanceTracker {
 		BigDecimal worth = getAssetWorth(portfolio, asset);
 		BigDecimal remainingTokensCost = getAssetRemainingTokensCost(portfolio, asset)
 				.orElse(BigDecimal.ZERO);
-		return worth.divide(remainingTokensCost, FinancialConstants.PRICE_SCALE, RoundingMode.HALF_UP);
+
+		return remainingTokensCost.signum() == 0
+				? BigDecimal.ZERO
+				: worth.divide(remainingTokensCost, FinancialConstants.PRICE_SCALE, RoundingMode.HALF_UP);
 	}
 
 	public String getAssetBuySellRatio(PortfolioDTO portfolio, AssetDTO asset) {
@@ -98,9 +100,15 @@ public class PortfolioPerformanceTracker {
 	 * @return the asset diversity percentage in the portfolio, range (0 - 100)%
 	 */
 	public int getAssetDiversityPercentage(PortfolioDTO portfolio, AssetDTO asset) {
-		BigDecimal totalPercentage = getAssetWorth(portfolio, asset)
-				.divide(getPortfolioWorth(portfolio), 2, RoundingMode.HALF_UP);
-		return totalPercentage.multiply(ONE_HUNDRED_PERCENT).intValue();
+		BigDecimal portfolioWorth = getPortfolioWorth(portfolio);
+
+		if (portfolioWorth.signum() == 0)
+			return 0;
+
+		return getAssetWorth(portfolio, asset)
+				.divide(portfolioWorth, 2, RoundingMode.HALF_UP)
+				.multiply(ONE_HUNDRED_PERCENT)
+				.intValue();
 	}
 	//endregion
 
@@ -169,10 +177,9 @@ public class PortfolioPerformanceTracker {
 		if (portfolioCost.signum() == 0)
 			return BigDecimal.ZERO;
 
-		BigDecimal totalPercentage = getPortfolioWorth(portfolio)
-				.divide(portfolioCost, FinancialConstants.PRICE_SCALE, RoundingMode.HALF_UP);
-
-		return totalPercentage.multiply(ONE_HUNDRED_PERCENT)
+		return getPortfolioWorth(portfolio)
+				.divide(portfolioCost, FinancialConstants.PRICE_SCALE, RoundingMode.HALF_UP)
+				.multiply(ONE_HUNDRED_PERCENT)
 				.subtract(ONE_HUNDRED_PERCENT);
 	}
 

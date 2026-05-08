@@ -11,9 +11,9 @@ import com.example.application.utils.exceptions.InternalUnexpectedException;
 import com.example.application.utils.exceptions.InvalidDataException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,8 +39,8 @@ public class AssetService {
 		return assetRepository.findById(assetId);
 	}
 
-	public Optional<Asset> findBySymbol(@NotNull String symbolName) {
-		return Optional.of(symbolName)
+	public Optional<Asset> findBySymbol(@Nullable String symbolName) {
+		return Optional.ofNullable(symbolName)
 				.map(String::trim)
 				.filter(s -> !s.isEmpty())
 				.map(String::toUpperCase)

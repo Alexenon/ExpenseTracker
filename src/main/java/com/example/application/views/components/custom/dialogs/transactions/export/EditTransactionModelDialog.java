@@ -102,7 +102,7 @@ public class EditTransactionModelDialog extends Dialog implements HasNotificatio
 	}
 
 	private void initializeFieldsValues() {
-		assetSymbolField.setValue(transaction.getSymbol());
+		assetSymbolField.setValueBySymbol(transaction.getSymbol());
 		typeField.setValue(transaction.getType());
 		amountField.setValue(transaction.getAmount());
 		marketPriceField.setValue(transaction.getPrice());

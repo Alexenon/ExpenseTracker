@@ -22,11 +22,6 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(body(request, e, HttpStatus.NOT_FOUND), HttpStatus.NOT_FOUND);
     }
 
-//    @ExceptionHandler({
-//            UserExistException.class,
-//            UsernameNotFoundException.class,
-//            BadCredentialsException.class
-//    })
     @ExceptionHandler(UsernameTakenException.class)
     public ResponseEntity<Object> handleExceptionsBadRequest(MethodArgumentNotValidException e, WebRequest request) {
         return new ResponseEntity<>(body(request, e, HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);

@@ -15,12 +15,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-/*
- * TODO: [LONG TERM]
- *  - (checkbox) Retrieve from holdings, on successful state if user wants to
- *
- * */
-
 @Service
 @RequiredArgsConstructor
 public class AssetWatcherService {

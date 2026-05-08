@@ -12,10 +12,6 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.util.List;
 
-/*
- * TODO: ADD VIEW TO EXCLUDE ADDING ALIASES EVERYWHERE
- * */
-
 @Repository
 public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 

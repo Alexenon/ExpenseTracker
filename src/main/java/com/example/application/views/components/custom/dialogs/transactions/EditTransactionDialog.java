@@ -96,7 +96,7 @@ public class EditTransactionDialog extends Dialog implements HasNotifications {
 	}
 
 	private void initializeFieldsValues() {
-		assetSymbolField.setValue(initialRequest.getAssetSymbol());
+		assetSymbolField.setValueBySymbol(initialRequest.getAssetSymbol());
 		typeField.setValue(initialRequest.getType());
 		amountField.setValue(initialRequest.getOrderQuantity());
 		totalCostField.setValue(initialRequest.getOrderTotalCost());

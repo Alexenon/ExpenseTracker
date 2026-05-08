@@ -13,6 +13,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
@@ -20,7 +21,7 @@ import java.math.RoundingMode;
 
 import static com.example.application.utils.investment.EarnCalculator.*;
 
-public final class StakingProfitTab extends BaseCalculatorTab {
+public final class StakingProfitTab extends BaseCalculatorTab implements BeforeEnterObserver {
 
 	private static final AmountFormatter amountFormatter = AmountFormatter.withDefaults();
 	private static final CurrencyFormatter currencyFormatter = CurrencyFormatter.withDefaults();
@@ -79,7 +80,9 @@ public final class StakingProfitTab extends BaseCalculatorTab {
 		worthField.addKeyUpListener(e -> {
 			BigDecimal worth = worthField.getMoneyAmount();
 			BigDecimal marketPrice = assetSymbolField.getMarketPrice().orElse(BigDecimal.ZERO);
-			BigDecimal amountOfTokens = worth.divide(marketPrice, FinancialConstants.AMOUNT_SCALE, RoundingMode.HALF_UP);
+			BigDecimal amountOfTokens = marketPrice.signum() == 0
+					? BigDecimal.ZERO
+					: worth.divide(marketPrice, FinancialConstants.AMOUNT_SCALE, RoundingMode.HALF_UP);
 			amountField.setValue(amountOfTokens);
 		});
 	}
