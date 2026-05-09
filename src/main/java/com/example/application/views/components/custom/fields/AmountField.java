@@ -21,6 +21,11 @@ public class AmountField extends AbstractNumberTextField {
 	}
 
 	public void setValue(BigDecimal value) {
+		if (value == null) {
+			super.setValue("");
+			return;
+		}
+
 		String formatedValue = StringUtils.stripTrailingZeroes(parse(value));
 		super.setValue(formatedValue);
 	}

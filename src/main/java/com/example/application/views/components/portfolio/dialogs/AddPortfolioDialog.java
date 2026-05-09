@@ -73,13 +73,19 @@ public class AddPortfolioDialog extends Dialog implements HasNotifications {
 				.setMinLengthErrorMessage("Porfolio Name must be have at least %s characters".formatted(MIN_NAME_LENGTH))
 				.setMaxLengthErrorMessage("Porfolio Name must be have maximum %s characters".formatted(MAX_NAME_LENGTH)));
 
-		binder.setBean(CreatePortfolioRequest.builder().build());
+		binder.setBean(defaultRequest());
 		binder.forField(nameField)
 				.asRequired("Porfolio Name cannot be blank")
 				.withValidator(s -> s.length() >= MIN_NAME_LENGTH, "Porfolio Name must be have at least %s characters".formatted(MIN_NAME_LENGTH))
 				.withValidator(s -> s.length() <= MAX_NAME_LENGTH, "Porfolio Name must be have maximum %s characters".formatted(MAX_NAME_LENGTH))
 				.withValidator(s -> instrumentsFacadeService.getPortfolioByName(s).isEmpty(), "There is already a portfolio with such name")
 				.bind(CreatePortfolioRequest::getPortfolioName, CreatePortfolioRequest::setPortfolioName);
+	}
+
+	private CreatePortfolioRequest defaultRequest() {
+		return CreatePortfolioRequest.builder()
+				.userId(instrumentsFacadeService.getAuthenticatedUser().getId())
+				.build();
 	}
 
 }

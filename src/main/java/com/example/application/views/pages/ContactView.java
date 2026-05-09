@@ -2,85 +2,80 @@ package com.example.application.views.pages;
 
 import com.example.application.data.requests.RegisterUserRequest;
 import com.example.application.services.crypto.InstrumentsFacadeService;
-import com.example.application.views.components.custom.forms.RegisterForm;
-import com.example.application.views.components.utils.HasNotifications;
+import com.example.application.views.components.custom.forms.ContactUsForm;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
-import com.vaadin.flow.component.html.*;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.textfield.EmailField;
+import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.validator.EmailValidator;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @AnonymousAllowed
-@PageTitle("Registration")
-@Route(value = "register")
+@PageTitle("Contact")
+@Route(value = "contact")
 @CssImport("./themes/light_theme/styles/page-styles/auth-pages.css")
-public class RegistrationView extends DefaultPage implements HasNotifications {
+public class ContactView extends DefaultPage {
 
-	private static final Logger log = LoggerFactory.getLogger(RegistrationView.class);
+	private final TextField name = new TextField("Name");
+	private final EmailField email = new EmailField("Email");
+	private final TextArea message = new TextArea("Message");
+	private final Button sendBtn = new Button("Send");
+	private final Image image = new Image("images/envelope.svg", "Contact image");
 
 	private final Binder<RegisterUserRequest> binder = new Binder<>(RegisterUserRequest.class);
-	private final RegisterForm registerForm = new RegisterForm();
+	private final ContactUsForm contactUsForm = new ContactUsForm();
 
 	@Autowired
 	private InstrumentsFacadeService instrumentsFacadeService;
 
-	public RegistrationView() {
+	public ContactView() {
 		initBinder();
 		initContent();
 	}
 
 	public void initContent() {
-		log.info("Accessed registration page");
 		setId("register-page");
 
-		H2 title = new H2("Register");
+		H2 title = new H2("Contact us");
 		title.addClassName("form-title");
-		registerForm.setId("register-form");
-		registerForm.addComponentAsFirst(title);
-		registerForm.getSubmitBtn().addClassName("submit-btn");
+		contactUsForm.setId("register-form");
+		contactUsForm.addComponentAsFirst(title);
+		contactUsForm.getSendBtn().addClassName("submit-btn");
 		addSubmitListener();
 
-		Div registerContainer = new Div(registerForm);
+		Div registerContainer = new Div(contactUsForm);
 		registerContainer.addClassName("register-container");
 
 		add(registerContainer, getRightPanel());
 	}
 
 	private void addSubmitListener() {
-		registerForm.getSubmitBtn().addClickListener(l -> {
+		contactUsForm.getSendBtn().addClickListener(l -> {
 			if (binder.validate().isOk()) {
 				RegisterUserRequest request = binder.getBean();
 				instrumentsFacadeService.createNewUser(request);
-				log.info("User '{}' created successfully", request.getUsername());
 				showSuccessfulNotification("User created successfully!");
 				getUI().ifPresent(ui -> ui.navigate(LoginView.class));
 			} else {
-				log.error("Submitted Registration Form with validation errors");
-				showErrorNotification("Submitted Registration Form with validation errors");
+				showErrorNotification("Submitted 'Contact us' form with validation errors");
 			}
 		});
 	}
 
 	private Div getRightPanel() {
-		H3 h3 = new H3("Welcome Back!");
-		Paragraph p = new Paragraph("To keep connected with us please login with your personal info");
-		Button btn = new Button("Log in", e -> getUI().ifPresent(ui -> ui.navigate(LoginView.class)));
-		Image image = new Image("images/forgot.svg", "Register page background image");
-
-		btn.addClassNames("btn", "transparent");
+		Image image = new Image("images/envelope.svg", "Contact us image");
 		image.addClassName("image");
 		image.getStyle().set("width", "70vh");
 
-		Div content = new Div(h3, p, btn);
-		content.addClassNames("content");
-
-		Div rightPanel = new Div(content, image);
+		Div rightPanel = new Div(image);
 		rightPanel.addClassNames("panel", "right-panel");
 
 		Div panelsContainer = new Div(rightPanel);
@@ -91,25 +86,19 @@ public class RegistrationView extends DefaultPage implements HasNotifications {
 
 	private void initBinder() {
 		binder.setBean(new RegisterUserRequest());
-		binder.forField(registerForm.getUsername())
+		binder.forField(contactUsForm.getName())
 				.asRequired("Please fill this field")
-				.withValidator(s -> s.length() >= 4, "Username must contain at least 4 characters")
-				.withValidator(s -> s.length() <= 255, "Username must not exceed 255 characters")
+				.withValidator(s -> s.length() >= 4, "Name must contain at least 4 characters")
+				.withValidator(s -> s.length() <= 255, "Name must not exceed 255 characters")
 				.withValidator(s -> !instrumentsFacadeService.isUsernameTaken(s), "Username already exists")
 				.bind(RegisterUserRequest::getUsername, RegisterUserRequest::setUsername);
 
-		binder.forField(registerForm.getPassword())
+		binder.forField(contactUsForm.getMessage())
 				.asRequired("Please fill this field")
-				.withValidator(t -> t.length() >= 4, "Password must contain at least 4 characters")
-				.withValidator(s -> s.length() <= 128, "Password must contain less than 128 characters")
+				.withValidator(s -> s.length() <= 1000, "Message must contain less than 1000 characters")
 				.bind(RegisterUserRequest::getPassword, RegisterUserRequest::setPassword);
 
-		binder.forField(registerForm.getConfirmPassword())
-				.asRequired("Please fill this field")
-				.withValidator(s -> s.equals(registerForm.getPassword().getValue()), "Passwords don't match")
-				.bind(RegisterUserRequest::getConfirmPassword, RegisterUserRequest::setConfirmPassword);
-
-		binder.forField(registerForm.getEmail())
+		binder.forField(contactUsForm.getEmail())
 				.asRequired("Please fill this field")
 				.withValidator(new EmailValidator("Please enter a valid email address"))
 				.withValidator(s -> !instrumentsFacadeService.isEmailTaken(s), "This email is already used")

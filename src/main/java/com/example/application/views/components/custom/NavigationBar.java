@@ -14,46 +14,39 @@ import com.vaadin.flow.router.RouterLink;
 
 import java.util.List;
 
-/*
-    TODO: [LONG TERM]
-    	- Add Contact Page
-    	- Settings
-    	- Email confirmation
-* */
-
 @Tag(Tag.NAV)
 public class NavigationBar extends Nav {
 
-    private final Image logoImage = new Image("/images/logos/logo-white-background.png", "Logo image");
-    private final RouterLink expensesLink = new RouterLink("Expenses", ExpensesView.class);
-    private final RouterLink dashboardLink = new RouterLink("Dashboard", DashboardView.class);
+	private final Image logoImage = new Image("/images/logos/logo-white-background.png", "Logo image");
+	private final RouterLink expensesLink = new RouterLink("Expenses", ExpensesView.class);
+	private final RouterLink dashboardLink = new RouterLink("Dashboard", DashboardView.class);
 	private final RouterLink portfolioLink = new RouterLink("Portfolio", PortfolioTrackerView.class);
 	private final RouterLink calculatorLink = new RouterLink("Calculator", AssetCalculatorView.class);
 
-    public NavigationBar() {
-        addClassName("navbar");
+	public NavigationBar() {
+		addClassName("navbar");
 
-        logoImage.addClassNames("logo");
-        logoImage.addClickListener(e -> getUI().ifPresent(ui -> ui.navigate(HomeView.class)));
+		logoImage.addClassNames("logo");
+		logoImage.addClickListener(e -> getUI().ifPresent(ui -> ui.navigate(HomeView.class)));
 
-        Div innerMenu = new Div();
-        innerMenu.addClassName("menu-inner");
-        innerMenu.add(logoImage);
-        innerMenu.add(getRoutes());
-        innerMenu.getChildren().forEach(c -> c.addClassName("menu-item"));
+		Div innerMenu = new Div();
+		innerMenu.addClassName("menu-inner");
+		innerMenu.add(logoImage);
+		innerMenu.add(getRoutes());
+		innerMenu.getChildren().forEach(c -> c.addClassName("menu-item"));
 
-        Div menu = new Div(innerMenu);
-        menu.setClassName("menu");
+		Div menu = new Div(innerMenu);
+		menu.setClassName("menu");
 
-        add(menu);
-    }
+		add(menu);
+	}
 
-    public List<Component> getRoutes() {
-        return List.of(expensesLink, dashboardLink, portfolioLink, calculatorLink);
-    }
+	public List<Component> getRoutes() {
+		return List.of(expensesLink, dashboardLink, portfolioLink, calculatorLink);
+	}
 
-    public Image getLogo() {
-        return logoImage;
-    }
+	public Image getLogo() {
+		return logoImage;
+	}
 
 }

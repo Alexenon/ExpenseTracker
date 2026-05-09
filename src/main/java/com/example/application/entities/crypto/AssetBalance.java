@@ -9,11 +9,6 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-/*
-	TODO: [URGENT] VERY
-		- Add for each entity annotations like @Size, @Min, @Max, @NotBlank...
-* */
-
 @Data
 @Entity(name = "asset_balances")
 @EqualsAndHashCode(of = {"id", "portfolio", "asset"})

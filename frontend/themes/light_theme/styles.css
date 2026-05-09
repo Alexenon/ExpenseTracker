@@ -203,6 +203,7 @@ vaadin-grid {
 vaadin-select::part(input-field),
 vaadin-combo-box::part(input-field),
 vaadin-text-field::part(input-field),
+vaadin-email-field::part(input-field),
 vaadin-date-picker::part(input-field),
 vaadin-number-field::part(input-field),
 vaadin-multi-select-combo-box::part(input-field)
@@ -214,12 +215,13 @@ vaadin-select::part(input-field),
 vaadin-text-area::part(input-field),
 vaadin-combo-box::part(input-field),
 vaadin-text-field::part(input-field),
+vaadin-email-field::part(input-field),
 vaadin-date-picker::part(input-field),
 vaadin-time-picker::part(input-field),
 vaadin-date-time-picker::part(input-field),
 vaadin-multi-select-combo-box::part(input-field) {
     width: 100%;
-    border-radius: .75rem;
+    border-radius: .40rem;
     border-width: 1px;
     border-style: solid;
     border-color: rgb(209 213 219);

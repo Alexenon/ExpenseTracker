@@ -1,6 +1,7 @@
 package com.example.application.services;
 
 import com.example.application.components.EntityValidator;
+import com.example.application.data.convertors.ExpenseConvertor;
 import com.example.application.data.dtos.ExpenseDTO;
 import com.example.application.data.models.projections.MonthlyExpensesProjection;
 import com.example.application.data.requests.ExpenseRequest;
@@ -8,25 +9,17 @@ import com.example.application.entities.Expense;
 import com.example.application.entities.ExpenseTimestamp;
 import com.example.application.entities.User;
 import com.example.application.repositories.ExpenseRepository;
-import com.example.application.utils.ExpenseConvertor;
 import com.example.application.utils.common.lang.DateUtils;
+import jakarta.annotation.Nonnull;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
-
-/*
-    TODO: Add Facade Service
-        - Fix convertToExpense
-        - Fix updateExpense
-        - Remove old implementations of monthly expenses
-* */
 
 @Service
 @RequiredArgsConstructor
@@ -37,24 +30,24 @@ public class ExpenseService {
 	private final ExpenseConvertor expenseConvertor;
 	private final EntityValidator validator;
 
-	@NotNull
+	@Nonnull
 	public List<ExpenseDTO> getAllExpenses() {
 		return expenseRepository.getAll();
 	}
 
-	@NotNull
+	@Nonnull
 	public List<ExpenseDTO> getAllExpensesByUser(@NotNull String userEmailOrUsername) {
 		Objects.requireNonNull(userEmailOrUsername, "user email or username");
 		return expenseRepository.getAll(userEmailOrUsername);
 	}
 
-	@NotNull
+	@Nonnull
 	public List<ExpenseDTO> getAllExpensesByUser(@NotNull User user) {
 		Objects.requireNonNull(user, "user");
 		return getAllExpensesByUser(user.getUsername());
 	}
 
-	@NotNull
+	@Nonnull
 	public List<ExpenseDTO> getAllExpensesByUser() {
 		return getAllExpensesByUser(securityService.getAuthenticatedUser());
 	}
@@ -74,7 +67,6 @@ public class ExpenseService {
 				.forEach(this::saveExpense);
 	}
 
-	@Nullable
 	public Expense updateExpense(@NotNull Expense expense) {
 		Objects.requireNonNull(expense, "expense");
 		Expense expenseToUpdate = expenseRepository.findById(expense.getId())
@@ -117,28 +109,28 @@ public class ExpenseService {
 		expenseRepository.deleteAll();
 	}
 
-	@NotNull
+	@Nonnull
 	public List<ExpenseDTO> getExpensesByCategory(String categoryName) {
 		return expenseRepository.findByCategory(categoryName);
 	}
 
-	@NotNull
+	@Nonnull
 	public List<ExpenseDTO> getExpensesByMonth(int month) {
 		return expenseRepository.findExpensesPerMonth(month);
 	}
 
-	@NotNull
+	@Nonnull
 	public List<ExpenseDTO> getExpensesByYear(int year) {
 		return expenseRepository.findExpensesPerYear(year);
 	}
 
-	@NotNull
+	@Nonnull
 	@Transactional
 	public List<MonthlyExpensesProjection> getMonthlyExpensesByUser() {
 		return getMonthlyExpensesByUser(securityService.getAuthenticatedUser(), LocalDate.now());
 	}
 
-	@NotNull
+	@Nonnull
 	@Transactional
 	public List<MonthlyExpensesProjection> getMonthlyExpensesByUser(@NotNull LocalDate date) {
 		return getMonthlyExpensesByUser(securityService.getAuthenticatedUser(), date);
@@ -152,7 +144,7 @@ public class ExpenseService {
 	 *                  <li>NEXT MONTH -> into another date with its first day of month
 	 *              </ul>
 	 */
-	@NotNull
+	@Nonnull
 	@Transactional
 	public List<MonthlyExpensesProjection> getMonthlyExpensesByUser(@NotNull User user, @NotNull LocalDate date) {
 		Objects.requireNonNull(user, "user");

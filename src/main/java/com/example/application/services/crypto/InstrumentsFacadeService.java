@@ -1,11 +1,15 @@
 package com.example.application.services.crypto;
 
+import com.example.application.components.EntityValidator;
+import com.example.application.data.convertors.AssetConvertor;
 import com.example.application.data.dtos.*;
 import com.example.application.data.enums.SymbolIndentifier;
 import com.example.application.data.models.InstrumentsProvider;
 import com.example.application.data.requests.CreateTransactionRequest;
 import com.example.application.data.requests.RegisterUserRequest;
 import com.example.application.data.requests.UpdateTransactionRequest;
+import com.example.application.data.requests.asset.CreateAssetRequest;
+import com.example.application.data.requests.asset.UpdateAssetRequest;
 import com.example.application.data.requests.asset_watchers.CreateAssetWatcherRequest;
 import com.example.application.data.requests.asset_watchers.UpdateAssetWatcherRequest;
 import com.example.application.data.requests.portfolio.CreatePortfolioRequest;
@@ -16,6 +20,7 @@ import com.example.application.services.SecurityService;
 import com.example.application.services.UserService;
 import com.example.application.utils.exceptions.InternalUnexpectedException;
 import com.example.application.utils.fetchers.crypto_compare.response.AssetMetadata;
+import jakarta.annotation.Nonnull;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
@@ -47,6 +52,8 @@ public class InstrumentsFacadeService {
 	private final AssetWatcherService assetWatcherService;
 	private final AssetBalanceService assetBalanceService;
 
+	private final EntityValidator validator;
+
 	@Autowired
 	public InstrumentsFacadeService(
 			SecurityService securityService,
@@ -57,7 +64,8 @@ public class InstrumentsFacadeService {
 			UserAssetService userAssetService,
 			TransactionService transactionService,
 			AssetWatcherService assetWatcherService,
-			AssetBalanceService assetBalanceService
+			AssetBalanceService assetBalanceService,
+			EntityValidator entityValidator
 	)
 	{
 		this.securityService = securityService;
@@ -69,6 +77,7 @@ public class InstrumentsFacadeService {
 		this.transactionService = transactionService;
 		this.assetWatcherService = assetWatcherService;
 		this.assetBalanceService = assetBalanceService;
+		this.validator = entityValidator;
 	}
 
 	//<editor-fold desc="USERS">
@@ -112,7 +121,8 @@ public class InstrumentsFacadeService {
 	}
 
 	public Optional<AssetDTO> getAssetBySymbol(@NotNull String symbol) {
-		return assetService.findBySymbol(symbol).map(AssetDTO::mappedFrom);
+		return assetService.findBySymbol(symbol)
+				.map(AssetDTO::mappedFrom);
 	}
 
 	public BigDecimal getAmountOfTokens(Long portfolioId, String assetSymbol) {
@@ -146,11 +156,9 @@ public class InstrumentsFacadeService {
 				.filter(TransactionDTO::isBuyTransaction)
 				.map(TransactionDTO::getAssetSymbol)
 				.distinct()
-				.map(symbol ->
-						getAssetBySymbol(symbol)
-								.orElseThrow(() ->
-										new InternalUnexpectedException("No asset with symbol " + symbol)))
-				.toList();
+				.map(symbol -> getAssetBySymbol(symbol)
+						.orElseThrow(() -> new InternalUnexpectedException("No asset with symbol " + symbol))
+				).toList();
 	}
 	//</editor-fold>
 
@@ -367,9 +375,10 @@ public class InstrumentsFacadeService {
 
 	//<editor-fold desc="PORTFOLIOS">
 
-	@NotNull
+	@Nonnull
 	@Transactional
 	public PortfolioDTO createPortfolio(@Valid CreatePortfolioRequest request) {
+		validator.validate(request);
 		User user = userService.findById(request.getUserId())
 				.orElseThrow(() -> new IllegalArgumentException("User #" + request.getUserId() + " not found. (deleted ?)"));
 
@@ -416,7 +425,7 @@ public class InstrumentsFacadeService {
 				.toList();
 	}
 
-	@NotNull
+	@Nonnull
 	public PortfolioDTO getActivePortfolio() {
 		User user = userService.findById(getAuthenticatedUser().getId())
 				.orElseThrow(() -> new RuntimeException("User #" + getAuthenticatedUser().getId() + " not found"));
@@ -433,43 +442,34 @@ public class InstrumentsFacadeService {
 
 	//<editor-fold desc="ASSET METADATA">
 	public void updateAssetData() {
-		Map<String, AssetMetadata> metadataMap = instrumentsProvider.getUpdatedMetadata();
+		Map<String, AssetMetadata> metadataMap = instrumentsProvider.getUpdatedAssetMetadata();
 
-		if (metadataMap.isEmpty()) {
-			log.info("Metadata is empty. Skipping update.");
-			return;
-		}
-
-		metadataMap.forEach((symbol, metadata) ->
-				updateAssetData(SymbolIndentifier.valueOf(symbol), metadata)
+		metadataMap.forEach((symbol, metadata) -> {
+					try {
+						updateAssetData(SymbolIndentifier.valueOf(symbol), metadata);
+					} catch (Exception ignored) {
+					}
+				}
 		);
 
 		log.info("Updated {} assets", metadataMap.size());
 	}
 
-	private void updateAssetData(SymbolIndentifier identifier, @Nullable AssetMetadata metadata) {
-		if (metadata == null) {
-			return;
+	private void updateAssetData(SymbolIndentifier identifier, AssetMetadata metadata) {
+		Optional<Asset> optionalAsset = assetService.findBySymbol(identifier.name());
+
+		if (optionalAsset.isEmpty()) {
+			CreateAssetRequest request = AssetConvertor.mapToCreateRequest(identifier, metadata);
+			assetService.createNewAsset(request);
+		} else {
+			Long assetId = optionalAsset.get().getId();
+			UpdateAssetRequest request = AssetConvertor.mapToUpdateRequest(assetId, metadata);
+			assetService.updateAsset(request);
 		}
-
-		Asset asset = assetService.findBySymbol(identifier.name()).orElse(new Asset());
-
-		asset.setSymbol(identifier.name());
-		asset.setFullName(identifier.getFullName());
-		Optional.ofNullable(metadata.getPriceUsd()).ifPresent(asset::setMarketPrice);
-		Optional.ofNullable(metadata.getAssetDescriptionSummary()).ifPresent(asset::setSummaryDescription);
-		Optional.ofNullable(metadata.getSpotMoving24HourQuoteVolumeUsd()).ifPresent(asset::setTodayVolume);
-		Optional.ofNullable(metadata.getSpotMoving24HourChangePercentageUsd()).ifPresent(asset::setChangePercentage);
-		Optional.ofNullable(metadata.getSupplyCirculating()).ifPresent(asset::setCirculationSupply);
-		Optional.ofNullable(metadata.getSupplyTotal()).ifPresent(asset::setTotalSupply);
-		Optional.ofNullable(metadata.getTotalMktCapUsd()).ifPresent(asset::setTotalMarketCap);
-		Optional.ofNullable(metadata.getLogoUrl()).ifPresent(asset::setImageUrl);
-
-		assetService.save(asset);
 	}
 	//</editor-fold>
 
-	@NotNull
+	@Nonnull
 	public UserDTO getAuthenticatedUser() {
 		return UserDTO.mappedFrom(securityService.getAuthenticatedUser());
 	}

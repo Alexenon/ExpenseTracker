@@ -1,10 +1,10 @@
 package com.example.application.views.pages.expenses;
 
+import com.example.application.data.convertors.ExpenseConvertor;
 import com.example.application.data.dtos.ExpenseDTO;
 import com.example.application.services.CategoryService;
 import com.example.application.services.ExpenseService;
 import com.example.application.services.SecurityService;
-import com.example.application.utils.ExpenseConvertor;
 import com.example.application.views.components.custom.dialogs.AddExpenseDialog;
 import com.example.application.views.components.custom.dialogs.EditExpenseDialog;
 import com.example.application.views.components.custom.icons.PictogramIcon;

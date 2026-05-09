@@ -1,4 +1,4 @@
-package com.example.application.utils;
+package com.example.application.data.convertors;
 
 import com.example.application.data.requests.ExpenseRequest;
 import com.example.application.entities.Category;
@@ -9,13 +9,6 @@ import com.example.application.services.SecurityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-/*
-    FIXME:
-        Throws error for unauthenticated user on API side - FIXING BY NOT ALLOWING UNAUTHENTICATED USERS TO THIS METHOD
-    REFACTOR:
-        Think about API part, allowing to POST for other users too, or just for logged in
- * */
 
 @Component
 @RequiredArgsConstructor

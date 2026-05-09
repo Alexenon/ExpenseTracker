@@ -12,6 +12,9 @@ public class ProfitUtils {
 	public static final BigDecimal ONE_HUNDRED_PERCENT = new BigDecimal("100");
 
 	public static BigDecimal coinsBought(BigDecimal buyPrice, BigDecimal investedAmount) {
+		if(buyPrice.signum() == 0)
+			return BigDecimal.ZERO;
+
 		return investedAmount.divide(buyPrice, FinancialConstants.AMOUNT_SCALE, RoundingMode.HALF_UP);
 	}
 
@@ -30,10 +33,20 @@ public class ProfitUtils {
 		return netProfit(transaction.getMarketPrice(), currentPrice, transaction.getOrderTotalCost());
 	}
 
+	public static BigDecimal netProfitPerToken(BigDecimal totalProfit, BigDecimal amountOfTokens) {
+		if(amountOfTokens.signum() == 0)
+			return BigDecimal.ZERO;
+
+		return totalProfit.divide(amountOfTokens, FinancialConstants.PRICE_SCALE, RoundingMode.HALF_UP);
+	}
+
 	/**
 	 * @return percentage profit relative to the investment amount (monetary perspective)
 	 */
 	public static BigDecimal profitPercentage(BigDecimal buyPrice, BigDecimal sellPrice, BigDecimal investedAmount) {
+		if(investedAmount.signum() == 0)
+			return BigDecimal.ZERO;
+
 		return netProfit(buyPrice, sellPrice, investedAmount)
 				.divide(investedAmount, 2, RoundingMode.HALF_UP)
 				.multiply(ONE_HUNDRED_PERCENT);
@@ -43,6 +56,9 @@ public class ProfitUtils {
 	 * @return percentage increase or decrease in the price of the asset (token price perspective)
 	 */
 	public static BigDecimal growthPercentage(BigDecimal buyPrice, BigDecimal sellPrice) {
+		if(buyPrice.signum() == 0)
+			return BigDecimal.ZERO;
+
 		return sellPrice
 				.subtract(buyPrice)
 				.divide(buyPrice, 2, RoundingMode.HALF_UP)
@@ -50,10 +66,16 @@ public class ProfitUtils {
 	}
 
 	public static BigDecimal buyPricePerUnit(BigDecimal totalBuyPrice, BigDecimal amountTokens) {
+		if(amountTokens.signum() == 0)
+			return BigDecimal.ZERO;
+
 		return totalBuyPrice.divide(amountTokens, FinancialConstants.PRICE_SCALE, RoundingMode.HALF_UP);
 	}
 
 	public static BigDecimal sellPricePerUnit(BigDecimal totalSellPrice, BigDecimal amountTokens) {
+		if(amountTokens.signum() == 0)
+			return BigDecimal.ZERO;
+
 		return totalSellPrice.divide(amountTokens, FinancialConstants.PRICE_SCALE, RoundingMode.HALF_UP);
 	}
 

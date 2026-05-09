@@ -37,13 +37,24 @@ public class MoneyField extends AbstractNumberTextField {
 	}
 
 	public void setValue(BigDecimal value) {
+		if (value == null) {
+			super.setValue("");
+			return;
+		}
+
 		String parsedValue = parse(value);
 		String formatedValue = StringUtils.stripTrailingZeroes(parsedValue);
 		super.setValue(formatedValue);
 	}
 
 	public BigDecimal getMoneyAmount() {
-		return new BigDecimal(getValue());
+		String rawValue = getValue();
+
+		if (rawValue == null || rawValue.isEmpty())
+			return BigDecimal.ZERO;
+
+		String parsedAmount = rawValue.replaceAll(",", "");
+		return new BigDecimal(parsedAmount);
 	}
 
 	private String parse(BigDecimal value) {

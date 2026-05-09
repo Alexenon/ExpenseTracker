@@ -5,7 +5,7 @@ import com.example.application.services.crypto.PortfolioPerformanceTracker;
 import com.example.application.views.layouts.MainLayout;
 import com.example.application.views.pages.DefaultPage;
 import com.example.application.views.pages.crypto.calculator.tabs.ProfitEmulatorTab;
-import com.example.application.views.pages.crypto.calculator.tabs.SellProfitTab;
+import com.example.application.views.pages.crypto.calculator.tabs.ProfitSellTab;
 import com.example.application.views.pages.crypto.calculator.tabs.StakingProfitTab;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.TabSheet;
@@ -32,9 +32,9 @@ public class AssetCalculatorView extends DefaultPage {
     private void buildPage() {
         getStyle().set("margin", "100px 0 50px 0");
 
-        Tab sellProfitTab = new SellProfitTab(instrumentsFacadeService, portfolioPerformanceTracker);
+        Tab sellProfitTab = new ProfitSellTab(instrumentsFacadeService, portfolioPerformanceTracker);
         Tab stakingProfitTab = new StakingProfitTab(instrumentsFacadeService);
-        Tab profitEmulatorTab = new ProfitEmulatorTab(instrumentsFacadeService, portfolioPerformanceTracker);
+        Tab profitEmulatorTab = new ProfitEmulatorTab(instrumentsFacadeService);
 
         TabSheet tabSheet = new TabSheet();
         tabSheet.setId("comparator-tabs");

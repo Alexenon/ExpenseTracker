@@ -1,6 +1,7 @@
 package com.example.application.entities.crypto;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -37,6 +38,7 @@ public class Asset {
 
 	@NotNull
 	@Column(name = "market_price", nullable = false, precision = 38, scale = 20)
+	@DecimalMin(value = "0.0", inclusive = false, message = "Market price must be greater than 0")
 	private BigDecimal marketPrice;
 
 	@NotNull

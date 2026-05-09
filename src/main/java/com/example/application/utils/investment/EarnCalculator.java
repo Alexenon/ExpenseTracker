@@ -97,7 +97,8 @@ public class EarnCalculator {
 	}
 
 	public static int daysToEarn(BigDecimal amountToEarn, BigDecimal dailyEarn) {
-		return amountToEarn.divide(dailyEarn, 0, RoundingMode.HALF_UP).intValue();
+		return dailyEarn.signum() == 0 ? 0 : amountToEarn.divide(dailyEarn, 0, RoundingMode.HALF_UP).intValue();
+
 	}
 
 }

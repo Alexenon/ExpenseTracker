@@ -1,19 +1,26 @@
 package com.example.application.services.crypto;
 
+import com.example.application.components.EntityValidator;
+import com.example.application.data.convertors.AssetConvertor;
+import com.example.application.data.requests.asset.CreateAssetRequest;
+import com.example.application.data.requests.asset.UpdateAssetRequest;
 import com.example.application.entities.crypto.Asset;
 import com.example.application.repositories.crypto.AssetRepository;
 import com.example.application.utils.common.lang.StringUtils;
 import com.example.application.utils.exceptions.InternalUnexpectedException;
 import com.example.application.utils.exceptions.InvalidDataException;
-import jakarta.validation.constraints.NotNull;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
@@ -21,18 +28,19 @@ import java.util.function.Predicate;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class AssetService {
 
-	@Autowired
-	private AssetRepository assetRepository;
+	private final AssetRepository assetRepository;
+	private final EntityValidator validator;
 
 	public Optional<Asset> findById(Long assetId) {
 		Objects.requireNonNull(assetId, "assetId");
 		return assetRepository.findById(assetId);
 	}
 
-	public Optional<Asset> findBySymbol(@NotNull String symbolName) {
-		return Optional.of(symbolName)
+	public Optional<Asset> findBySymbol(@Nullable String symbolName) {
+		return Optional.ofNullable(symbolName)
 				.map(String::trim)
 				.filter(s -> !s.isEmpty())
 				.map(String::toUpperCase)
@@ -43,97 +51,127 @@ public class AssetService {
 		return assetRepository.findAll();
 	}
 
-	public void delete(Asset asset) {
-		try {
-			assetRepository.delete(asset);
-			log.info("Deleted successfully {}", asset);
-		} catch (Exception e) {
-			log.error("Failed to delete {}", asset, e);
-			throw new InternalUnexpectedException(e);
-		}
-	}
-
 	/**
 	 * @throws InvalidDataException        when validating an invalid asset that comes from external resources
 	 * @throws InternalUnexpectedException when there is any issue related to save the entity to the database
 	 */
-	@Nullable
-	public Asset save(@NotNull Asset asset) {
+	@Transactional
+	public Asset createNewAsset(@Valid CreateAssetRequest request) {
+		log.info("Creating new asset: {}", request);
+		Asset asset = AssetConvertor.mapToEntity(request);
+		return save(asset);
+	}
+
+	@Transactional
+	public Asset updateAsset(UpdateAssetRequest request) {
+		log.info("Updating asset: {}", request);
+
+		Asset asset = findById(request.getAssetId())
+				.orElseThrow(() -> new EntityNotFoundException("Cannot update a non existent asset"));
+
+		Map<String, String> validationErrors = validator.validateSafe(request);
+
+		if (validationErrors.isEmpty()) {
+			log.info("UpdateRequest has all fields valid, updating all fields");
+			asset.setSummaryDescription(request.getSummaryDescription());
+			asset.setMarketPrice(request.getMarketPrice());
+			asset.setChangePercentage(request.getChangePercentage());
+			asset.setTodayVolume(request.getTodayVolume());
+			asset.setCirculationSupply(request.getCirculationSupply());
+			asset.setTotalSupply(request.getTotalSupply());
+			asset.setTotalMarketCap(request.getTotalMarketCap());
+			asset.setImageUrl(request.getImageUrl());
+			return save(asset);
+		}
+
+		return save(validatedAsset(request));
+	}
+
+	/**
+	 * @throws InternalUnexpectedException when there is any issue related to save the entity to the database
+	 */
+	private Asset save(Asset asset) {
 		try {
-			Asset saved = assetRepository.save(validatedAsset(asset));
-			log.debug("Saved successfully {}", saved);
+			log.info("Saving {}", asset.toFullString());
+			Asset saved = assetRepository.save(asset);
+			log.info("Saved successfully {}", saved);
 			return saved;
-		} catch (InvalidDataException e) {
-			log.error("Failed to save invalid {}", asset, e);
-			return null;
 		} catch (Exception e) {
-			log.error("Failed to save {}", asset, e);
+			log.error("Failed to save {}", asset.toFullString(), e);
 			throw new InternalUnexpectedException(e);
 		}
 	}
 
-	private Asset validatedAsset(Asset asset) {
-		Objects.requireNonNull(asset, "asset");
-		Asset target = findBySymbol(asset.getSymbol())
-				.orElse(new Asset());
+	@Transactional
+	public void delete(Long assetId) {
+		try {
+			assetRepository.deleteById(assetId);
+			log.info("Deleted successfully asset: #{}", assetId);
+		} catch (Exception e) {
+			log.error("Failed to delete asset: #{}", assetId, e);
+			throw new InternalUnexpectedException(e);
+		}
+	}
 
-		target.setSymbol(validatedField(asset, target, Asset::getSymbol, StringUtils::isBlank, "symbol"));
-		target.setFullName(validatedField(asset, target, Asset::getFullName, StringUtils::isBlank, "full name"));
-		target.setImageUrl(validatedField(asset, target, Asset::getImageUrl, StringUtils::isBlank, "image url"));
-		target.setSummaryDescription(validatedField(asset, target, Asset::getSummaryDescription, StringUtils::isBlank, "description"));
+	private Asset validatedAsset(UpdateAssetRequest updateAssetRequest) {
+		Objects.requireNonNull(updateAssetRequest, "updateAssetRequest");
 
-		Function<Asset, BigInteger> totalSupplyValue = a -> Objects.requireNonNullElse(a.getCirculationSupply(), BigInteger.ZERO);
-		BigInteger totalSupply = validatedField(asset, target, totalSupplyValue, supply -> supply.signum() < 0, "total supply");
-		target.setTotalSupply(totalSupply);
+		Asset oldAsset = findById(updateAssetRequest.getAssetId())
+				.orElseThrow(() -> new EntityNotFoundException("Cannot find asset: #" + updateAssetRequest.getAssetId()));
 
-		Function<Asset, BigInteger> circulationSupplyValue = a -> Objects.requireNonNullElse(a.getCirculationSupply(), BigInteger.ZERO);
-		BigInteger circulationSupply = validatedField(asset, target, circulationSupplyValue, supply -> supply.signum() < 0, "circulation supply");
-		target.setCirculationSupply(circulationSupply);
+		oldAsset.setImageUrl(validatedField(updateAssetRequest, oldAsset, UpdateAssetRequest::getImageUrl, StringUtils::isBlank, "image url"));
+		oldAsset.setSummaryDescription(validatedField(updateAssetRequest, oldAsset, UpdateAssetRequest::getSummaryDescription, StringUtils::isBlank, "description"));
 
-		Function<Asset, BigInteger> marketCapValue = a -> Objects.requireNonNullElse(a.getCirculationSupply(), BigInteger.ZERO);
-		BigInteger totalMarketCap = validatedField(asset, target, marketCapValue, marketCap -> marketCap.signum() < 0, "total market cap");
-		target.setTotalMarketCap(totalMarketCap);
+		Function<UpdateAssetRequest, BigInteger> totalSupplyValue = UpdateAssetRequest::getCirculationSupply;
+		BigInteger totalSupply = validatedField(updateAssetRequest, oldAsset, totalSupplyValue, supply -> supply.signum() < 0, "total supply");
+		oldAsset.setTotalSupply(totalSupply);
 
-		Function<Asset, BigDecimal> changePercentage = a -> Objects.requireNonNullElse(a.getChangePercentage(), BigDecimal.ZERO);
-		target.setChangePercentage(validatedField(asset, target, changePercentage, _ -> false, "change percentage"));
+		Function<UpdateAssetRequest, BigInteger> circulationSupplyValue = UpdateAssetRequest::getCirculationSupply;
+		BigInteger circulationSupply = validatedField(updateAssetRequest, oldAsset, circulationSupplyValue, supply -> supply.signum() < 0, "circulation supply");
+		oldAsset.setCirculationSupply(circulationSupply);
 
-		Function<Asset, BigInteger> todayVolume = a -> Objects.requireNonNullElse(a.getTodayVolume(), BigInteger.ZERO);
-		target.setTodayVolume(validatedField(asset, target, todayVolume, volume -> volume.signum() < 0, "today volume"));
+		Function<UpdateAssetRequest, BigInteger> marketCapValue = UpdateAssetRequest::getCirculationSupply;
+		BigInteger totalMarketCap = validatedField(updateAssetRequest, oldAsset, marketCapValue, marketCap -> marketCap.signum() < 0, "total market cap");
+		oldAsset.setTotalMarketCap(totalMarketCap);
 
-		target.setMarketPrice(validatedField(asset, target, Asset::getMarketPrice, price -> price == null || price.signum() < 0, "market price"));
+		Function<UpdateAssetRequest, BigDecimal> changePercentage = UpdateAssetRequest::getChangePercentage;
+		oldAsset.setChangePercentage(validatedField(updateAssetRequest, oldAsset, changePercentage, _ -> false, "change percentage"));
 
-		return target;
+		Function<UpdateAssetRequest, BigInteger> todayVolume = UpdateAssetRequest::getTodayVolume;
+		oldAsset.setTodayVolume(validatedField(updateAssetRequest, oldAsset, todayVolume, volume -> volume.signum() < 0, "today volume"));
+
+		oldAsset.setMarketPrice(validatedField(updateAssetRequest, oldAsset, UpdateAssetRequest::getMarketPrice, price -> price == null || price.signum() < 0, "market price"));
+
+		return oldAsset;
 	}
 
 	/**
-	 * @return either the value for the field from new asset if it's valid, or the value from old asset if it's not valid
-	 * */
-	private <T> T validatedField(@NotNull Asset newAsset,
-								 @Nullable Asset oldAsset,
-								 Function<Asset, T> getter, Predicate<T> invalidCheck, String fieldName)
+	 * Checks the new value for the asset, if it's valid then it overrides the old value. If the new value is not valid,
+	 * then it uses the previous value stored in the database.
+	 *
+	 * @throws InvalidDataException in case no previous value is stored in the database, and current value is invalid
+	 */
+	private <T> T validatedField(UpdateAssetRequest updateAssetRequest,
+								 Asset oldAsset,
+								 Function<UpdateAssetRequest, T> getter, Predicate<T> invalidCheck, String fieldName)
 	{
-		T newValue = getter.apply(newAsset);
-		String symbol = newAsset.getSymbol();
+		String symbol = oldAsset.getSymbol();
+		T newValue = getter.apply(updateAssetRequest);
+		T oldValue = getter.apply(updateAssetRequest);
 
+		// If new value is valid, override the old value
 		if (!invalidCheck.test(newValue)) {
-			logUpdateInfo(oldAsset, getter, fieldName, newValue, symbol);
+			logUpdateInfo(fieldName, newValue, oldValue, symbol);
 			return newValue;
 		}
 
-		if (oldAsset == null)
-			throw new InvalidDataException("Invalid asset %s: %s".formatted(fieldName, newValue));
-
-		T oldValue = getter.apply(oldAsset);
 		log.debug("Warning: asset {} [{}] field uses old value: '{}' instead of '{}'", symbol, fieldName, oldValue, newValue);
 		return oldValue;
 	}
 
-	private static <T> void logUpdateInfo(Asset oldAsset, Function<Asset, T> getter, String fieldName, T newValue, String symbol) {
-		if (oldAsset != null) {
-			T oldValue = getter.apply(oldAsset);
-			if (!Objects.equals(oldValue, newValue))
-				log.debug("Updated asset {} [{}] field: '{}' from '{}'", symbol, fieldName, newValue, oldValue);
-		}
+	private static <T> void logUpdateInfo(String fieldName, T newValue, T oldValue, String symbol) {
+		if (!Objects.equals(oldValue, newValue))
+			log.debug("Updated asset {} [{}] field: '{}' from '{}'", symbol, fieldName, newValue, oldValue);
 	}
 
 }

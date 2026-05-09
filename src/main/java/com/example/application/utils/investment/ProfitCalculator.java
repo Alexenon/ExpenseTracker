@@ -23,7 +23,9 @@ public class ProfitCalculator {
 		BigDecimal newCost = newAmount.multiply(buyPrice);
 		BigDecimal totalValue = prevCost.add(newCost);
 		BigDecimal totalAmount = prevAmount.add(newAmount);
-		return totalValue.divide(totalAmount, FinancialConstants.PRICE_SCALE, RoundingMode.HALF_UP);
+		return totalAmount.signum() == 0
+				? BigDecimal.ZERO
+				: totalValue.divide(totalAmount, FinancialConstants.PRICE_SCALE, RoundingMode.HALF_UP);
 	}
 
 	/**
@@ -91,7 +93,9 @@ public class ProfitCalculator {
 					throw new IllegalArgumentException("Selling more than owned");
 				}
 
-				BigDecimal averageCostPerUnit = totalCost.divide(remainingQuantity, FinancialConstants.PRICE_SCALE, RoundingMode.HALF_UP);
+				BigDecimal averageCostPerUnit = remainingQuantity.signum() == 0
+						? BigDecimal.ZERO
+						: totalCost.divide(remainingQuantity, FinancialConstants.PRICE_SCALE, RoundingMode.HALF_UP);
 
 				BigDecimal costOfSoldTokens =
 						averageCostPerUnit.multiply(sellQuantity);
@@ -140,7 +144,10 @@ public class ProfitCalculator {
 						sellQuantity = sellQuantity.subtract(oldestOrder.quantity);
 						fifoQueue.poll();
 					} else {
-						BigDecimal proportion = sellQuantity.divide(oldestOrder.quantity, FinancialConstants.AMOUNT_SCALE, RoundingMode.HALF_UP);
+						BigDecimal oldestQuantity = oldestOrder.quantity;
+						BigDecimal proportion = oldestQuantity.signum() == 0
+								? BigDecimal.ZERO
+								: sellQuantity.divide(oldestQuantity, FinancialConstants.AMOUNT_SCALE, RoundingMode.HALF_UP);
 
 						BigDecimal partialCost = oldestOrder.cost.multiply(proportion);
 
@@ -164,17 +171,23 @@ public class ProfitCalculator {
 		if (transactions == null || transactions.isEmpty())
 			return "N/A";
 
+		// TODO: Optimize this from database directly
 		BigDecimal buyCost = totalCostForBuyTransactions(transactions);
 		BigDecimal sellCost = totalCostForSellTransactions(transactions);
 		BigDecimal totalCost = buyCost.add(sellCost);
 
+		if (totalCost.signum() == 0)
+			return buyCost.compareTo(sellCost) == 0 ? "50 : 50" : "0 : 0";
+
 		BigDecimal buyRatio = buyCost
 				.divide(totalCost, 0, RoundingMode.HALF_UP)
-				.multiply(ONE_HUNDRED_PERCENT);
+				.multiply(ONE_HUNDRED_PERCENT)
+				.stripTrailingZeros();
 
 		BigDecimal sellRatio = sellCost
 				.divide(totalCost, 0, RoundingMode.HALF_UP)
-				.multiply(ONE_HUNDRED_PERCENT);
+				.multiply(ONE_HUNDRED_PERCENT)
+				.stripTrailingZeros();
 
 		return String.format("%f : %f", buyRatio, sellRatio);
 	}
@@ -215,6 +228,9 @@ public class ProfitCalculator {
 	}
 
 	public static BigDecimal calculateAveragePrice(BigDecimal totalCost, BigDecimal totalQuantity) {
+		if (totalQuantity.signum() == 0)
+			return BigDecimal.ZERO;
+
 		return totalCost.divide(totalQuantity, FinancialConstants.PRICE_SCALE, RoundingMode.HALF_UP);
 	}
 

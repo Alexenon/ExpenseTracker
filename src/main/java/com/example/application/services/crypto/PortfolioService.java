@@ -7,6 +7,7 @@ import com.example.application.entities.crypto.Portfolio;
 import com.example.application.repositories.crypto.PortfolioRepository;
 import com.example.application.utils.exceptions.InternalUnexpectedException;
 import com.example.application.utils.exceptions.InvalidDataException;
+import jakarta.annotation.Nonnull;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -60,7 +61,7 @@ public class PortfolioService {
 		log.info("Updated activePortfolio from '{}' to '{}', for {}", oldActivePortfolioName, portfolio.getName(), user);
 	}
 
-	@NotNull
+	@Nonnull
 	public Portfolio findLatestUpdatedPortfolio(@NotNull Long userId) {
 		Objects.requireNonNull(userId, "userId");
 		Portfolio latestUpdatedPortfolio = portfolioRepository.findLatestUpdatedPortfolio(userId);
@@ -69,7 +70,7 @@ public class PortfolioService {
 				.orElseThrow(() -> new InternalUnexpectedException("User #%d doesn't have any portfolios".formatted(userId)));
 	}
 
-	@NotNull
+	@Nonnull
 	@Transactional
 	public Portfolio createPortfolio(@NotNull CreatePortfolioRequest request, User user) {
 		log.info("Creating new portfolio: {}", request);

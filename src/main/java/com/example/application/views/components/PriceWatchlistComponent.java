@@ -165,25 +165,16 @@ public class PriceWatchlistComponent extends Div implements HasNotifications {
 					.asRequired("Please fill this field")
 					.withConverter(new StringToBigDecimalConverter(BigDecimal.ZERO, "Invalid number"))
 					.withValidator(v -> v.signum() > 0, "Must be greater than 0")
-					.bind(
-							AssetWatcherDTO::getTargetPrice,
-							AssetWatcherDTO::setTargetPrice
-					);
+					.bind(AssetWatcherDTO::getTargetPrice, AssetWatcherDTO::setTargetPrice);
 
 			binder.forField(targetAmount)
 					.asRequired("Please fill this field")
 					.withConverter(new StringToBigDecimalConverter(BigDecimal.ZERO, "Invalid number"))
 					.withValidator(v -> v.signum() > 0, "Must be greater than 0")
-					.bind(
-							AssetWatcherDTO::getTargetAmount,
-							AssetWatcherDTO::setTargetAmount
-					);
+					.bind(AssetWatcherDTO::getTargetAmount, AssetWatcherDTO::setTargetAmount);
 
 			binder.forField(markAsCompleted)
-					.bind(
-							AssetWatcherDTO::isCompleted,
-							AssetWatcherDTO::setCompleted
-					);
+					.bind(AssetWatcherDTO::isCompleted, AssetWatcherDTO::setCompleted);
 
 			binder.readBean(assetWatcher);
 		}

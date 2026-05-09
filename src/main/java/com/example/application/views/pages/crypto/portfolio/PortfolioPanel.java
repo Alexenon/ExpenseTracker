@@ -19,6 +19,7 @@ import com.example.application.views.components.custom.fields.stats.PortfolioSta
 import com.example.application.views.components.portfolio.AssetsChart;
 import com.example.application.views.components.portfolio.AssetsGrid;
 import com.example.application.views.pages.crypto.AssetDetailsView;
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.UI;
@@ -80,6 +81,12 @@ public class PortfolioPanel extends Div implements BeforeEnterObserver, BeforeLe
 	}
 
 	@Override
+	protected void onAttach(AttachEvent attachEvent) {
+		super.onAttach(attachEvent);
+		assetsChart.updateChartItems();
+	}
+
+	@Override
 	public void update() {
 		this.removeAll();
 		this.build();
@@ -105,7 +112,6 @@ public class PortfolioPanel extends Div implements BeforeEnterObserver, BeforeLe
 		getUI().ifPresent(ui -> ui.access(() -> {
 			this.removeAll();
 			this.build();
-			assetsChart.updateChartItems();
 		}));
 	}
 

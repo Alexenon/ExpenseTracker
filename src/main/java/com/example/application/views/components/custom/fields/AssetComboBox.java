@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.Optional;
-import java.util.function.Function;
 
 @Component
 public class AssetComboBox extends ComboBox<AssetDTO> {
@@ -29,12 +28,12 @@ public class AssetComboBox extends ComboBox<AssetDTO> {
 		setRenderer(assetSymbolRenderer());
 	}
 
-	public void setValue(String symbol) {
+	public void setValueBySymbol(String symbol) {
 		AssetDTO asset = Optional.ofNullable(symbol)
 				.flatMap(a -> instrumentsFacadeService.getAssetBySymbol(symbol))
 				.orElse(null);
 
-		setValue(asset);
+		super.setValue(asset);
 	}
 
 	private void setItemsWithFilter() {
@@ -66,22 +65,19 @@ public class AssetComboBox extends ComboBox<AssetDTO> {
 		return this.getValue();
 	}
 
-	public String getSymbol() {
-		return extract(AssetDTO::getSymbol, "");
-	}
-
-	public BigDecimal getMarketPrice() {
-		return extract(AssetDTO::getMarketPrice, BigDecimal.ZERO);
-	}
-
-	public BigDecimal getAmountTokens(Long portfolioId) {
-		return extract(asset -> instrumentsFacadeService.getAmountOfTokens(portfolioId, asset.getSymbol()), BigDecimal.ZERO);
-	}
-
-	public <R> R extract(Function<AssetDTO, R> getter, R defaultValue) {
+	public Optional<String> getSymbol() {
 		return Optional.ofNullable(this.getValue())
-				.map(getter)
-				.orElse(defaultValue);
+				.map(AssetDTO::getSymbol);
+	}
+
+	public Optional<BigDecimal> getMarketPrice() {
+		return Optional.ofNullable(this.getValue())
+				.map(AssetDTO::getMarketPrice);
+	}
+
+	public Optional<BigDecimal> getAmountTokens(Long portfolioId) {
+		return Optional.ofNullable(this.getValue())
+				.map(asset -> instrumentsFacadeService.getAmountOfTokens(portfolioId, asset.getSymbol()));
 	}
 
 }

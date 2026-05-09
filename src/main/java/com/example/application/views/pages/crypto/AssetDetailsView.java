@@ -222,9 +222,9 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
 		AmountField tokenAmountField = new AmountField();
 		tokenAmountField.setValue("1");
 
-		MoneyField usdAmountField = new MoneyField();
-		usdAmountField.setPrefix(false);
-		usdAmountField.setValue(asset.getMarketPrice());
+		MoneyField moneyField = new MoneyField();
+		moneyField.setPrefix(false);
+		moneyField.setValue(asset.getMarketPrice());
 
 		Container inputContainer = Container.builder()
 				.addComponent(inputImage)
@@ -241,7 +241,7 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
 					return outputImage;
 				})
 				.addComponent(new Paragraph("USD"))
-				.addComponent(usdAmountField)
+				.addComponent(moneyField)
 				.build();
 
 		Container sectionBody = Container.builder()
@@ -253,14 +253,17 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
 		tokenAmountField.setValueChangeMode(ValueChangeMode.EAGER);
 		tokenAmountField.addKeyUpListener(e -> {
 			BigDecimal calculatedPrice = tokenAmountField.getAmount().multiply(asset.getMarketPrice());
-			usdAmountField.setValue(calculatedPrice);
+			moneyField.setValue(calculatedPrice);
 		});
 
-		usdAmountField.setValueChangeMode(ValueChangeMode.EAGER);
-		usdAmountField.addKeyUpListener(e -> {
-			BigDecimal amount = usdAmountField.getMoneyAmount();
+		moneyField.setValueChangeMode(ValueChangeMode.EAGER);
+		moneyField.addKeyUpListener(e -> {
+			BigDecimal moneyAmount = moneyField.getMoneyAmount();
 			BigDecimal price = asset.getMarketPrice();
-			tokenAmountField.setValue(amount.divide(price, FinancialConstants.PRICE_SCALE, RoundingMode.HALF_UP));
+			BigDecimal amountOfTokens = price.signum() == 0
+					? BigDecimal.ZERO
+					: moneyAmount.divide(price, FinancialConstants.PRICE_SCALE, RoundingMode.HALF_UP);
+			tokenAmountField.setValue(amountOfTokens);
 		});
 
 		Section section = new Section(title, sectionBody);
@@ -283,10 +286,10 @@ public class AssetDetailsView extends DefaultPage implements HasUrlParameter<Str
 				})
 				.build();
 
-		BigDecimal assetCost = portfolioPerformanceTracker.getAssetRemainingTokensCost(portfolio, asset);
+		BigDecimal assetCost = portfolioPerformanceTracker.getAssetRemainingTokensCost(portfolio, asset).orElse(BigDecimal.ZERO);
 		BigDecimal assetWorth = portfolioPerformanceTracker.getAssetWorth(portfolio, asset);
 		BigDecimal assetProfitLoss = portfolioPerformanceTracker.getAssetTotalProfit(portfolio, asset);
-		BigDecimal assetRealized = portfolioPerformanceTracker.getAssetRealizedProfit(portfolio, asset);
+		BigDecimal assetRealized = portfolioPerformanceTracker.getAssetRealizedProfit(portfolio, asset).orElse(BigDecimal.ZERO);
 		BigDecimal assetUnrealized = portfolioPerformanceTracker.getAssetUnrealizedProfit(portfolio, asset);
 		BigDecimal profitLossPercentage = portfolioPerformanceTracker.getAssetNetProfitPercentage(portfolio, asset);
 		int assetDiversityPercentage = portfolioPerformanceTracker.getAssetDiversityPercentage(portfolio, asset);

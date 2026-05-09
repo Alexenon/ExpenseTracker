@@ -43,7 +43,9 @@ public class MathUtils {
 	}
 
 	public static BigInteger percentageOf(BigInteger from, BigInteger to) {
-		return from.multiply(ONE_HUNDRED_PERCENT.toBigInteger()).divide(to);
+		return to.signum() == 0
+				? BigInteger.ZERO
+				: from.multiply(ONE_HUNDRED_PERCENT.toBigInteger()).divide(to);
 	}
 
 	/**
