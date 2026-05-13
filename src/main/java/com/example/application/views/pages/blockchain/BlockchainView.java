@@ -1,60 +1,30 @@
 package com.example.application.views.pages.blockchain;
 
-import com.vaadin.flow.component.ComponentUtil;
-import com.vaadin.flow.component.UI;
+import com.example.application.views.pages.blockchain.tabs.NetworkBlockChainTab;
+import com.example.application.views.pages.blockchain.tabs.SimpleBlockChainTab;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.tabs.Tab;
+import com.vaadin.flow.component.tabs.TabSheet;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
-
-import java.util.LinkedList;
-import java.util.List;
 
 @PermitAll
 @PageTitle("Blockchain")
 @Route("blockchain")
 public class BlockchainView extends HorizontalLayout {
 
-	private final List<BlockComponent> blocks = new LinkedList<>();
-
 	public BlockchainView() {
-		BlockNode node1 = new BlockNode("Block 1", null);
-		BlockNode node2 = new BlockNode("Block 2", node1);
-		BlockNode node3 = new BlockNode("Block 3", node2);
+		Tab simpleBlockChainTab = new SimpleBlockChainTab();
+		Tab networkBlockChainTab = new NetworkBlockChainTab();
 
-		addBlocks(
-				new BlockComponent("Block #1", node1),
-				new BlockComponent("Block #2", node2),
-				new BlockComponent("Block #3", node3)
-		);
+		TabSheet tabSheet = new TabSheet();
+		tabSheet.setClassName("blockchain-tabs");
 
-		ComponentUtil.addListener(UI.getCurrent(), BlockNodeCreatedOrUpdatedEvent.class, event -> {
-			BlockComponent component = event.getSource();
+		tabSheet.add("Simple blockchain", simpleBlockChainTab);
+		tabSheet.add("Network blockchain", networkBlockChainTab);
 
-			component.applyColor();
-			System.out.println(getAllBlocksAfter(component));
-			getAllBlocksAfter(component).forEach(BlockComponent::applyColor);
-		});
-	}
-
-	public void addBlocks(BlockComponent... blockComponents) {
-		for (BlockComponent b : blockComponents) {
-			blocks.add(b);
-			add(b);
-		}
-	}
-
-	public List<BlockComponent> getAllBlocksAfter(BlockComponent blockComponent) {
-		int index = blocks.indexOf(blockComponent);
-		if (index == -1 || index == blocks.size() - 1) {
-			return List.of();
-		}
-		return blocks.subList(index + 1, blocks.size());
-	}
-
-	public BlockComponent getPrevious(BlockComponent blockComponent) {
-		int index = blocks.indexOf(blockComponent);
-		return (index > 0) ? blocks.get(index - 1) : null;
+		add(tabSheet);
 	}
 
 }

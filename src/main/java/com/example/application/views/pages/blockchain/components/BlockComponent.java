@@ -1,8 +1,14 @@
-package com.example.application.views.pages.blockchain;
+package com.example.application.views.pages.blockchain.components;
 
+import com.example.application.data.models.blockchain.BlockNode;
+import com.example.application.views.components.core.Container;
+import com.example.application.views.components.custom.fields.helpers.InfoTooltip;
+import com.example.application.views.pages.blockchain.BlockNodeCreatedOrUpdatedEvent;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
@@ -15,6 +21,7 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.dom.ThemeList;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /*
@@ -32,11 +39,10 @@ public class BlockComponent extends VerticalLayout {
 
 	private final IntegerField nonceField = new IntegerField("Nonce");
 	private final TextArea dataField = new TextArea("Data");
-	private final TextField prevField = new TextField("Prev");
-	private final TextField hashField = new TextField("Hash");
+	private final TextField prevField = new TextField("Previous hash");
+	private final TextField hashField = new TextField("Current hash");
 	private final Button mineButton = new Button("Mine");
-
-	private Span statusBadge = new Span();
+	private final Span statusBadge = new Span();
 
 	public BlockComponent(String name, BlockNode node) {
 		this.node = node;
@@ -53,16 +59,16 @@ public class BlockComponent extends VerticalLayout {
 
 		initializeFields();
 		updateNodeValues();
-		applyColor();
+		applyBadgeAndColor();
 		initializeFieldsListeners(node);
 
 		add(
 				new H3(name),
 				statusBadge,
-				nonceField,
-				dataField,
-				prevField,
-				hashField,
+				addFieldWithTooltip(nonceField, "A value adjusted during mining so the block’s hash starts with ‘0000’. The correct nonce proves the block is valid"),
+				addFieldWithTooltip(dataField, "Data that is stored about this block and it's converted into hash"),
+				addFieldWithTooltip(prevField, "This is the hash value for the previous block"),
+				addFieldWithTooltip(hashField, "This is the hash value for current block, generated from it's data, nonce and previous hash block"),
 				mineButton
 		);
 	}
@@ -72,22 +78,18 @@ public class BlockComponent extends VerticalLayout {
 		nonceField.setStepButtonsVisible(true);
 		nonceField.setMin(0);
 		nonceField.setMax(Integer.MAX_VALUE);
-		nonceField.setHelperText("A value adjusted during mining so the block’s hash starts with ‘0000’. The correct nonce proves the block is valid");
 		nonceField.setValueChangeMode(ValueChangeMode.EAGER);
 
 		dataField.setWidthFull();
 		dataField.setHeight("120px");
-		dataField.setHelperText("Data that is stored about this block and it's converted into hash");
 		dataField.setValueChangeMode(ValueChangeMode.EAGER);
 
 		prevField.setWidthFull();
 		prevField.setValueChangeMode(ValueChangeMode.EAGER);
-		prevField.setHelperText("This is the hash value for the previous block");
 		prevField.setReadOnly(true);
 
 		hashField.setWidthFull();
 		hashField.setValueChangeMode(ValueChangeMode.EAGER);
-		hashField.setHelperText("This is the hash value for current block, generated from it's data, nonce and previous hash block");
 		hashField.setReadOnly(true);
 	}
 
@@ -95,24 +97,24 @@ public class BlockComponent extends VerticalLayout {
 		nonceField.addValueChangeListener(field -> {
 			node.setNonce(field.getValue());
 			updateHashFieldValue();
-			applyColor();
+			applyBadgeAndColor();
 		});
 
 		dataField.addValueChangeListener(field -> {
 			node.setData(field.getValue());
 			updateHashFieldValue();
-			applyColor();
+			applyBadgeAndColor();
 		});
 
 		mineButton.addClickListener(field -> {
 			node.mineBlock();
 			updateNodeValues();
-			applyColor();
+			applyBadgeAndColor();
 		});
 
 		hashField.addValueChangeListener(field -> {
 			updateHashFieldValue();
-			applyColor();
+			applyBadgeAndColor();
 		});
 	}
 
@@ -121,10 +123,10 @@ public class BlockComponent extends VerticalLayout {
 				.map(BlockNode::getHash)
 				.orElse("");
 
-		nonceField.setValue(node.getNonce() == null ? 0 : node.getNonce());
-		dataField.setValue(node.getData() == null ? "" : node.getData());
+		nonceField.setValue(Objects.requireNonNullElse(node.getNonce(), 0));
+		dataField.setValue(Objects.requireNonNullElse(node.getData(), ""));
 		prevField.setValue(prevHash);
-		hashField.setValue(node.getHash() == null ? "" : node.getHash());
+		hashField.setValue(Objects.requireNonNullElse(node.getHash(), ""));
 	}
 
 	private void updateHashFieldValue() {
@@ -140,21 +142,21 @@ public class BlockComponent extends VerticalLayout {
 		UI.getCurrent().access(() -> ComponentUtil.fireEvent(UI.getCurrent(), new BlockNodeCreatedOrUpdatedEvent(this, node)));
 	}
 
-	public void applyColor() {
+	public void applyBadgeAndColor() {
 		if (!node.isValid()) {
 			getStyle().set("background-color", SOFT_RED_COLOR);
-			statusBadge = createStatusBadge("Invalid", VaadinIcon.EXCLAMATION_CIRCLE_O.create(), "error");
+			updateStatusBadge("Invalid", VaadinIcon.EXCLAMATION_CIRCLE_O.create(), "error");
 			return;
 		}
 
 		if (node.isMined()) {
 			getStyle().set("background-color", SOFT_BLUE_COLOR);
-			statusBadge = createStatusBadge("Mined", VaadinIcon.CHECK.create(), "success");
+			updateStatusBadge("Mined", VaadinIcon.CHECK.create(), "success");
 			return;
 		}
 
 		getStyle().set("background-color", SOFT_GREEN_COLOR);
-		statusBadge = createStatusBadge("Waiting", VaadinIcon.HAND.create(), "contrast");
+		updateStatusBadge("Waiting", VaadinIcon.HAND.create(), "contrast");
 	}
 
 	private Span createStatusBadge(String name, Icon icon, String theme) {
@@ -164,6 +166,28 @@ public class BlockComponent extends VerticalLayout {
 		themeList.add("badge");
 		themeList.add(theme);
 		return new Span(icon, new Span(name));
+	}
+
+	private void updateStatusBadge(String text, Icon icon, String theme) {
+		statusBadge.removeAll();
+
+		icon.getStyle().set("padding", "var(--lumo-space-xs)");
+
+		ThemeList themes = statusBadge.getElement().getThemeList();
+		List.of("success", "contrast", "error").forEach(themes::remove);
+
+		themes.add("badge");
+		themes.add(theme);
+
+		statusBadge.add(icon, new Span(text));
+	}
+
+	// Extract this to separate component if used very often
+	private Div addFieldWithTooltip(Component component, String tooltipText) {
+		return Container.builder("tooltip-container")
+				.addComponent(component)
+				.addComponent(new InfoTooltip(tooltipText).getIcon())
+				.build();
 	}
 
 }

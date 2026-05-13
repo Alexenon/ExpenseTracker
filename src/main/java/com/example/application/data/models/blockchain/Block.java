@@ -1,4 +1,4 @@
-package com.example.application.views.pages.blockchain;
+package com.example.application.data.models.blockchain;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -31,9 +31,10 @@ public class Block {
 
 		Block copyBlock = (Block) o;
 
-		return Objects.equals(nonce, copyBlock.nonce)
-			   && Objects.equals(previousBlock, copyBlock.previousBlock)
-			   && Objects.equals(data, copyBlock.data);
+		return Objects.equals(id, copyBlock.getId())
+			   && Objects.equals(nonce, copyBlock.getNonce())
+			   && Objects.equals(previousBlock, copyBlock.getPreviousBlock())
+			   && Objects.equals(data, copyBlock.getData());
 	}
 
 	@Override

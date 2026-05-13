@@ -1,4 +1,43 @@
-/* ===== BLOCK CARD ===== */
+/********************************************
+	 				TABS
+*********************************************/
+
+.blockchain-tabs {
+	display: flex;
+	width: 100%;
+}
+
+.blockchain-tabs > vaadin-tab {
+	  gap: 2vw;
+}
+
+.blockchain-tabs::part(content) {
+	display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 3vw;
+}
+
+.blockchain-network-tab > .content {
+    display: flex;
+    flex-direction: column;
+    background-color: blue;
+    gap: 3vw;
+}
+
+.blocks-container {
+    display: flex;
+    background-color: yellow;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 2vw;
+}
+
+/*********************************************
+					CARDS
+*********************************************/
 .block-card {
     background: #ffffff;
     border-radius: 16px;
@@ -33,8 +72,6 @@
     font-size: 1.3rem;
     color: #333;
 }
-
-/* ===== INPUTS ===== */
 
 /* Textarea */
 .block-textarea {

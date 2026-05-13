@@ -3,7 +3,7 @@
 
 	Usages:
 		'rem' → if you want it to scale with user’s font size (accessibility).
-    	'vw' → if you want it to scale proportionally with screen/window width.
+    	'vw' → if you want it to scale proportionally with screen/window width, where 1vw = 1% of screen, 1920px = 19.2vw
     	'px' → if you always want it fixed.
 
 	TODO:
@@ -293,4 +293,15 @@ vcf-toggle-button::part(checkbox) {
 
 vcf-toggle-button::part(checkbox)::before {
     top: 20px;
+}
+
+
+/******************************************
+				COMPONENTS
+******************************************/
+
+.tooltip-container {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
 }
