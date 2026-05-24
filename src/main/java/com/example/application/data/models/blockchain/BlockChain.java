@@ -1,36 +1,75 @@
 package com.example.application.data.models.blockchain;
 
-
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
 public class BlockChain {
 
-	private BlockNode lastNodeAdded;
 	private final List<BlockNode> nodes = new LinkedList<>();
 
-	public void add(BlockNode node) {
-		node.mineBlock();
-		nodes.getLast().setNextNode(node);
-
-		Optional.ofNullable(nodes.getLast()).ifPresent(n -> n.setNextNode(node));
-		node.setPreviousNode(nodes.getLast());
-
+	public void addNode(BlockNode node) {
+		if (lastNode().isPresent()) {
+			BlockNode previous = lastNode().get();
+			previous.setNextNode(node);
+			node.setPreviousNode(previous);
+		}
+		node.setChain(this);
 		nodes.add(node);
-		System.out.println("Added new block");
 	}
 
-	public static void main(String[] args) {
-		BlockChain chain = new BlockChain();
+	public void removeNode(BlockNode node) {
+		Optional.ofNullable(node.getPreviousNode()).ifPresent(prev -> prev.setNextNode(node.getNextNode()));
+		Optional.ofNullable(node.getNextNode()).ifPresent(next -> next.setPreviousNode(node.getPreviousNode()));
+		node.setChain(null);
+		nodes.remove(node);
+	}
 
-		BlockNode node1 = new BlockNode("Node 1", null);
-		BlockNode node2 = new BlockNode("Node 2", node1);
-		BlockNode node3 = new BlockNode("Node 3", node2);
+	public Optional<BlockNode> lastNode() {
+		return nodes.isEmpty()
+				? Optional.empty()
+				: Optional.of(nodes.getLast());
+	}
 
-		chain.add(node1);
-		chain.add(node2);
-		chain.add(node3);
+	public List<BlockNode> getNodes() {
+		return nodes;
+	}
+
+	public List<BlockNode> getNodesAfter(BlockNode node) {
+		return nodes.stream()
+				.dropWhile(n -> n != node)
+				.toList();
+	}
+
+	public boolean isValid() {
+		return nodes.isEmpty() || isAllBlocksValid();
+	}
+
+	private boolean isAllBlocksValid() {
+		return false;
+	}
+
+	void onBlockHashChanged(BlockNode node, String oldHash, String newHash) {
+		System.out.printf("""
+				Blockchain detected block change:
+					Old hash: %s
+					New hash: %s
+				%s
+				%n""", oldHash, newHash, node);
+
+		invalidateFollowingBlocks(node);
+	}
+
+	private void invalidateFollowingBlocks(BlockNode node) {
+		System.out.println("Invalidation following blocks: ");
+		BlockNode current = node.getNextNode();
+
+		while (current != null) {
+			System.out.println(" -> " + current);
+			current.updateHashAndStatus();
+			current = current.getNextNode();
+		}
+		System.out.println("----Finished invalidation----");
 	}
 
 }

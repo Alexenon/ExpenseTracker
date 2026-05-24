@@ -1,7 +1,12 @@
 package com.example.application.data.models.blockchain;
 
+import com.example.application.views.pages.blockchain.components.BlockStatus;
+
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.UUID;
 
 public class BlockNode {
@@ -13,42 +18,69 @@ public class BlockNode {
 	private String hashValue;
 	private BlockNode previousNode;
 	private BlockNode nextNode;
+	private BlockStatus status = BlockStatus.WAITING;
+	private BlockChain chain;
 
 	public BlockNode(String data) {
-		this(data, null);
-	}
-
-	public BlockNode(String data, BlockNode previousNode) {
-		this(data, previousNode, null);
-	}
-
-	public BlockNode(String data, BlockNode previousNode, BlockNode nextNode) {
 		this.data = data;
-		this.previousNode = previousNode;
-		this.nextNode = nextNode;
 	}
 
+	public void mineBlock() {
+		if (isMined())
+			return;
+
+		System.out.println("Started mining: " + this);
+		nonce = 0;
+		String hash = recalculateHash();
+		while (!isMinedCorrectly(hash)) {
+			nonce++;
+			hash = recalculateHash();
+		}
+
+		this.hashValue = hash;
+		this.status = BlockStatus.MINED;
+		System.out.println("Block mined! Nonce=" + nonce + " Hash=" + hash);
+	}
+
+	//<editor-fold desc="Setters">
 	public void setNonce(Integer nonce) {
 		this.nonce = nonce;
-		this.hashValue = recalculateHash();
+		updateHashAndStatus();
 	}
 
 	public void setData(String data) {
 		this.data = data;
-		this.hashValue = recalculateHash();
+		updateHashAndStatus();
 	}
 
-	public void setPreviousNode(BlockNode previousNode) {
+	void setPreviousNode(BlockNode previousNode) {
 		this.previousNode = previousNode;
-		this.hashValue = recalculateHash();
+		updateHashAndStatus();
 	}
 
-	public void setNextNode(BlockNode nextNode) {
+	void setNextNode(BlockNode nextNode) {
 		this.nextNode = nextNode;
-		this.hashValue = recalculateHash();
+		updateHashAndStatus();
 	}
+
+	void setChain(BlockChain chain) {
+		this.chain = chain;
+	}
+
+	void setStatus(BlockStatus status) {
+		this.status = status;
+	}
+	//</editor-fold>
 
 	//<editor-fold desc="Getters">
+	public boolean isMined() {
+		return status.equals(BlockStatus.MINED);
+	}
+
+	public boolean isInvalid() {
+		return status.equals(BlockStatus.INVALID);
+	}
+
 	public Integer getNonce() {
 		return nonce;
 	}
@@ -68,25 +100,31 @@ public class BlockNode {
 	public BlockNode getNextNode() {
 		return nextNode;
 	}
+
+	public BlockStatus getStatus() {
+		return status;
+	}
 	//</editor-fold>
 
-	public void mineBlock() {
-		nonce = 0;
-		String hash = recalculateHash();
+	void updateHashAndStatus() {
+		String previousHash = hashValue;
+		String newHash = recalculateHash();
 
-		while (!hash.startsWith("0000")) {
-			nonce++;
-			hash = recalculateHash();
-		}
+		if (newHash.equals(previousHash))
+			return;
 
-		this.hashValue = hash;
-		System.out.println("Block mined! Nonce=" + nonce + " Hash=" + hash);
+		BlockStatus previousStatus = status;
+
+		this.hashValue = newHash;
+		this.status = recalculateStatus();
+		Optional.ofNullable(chain).ifPresent(c -> c.onBlockHashChanged(this, previousHash, newHash));
+		System.out.printf("Updated from [%s] to [%s], %s\n", previousStatus, status, this);
 	}
 
 	private String recalculateHash() {
 		try {
 			MessageDigest md = MessageDigest.getInstance("SHA-256");
-			String input = (previousNode == null ? "" : previousNode.getHash()) + data + nonce;
+			String input = id + (previousNode == null ? "" : previousNode.getHash()) + data + nonce;
 			byte[] hashBytes = md.digest(input.getBytes(StandardCharsets.UTF_8));
 
 			StringBuilder sb = new StringBuilder();
@@ -99,27 +137,44 @@ public class BlockNode {
 		}
 	}
 
-	public boolean isMined() {
-		return nonce != null && getHash() != null && getHash().startsWith("0000");
+	private BlockStatus recalculateStatus() {
+		if (nonce == null || nonce == 0)
+			return BlockStatus.WAITING;
+
+		if (isMinedCorrectly(hashValue))
+			return BlockStatus.MINED;
+
+		return BlockStatus.INVALID;
 	}
 
-	public boolean isFirstNode() {
-		return previousNode == null;
+	private boolean isMinedCorrectly(String hash) {
+		return nonce != null
+			   && nonce > 0
+			   && hash.startsWith("0000");
 	}
 
-	/**
-	 * @return whenever current node is pointed to previous node correctly, and this node is mined
-	 * */
-	public boolean isValid() {
-		return (isFirstNode() || previousNode.isValid()) && isMined();
+	@Override
+	public String toString() {
+		return new StringJoiner(", ", BlockNode.class.getSimpleName() + "[", "]")
+				.add("id='" + id + "'")
+				.add("data='" + data + "'")
+				.add("status=" + status)
+				.add("nonce=" + nonce)
+				.add("hashValue='" + hashValue + "'")
+				.toString();
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
 
-	/*
-		TODO:
-			- Can be INVALID and MINED at same time ???
-			- WHAT PENDING MEANS ?
-	* */
+		BlockNode blockNode = (BlockNode) o;
+		return Objects.equals(id, blockNode.id);
+	}
 
-
+	@Override
+	public int hashCode() {
+		return Objects.hash(hashValue);
+	}
 }

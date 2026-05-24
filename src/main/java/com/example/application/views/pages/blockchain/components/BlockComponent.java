@@ -3,7 +3,7 @@ package com.example.application.views.pages.blockchain.components;
 import com.example.application.data.models.blockchain.BlockNode;
 import com.example.application.views.components.core.Container;
 import com.example.application.views.components.custom.fields.helpers.InfoTooltip;
-import com.example.application.views.pages.blockchain.BlockNodeCreatedOrUpdatedEvent;
+import com.example.application.views.pages.blockchain.events.BlockNodeUpdatedEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.UI;
@@ -73,6 +73,10 @@ public class BlockComponent extends VerticalLayout {
 		);
 	}
 
+	public BlockNode getNode() {
+		return node;
+	}
+
 	private void initializeFields() {
 		nonceField.setWidth("200px");
 		nonceField.setStepButtonsVisible(true);
@@ -118,7 +122,7 @@ public class BlockComponent extends VerticalLayout {
 		});
 	}
 
-	public void updateNodeValues() {
+	private void updateNodeValues() {
 		String prevHash = Optional.ofNullable(node.getPreviousNode())
 				.map(BlockNode::getHash)
 				.orElse("");
@@ -139,24 +143,24 @@ public class BlockComponent extends VerticalLayout {
 	}
 
 	private void notifyHashChanged() {
-		UI.getCurrent().access(() -> ComponentUtil.fireEvent(UI.getCurrent(), new BlockNodeCreatedOrUpdatedEvent(this, node)));
+		UI.getCurrent().access(() -> ComponentUtil.fireEvent(UI.getCurrent(), new BlockNodeUpdatedEvent(this, node)));
 	}
 
 	public void applyBadgeAndColor() {
-		if (!node.isValid()) {
-			getStyle().set("background-color", SOFT_RED_COLOR);
-			updateStatusBadge("Invalid", VaadinIcon.EXCLAMATION_CIRCLE_O.create(), "error");
-			return;
+		switch (node.getStatus()) {
+			case INVALID -> {
+				getStyle().set("background-color", SOFT_RED_COLOR);
+				updateStatusBadge("Invalid", VaadinIcon.EXCLAMATION_CIRCLE_O.create(), "error");
+			}
+			case MINED -> {
+				getStyle().set("background-color", SOFT_BLUE_COLOR);
+				updateStatusBadge("Mined", VaadinIcon.CHECK.create(), "success");
+			}
+			case WAITING -> {
+				getStyle().set("background-color", SOFT_GREEN_COLOR);
+				updateStatusBadge("Waiting", VaadinIcon.HAND.create(), "contrast");
+			}
 		}
-
-		if (node.isMined()) {
-			getStyle().set("background-color", SOFT_BLUE_COLOR);
-			updateStatusBadge("Mined", VaadinIcon.CHECK.create(), "success");
-			return;
-		}
-
-		getStyle().set("background-color", SOFT_GREEN_COLOR);
-		updateStatusBadge("Waiting", VaadinIcon.HAND.create(), "contrast");
 	}
 
 	private Span createStatusBadge(String name, Icon icon, String theme) {
@@ -188,6 +192,14 @@ public class BlockComponent extends VerticalLayout {
 				.addComponent(component)
 				.addComponent(new InfoTooltip(tooltipText).getIcon())
 				.build();
+	}
+
+	@Override
+	public final boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof BlockComponent candidate)) return false;
+
+		return Objects.equals(node, candidate.node);
 	}
 
 }
