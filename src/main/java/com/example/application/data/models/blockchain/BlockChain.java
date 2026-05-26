@@ -49,14 +49,7 @@ public class BlockChain {
 		return false;
 	}
 
-	void onBlockHashChanged(BlockNode node, String oldHash, String newHash) {
-		System.out.printf("""
-				Blockchain detected block change:
-					Old hash: %s
-					New hash: %s
-				%s
-				%n""", oldHash, newHash, node);
-
+	void onBlockHashChanged(BlockNode node) {
 		invalidateFollowingBlocks(node);
 	}
 

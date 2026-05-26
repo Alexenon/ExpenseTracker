@@ -1,6 +1,6 @@
 package com.example.application.views.components.core;
 
-import com.example.application.views.components.utils.TextFieldValidationSupport;
+import com.example.application.views.components.custom.fields.helpers.TextFieldValidationSupport;
 import com.vaadin.flow.component.PropertyDescriptor;
 import com.vaadin.flow.component.PropertyDescriptors;
 import com.vaadin.flow.component.Tag;

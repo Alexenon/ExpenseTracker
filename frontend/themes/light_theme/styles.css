@@ -1,10 +1,15 @@
 /*
 	Resolution: 1920 * 1080
 
+
 	Usages:
 		'rem' → if you want it to scale with user’s font size (accessibility).
-    	'vw' → if you want it to scale proportionally with screen/window width, where 1vw = 1% of screen, 1920px = 19.2vw
+    	'vw' → 1vw = 1% of screen, 1920px = 19.2vw (if you want it to scale proportionally with screen/window width, where)
     	'px' → if you always want it fixed.
+
+	Tips:
+		padding: 0 10 20 30 ->  top: 0, right: 10, down: 20, left: 30
+
 
 	TODO:
 		- '@import' component doesn't work inside pages css files
@@ -300,8 +305,45 @@ vcf-toggle-button::part(checkbox)::before {
 				COMPONENTS
 ******************************************/
 
+/*
+	Info Tooltip
+*/
+
 .tooltip-container {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
 }
+
+
+/*
+	Field With Tooltip
+*/
+
+.field-container > .field-header {
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+	padding: 0 0 5px 5px;
+}
+
+.field-header > field-label {
+	color: gray;
+}
+
+.field-container:has(vaadin-integer-field) {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+/*
+.field-container vaadin-integer-field::part(input-field) {
+	width: 100%;
+}
+*/
+
+
+/*
+
+*/

@@ -31,6 +31,8 @@ public class BlockNode {
 
 		System.out.println("Started mining: " + this);
 		nonce = 0;
+
+		String previousHash = hashValue;
 		String hash = recalculateHash();
 		while (!isMinedCorrectly(hash)) {
 			nonce++;
@@ -39,6 +41,7 @@ public class BlockNode {
 
 		this.hashValue = hash;
 		this.status = BlockStatus.MINED;
+		notifyChainThatBlockChanged(previousHash, hash);
 		System.out.println("Block mined! Nonce=" + nonce + " Hash=" + hash);
 	}
 
@@ -117,7 +120,7 @@ public class BlockNode {
 
 		this.hashValue = newHash;
 		this.status = recalculateStatus();
-		Optional.ofNullable(chain).ifPresent(c -> c.onBlockHashChanged(this, previousHash, newHash));
+		notifyChainThatBlockChanged(previousHash, newHash);
 		System.out.printf("Updated from [%s] to [%s], %s\n", previousStatus, status, this);
 	}
 
@@ -151,6 +154,16 @@ public class BlockNode {
 		return nonce != null
 			   && nonce > 0
 			   && hash.startsWith("0000");
+	}
+
+	private void notifyChainThatBlockChanged(String oldHash, String newHash) {
+		Optional.ofNullable(chain).ifPresent(c -> c.onBlockHashChanged(this));
+		System.out.printf("""
+				Blockchain detected block change:
+					Old hash: %s
+					New hash: %s
+				%s
+				%n""", oldHash, newHash, this);
 	}
 
 	@Override

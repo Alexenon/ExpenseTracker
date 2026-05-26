@@ -2,6 +2,7 @@ package com.example.application.views.pages.blockchain.components;
 
 import com.example.application.data.models.blockchain.BlockNode;
 import com.example.application.views.components.core.Container;
+import com.example.application.views.components.custom.fields.FieldWithTooltip;
 import com.example.application.views.components.custom.fields.helpers.InfoTooltip;
 import com.example.application.views.pages.blockchain.events.BlockNodeUpdatedEvent;
 import com.vaadin.flow.component.Component;
@@ -37,10 +38,10 @@ public class BlockComponent extends VerticalLayout {
 
 	private final BlockNode node;
 
-	private final IntegerField nonceField = new IntegerField("Nonce");
-	private final TextArea dataField = new TextArea("Data");
-	private final TextField prevField = new TextField("Previous hash");
-	private final TextField hashField = new TextField("Current hash");
+	private final IntegerField nonceField = new IntegerField();
+	private final TextArea dataField = new TextArea();
+	private final TextField prevField = new TextField();
+	private final TextField hashField = new TextField();
 	private final Button mineButton = new Button("Mine");
 	private final Span statusBadge = new Span();
 
@@ -63,12 +64,13 @@ public class BlockComponent extends VerticalLayout {
 		initializeFieldsListeners(node);
 
 		add(
-				new H3(name),
-				statusBadge,
-				addFieldWithTooltip(nonceField, "A value adjusted during mining so the block’s hash starts with ‘0000’. The correct nonce proves the block is valid"),
-				addFieldWithTooltip(dataField, "Data that is stored about this block and it's converted into hash"),
-				addFieldWithTooltip(prevField, "This is the hash value for the previous block"),
-				addFieldWithTooltip(hashField, "This is the hash value for current block, generated from it's data, nonce and previous hash block"),
+				createHeader(name),
+				createBody(
+						addField("Nonce", nonceField, "A value adjusted during mining so the block’s hash starts with ‘0000’. The correct nonce proves the block is valid"),
+						addField("Data", dataField, "Data that is stored about this block and it's converted into hash"),
+						addField("Previous hash", prevField, "This is the hash value for the previous block"),
+						addField("Current hash", hashField, "This is the hash value for current block, generated from it's data, nonce and previous hash block")
+				),
 				mineButton
 		);
 	}
@@ -78,7 +80,6 @@ public class BlockComponent extends VerticalLayout {
 	}
 
 	private void initializeFields() {
-		nonceField.setWidth("200px");
 		nonceField.setStepButtonsVisible(true);
 		nonceField.setMin(0);
 		nonceField.setMax(Integer.MAX_VALUE);
@@ -113,6 +114,7 @@ public class BlockComponent extends VerticalLayout {
 		mineButton.addClickListener(field -> {
 			node.mineBlock();
 			updateNodeValues();
+			updateHashFieldValue();
 			applyBadgeAndColor();
 		});
 
@@ -186,11 +188,28 @@ public class BlockComponent extends VerticalLayout {
 		statusBadge.add(icon, new Span(text));
 	}
 
+	private FieldWithTooltip addField(String label, Component component, String tooltipText) {
+		return new FieldWithTooltip(label, component, tooltipText);
+	}
+
 	// Extract this to separate component if used very often
 	private Div addFieldWithTooltip(Component component, String tooltipText) {
 		return Container.builder("tooltip-container")
 				.addComponent(component)
 				.addComponent(new InfoTooltip(tooltipText).getIcon())
+				.build();
+	}
+
+	private Div createHeader(String name) {
+		return Container.builder("card-header")
+				.addComponent(new H3(name))
+				.addComponent(statusBadge)
+				.build();
+	}
+
+	private Div createBody(Component... components) {
+		return Container.builder("card-body")
+				.addComponents(components)
 				.build();
 	}
 

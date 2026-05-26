@@ -22,13 +22,29 @@
 .blockchain-network-tab > .content {
     display: flex;
     flex-direction: column;
-    background-color: blue;
     gap: 3vw;
 }
 
-.blocks-container {
+/*********************************************
+					BLOCKCHAIN
+*********************************************/
+
+.blockchain {
     display: flex;
-    background-color: yellow;
+    border-radius: 16px;
+    border: 0.025rem solid black;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+	padding: 1vw 1vw 1vw 1vw;
+}
+
+.blockchain > h3 {
+	padding-bottom: 0.5vw;
+}
+
+.blocks {
+    display: flex;
     flex-direction: row;
     justify-content: center;
     align-items: center;
@@ -41,7 +57,7 @@
 .block-card {
     background: #ffffff;
     border-radius: 16px;
-    padding: 20px 26px;
+    padding: 1vw 1vw;
     box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
     transition: transform 0.15s ease, box-shadow 0.2s ease;
     border: 2px solid transparent;
@@ -64,16 +80,27 @@
     border-color: #8ddf8d;
 }
 
-/* Header */
+.block-card > .card-body {
+	width: 100%;
+	display: flex;
+	gap: 1vw;
+	padding: 0.5vw;
+	flex-direction: column;
+}
+
+.block-card > .card-header {
+	width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
 .block-card h3 {
-    margin-top: 0;
-    margin-bottom: 10px;
     font-weight: 600;
     font-size: 1.3rem;
     color: #333;
 }
 
-/* Textarea */
 .block-textarea {
     height: 120px;
 }
@@ -87,6 +114,7 @@
     font-weight: 600;
     padding: 8px 0;
     transition: background 0.2s ease, transform 0.1s ease;
+    cursor: pointer;
 }
 
 .block-button:hover {

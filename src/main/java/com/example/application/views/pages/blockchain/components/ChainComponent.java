@@ -1,6 +1,7 @@
 package com.example.application.views.pages.blockchain.components;
 
 import com.example.application.data.models.blockchain.BlockChain;
+import com.example.application.views.components.core.Container;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
 
@@ -11,21 +12,22 @@ public class ChainComponent extends Div {
 
 	private final BlockChain chain = new BlockChain();
 	private final List<BlockComponent> blocks = new LinkedList<>();
+	private final Div container = new Container("blocks");
 
 	public ChainComponent(String name) {
-		addClassName("blocks-container");
+		addClassName("blockchain");
 		H3 blockHeader = new H3(name);
-		add(blockHeader);
+		add(blockHeader, container);
 	}
 
 	public void addBlock(BlockComponent component) {
-		add(component);
+		container.add(component);
 		blocks.add(component);
 		chain.addNode(component.getNode());
 	}
 
 	public void removeBlock(BlockComponent component) {
-		remove(component);
+		container.remove(component);
 		blocks.remove(component);
 		chain.removeNode(component.getNode());
 	}
