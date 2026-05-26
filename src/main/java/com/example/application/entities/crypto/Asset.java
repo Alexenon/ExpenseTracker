@@ -8,7 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.StringJoiner;
 
@@ -86,4 +85,3 @@ public class Asset {
 				.toString();
 	}
 }
-

@@ -1,0 +1,126 @@
+/********************************************
+	 				TABS
+*********************************************/
+
+.blockchain-tabs {
+	display: flex;
+	width: 100%;
+}
+
+.blockchain-tabs > vaadin-tab {
+	  gap: 2vw;
+}
+
+.blockchain-tabs::part(content) {
+	display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 3vw;
+}
+
+.blockchain-network-tab > .content {
+    display: flex;
+    flex-direction: column;
+    gap: 3vw;
+}
+
+/*********************************************
+					BLOCKCHAIN
+*********************************************/
+
+.blockchain {
+    display: flex;
+    border-radius: 16px;
+    border: 0.025rem solid black;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+	padding: 1vw 1vw 1vw 1vw;
+}
+
+.blockchain > h3 {
+	padding-bottom: 0.5vw;
+}
+
+.blocks {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 2vw;
+}
+
+/*********************************************
+					CARDS
+*********************************************/
+.block-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 1vw 1vw;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+    transition: transform 0.15s ease, box-shadow 0.2s ease;
+    border: 2px solid transparent;
+}
+
+.block-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 7px 25px rgba(0, 0, 0, 0.12);
+}
+
+.block-card[style*="background-color: #ffd6d6"] {
+    border-color: #ff9c9c;
+}
+
+.block-card[style*="background-color: #d6ebff"] {
+    border-color: #7cb8ff;
+}
+
+.block-card[style*="background-color: #e1f5e1"] {
+    border-color: #8ddf8d;
+}
+
+.block-card > .card-body {
+	width: 100%;
+	display: flex;
+	gap: 1vw;
+	padding: 0.5vw;
+	flex-direction: column;
+}
+
+.block-card > .card-header {
+	width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.block-card h3 {
+    font-weight: 600;
+    font-size: 1.3rem;
+    color: #333;
+}
+
+.block-textarea {
+    height: 120px;
+}
+
+/* ===== MINE BUTTON ===== */
+.block-button {
+    width: 100%;
+    border-radius: 10px;
+    background: #4ba3ff;
+    color: white;
+    font-weight: 600;
+    padding: 8px 0;
+    transition: background 0.2s ease, transform 0.1s ease;
+    cursor: pointer;
+}
+
+.block-button:hover {
+    background: #358be6;
+}
+
+.block-button:active {
+    transform: scale(0.97);
+}

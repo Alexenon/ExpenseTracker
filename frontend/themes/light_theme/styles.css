@@ -1,10 +1,15 @@
 /*
 	Resolution: 1920 * 1080
 
+
 	Usages:
 		'rem' → if you want it to scale with user’s font size (accessibility).
-    	'vw' → if you want it to scale proportionally with screen/window width.
+    	'vw' → 1vw = 1% of screen, 1920px = 19.2vw (if you want it to scale proportionally with screen/window width, where)
     	'px' → if you always want it fixed.
+
+	Tips:
+		padding: 0 10 20 30 ->  top: 0, right: 10, down: 20, left: 30
+
 
 	TODO:
 		- '@import' component doesn't work inside pages css files
@@ -15,6 +20,7 @@
 @import 'styles/component-styles/multi-button-group.css';
 @import 'styles/page-styles/error-page.css';
 @import 'styles/page-styles/auth-pages.css';
+@import 'styles/page-styles/blockchain-demo.css';
 
 @import 'styles/page-styles/home-page.css';
 @import 'styles/page-styles/assets-page.css';
@@ -125,12 +131,6 @@ vaadin-grid::part(selected-row-cell) {
 	box-shadow: none;
 }
 
-vaadin-text-area::part(input-field),
-vaadin-number-field::part(input-field) {
-/*    background: white;
-    padding: 0;*/
-}
-
 vaadin-text-field > [slot="prefix"],
 vaadin-number-field > [slot="prefix"] {
     margin: 0;
@@ -206,6 +206,7 @@ vaadin-text-field::part(input-field),
 vaadin-email-field::part(input-field),
 vaadin-date-picker::part(input-field),
 vaadin-number-field::part(input-field),
+vaadin-integer-field::part(input-field),
 vaadin-multi-select-combo-box::part(input-field)
 {
     height: 2.5rem;
@@ -215,6 +216,7 @@ vaadin-select::part(input-field),
 vaadin-text-area::part(input-field),
 vaadin-combo-box::part(input-field),
 vaadin-text-field::part(input-field),
+vaadin-integer-field::part(input-field),
 vaadin-email-field::part(input-field),
 vaadin-date-picker::part(input-field),
 vaadin-time-picker::part(input-field),
@@ -233,6 +235,18 @@ vaadin-multi-select-combo-box::part(input-field) {
     font-weight: 500;
     color: rgb(17 24 39);
     caret-color: var(--BlueLightColor);
+}
+
+vaadin-select[readonly]::part(input-field),
+vaadin-text-area[readonly]::part(input-field),
+vaadin-combo-box[readonly]::part(input-field),
+vaadin-text-field[readonly]::part(input-field),
+vaadin-integer-field[readonly]::part(input-field),
+vaadin-date-picker[readonly]::part(input-field),
+vaadin-time-picker[readonly]::part(input-field),
+vaadin-date-time-picker[readonly]::part(input-field),
+vaadin-multi-select-combo-box[readonly]::part(input-field) {
+	cursor: not-allowed;
 }
 
 vaadin-date-time-picker > vaadin-date-picker {
@@ -285,3 +299,51 @@ vcf-toggle-button::part(checkbox) {
 vcf-toggle-button::part(checkbox)::before {
     top: 20px;
 }
+
+
+/******************************************
+				COMPONENTS
+******************************************/
+
+/*
+	Info Tooltip
+*/
+
+.tooltip-container {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+
+/*
+	Field With Tooltip
+*/
+
+.field-container > .field-header {
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+	padding: 0 0 5px 5px;
+}
+
+.field-header > field-label {
+	color: gray;
+}
+
+.field-container:has(vaadin-integer-field) {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+/*
+.field-container vaadin-integer-field::part(input-field) {
+	width: 100%;
+}
+*/
+
+
+/*
+
+*/

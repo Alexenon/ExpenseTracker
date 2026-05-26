@@ -1,4 +1,4 @@
-package com.example.application.views.components.utils;
+package com.example.application.views.components.custom.fields.helpers;
 
 import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.shared.ValidationUtil;
