@@ -1,10 +1,10 @@
 package com.example.application.views.components.custom.dialogs;
 
 import com.example.application.data.requests.ExpenseRequest;
-import com.example.application.entities.Expense;
-import com.example.application.entities.ExpenseTimestamp;
-import com.example.application.services.CategoryService;
-import com.example.application.services.ExpenseService;
+import com.example.application.entities.expenses.Expense;
+import com.example.application.entities.expenses.ExpenseTimestamp;
+import com.example.application.services.expenses.CategoryService;
+import com.example.application.services.expenses.ExpenseService;
 import com.example.application.views.components.utils.HasNotifications;
 import com.example.application.views.pages.expenses.ExpensesView;
 import com.vaadin.flow.component.Component;
@@ -12,6 +12,7 @@ import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Span;
@@ -47,6 +48,7 @@ public class AddExpenseDialog extends Dialog implements HasNotifications {
     private final NumberField amountField = new NumberField("Amount");
     private final Select<ExpenseTimestamp> timestampField = new Select<>();
     private final ComboBox<String> categoryField = new ComboBox<>("Category");
+	private final MultiSelectComboBox<String> tagsField = new MultiSelectComboBox<>("Tags");
     private final DatePicker startDateField = new DatePicker("Start Date");
     private final DatePicker expireDateField = new DatePicker("Expire Date");
     private final Button saveButton = new Button("Save");
@@ -69,7 +71,7 @@ public class AddExpenseDialog extends Dialog implements HasNotifications {
     }
 
     private VerticalLayout createDialogLayout() {
-        Component[] components = {nameField, descriptionField, amountField, categoryField, timestampField, startDateField, expireDateField};
+        Component[] components = {nameField, descriptionField, amountField, categoryField, tagsField, timestampField, startDateField, expireDateField};
         VerticalLayout dialogLayout = new VerticalLayout(components);
         dialogLayout.setPadding(false);
         dialogLayout.setSpacing(false);
@@ -99,6 +101,7 @@ public class AddExpenseDialog extends Dialog implements HasNotifications {
 
         categoryField.setItems(categoryService.getAllCategoryNames());
         categoryField.setHelperText("Select the category which fits this expense");
+		tagsField.setHelperText("Add tags related with this expenses in case there are");
         amountField.setSuffixComponent(new Span("MDL"));
 
         startDateField.setI18n(singleFormatI18n);
@@ -140,6 +143,10 @@ public class AddExpenseDialog extends Dialog implements HasNotifications {
         binder.forField(categoryField)
                 .asRequired("Please fill this field")
                 .bind(ExpenseRequest::getCategoryName, ExpenseRequest::setCategoryName);
+
+		binder.forField(tagsField)
+				.asRequired("Please fill this field")
+				.bind(ExpenseRequest::getTags, ExpenseRequest::setTags);
 
         binder.forField(timestampField)
                 .asRequired("Please fill this field")

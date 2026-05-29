@@ -1,6 +1,6 @@
-package com.example.application.data.dtos;
+package com.example.application.data.dtos.expense;
 
-import com.example.application.entities.ExpenseTimestamp;
+import com.example.application.entities.expenses.ExpenseTimestamp;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.time.LocalDate;

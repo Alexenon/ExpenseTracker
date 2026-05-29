@@ -1,8 +1,8 @@
-package com.example.application.repositories;
+package com.example.application.repositories.expenses;
 
-import com.example.application.data.dtos.ExpenseDTO;
+import com.example.application.data.dtos.expense.ExpenseDTO;
 import com.example.application.data.models.projections.MonthlyExpensesProjection;
-import com.example.application.entities.Expense;
+import com.example.application.entities.expenses.Expense;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.query.Procedure;

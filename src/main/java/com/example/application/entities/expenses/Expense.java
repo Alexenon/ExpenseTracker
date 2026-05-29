@@ -1,5 +1,6 @@
-package com.example.application.entities;
+package com.example.application.entities.expenses;
 
+import com.example.application.entities.User;
 import com.example.application.utils.common.formatters.CommonFormatters;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
@@ -8,6 +9,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.StringJoiner;
 
 @Data
@@ -20,7 +23,7 @@ public class Expense {
 	private Long id;
 
 	@Column(name = "name", nullable = false)
-	@Size(min = 4, max = 20, message = "Name should be between 4 and 20 characters")
+	@Size(min = 4, max = 20, message = "Expense name should be between 4 and 20 characters")
 	private String name;
 
 	@Column(name = "amount", nullable = false)
@@ -45,6 +48,9 @@ public class Expense {
 	@ManyToOne
 	@JoinColumn(name = "category_id", nullable = false)
 	private Category category;
+
+	@OneToMany(mappedBy = "tag", cascade = CascadeType.ALL, orphanRemoval = true)
+	private Set<ExpenseTag> expenseTags = new HashSet<>();
 
 	@ManyToOne
 	@JoinColumn(name = "user_id", nullable = false)

@@ -1,8 +1,8 @@
-package com.example.application.services;
+package com.example.application.services.expenses;
 
 import com.example.application.data.enums.Categories;
-import com.example.application.entities.Category;
-import com.example.application.repositories.CategoryRepository;
+import com.example.application.entities.expenses.Category;
+import com.example.application.repositories.expenses.CategoryRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

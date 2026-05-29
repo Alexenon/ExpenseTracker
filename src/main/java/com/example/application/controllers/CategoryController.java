@@ -1,7 +1,7 @@
 package com.example.application.controllers;
 
-import com.example.application.entities.Category;
-import com.example.application.repositories.CategoryRepository;
+import com.example.application.entities.expenses.Category;
+import com.example.application.repositories.expenses.CategoryRepository;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

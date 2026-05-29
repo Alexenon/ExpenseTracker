@@ -1,7 +1,7 @@
 package com.example.application.views.pages.expenses;
 
 import com.example.application.data.models.projections.MonthlyExpensesProjection;
-import com.example.application.services.ExpenseService;
+import com.example.application.services.expenses.ExpenseService;
 import com.example.application.views.layouts.MainLayout;
 import com.example.application.views.pages.DefaultPage;
 import com.vaadin.flow.component.dependency.JavaScript;

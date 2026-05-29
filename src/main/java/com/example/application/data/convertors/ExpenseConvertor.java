@@ -1,11 +1,11 @@
 package com.example.application.data.convertors;
 
 import com.example.application.data.requests.ExpenseRequest;
-import com.example.application.entities.Category;
-import com.example.application.entities.Expense;
 import com.example.application.entities.User;
-import com.example.application.services.CategoryService;
+import com.example.application.entities.expenses.Category;
+import com.example.application.entities.expenses.Expense;
 import com.example.application.services.SecurityService;
+import com.example.application.services.expenses.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

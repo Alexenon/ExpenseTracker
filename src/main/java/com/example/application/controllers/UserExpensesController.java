@@ -1,10 +1,10 @@
 package com.example.application.controllers;
 
 import com.example.application.data.convertors.ExpenseConvertor;
-import com.example.application.data.dtos.ExpenseDTO;
+import com.example.application.data.dtos.expense.ExpenseDTO;
 import com.example.application.data.requests.ExpenseRequest;
-import com.example.application.entities.Expense;
-import com.example.application.services.ExpenseService;
+import com.example.application.entities.expenses.Expense;
+import com.example.application.services.expenses.ExpenseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

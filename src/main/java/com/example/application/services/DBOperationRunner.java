@@ -1,6 +1,7 @@
 package com.example.application.services;
 
 import com.example.application.services.crypto.InstrumentsFacadeService;
+import com.example.application.services.expenses.CategoryService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;

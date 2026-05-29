@@ -12,15 +12,22 @@ import com.example.application.data.requests.asset.CreateAssetRequest;
 import com.example.application.data.requests.asset.UpdateAssetRequest;
 import com.example.application.data.requests.asset_watchers.CreateAssetWatcherRequest;
 import com.example.application.data.requests.asset_watchers.UpdateAssetWatcherRequest;
+import com.example.application.data.requests.expenses.CreateTagRequest;
+import com.example.application.data.requests.expenses.UpdateTagRequest;
 import com.example.application.data.requests.portfolio.CreatePortfolioRequest;
 import com.example.application.entities.User;
 import com.example.application.entities.common.TransactionType;
 import com.example.application.entities.crypto.*;
+import com.example.application.entities.expenses.ExpenseTag;
+import com.example.application.entities.expenses.Tag;
 import com.example.application.services.SecurityService;
 import com.example.application.services.UserService;
+import com.example.application.services.expenses.ExpenseTagService;
+import com.example.application.services.expenses.TagService;
 import com.example.application.utils.exceptions.InternalUnexpectedException;
 import com.example.application.utils.fetchers.crypto_compare.response.AssetMetadata;
 import jakarta.annotation.Nonnull;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
@@ -52,6 +59,9 @@ public class InstrumentsFacadeService {
 	private final AssetWatcherService assetWatcherService;
 	private final AssetBalanceService assetBalanceService;
 
+	private final TagService tagService;
+	private final ExpenseTagService expenseTagService;
+
 	private final EntityValidator validator;
 
 	@Autowired
@@ -65,6 +75,8 @@ public class InstrumentsFacadeService {
 			TransactionService transactionService,
 			AssetWatcherService assetWatcherService,
 			AssetBalanceService assetBalanceService,
+			TagService tagService,
+			ExpenseTagService expenseTagService,
 			EntityValidator entityValidator
 	)
 	{
@@ -77,6 +89,8 @@ public class InstrumentsFacadeService {
 		this.transactionService = transactionService;
 		this.assetWatcherService = assetWatcherService;
 		this.assetBalanceService = assetBalanceService;
+		this.tagService = tagService;
+		this.expenseTagService = expenseTagService;
 		this.validator = entityValidator;
 	}
 
@@ -103,12 +117,12 @@ public class InstrumentsFacadeService {
 		log.info("Finished deleting user #{} in batch", userId);
 	}
 
-	public boolean isUsernameTaken(String username) {
-		return userService.isUsernameTaken(username);
+	public boolean isUsernameAvailable(String username) {
+		return !userService.isUsernameTaken(username);
 	}
 
-	public boolean isEmailTaken(String email) {
-		return userService.isEmailTaken(email);
+	public boolean isEmailAvailable(String email) {
+		return !userService.isEmailTaken(email);
 	}
 	//</editor-fold>
 
@@ -197,7 +211,7 @@ public class InstrumentsFacadeService {
 	@Transactional
 	public TransactionDTO transferTransaction(Long transactionId, Long portfolioId, boolean replace) {
 		Portfolio portfolio = portfolioService.findById(portfolioId)
-				.orElseThrow(() -> new IllegalArgumentException("There is no such portfolio with id: #" + transactionId));
+				.orElseThrow(() -> new EntityNotFoundException("There is no such portfolio with id: #" + transactionId));
 
 		return new TransactionDTO(transactionService.transfer(transactionId, portfolio, replace));
 	}
@@ -208,10 +222,10 @@ public class InstrumentsFacadeService {
 		Transaction transaction = new Transaction();
 
 		Asset asset = assetService.findBySymbol(request.getAssetSymbol())
-				.orElseThrow(() -> new IllegalArgumentException("Cannot find asset: " + request.getAssetSymbol()));
+				.orElseThrow(() -> new EntityNotFoundException("Cannot find asset: " + request.getAssetSymbol()));
 
 		Portfolio portfolio = portfolioService.findById(request.getPortfolioId())
-				.orElseThrow(() -> new IllegalArgumentException("Cannot find portfolio with id: #" + request.getPortfolioId()));
+				.orElseThrow(() -> new EntityNotFoundException("Cannot find portfolio with id: #" + request.getPortfolioId()));
 
 		transaction.setAsset(asset);
 		transaction.setPortfolio(portfolio);
@@ -231,10 +245,10 @@ public class InstrumentsFacadeService {
 	public TransactionDTO updateTransaction(@Valid UpdateTransactionRequest request) {
 		log.info("Updating transaction: {}", request);
 		Transaction transaction = transactionService.findById(request.getId())
-				.orElseThrow(() -> new IllegalArgumentException("Cannot find transaction with id: #" + request.getId()));
+				.orElseThrow(() -> new EntityNotFoundException("Cannot find transaction with id: #" + request.getId()));
 
 		Asset asset = assetService.findBySymbol(request.getAssetSymbol())
-				.orElseThrow(() -> new IllegalArgumentException("Cannot find asset: " + request.getAssetSymbol()));
+				.orElseThrow(() -> new EntityNotFoundException("Cannot find asset: " + request.getAssetSymbol()));
 
 		transaction.setAsset(asset);
 		transaction.setMarketPrice(request.getMarketPrice());
@@ -254,10 +268,10 @@ public class InstrumentsFacadeService {
 	@Transactional
 	public AssetWatcherDTO createAssetWatcher(@Valid CreateAssetWatcherRequest request) {
 		Asset asset = assetService.findBySymbol(request.getAssetSymbol())
-				.orElseThrow(() -> new IllegalArgumentException("Cannot find asset: " + request.getAssetSymbol()));
+				.orElseThrow(() -> new EntityNotFoundException("Cannot find asset: " + request.getAssetSymbol()));
 
 		Portfolio portfolio = portfolioService.findById(request.getPortfolioId())
-				.orElseThrow(() -> new IllegalArgumentException("Cannot find portfolio with id: #" + request.getPortfolioId()));
+				.orElseThrow(() -> new EntityNotFoundException("Cannot find portfolio with id: #" + request.getPortfolioId()));
 
 		AssetWatcher newEntity = new AssetWatcher();
 		newEntity.setAsset(asset);
@@ -274,10 +288,10 @@ public class InstrumentsFacadeService {
 	@Transactional
 	public AssetWatcherDTO updateAssetWatcher(@Valid UpdateAssetWatcherRequest request) {
 		AssetWatcher entity = assetWatcherService.findById(request.getId())
-				.orElseThrow(() -> new IllegalArgumentException("Cannot find assetWatcher: #" + request.getId() + " (deleted ?)"));
+				.orElseThrow(() -> new EntityNotFoundException("Cannot find assetWatcher: #" + request.getId() + " (deleted ?)"));
 
 		Asset asset = assetService.findBySymbol(request.getAssetSymbol())
-				.orElseThrow(() -> new IllegalArgumentException("Cannot find asset: " + request.getAssetSymbol()));
+				.orElseThrow(() -> new EntityNotFoundException("Cannot find asset: " + request.getAssetSymbol()));
 
 		entity.setAsset(asset);
 		entity.setTargetPrice(request.getTargetPrice());
@@ -342,10 +356,10 @@ public class InstrumentsFacadeService {
 		Long portfolioId = transaction.getPortfolio().getId();
 
 		Portfolio portfolio = portfolioService.findById(portfolioId)
-				.orElseThrow(() -> new IllegalArgumentException("Cannot find portfolio: #" + portfolioId));
+				.orElseThrow(() -> new EntityNotFoundException("Cannot find portfolio: #" + portfolioId));
 
 		Asset asset = assetService.findById(assetId)
-				.orElseThrow(() -> new IllegalArgumentException("Cannot find asset: #" + assetId));
+				.orElseThrow(() -> new EntityNotFoundException("Cannot find asset: #" + assetId));
 
 		AssetBalance assetBalance = assetBalanceService.findByPortfolioAndAsset(portfolio.getId(), asset.getSymbol())
 				.orElseGet(() -> createAssetBalance(portfolio, asset));
@@ -380,7 +394,7 @@ public class InstrumentsFacadeService {
 	public PortfolioDTO createPortfolio(@Valid CreatePortfolioRequest request) {
 		validator.validate(request);
 		User user = userService.findById(request.getUserId())
-				.orElseThrow(() -> new IllegalArgumentException("User #" + request.getUserId() + " not found. (deleted ?)"));
+				.orElseThrow(() -> new EntityNotFoundException("User #" + request.getUserId() + " not found. (deleted ?)"));
 
 		Portfolio portfolio = portfolioService.createPortfolio(request, user);
 		userService.setPortfolioAsActive(user.getId(), portfolio);
@@ -466,6 +480,44 @@ public class InstrumentsFacadeService {
 			UpdateAssetRequest request = AssetConvertor.mapToUpdateRequest(assetId, metadata);
 			assetService.updateAsset(request);
 		}
+	}
+	//</editor-fold>
+
+	//<editor-fold desc="TAGS">
+	public Optional<Tag> findTagById(Long tagId) {
+		return tagService.findById(tagId);
+	}
+
+	public Optional<Tag> findTagByName(String name) {
+		return tagService.findByName(name);
+	}
+
+	public List<Tag> findExpenseTags(Long expenseId) {
+		return expenseTagService.findByExpense(expenseId)
+				.stream()
+				.map(ExpenseTag::getTag)
+				.toList();
+	}
+
+	public Tag createTag(@Valid CreateTagRequest request) {
+		User user = userService.findById(request.getUserId())
+				.orElseThrow(() -> new EntityNotFoundException("Cannot find user with id: #" + request.getUserId()));
+
+		Tag tag = new Tag(request.getName(), user);
+
+		return tagService.save(tag);
+	}
+
+	public Tag updateTag(@Valid UpdateTagRequest request) {
+		Tag tag = tagService.findById(request.getId())
+				.orElseThrow(() -> new EntityNotFoundException("Cannot find tag with id: #" + request.getId()));
+
+		tag.setName(request.getName());
+		return tagService.save(tag);
+	}
+
+	public void deleteTag(Long tagId) {
+		tagService.delete(tagId);
 	}
 	//</editor-fold>
 

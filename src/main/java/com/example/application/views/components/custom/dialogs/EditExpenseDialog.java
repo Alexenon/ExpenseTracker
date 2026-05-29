@@ -1,11 +1,11 @@
 package com.example.application.views.components.custom.dialogs;
 
-import com.example.application.data.dtos.ExpenseDTO;
+import com.example.application.data.dtos.expense.ExpenseDTO;
 import com.example.application.data.requests.ExpenseRequest;
-import com.example.application.entities.Expense;
-import com.example.application.entities.ExpenseTimestamp;
-import com.example.application.services.CategoryService;
-import com.example.application.services.ExpenseService;
+import com.example.application.entities.expenses.Expense;
+import com.example.application.entities.expenses.ExpenseTimestamp;
+import com.example.application.services.expenses.CategoryService;
+import com.example.application.services.expenses.ExpenseService;
 import com.example.application.views.components.utils.HasNotifications;
 import com.example.application.views.pages.expenses.ExpensesView;
 import com.vaadin.flow.component.Component;
@@ -13,6 +13,7 @@ import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Span;
@@ -48,6 +49,7 @@ public class EditExpenseDialog extends Dialog implements HasNotifications {
     private final NumberField amountField = new NumberField("Amount");
     private final Select<ExpenseTimestamp> timestampField = new Select<>();
     private final ComboBox<String> categoryField = new ComboBox<>("Category");
+	private final MultiSelectComboBox<String> tagsField = new MultiSelectComboBox<>("Tags");
     private final DatePicker startDateField = new DatePicker("Start Date");
     private final DatePicker expireDateField = new DatePicker("Expire Date");
     private final Button saveButton = new Button("Save");

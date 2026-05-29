@@ -1,4 +1,4 @@
-package com.example.application.entities;
+package com.example.application.entities.expenses;
 
 import java.util.Arrays;
 import java.util.List;

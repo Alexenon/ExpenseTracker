@@ -1,14 +1,15 @@
-package com.example.application.services;
+package com.example.application.services.expenses;
 
 import com.example.application.components.EntityValidator;
 import com.example.application.data.convertors.ExpenseConvertor;
-import com.example.application.data.dtos.ExpenseDTO;
+import com.example.application.data.dtos.expense.ExpenseDTO;
 import com.example.application.data.models.projections.MonthlyExpensesProjection;
 import com.example.application.data.requests.ExpenseRequest;
-import com.example.application.entities.Expense;
-import com.example.application.entities.ExpenseTimestamp;
 import com.example.application.entities.User;
-import com.example.application.repositories.ExpenseRepository;
+import com.example.application.entities.expenses.Expense;
+import com.example.application.entities.expenses.ExpenseTimestamp;
+import com.example.application.repositories.expenses.ExpenseRepository;
+import com.example.application.services.SecurityService;
 import com.example.application.utils.common.lang.DateUtils;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.EntityNotFoundException;
