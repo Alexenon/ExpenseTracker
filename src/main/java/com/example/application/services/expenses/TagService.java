@@ -1,6 +1,7 @@
 package com.example.application.services.expenses;
 
 import com.example.application.components.EntityValidator;
+import com.example.application.entities.User;
 import com.example.application.entities.expenses.Tag;
 import com.example.application.repositories.expenses.TagRepository;
 import com.example.application.services.UserService;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -31,10 +33,34 @@ public class TagService {
 		return tagRepository.findById(tagId);
 	}
 
-	public Optional<Tag> findByName(@NotNull String name) {
+	public List<Tag> findByExpense(@NotNull Long expenseId) {
+		Objects.requireNonNull(expenseId, "expenseId");
+		return tagRepository.findByExpense(expenseId);
+	}
+
+	public List<Tag> findByName(@NotNull String name) {
 		Objects.requireNonNull(name, "name");
 		return tagRepository.findByName(name);
 	}
+
+	public List<Tag> findByUser(@NotNull Long userId) {
+		Objects.requireNonNull(userId, "userId");
+		return tagRepository.findByUser(userId);
+	}
+
+	public Optional<Tag> findByNameAndUser(@NotNull String name, @NotNull Long userId) {
+		Objects.requireNonNull(name, "name");
+		Objects.requireNonNull(userId, "userId");
+		return tagRepository.findByNameAndUser(name, userId);
+	}
+
+	public Tag findByNameAndUserOrCreate(@NotNull String name, @NotNull User user) {
+		Objects.requireNonNull(name, "name");
+		Objects.requireNonNull(user, "user");
+		return tagRepository.findByNameAndUser(name, user.getId())
+				.orElseGet(() -> save(new Tag(name, user)));
+	}
+
 	//</editor-fold>
 
 	@Transactional
@@ -58,6 +84,10 @@ public class TagService {
 		} catch (Exception e) {
 			throw new InternalUnexpectedException(e);
 		}
+	}
+
+	public boolean isNameTaken(String tagName, Long userId) {
+		return findByNameAndUser(tagName, userId).isEmpty();
 	}
 
 }

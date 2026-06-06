@@ -5,6 +5,7 @@ import com.example.application.views.components.custom.NavigationBar;
 import com.example.application.views.components.custom.icons.MonoIcon;
 import com.example.application.views.components.custom.icons.PictogramIcon;
 import com.example.application.views.pages.LoginView;
+import com.example.application.views.pages.settings.SettingsView;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.html.Header;
@@ -64,6 +65,10 @@ public class MainLayout extends AppLayout {
         accountIconTooltip.setPosition(Tooltip.TooltipPosition.BOTTOM);
         loginIconTooltip.setPosition(Tooltip.TooltipPosition.BOTTOM);
         logoutIconTooltip.setPosition(Tooltip.TooltipPosition.BOTTOM);
+
+		accountIcon.addClickListener(e -> {
+			getUI().ifPresent(ui -> ui.navigate(SettingsView.class));
+		});
 
         loginIcon.addClickListener(e -> {
             getUI().ifPresent(ui -> ui.navigate(LoginView.class));

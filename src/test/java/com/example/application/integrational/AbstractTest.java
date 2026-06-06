@@ -5,6 +5,7 @@ import com.example.application.data.dtos.TransactionDTO;
 import com.example.application.data.dtos.UserDTO;
 import com.example.application.data.requests.CreateTransactionRequest;
 import com.example.application.data.requests.RegisterUserRequest;
+import com.example.application.data.requests.asset.CreateAssetRequest;
 import com.example.application.data.requests.portfolio.CreatePortfolioRequest;
 import com.example.application.entities.User;
 import com.example.application.entities.common.TransactionType;
@@ -16,6 +17,8 @@ import com.example.application.repositories.crypto.AssetBalanceRepository;
 import com.example.application.repositories.crypto.AssetRepository;
 import com.example.application.repositories.crypto.PortfolioRepository;
 import com.example.application.repositories.crypto.TransactionRepository;
+import com.example.application.repositories.expenses.CategoryRepository;
+import com.example.application.repositories.expenses.TagRepository;
 import com.example.application.services.crypto.AssetService;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import jakarta.persistence.EntityNotFoundException;
@@ -42,6 +45,13 @@ public abstract class AbstractTest {
 	protected InstrumentsFacadeService instrumentsFacadeService;
 	@Autowired
 	protected AssetService assetService;
+	/* --------------------------------------
+	 * 				EXPENSES
+	 * ------------------------------------ */
+	@Autowired
+	protected TagRepository tagRepository;
+	@Autowired
+	protected CategoryRepository categoryRepository;
 
 	protected User createUser(String username, String email) {
 		RegisterUserRequest request = RegisterUserRequest.builder()
@@ -61,14 +71,14 @@ public abstract class AbstractTest {
 	}
 
 	protected Asset createAsset(String symbol, double price) {
-		Asset asset = new Asset();
-		asset.setSymbol(symbol);
-		asset.setMarketPrice(BigDecimal.valueOf(price));
-		asset.setFullName("Some full name");
-		asset.setTotalMarketCap(BigInteger.ZERO);
-		asset.setTotalSupply(BigInteger.ZERO);
+		CreateAssetRequest request = new CreateAssetRequest();
+		request.setSymbol(symbol);
+		request.setMarketPrice(BigDecimal.valueOf(price));
+		request.setFullName("Some full name");
+		request.setTotalMarketCap(BigInteger.ZERO);
+		request.setTotalSupply(BigInteger.ZERO);
 
-		return Objects.requireNonNull(assetService.save(asset), "Asset was not created");
+		return Objects.requireNonNull(assetService.createNewAsset(request), "Asset was not created");
 	}
 
 	protected Transaction createTransaction(Asset asset, TransactionType type, double marketPrice, double orderQuantity, long portfolioId) {
@@ -103,7 +113,6 @@ public abstract class AbstractTest {
 		return portfolioRepository.findById(dto.getId())
 				.orElseThrow(() -> new EntityNotFoundException("Portfolio was not created"));
 	}
-
 
 	protected void assertBigDecimalEquals(BigDecimal expected, BigDecimal actual, String field) {
 		Assertions.assertEquals(

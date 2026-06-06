@@ -10,7 +10,7 @@ import lombok.Data;
 public class UpdateCategoryRequest {
 
 	@NotNull
-	@Min(value = 0, message = "Invalid id")
+	@Min(value = 1, message = "Invalid id")
 	private final Long id;
 
 	@NotBlank

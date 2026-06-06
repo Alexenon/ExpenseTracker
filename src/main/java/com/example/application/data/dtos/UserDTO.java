@@ -1,21 +1,21 @@
 package com.example.application.data.dtos;
 
 import com.example.application.entities.User;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
+@AllArgsConstructor
 public class UserDTO {
 
-	private Long id;
-	private String username;
-	private String email;
+	private final Long id;
+	private final String username;
+	private final String email;
 
-	public static UserDTO mappedFrom(User user) {
-		UserDTO dto = new UserDTO();
-		dto.setId(user.getId());
-		dto.setUsername(user.getUsername());
-		dto.setEmail(user.getEmail());
-		return dto;
+	public UserDTO(User user) {
+		this.id = user.getId();
+		this.username = user.getUsername();
+		this.email = user.getEmail();
 	}
 
 }

@@ -1,6 +1,6 @@
 package com.example.application.entities.expenses;
 
-import jakarta.annotation.Nullable;
+import com.example.application.entities.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -18,15 +18,17 @@ public class Category {
 
 	@NotNull
 	@Column(unique = true, nullable = false)
-	@Size(min = 4, max = 20, message = "Category name should be between 4 and 20 characters")
+	@Size(min = 4, max = 20, message = "Name should be between 4 and 20 characters")
 	private String name;
 
-	@Nullable
-	@Column(name = "icon_name")
+	@NotNull
+	@Column(name = "icon_name", unique = true, nullable = false)
 	@Size(min = 3, max = 20, message = "Icon name should be between 3 and 20 characters")
 	private String iconName;
 
-	public Category(String name) {
-		this.name = name;
-	}
+	@NotNull
+	@ManyToOne
+	@JoinColumn(name = "user_id", nullable = false)
+	private User user;
+
 }

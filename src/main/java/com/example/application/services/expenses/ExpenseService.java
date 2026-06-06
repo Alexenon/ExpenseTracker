@@ -1,18 +1,12 @@
 package com.example.application.services.expenses;
 
 import com.example.application.components.EntityValidator;
-import com.example.application.data.convertors.ExpenseConvertor;
-import com.example.application.data.dtos.expense.ExpenseDTO;
 import com.example.application.data.models.projections.MonthlyExpensesProjection;
-import com.example.application.data.requests.ExpenseRequest;
-import com.example.application.entities.User;
 import com.example.application.entities.expenses.Expense;
 import com.example.application.entities.expenses.ExpenseTimestamp;
 import com.example.application.repositories.expenses.ExpenseRepository;
-import com.example.application.services.SecurityService;
 import com.example.application.utils.common.lang.DateUtils;
 import jakarta.annotation.Nonnull;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,69 +15,71 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class ExpenseService {
 
 	private final ExpenseRepository expenseRepository;
-	private final SecurityService securityService;
-	private final ExpenseConvertor expenseConvertor;
 	private final EntityValidator validator;
 
-	@Nonnull
-	public List<ExpenseDTO> getAllExpenses() {
-		return expenseRepository.getAll();
+	//<editor-fold desc="SEARCH">
+	public Optional<Expense> findById(@NotNull Long id) {
+		Objects.requireNonNull(id, "id");
+		return expenseRepository.findById(id);
 	}
 
-	@Nonnull
-	public List<ExpenseDTO> getAllExpensesByUser(@NotNull String userEmailOrUsername) {
-		Objects.requireNonNull(userEmailOrUsername, "user email or username");
-		return expenseRepository.getAll(userEmailOrUsername);
+	public List<Expense> findByUser(@NotNull Long userId) {
+		Objects.requireNonNull(userId, "userId");
+		return expenseRepository.findByUser(userId);
 	}
 
-	@Nonnull
-	public List<ExpenseDTO> getAllExpensesByUser(@NotNull User user) {
-		Objects.requireNonNull(user, "user");
-		return getAllExpensesByUser(user.getUsername());
+	public List<Expense> getExpensesByCategory(String categoryName) {
+		return expenseRepository.findByCategory(categoryName);
 	}
 
-	@Nonnull
-	public List<ExpenseDTO> getAllExpensesByUser() {
-		return getAllExpensesByUser(securityService.getAuthenticatedUser());
+	public List<Expense> getExpensesByMonth(int month) {
+		return expenseRepository.findExpensesPerMonth(month);
 	}
 
+	public List<Expense> getExpensesByYear(int year) {
+		return expenseRepository.findExpensesPerYear(year);
+	}
+
+	/**
+	 * @param date is converted if it's:
+	 *             <ul>
+	 *                  <li>CURRENT MONTH -> remains same
+	 *                  <li>PREVIOUS MONTH -> into another date with its last day of month
+	 *                  <li>NEXT MONTH -> into another date with its first day of month
+	 *              </ul>
+	 */
+	@Nonnull
+	@Transactional
+	public List<MonthlyExpensesProjection> findMonthlyExpensesByUser(@NotNull String username, @NotNull LocalDate date) {
+		Objects.requireNonNull(username, "username");
+		Objects.requireNonNull(date, "date");
+
+		if (!DateUtils.isInSameMonthAndYear(date, LocalDate.now())) {
+			date = date.isBefore(LocalDate.now())
+					? DateUtils.lastDayOfMonth(date)
+					: DateUtils.firstDayOfMonth(date);
+		}
+
+		return expenseRepository.findMonthlyExpenses(username, date);
+	}
+	//</editor-fold>
+
+	@Transactional
 	public Expense saveExpense(@NotNull Expense expense) {
-		Objects.requireNonNull(expense);
+		Objects.requireNonNull(expense, "expense");
 		validator.validate(expense);
 
 		replaceExpireDateForOneTimeExpenses(expense);
 		System.out.println("Saving " + expense);
 
 		return expenseRepository.save(expense);
-	}
-
-	public void saveExpenses(@NotNull List<Expense> expenseList) {
-		Objects.requireNonNull(expenseList, "expensesList")
-				.forEach(this::saveExpense);
-	}
-
-	public Expense updateExpense(@NotNull Expense expense) {
-		Objects.requireNonNull(expense, "expense");
-		Expense expenseToUpdate = expenseRepository.findById(expense.getId())
-				.orElseThrow(() -> new EntityNotFoundException("Expense not found"));
-
-		expenseToUpdate.setName(expense.getName());
-		expenseToUpdate.setAmount(expense.getAmount());
-		expenseToUpdate.setDescription(expense.getDescription());
-		expenseToUpdate.setStartDate(expense.getStartDate());
-		expenseToUpdate.setExpireDate(expense.getExpireDate());
-		expenseToUpdate.setTimestamp(expense.getTimestamp());
-		expenseToUpdate.setCategory(expense.getCategory());
-
-		replaceExpireDateForOneTimeExpenses(expense);
-
-		return expenseRepository.save(expenseToUpdate);
 	}
 
 	/**
@@ -98,10 +94,6 @@ public class ExpenseService {
 		expense.setExpireDate(startDate.plusDays(1));
 	}
 
-	public void deleteExpense(Expense expense) {
-		expenseRepository.delete(expense);
-	}
-
 	public void deleteExpenseById(long expenseId) {
 		expenseRepository.deleteById(expenseId);
 	}
@@ -110,62 +102,5 @@ public class ExpenseService {
 		expenseRepository.deleteAll();
 	}
 
-	@Nonnull
-	public List<ExpenseDTO> getExpensesByCategory(String categoryName) {
-		return expenseRepository.findByCategory(categoryName);
-	}
-
-	@Nonnull
-	public List<ExpenseDTO> getExpensesByMonth(int month) {
-		return expenseRepository.findExpensesPerMonth(month);
-	}
-
-	@Nonnull
-	public List<ExpenseDTO> getExpensesByYear(int year) {
-		return expenseRepository.findExpensesPerYear(year);
-	}
-
-	@Nonnull
-	@Transactional
-	public List<MonthlyExpensesProjection> getMonthlyExpensesByUser() {
-		return getMonthlyExpensesByUser(securityService.getAuthenticatedUser(), LocalDate.now());
-	}
-
-	@Nonnull
-	@Transactional
-	public List<MonthlyExpensesProjection> getMonthlyExpensesByUser(@NotNull LocalDate date) {
-		return getMonthlyExpensesByUser(securityService.getAuthenticatedUser(), date);
-	}
-
-	/**
-	 * @param date is converted if it's:
-	 *             <ul>
-	 *                  <li>CURRENT MONTH -> remains same
-	 *                  <li>PREVIOUS MONTH -> into another date with its last day of month
-	 *                  <li>NEXT MONTH -> into another date with its first day of month
-	 *              </ul>
-	 */
-	@Nonnull
-	@Transactional
-	public List<MonthlyExpensesProjection> getMonthlyExpensesByUser(@NotNull User user, @NotNull LocalDate date) {
-		Objects.requireNonNull(user, "user");
-		Objects.requireNonNull(date, "date");
-
-		if (!DateUtils.isInSameMonthAndYear(date, LocalDate.now())) {
-			date = date.isBefore(LocalDate.now())
-					? DateUtils.lastDayOfMonth(date)
-					: DateUtils.firstDayOfMonth(date);
-		}
-
-		return expenseRepository.findMonthlyExpenses(user.getUsername(), date);
-	}
-
-	public Expense convertToExpense(ExpenseRequest expenseRequest) {
-		return expenseConvertor.convertToExpense(expenseRequest);
-	}
-
-	public Expense convertToExpense(ExpenseRequest expenseRequest, User user) {
-		return expenseConvertor.convertToExpense(expenseRequest, user);
-	}
 
 }

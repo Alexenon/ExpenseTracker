@@ -16,7 +16,7 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
 			         SELECT * FROM tags T
 			         WHERE T.name = :name
 			""", nativeQuery = true)
-	Optional<Tag> findByName(@Param("name") String name);
+	List<Tag> findByName(@Param("name") String name);
 
 	@Query(value = """
 			         SELECT * FROM tags T
@@ -29,5 +29,11 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
 			         WHERE T.name = :name AND T.user_id = :userId
 			""", nativeQuery = true)
 	Optional<Tag> findByNameAndUser(@Param("name") String name, @Param("userId") long userId);
+
+	@Query(value = """
+			         SELECT * FROM expense_tags
+			         WHERE expense_id = :expenseId
+			""", nativeQuery = true)
+	List<Tag> findByExpense(@Param("expenseId") Long expenseId);
 
 }

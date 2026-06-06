@@ -14,7 +14,22 @@ public class CreateTagRequest {
 	private final String name;
 
 	@NotNull
-	@Min(value = 0, message = "Invalid userId")
+	@Min(value = 1, message = "Invalid userId")
 	private final Long userId;
+
+	@Override
+	public final boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof CreateTagRequest that)) return false;
+
+		return name.equals(that.name) && userId.equals(that.userId);
+	}
+
+	@Override
+	public int hashCode() {
+		int result = name.hashCode();
+		result = 31 * result + userId.hashCode();
+		return result;
+	}
 
 }

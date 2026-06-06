@@ -20,7 +20,6 @@ import java.util.*;
 @Entity(name = "users")
 public class User {
 
-	@Nullable
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")

@@ -4,6 +4,7 @@ import com.example.application.entities.User;
 import com.example.application.utils.common.formatters.CommonFormatters;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -15,7 +16,7 @@ import java.util.StringJoiner;
 
 @Data
 @Entity(name = "expenses")
-@EqualsAndHashCode(of = {"id", "name", "category", "user"})
+@EqualsAndHashCode(of = {"id", "name", "category", "tags", "user"})
 public class Expense {
 
 	@Id
@@ -27,6 +28,7 @@ public class Expense {
 	private String name;
 
 	@Column(name = "amount", nullable = false)
+	@DecimalMin(value = "0.0", inclusive = false, message = "Amount must be greater than 0")
 	private double amount;
 
 	@Column(name = "description")
@@ -49,8 +51,14 @@ public class Expense {
 	@JoinColumn(name = "category_id", nullable = false)
 	private Category category;
 
-	@OneToMany(mappedBy = "tag", cascade = CascadeType.ALL, orphanRemoval = true)
-	private Set<ExpenseTag> expenseTags = new HashSet<>();
+	@ManyToMany
+	@JoinTable(
+			name = "expense_tags",
+			joinColumns = @JoinColumn(name = "expense_id"),
+			inverseJoinColumns = @JoinColumn(name = "tag_id"),
+			uniqueConstraints = @UniqueConstraint(columnNames = {"expense_id", "tag_id"})
+	)
+	private Set<Tag> tags = new HashSet<>();
 
 	@ManyToOne
 	@JoinColumn(name = "user_id", nullable = false)

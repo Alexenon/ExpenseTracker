@@ -110,7 +110,7 @@ public class PortfolioService {
 		User user = portfolio.getUser();
 		List<Portfolio> userPortfolios = findByUserId(user.getId());
 
-		if (userPortfolios.size() == 1)
+		if (userPortfolios.size() <= 1)
 			throw new InvalidDataException("Cannot delete the last remaining portfolio");
 
 		Portfolio latestUpdatedPortfolio = findLatestUpdatedPortfolio(user.getId());

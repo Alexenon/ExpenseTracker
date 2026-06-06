@@ -3,8 +3,11 @@ package com.example.application.services.crypto;
 import com.example.application.components.EntityValidator;
 import com.example.application.data.convertors.AssetConvertor;
 import com.example.application.data.dtos.*;
+import com.example.application.data.dtos.expense.CategoryDTO;
+import com.example.application.data.dtos.expense.ExpenseDTO;
 import com.example.application.data.enums.SymbolIndentifier;
 import com.example.application.data.models.InstrumentsProvider;
+import com.example.application.data.models.projections.MonthlyExpensesProjection;
 import com.example.application.data.requests.CreateTransactionRequest;
 import com.example.application.data.requests.RegisterUserRequest;
 import com.example.application.data.requests.UpdateTransactionRequest;
@@ -12,26 +15,30 @@ import com.example.application.data.requests.asset.CreateAssetRequest;
 import com.example.application.data.requests.asset.UpdateAssetRequest;
 import com.example.application.data.requests.asset_watchers.CreateAssetWatcherRequest;
 import com.example.application.data.requests.asset_watchers.UpdateAssetWatcherRequest;
+import com.example.application.data.requests.expenses.CreateExpenseRequest;
 import com.example.application.data.requests.expenses.CreateTagRequest;
+import com.example.application.data.requests.expenses.UpdateExpenseRequest;
 import com.example.application.data.requests.expenses.UpdateTagRequest;
+import com.example.application.data.requests.expenses.category.CreateCategoryRequest;
+import com.example.application.data.requests.expenses.category.UpdateCategoryRequest;
 import com.example.application.data.requests.portfolio.CreatePortfolioRequest;
 import com.example.application.entities.User;
 import com.example.application.entities.common.TransactionType;
 import com.example.application.entities.crypto.*;
-import com.example.application.entities.expenses.ExpenseTag;
+import com.example.application.entities.expenses.Category;
+import com.example.application.entities.expenses.Expense;
 import com.example.application.entities.expenses.Tag;
 import com.example.application.services.SecurityService;
 import com.example.application.services.UserService;
-import com.example.application.services.expenses.ExpenseTagService;
-import com.example.application.services.expenses.TagService;
+import com.example.application.services.expenses.*;
 import com.example.application.utils.exceptions.InternalUnexpectedException;
 import com.example.application.utils.fetchers.crypto_compare.response.AssetMetadata;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,6 +53,7 @@ import java.util.Optional;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class InstrumentsFacadeService {
 
 	private final SecurityService securityService;
@@ -59,40 +67,11 @@ public class InstrumentsFacadeService {
 	private final AssetWatcherService assetWatcherService;
 	private final AssetBalanceService assetBalanceService;
 
+	private final ExpenseService expenseService;
+	private final CategoryService categoryService;
 	private final TagService tagService;
-	private final ExpenseTagService expenseTagService;
 
 	private final EntityValidator validator;
-
-	@Autowired
-	public InstrumentsFacadeService(
-			SecurityService securityService,
-			InstrumentsProvider instrumentsProvider,
-			UserService userService,
-			PortfolioService portfolioService,
-			AssetService assetService,
-			UserAssetService userAssetService,
-			TransactionService transactionService,
-			AssetWatcherService assetWatcherService,
-			AssetBalanceService assetBalanceService,
-			TagService tagService,
-			ExpenseTagService expenseTagService,
-			EntityValidator entityValidator
-	)
-	{
-		this.securityService = securityService;
-		this.instrumentsProvider = instrumentsProvider;
-		this.userService = userService;
-		this.portfolioService = portfolioService;
-		this.assetService = assetService;
-		this.userAssetService = userAssetService;
-		this.transactionService = transactionService;
-		this.assetWatcherService = assetWatcherService;
-		this.assetBalanceService = assetBalanceService;
-		this.tagService = tagService;
-		this.expenseTagService = expenseTagService;
-		this.validator = entityValidator;
-	}
 
 	//<editor-fold desc="USERS">
 	@Transactional(rollbackFor = Exception.class)
@@ -106,7 +85,7 @@ public class InstrumentsFacadeService {
 
 		createPortfolio(defaultPortfolio);
 
-		return UserDTO.mappedFrom(userEntity);
+		return new UserDTO(userEntity);
 	}
 
 	@Transactional
@@ -483,34 +462,186 @@ public class InstrumentsFacadeService {
 	}
 	//</editor-fold>
 
+	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+	//<editor-fold desc="EXPENSES">
+	public List<ExpenseDTO> findAllUserExpenses() {
+		return findAllUserExpenses(getAuthenticatedUser().getId());
+	}
+
+	public List<ExpenseDTO> findAllUserExpenses(Long userId) {
+		return expenseService.findByUser(userId)
+				.stream()
+				.map(ExpenseDTO::new)
+				.toList();
+	}
+
+	public List<MonthlyExpensesProjection> getMonthlyUserExpenses() {
+		return getMonthlyUserExpenses(LocalDate.now());
+	}
+
+	public List<MonthlyExpensesProjection> getMonthlyUserExpenses(@NotNull LocalDate date) {
+		return expenseService.findMonthlyExpensesByUser(getAuthenticatedUser().getUsername(), date);
+	}
+
+	public Expense createExpense(@Valid CreateExpenseRequest request) {
+		User user = userService.findById(request.getUserId())
+				.orElseThrow(() -> new EntityNotFoundException("User not found: #" + request.getUserId()));
+
+		String categoryName = request.getCategory();
+		Category category = categoryService.findByNameAndUser(categoryName, request.getUserId())
+				.orElseThrow(() -> new EntityNotFoundException("Category '%s' does not exist.".formatted(categoryName)));
+
+		List<Tag> tags = request.getTags()
+				.stream()
+				.map(s -> tagService.findByNameAndUserOrCreate(categoryName, user))
+				.toList();
+
+		Expense expense = new Expense();
+		expense.setName(request.getName());
+		expense.setDescription(request.getDescription());
+		expense.setAmount(request.getAmount());
+		expense.setCategory(category);
+		expense.setTimestamp(request.getTimestamp());
+		expense.setStartDate(request.getStartDate());
+		expense.setExpireDate(request.getExpireDate());
+		expense.setUser(user);
+		expense.getTags().addAll(tags);
+
+		return expenseService.saveExpense(expense);
+	}
+
+	public Expense updateExpense(@Valid UpdateExpenseRequest request) {
+		Expense expense = expenseService.findById(request.getId())
+				.orElseThrow(() -> new EntityNotFoundException("User cannot be found"));
+
+		String categoryName = request.getCategory();
+		Category category = categoryService.findByNameAndUser(categoryName, expense.getUser().getId())
+				.orElseThrow(() -> new EntityNotFoundException("Category '%s' does not exist.".formatted(categoryName)));
+
+		List<Tag> tags = request.getTags()
+				.stream()
+				.map(s -> tagService.findByNameAndUserOrCreate(categoryName, expense.getUser()))
+				.toList();
+
+		expense.setName(request.getName());
+		expense.setDescription(request.getDescription());
+		expense.setAmount(request.getAmount());
+		expense.setCategory(category);
+		expense.setTimestamp(request.getTimestamp());
+		expense.setStartDate(request.getStartDate());
+		expense.setExpireDate(request.getExpireDate());
+		expense.getTags().addAll(tags);
+
+		return expenseService.saveExpense(expense);
+	}
+
+	@Transactional
+	public void deleteExpense(Long expenseId) {
+		expenseService.deleteExpenseById(expenseId);
+	}
+
+	//</editor-fold>
+
+	//<editor-fold desc="CATEGORIES">
+	public Optional<Category> findCategoryById(Long id) {
+		return categoryService.findById(id);
+	}
+
+	public Optional<Category> findCategoryByName(String name) {
+		return categoryService.findByName(name);
+	}
+
+	public Optional<Category> findCategoryByNameAndUser(String name, Long userId) {
+		return categoryService.findByNameAndUser(name, userId);
+	}
+
+	public List<Category> getUserCategories(Long userId) {
+		return categoryService.findByUser(userId);
+	}
+
+	public List<Category> getUserCategories() {
+		return getUserCategories(getAuthenticatedUser().getId());
+	}
+
+	public CategoryDTO createCategory(@Valid CreateCategoryRequest request) {
+		String name = request.getName();
+		Long userId = request.getUserId();
+
+		User user = userService.findById(userId)
+				.orElseThrow(() -> new EntityNotFoundException("Couldn't find user with id: #" + userId));
+
+		if (categoryService.isNameTaken(request.getName(), userId))
+			throw new CategoryNameAlreadyExistsException(request.getIconName());
+
+		if (categoryService.isIconTaken(request.getIconName(), userId))
+			throw new CategoryIconAlreadyExistsException(request.getIconName());
+
+		Category category = new Category();
+		category.setName(name);
+		category.setUser(user);
+		category.setIconName(request.getIconName());
+
+		Category savedCategory = categoryService.save(category);
+		return new CategoryDTO(savedCategory);
+	}
+
+	public CategoryDTO updateCategory(@Valid UpdateCategoryRequest request) {
+		Category category = findCategoryById(request.getId())
+				.orElseThrow(() -> new EntityNotFoundException("Couldn't find category with id: #" + request.getId()));
+
+		Long userId = category.getUser().getId();
+
+		if (!category.getName().equals(request.getName()) && categoryService.isNameTaken(request.getName(), userId))
+			throw new CategoryNameAlreadyExistsException(request.getIconName());
+
+		if (!category.getIconName().equals(request.getIconName()) && categoryService.isIconTaken(request.getIconName(), userId))
+			throw new CategoryIconAlreadyExistsException(request.getIconName());
+
+		category.setName(request.getName());
+		category.setIconName(request.getIconName());
+
+		Category updatedCategory = categoryService.save(category);
+		return new CategoryDTO(updatedCategory);
+	}
+	//</editor-fold>
+
 	//<editor-fold desc="TAGS">
 	public Optional<Tag> findTagById(Long tagId) {
 		return tagService.findById(tagId);
 	}
 
-	public Optional<Tag> findTagByName(String name) {
-		return tagService.findByName(name);
+	public List<Tag> findUserTags() {
+		return findUserTags(getAuthenticatedUser().getId());
+	}
+
+	public List<Tag> findUserTags(Long userId) {
+		return tagService.findByUser(userId);
 	}
 
 	public List<Tag> findExpenseTags(Long expenseId) {
-		return expenseTagService.findByExpense(expenseId)
-				.stream()
-				.map(ExpenseTag::getTag)
-				.toList();
+		return tagService.findByExpense(expenseId);
 	}
 
 	public Tag createTag(@Valid CreateTagRequest request) {
 		User user = userService.findById(request.getUserId())
 				.orElseThrow(() -> new EntityNotFoundException("Cannot find user with id: #" + request.getUserId()));
 
-		Tag tag = new Tag(request.getName(), user);
+		if (tagService.isNameTaken(request.getName(), user.getId()))
+			throw new CategoryNameAlreadyExistsException(request.getName());
 
+		Tag tag = new Tag(request.getName(), user);
 		return tagService.save(tag);
 	}
 
 	public Tag updateTag(@Valid UpdateTagRequest request) {
 		Tag tag = tagService.findById(request.getId())
 				.orElseThrow(() -> new EntityNotFoundException("Cannot find tag with id: #" + request.getId()));
+
+		Long userId = tag.getUser().getId();
+
+		if (!tag.getName().equals(request.getName()) && tagService.isNameTaken(request.getName(), userId))
+			throw new CategoryNameAlreadyExistsException(request.getName());
 
 		tag.setName(request.getName());
 		return tagService.save(tag);
@@ -523,6 +654,6 @@ public class InstrumentsFacadeService {
 
 	@Nonnull
 	public UserDTO getAuthenticatedUser() {
-		return UserDTO.mappedFrom(securityService.getAuthenticatedUser());
+		return new UserDTO(securityService.getAuthenticatedUser());
 	}
 }
