@@ -16,6 +16,7 @@ import com.example.application.services.crypto.AssetBalanceService;
 import com.example.application.services.crypto.AssetService;
 import com.example.application.services.crypto.PortfolioService;
 import com.example.application.services.crypto.TransactionService;
+import com.example.application.utils.exceptions.InternalUnexpectedException;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -63,14 +64,22 @@ class TransactionsServiceTest extends AbstractTest {
 
 	@AfterEach
 	void removeUser() {
-		assetBalanceRepository.deleteAll();
-		transactionRepository.deleteAll();
-		portfolioRepository.deleteAll();
-		userRepository.deleteAll();
-		assetRepository.deleteAll();
+		try {
+			assetBalanceRepository.deleteAll();
+			transactionRepository.deleteAll();
+			portfolioRepository.deleteAll();
+			categoryRepository.deleteAll();
+			tagRepository.deleteAll();
+			userRepository.deleteAll();
+			assetRepository.deleteAll();
+		} catch (Exception e) {
+			throw new InternalUnexpectedException("Couldn't clear database properly", e);
+		}
 		Assertions.assertTrue(userService.findById(user.getId()).isEmpty(), "User was not deleted");
-		Assertions.assertTrue(portfolioService.findByUserId(user.getId()).isEmpty(), "Portfolios are not deleted");
-		Assertions.assertTrue(assetBalanceService.findByPortfolio(portfolio.getId()).isEmpty(), "Asset balances are not deleted");
+		Assertions.assertTrue(portfolioService.findByUser(user.getId()).isEmpty(), "User portfolios are not deleted");
+		Assertions.assertTrue(categoryRepository.findByUser(user.getId()).isEmpty(), "User categories are not deleted");
+		Assertions.assertTrue(tagRepository.findByUser(user.getId()).isEmpty(), "User tags are not deleted");
+		Assertions.assertTrue(assetBalanceService.findByPortfolio(portfolio.getId()).isEmpty(), "User asset balances are not deleted");
 	}
 
 	@Test

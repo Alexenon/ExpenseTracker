@@ -10,6 +10,7 @@ import com.example.application.entities.crypto.Portfolio;
 import com.example.application.services.UserService;
 import com.example.application.services.crypto.AssetBalanceService;
 import com.example.application.services.crypto.PortfolioService;
+import com.example.application.utils.exceptions.InternalUnexpectedException;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -52,13 +53,18 @@ class AssetBalanceServiceTest extends AbstractTest {
 
 	@AfterEach
 	void removeUser() {
-		assetBalanceRepository.deleteAll();
-		transactionRepository.deleteAll();
-		portfolioRepository.deleteAll();
-		userService.delete(user.getId());
+		try {
+			assetBalanceRepository.deleteAll();
+			transactionRepository.deleteAll();
+			portfolioRepository.deleteAll();
+			assetRepository.deleteAll();
+			instrumentsFacadeService.deleteUser(user.getId());
+		} catch (Exception e) {
+			throw new InternalUnexpectedException("Couldn't clear database properly", e);
+		}
 
 		Assertions.assertTrue(userService.findById(user.getId()).isEmpty());
-		Assertions.assertTrue(portfolioService.findByUserId(user.getId()).isEmpty());
+		Assertions.assertTrue(portfolioService.findByUser(user.getId()).isEmpty());
 		Assertions.assertTrue(assetBalanceService.findByPortfolio(portfolio.getId()).isEmpty());
 	}
 

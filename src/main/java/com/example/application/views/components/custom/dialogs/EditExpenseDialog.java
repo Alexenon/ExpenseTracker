@@ -1,8 +1,8 @@
 package com.example.application.views.components.custom.dialogs;
 
+import com.example.application.data.dtos.expense.CategoryDTO;
 import com.example.application.data.dtos.expense.ExpenseDTO;
 import com.example.application.data.requests.expenses.UpdateExpenseRequest;
-import com.example.application.entities.expenses.Category;
 import com.example.application.entities.expenses.ExpenseTimestamp;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.views.components.utils.HasNotifications;
@@ -203,7 +203,7 @@ public class EditExpenseDialog extends Dialog implements HasNotifications {
 	}
 
 	private List<String> getUserCategories() {
-		return instrumentsFacadeService.getUserCategories().stream().map(Category::getName).toList();
+		return instrumentsFacadeService.findUserCategories().stream().map(CategoryDTO::getName).toList();
 	}
 
 	private UpdateExpenseRequest initBean() {

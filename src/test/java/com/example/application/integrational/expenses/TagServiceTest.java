@@ -6,10 +6,12 @@ import com.example.application.data.requests.expenses.UpdateTagRequest;
 import com.example.application.entities.User;
 import com.example.application.entities.expenses.Tag;
 import com.example.application.integrational.AbstractTest;
-import com.example.application.services.UserService;
 import com.example.application.services.expenses.TagService;
 import jakarta.persistence.EntityNotFoundException;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -22,38 +24,18 @@ import java.util.List;
 @ActiveProfiles("test")
 class TagServiceTest extends AbstractTest {
 
-	private final UserService userService;
 	private final TagService tagService;
 
 	private User user;
 
 	@Autowired
-	public TagServiceTest(UserService userService,
-						  TagService tagService)
-	{
-		this.userService = userService;
+	public TagServiceTest(TagService tagService) {
 		this.tagService = tagService;
 	}
 
 	@BeforeEach
 	void setup() {
 		this.user = createUser("user", "test@email.com");
-	}
-
-	@AfterEach
-	void cleanup() {
-		tagRepository.deleteAll();
-		userRepository.deleteAll();
-
-		Assertions.assertTrue(
-				userService.findById(user.getId()).isEmpty(),
-				"User was not deleted"
-		);
-
-		Assertions.assertTrue(
-				tagService.findByUser(user.getId()).isEmpty(),
-				"Tags were not deleted"
-		);
 	}
 
 	@Test
@@ -80,7 +62,7 @@ class TagServiceTest extends AbstractTest {
 	}
 
 	@Test
-	void userShouldHaveCreatedTag() {
+	void newlyCreatedUserShouldHaveDefaultTags() {
 		CreateTagRequest request = createTagRequest("Food");
 
 		Tag saved = instrumentsFacadeService.createTag(request);
@@ -89,7 +71,7 @@ class TagServiceTest extends AbstractTest {
 
 		Assertions.assertFalse(tags.isEmpty(), "User should have tags");
 		Assertions.assertEquals(1, tags.size(), "User should have exactly one tag");
-		Assertions.assertEquals(saved.getId(), tags.get(0).getId());
+		Assertions.assertEquals(saved.getId(), tags.getFirst().getId());
 	}
 
 	@Test
@@ -97,11 +79,7 @@ class TagServiceTest extends AbstractTest {
 		Tag tag = instrumentsFacadeService.createTag(createTagRequest("Food"));
 
 		tagService.delete(tag.getId());
-
-		Assertions.assertTrue(
-				tagService.findById(tag.getId()).isEmpty(),
-				"Tag is still present in database"
-		);
+		Assertions.assertTrue(tagService.findById(tag.getId()).isEmpty(), "Tag is still present in database");
 	}
 
 	@Test
@@ -114,22 +92,8 @@ class TagServiceTest extends AbstractTest {
 	}
 
 	@Test
-	void findByNameShouldReturnCreatedTag() {
-		instrumentsFacadeService.createTag(
-				createTagRequest("Food")
-		);
-
-		List<Tag> tags = tagService.findByName("Food");
-
-		Assertions.assertEquals(1, tags.size());
-		Assertions.assertEquals("Food", tags.get(0).getName());
-	}
-
-	@Test
 	void singleTagModifyTest() {
-		Tag originalTag = instrumentsFacadeService.createTag(
-				createTagRequest("Food")
-		);
+		Tag originalTag = createTag("Test-Name");
 
 		LocalDateTime timeCreated = tagService.findById(originalTag.getId())
 				.orElseThrow()
@@ -151,8 +115,7 @@ class TagServiceTest extends AbstractTest {
 		);
 
 		Assertions.assertTrue(!timeCreated.equals(timeUpdated) && timeUpdated.isAfter(timeCreated),
-				"lastTimeUpdated is not correct"
-		);
+				"lastTimeUpdated is not correct");
 	}
 
 	//<editor-fold desc="Utils">

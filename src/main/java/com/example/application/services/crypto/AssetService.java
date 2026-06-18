@@ -10,7 +10,6 @@ import com.example.application.utils.common.lang.StringUtils;
 import com.example.application.utils.exceptions.InternalUnexpectedException;
 import com.example.application.utils.exceptions.InvalidDataException;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.Nullable;
@@ -56,8 +55,9 @@ public class AssetService {
 	 * @throws InternalUnexpectedException when there is any issue related to save the entity to the database
 	 */
 	@Transactional
-	public Asset createNewAsset(@Valid CreateAssetRequest request) {
+	public Asset createNewAsset(CreateAssetRequest request) {
 		log.info("Creating new asset: {}", request);
+		validator.validate(request);
 		Asset asset = AssetConvertor.mapToEntity(request);
 		return save(asset);
 	}

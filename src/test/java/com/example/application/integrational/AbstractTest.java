@@ -21,13 +21,14 @@ import com.example.application.repositories.expenses.CategoryRepository;
 import com.example.application.repositories.expenses.TagRepository;
 import com.example.application.services.crypto.AssetService;
 import com.example.application.services.crypto.InstrumentsFacadeService;
+import com.example.application.utils.exceptions.InternalUnexpectedException;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Objects;
 
 public abstract class AbstractTest {
 
@@ -53,6 +54,21 @@ public abstract class AbstractTest {
 	@Autowired
 	protected CategoryRepository categoryRepository;
 
+	@BeforeEach
+	protected void beforeTest() {
+		try {
+			assetBalanceRepository.deleteAll();
+			transactionRepository.deleteAll();
+			portfolioRepository.deleteAll();
+			categoryRepository.deleteAll();
+			tagRepository.deleteAll();
+			assetRepository.deleteAll();
+			userRepository.deleteAll();
+		} catch (Exception e) {
+			throw new InternalUnexpectedException("Couldn't clear database properly", e);
+		}
+	}
+
 	protected User createUser(String username, String email) {
 		RegisterUserRequest request = RegisterUserRequest.builder()
 				.username(username)
@@ -75,10 +91,15 @@ public abstract class AbstractTest {
 		request.setSymbol(symbol);
 		request.setMarketPrice(BigDecimal.valueOf(price));
 		request.setFullName("Some full name");
+		request.setSummaryDescription("Some summary description");
+		request.setImageUrl("https://test-url.com");
 		request.setTotalMarketCap(BigInteger.ZERO);
 		request.setTotalSupply(BigInteger.ZERO);
+		request.setTodayVolume(BigInteger.ZERO);
+		request.setChangePercentage(BigDecimal.ZERO);
+		request.setCirculationSupply(BigInteger.ZERO);
 
-		return Objects.requireNonNull(assetService.createNewAsset(request), "Asset was not created");
+		return assetService.createNewAsset(request);
 	}
 
 	protected Transaction createTransaction(Asset asset, TransactionType type, double marketPrice, double orderQuantity, long portfolioId) {

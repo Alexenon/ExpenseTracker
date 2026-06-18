@@ -106,16 +106,11 @@ public class AssetBalanceService {
 	}
 
 	@Transactional
-	public void deleteAll(@NotNull List<AssetBalance> assetBalances) {
-		int size = assetBalances.size();
-		log.info("Deleting {} assetBalances", size);
-		try {
-			assetBalanceRepository.deleteAll(assetBalances);
-		} catch (Exception e) {
-			log.error("Failed to delete {} assetBalances", size, e);
-			throw new InternalUnexpectedException(e);
-		}
-		log.info("Deleted successfully {} assetBalances", size);
+	public void deleteAllForPortfolio(Long portfolioId) {
+		List<AssetBalance> balances = findByPortfolio(portfolioId);
+		log.info("Deleting all asset balances for portfolio: #{}", portfolioId);
+		balances.forEach(assetBalance -> delete(assetBalance.getId()));
+		log.info("Deleted succesfully all {} asset balances for portfolio: #{}", balances.size(), portfolioId);
 	}
 
 	private static BigDecimal calculateTotalRealizedProfit(@NotNull AssetBalance assetBalance, @NotNull Transaction transaction) {

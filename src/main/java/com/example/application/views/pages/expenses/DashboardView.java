@@ -37,7 +37,6 @@ public class DashboardView extends DefaultPage {
 
 	private final InstrumentsFacadeService instrumentsFacadeService;
 
-
     private final Div chartPie = new Div();
     private final Grid<MonthlyExpensesProjection> grid = new Grid<>();
     private final GridListDataView<MonthlyExpensesProjection> dataView = grid.setItems();
@@ -157,6 +156,5 @@ public class DashboardView extends DefaultPage {
                 .replace("\"", "")
                 .split(","));
     }
-
 
 }

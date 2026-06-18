@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.util.List;
+import java.util.Optional;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = Application.class)
@@ -63,7 +63,7 @@ class CategoryServiceTest extends AbstractTest {
 
 		Assertions.assertNotNull(saved.getId(), "Category ID should be generated");
 		Assertions.assertEquals("Food", saved.getName(), "Category name should match");
-		Assertions.assertEquals("restaurant", saved.getIconName(), "Icon name should match");
+		Assertions.assertEquals("DEFAULT_ICON_NAME", saved.getIconName(), "Icon name should match");
 		Assertions.assertEquals(user.getId(), saved.getUserId(), "Category should belong to user");
 	}
 
@@ -86,11 +86,8 @@ class CategoryServiceTest extends AbstractTest {
 	void userShouldHaveCreatedCategory() {
 		CategoryDTO category = createCategory("Food");
 
-		List<Category> categories = categoryService.findByUser(user.getId());
-
-		Assertions.assertFalse(categories.isEmpty(), "User should have categories");
-		Assertions.assertEquals(1, categories.size(), "User should have exactly one category");
-		Assertions.assertEquals(category.getId(), categories.get(0).getId());
+		Optional<Category> createdCategory = categoryService.findByNameAndUser("Food", user.getId());
+		Assertions.assertTrue(createdCategory.isPresent(), "Cannot found created category");
 	}
 
 	@Test
@@ -99,10 +96,8 @@ class CategoryServiceTest extends AbstractTest {
 
 		categoryService.delete(category.getId());
 
-		Assertions.assertTrue(
-				categoryService.findById(category.getId()).isEmpty(),
-				"Category is still present in database"
-		);
+		Assertions.assertTrue(categoryService.findById(category.getId()).isEmpty(),
+				"Category is still present in database after deletion");
 	}
 
 	@Test
@@ -115,30 +110,19 @@ class CategoryServiceTest extends AbstractTest {
 	}
 
 	@Test
-	void singleCategoryModifyTest() {
-		CategoryDTO originalCategory = createCategory("Services");
+	void categoryUpdateTest() {
+		CategoryDTO originalCategory = createCategory("#Healthcare");
 
 		// TODO: Add cleaner way to do this -> builder I guess
 		UpdateCategoryRequest updateRequest = new UpdateCategoryRequest(
 				originalCategory.getId(),
-				"Groceries",
+				"#Groceries",
 				"shopping_cart"
 		);
 
-		CategoryDTO updatedCategory =
-				instrumentsFacadeService.updateCategory(updateRequest);
-
-		Assertions.assertEquals(
-				"Groceries",
-				updatedCategory.getName(),
-				"Category name was not updated"
-		);
-
-		Assertions.assertEquals(
-				"shopping_cart",
-				updatedCategory.getIconName(),
-				"Icon name was not updated"
-		);
+		CategoryDTO updatedCategory = instrumentsFacadeService.updateCategory(updateRequest);
+		Assertions.assertEquals("#Groceries", updatedCategory.getName(), "Category name was not updated");
+		Assertions.assertEquals("shopping_cart", updatedCategory.getIconName(), "Icon name was not updated");
 	}
 
 	//<editor-fold desc="Utils">

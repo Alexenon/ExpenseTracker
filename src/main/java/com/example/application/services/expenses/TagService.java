@@ -87,7 +87,7 @@ public class TagService {
 	}
 
 	public boolean isNameTaken(String tagName, Long userId) {
-		return findByNameAndUser(tagName, userId).isEmpty();
+		return findByNameAndUser(tagName, userId).isPresent();
 	}
 
 }

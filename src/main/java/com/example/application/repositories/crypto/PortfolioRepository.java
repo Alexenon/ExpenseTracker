@@ -13,20 +13,20 @@ import java.util.Optional;
 public interface PortfolioRepository extends JpaRepository<Portfolio, Long> {
 
 	@Query(value = """
-			         SELECT * FROM portfolios P
-			         WHERE P.user_id = :userId
+			         SELECT * FROM portfolios
+			         WHERE user_id = :userId
 			""", nativeQuery = true)
 	List<Portfolio> findByUser(@Param("userId") long userId);
 
 	@Query(value = """
-			         SELECT * FROM portfolios P
-			         WHERE P.name = :name AND P.user_id = :userId
+			         SELECT * FROM portfolios
+			         WHERE name = :name AND user_id = :userId
 			""", nativeQuery = true)
 	Optional<Portfolio> findByNameAndUser(@Param("name") String name, @Param("userId") long userId);
 
 	@Query(value = """
-			         SELECT * FROM portfolios P
-			         WHERE P.user_id = :userId
+			         SELECT * FROM portfolios
+			         WHERE user_id = :userId
 			         ORDER BY last_time_updated
 			         LIMIT 1
 			""", nativeQuery = true)

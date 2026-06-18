@@ -32,7 +32,7 @@ public class PortfolioService {
 		return portfolioRepository.findById(Objects.requireNonNull(portfolioId, "portfolioId"));
 	}
 
-	public List<Portfolio> findByUserId(@NotNull Long userId) {
+	public List<Portfolio> findByUser(@NotNull Long userId) {
 		return portfolioRepository.findByUser(Objects.requireNonNull(userId, "userId"));
 	}
 
@@ -108,7 +108,7 @@ public class PortfolioService {
 				.orElseThrow(() -> new IllegalArgumentException("Invalid portfolio: #%d".formatted(portfolioId)));
 
 		User user = portfolio.getUser();
-		List<Portfolio> userPortfolios = findByUserId(user.getId());
+		List<Portfolio> userPortfolios = findByUser(user.getId());
 
 		if (userPortfolios.size() <= 1)
 			throw new InvalidDataException("Cannot delete the last remaining portfolio");
@@ -141,7 +141,7 @@ public class PortfolioService {
 
 	@Transactional
 	public void deleteAllUserPortfolios(Long userId) {
-		deleteAll(findByUserId(userId));
+		deleteAll(findByUser(userId));
 	}
 
 }

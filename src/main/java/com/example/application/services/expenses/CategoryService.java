@@ -45,11 +45,11 @@ public class CategoryService {
 	}
 
 	public boolean isNameTaken(String name, Long userId) {
-		return categoryRepository.findByNameAndUser(name, userId).isEmpty();
+		return categoryRepository.findByNameAndUser(name, userId).isPresent();
 	}
 
 	public boolean isIconTaken(String iconName, Long userId) {
-		return categoryRepository.findByIconAndUser(iconName, userId).isEmpty();
+		return categoryRepository.findByIconAndUser(iconName, userId).isPresent();
 	}
 
 	@Transactional
@@ -68,14 +68,15 @@ public class CategoryService {
 
 	@Transactional
 	public void delete(@NotNull Long categoryId) {
+		log.info("Deleting category: #{}", categoryId);
 		Category category = categoryRepository.findById(categoryId)
 				.orElseThrow(() -> new EntityNotFoundException("Cannot find category by id: #" + categoryId));
 
 		try {
 			categoryRepository.delete(category);
-			log.info("Deleted successfully {}", categoryId);
+			log.info("Deleted successfully category: #{}", categoryId);
 		} catch (Exception e) {
-			log.error("Failed to delete {}", category, e);
+			log.error("Failed to delete category: #{}", category, e);
 			throw new InternalUnexpectedException(e);
 		}
 	}

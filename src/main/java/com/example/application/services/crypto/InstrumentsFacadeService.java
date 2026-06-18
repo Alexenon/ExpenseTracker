@@ -5,6 +5,7 @@ import com.example.application.data.convertors.AssetConvertor;
 import com.example.application.data.dtos.*;
 import com.example.application.data.dtos.expense.CategoryDTO;
 import com.example.application.data.dtos.expense.ExpenseDTO;
+import com.example.application.data.enums.Categories;
 import com.example.application.data.enums.SymbolIndentifier;
 import com.example.application.data.models.InstrumentsProvider;
 import com.example.application.data.models.projections.MonthlyExpensesProjection;
@@ -33,7 +34,10 @@ import com.example.application.services.UserService;
 import com.example.application.services.expenses.*;
 import com.example.application.utils.exceptions.InternalUnexpectedException;
 import com.example.application.utils.fetchers.crypto_compare.response.AssetMetadata;
+import com.example.application.views.components.custom.icons.MonoIcon;
+import com.example.application.views.components.custom.icons.PictogramIcon;
 import jakarta.annotation.Nonnull;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -46,10 +50,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -71,19 +72,19 @@ public class InstrumentsFacadeService {
 	private final CategoryService categoryService;
 	private final TagService tagService;
 
+	private final EntityManager entityManager;
+
 	private final EntityValidator validator;
 
 	//<editor-fold desc="USERS">
 	@Transactional(rollbackFor = Exception.class)
 	public UserDTO createNewUser(@Valid RegisterUserRequest request) {
 		User userEntity = userService.createNewUser(request);
+		Long userId = userEntity.getId();
 
-		CreatePortfolioRequest defaultPortfolio = CreatePortfolioRequest.builder()
-				.portfolioName("Main")
-				.userId(userEntity.getId())
-				.build();
-
-		createPortfolio(defaultPortfolio);
+		addDefaultUserPortfolio(userId);
+		addDefaultUserCategories(userId);
+		addDefaultUserTags(userId);
 
 		return new UserDTO(userEntity);
 	}
@@ -91,7 +92,16 @@ public class InstrumentsFacadeService {
 	@Transactional
 	public void deleteUser(Long userId) {
 		log.info("Starting deleting user #{} in batch", userId);
-		deletePortfolios(portfolioService.findByUserId(userId));
+
+		User user = userService.findById(userId)
+				.orElseThrow(() -> new EntityNotFoundException("User not found: #" + userId));
+
+		// Removing user's active portfolio constraint & deleting all entities related with this user
+		user.resetActivePortfolio();
+		deleteUserPortfolios(userId);
+		findUserCategories(userId).forEach(category -> deleteCategory(category.getId()));
+		findUserTags(userId).forEach(tag -> deleteTag(tag.getId()));
+
 		userService.delete(userId);
 		log.info("Finished deleting user #{} in batch", userId);
 	}
@@ -283,14 +293,14 @@ public class InstrumentsFacadeService {
 	}
 
 	public List<AssetWatcher> getAssetWatchersByAsset(Long portfolioId, String assetSymbol) {
-		return assetWatcherService.findBy(portfolioId, assetSymbol);
+		return assetWatcherService.findByPortfolioAndAsset(portfolioId, assetSymbol);
 	}
 
 	public List<AssetWatcherDTO> getAssetWatchersByAssetAndActionType(Long portfolioId,
 																	  String assetSymbol,
 																	  TransactionType type)
 	{
-		return assetWatcherService.findBy(portfolioId, assetSymbol, type)
+		return assetWatcherService.findByPortfolioAndAssetAndTransactionType(portfolioId, assetSymbol, type)
 				.stream()
 				.map(AssetWatcherDTO::new)
 				.toList();
@@ -371,6 +381,7 @@ public class InstrumentsFacadeService {
 	@Nonnull
 	@Transactional
 	public PortfolioDTO createPortfolio(@Valid CreatePortfolioRequest request) {
+		log.info("Creating new portfolio: {}", request);
 		validator.validate(request);
 		User user = userService.findById(request.getUserId())
 				.orElseThrow(() -> new EntityNotFoundException("User #" + request.getUserId() + " not found. (deleted ?)"));
@@ -385,23 +396,26 @@ public class InstrumentsFacadeService {
 	public void deletePortfolio(Long portfolioId) {
 		log.info("Starting deleting portfolio #{} in batch", portfolioId);
 		transactionService.deleteAllPorfolioTransactions(portfolioId);
-		List<AssetBalance> assetBalances = assetBalanceService.findByPortfolio(portfolioId);
-		assetBalanceService.deleteAll(assetBalances);
+		assetBalanceService.deleteAllForPortfolio(portfolioId);
+		assetWatcherService.deleteAllForPortfolio(portfolioId);
 		portfolioService.delete(portfolioId);
 		log.info("Finished deleting portfolio #{} in batch", portfolioId);
 	}
 
 	@Transactional
-	public void deletePortfolios(List<Portfolio> portfolios) {
-		int size = portfolios.size();
-		log.info("Starting deleting all portfolios #{} in batch", size);
+	public void deleteUserPortfolios(Long userId) {
+		List<Portfolio> userPortfolios = portfolioService.findByUser(userId);
+		log.info("Starting deleting all {} user portfolios in batch, for user: #{}", userPortfolios.size(), userId);
 
-		for (Portfolio portfolio : portfolios) {
-			transactionService.deleteAllPorfolioTransactions(portfolio.getId());
+		for (Portfolio portfolio : userPortfolios) {
+			Long portfolioId = portfolio.getId();
+			transactionService.deleteAllPorfolioTransactions(portfolioId);
+			assetBalanceService.deleteAllForPortfolio(portfolioId);
+			assetWatcherService.deleteAllForPortfolio(portfolioId);
 		}
 
-		portfolioService.deleteAll(portfolios);
-		log.info("Finished deleting all portfolios #{} in batch", size);
+		portfolioService.deleteAllUserPortfolios(userId);
+		log.info("Finished deleting all user portfolios in batch, for user: #{}", userId);
 	}
 
 	public Optional<PortfolioDTO> getPortfolioByName(String name) {
@@ -412,7 +426,7 @@ public class InstrumentsFacadeService {
 
 	public List<PortfolioDTO> getUserPortfolios() {
 		return portfolioService
-				.findByUserId(getAuthenticatedUser().getId())
+				.findByUser(getAuthenticatedUser().getId())
 				.stream()
 				.map(PortfolioDTO::new)
 				.toList();
@@ -548,45 +562,48 @@ public class InstrumentsFacadeService {
 		return categoryService.findById(id);
 	}
 
-	public Optional<Category> findCategoryByName(String name) {
-		return categoryService.findByName(name);
-	}
-
 	public Optional<Category> findCategoryByNameAndUser(String name, Long userId) {
 		return categoryService.findByNameAndUser(name, userId);
 	}
 
-	public List<Category> getUserCategories(Long userId) {
+	public List<Category> findUserCategories(Long userId) {
 		return categoryService.findByUser(userId);
 	}
 
-	public List<Category> getUserCategories() {
-		return getUserCategories(getAuthenticatedUser().getId());
+	public List<CategoryDTO> findUserCategories() {
+		return findUserCategories(getAuthenticatedUser().getId())
+				.stream()
+				.map(CategoryDTO::new)
+				.toList();
 	}
 
 	public CategoryDTO createCategory(@Valid CreateCategoryRequest request) {
-		String name = request.getName();
+		log.info("Creating category: {}", request);
 		Long userId = request.getUserId();
 
 		User user = userService.findById(userId)
 				.orElseThrow(() -> new EntityNotFoundException("Couldn't find user with id: #" + userId));
 
-		if (categoryService.isNameTaken(request.getName(), userId))
-			throw new CategoryNameAlreadyExistsException(request.getIconName());
+		String name = request.getName();
+		String iconName = request.getIconName();
 
-		if (categoryService.isIconTaken(request.getIconName(), userId))
-			throw new CategoryIconAlreadyExistsException(request.getIconName());
+		if (categoryService.isNameTaken(name, userId))
+			throw new CategoryNameAlreadyExistsException(name);
+
+		if (categoryService.isIconTaken(iconName, userId))
+			throw new CategoryIconAlreadyExistsException(iconName);
 
 		Category category = new Category();
 		category.setName(name);
 		category.setUser(user);
-		category.setIconName(request.getIconName());
+		category.setIconName(iconName);
 
 		Category savedCategory = categoryService.save(category);
 		return new CategoryDTO(savedCategory);
 	}
 
 	public CategoryDTO updateCategory(@Valid UpdateCategoryRequest request) {
+		log.info("Updating category: {}", request);
 		Category category = findCategoryById(request.getId())
 				.orElseThrow(() -> new EntityNotFoundException("Couldn't find category with id: #" + request.getId()));
 
@@ -604,6 +621,17 @@ public class InstrumentsFacadeService {
 		Category updatedCategory = categoryService.save(category);
 		return new CategoryDTO(updatedCategory);
 	}
+
+	public void deleteCategory(Long categoryId) {
+		categoryService.delete(categoryId);
+	}
+
+	public List<MonoIcon> getCategoryIcons() {
+		return Arrays.stream(PictogramIcon.values())
+				.map(PictogramIcon::create)
+				.toList();
+	}
+
 	//</editor-fold>
 
 	//<editor-fold desc="TAGS">
@@ -651,6 +679,26 @@ public class InstrumentsFacadeService {
 		tagService.delete(tagId);
 	}
 	//</editor-fold>
+
+	private void addDefaultUserPortfolio(Long userId) {
+		createPortfolio(new CreatePortfolioRequest("Main", userId));
+	}
+
+	private void addDefaultUserTags(Long userId) {
+		// TODO: [URGENT] ...
+	}
+
+	private void addDefaultUserCategories(Long userId) {
+		for (Categories category : Categories.values()) {
+			CreateCategoryRequest categoryRequest = CreateCategoryRequest.builder()
+					.name(category.getDisplayName())
+					.iconName(category.getIconName())
+					.userId(userId)
+					.build();
+
+			createCategory(categoryRequest);
+		}
+	}
 
 	@Nonnull
 	public UserDTO getAuthenticatedUser() {

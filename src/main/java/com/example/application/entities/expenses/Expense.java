@@ -14,6 +14,11 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.StringJoiner;
 
+/*
+	TODO: Add field that says that the expense is either 'Must Have' or 'Wants'
+		so user can filter out what expenses he could avoid next time
+* */
+
 @Data
 @Entity(name = "expenses")
 @EqualsAndHashCode(of = {"id", "name", "category", "tags", "user"})
@@ -36,7 +41,6 @@ public class Expense {
 	private String description;
 
 	@Column(name = "start_date", nullable = false)
-	@JsonFormat(pattern = "yyyy-MM-dd")
 	private LocalDate startDate = LocalDate.now();
 
 	@Column(name = "expire_date")

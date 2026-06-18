@@ -4,11 +4,13 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
 @Data
 @Builder
+@AllArgsConstructor
 public class CreateCategoryRequest {
 
 	@NotBlank
@@ -16,7 +18,7 @@ public class CreateCategoryRequest {
 	private final String name;
 
 	@NotBlank
-	@Size(min = 4, max = 20, message = "Icon name should be between 4 and 20 characters")
+	@Size(min = 4, max = 50, message = "Icon name should be between 4 and 20 characters")
 	private final String iconName;
 
 	@NotNull

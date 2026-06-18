@@ -18,7 +18,7 @@ public class UpdateCategoryRequest {
 	private final String name;
 
 	@NotBlank
-	@Size(min = 4, max = 20, message = "Icon name should be between 4 and 20 characters")
+	@Size(min = 4, max = 50, message = "Icon name should be between 4 and 20 characters")
 	private final String iconName;
 
 }

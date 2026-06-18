@@ -17,4 +17,9 @@ public class CreatePortfolioRequest {
 	@NotNull
 	private Long userId;
 
+	public CreatePortfolioRequest(String portfolioName, Long userId) {
+		this.portfolioName = portfolioName;
+		this.userId = userId;
+	}
+
 }

@@ -1,7 +1,7 @@
 package com.example.application.views.components.custom.dialogs;
 
+import com.example.application.data.dtos.expense.CategoryDTO;
 import com.example.application.data.requests.expenses.CreateExpenseRequest;
-import com.example.application.entities.expenses.Category;
 import com.example.application.entities.expenses.ExpenseTimestamp;
 import com.example.application.entities.expenses.Tag;
 import com.example.application.services.crypto.InstrumentsFacadeService;
@@ -203,9 +203,9 @@ public class AddExpenseDialog extends Dialog implements HasNotifications {
 	}
 
 	private List<String> getUserCategories() {
-		return instrumentsFacadeService.getUserCategories()
+		return instrumentsFacadeService.findUserCategories()
 				.stream()
-				.map(Category::getName)
+				.map(CategoryDTO::getName)
 				.toList();
 	}
 
