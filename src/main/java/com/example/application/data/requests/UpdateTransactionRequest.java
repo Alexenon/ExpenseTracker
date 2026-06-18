@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 public class UpdateTransactionRequest {
 
 	@NotNull
-	@Min(1)
+	@Min(value = 1, message = "Invalid id")
 	private final Long id;
 
 	@NotBlank

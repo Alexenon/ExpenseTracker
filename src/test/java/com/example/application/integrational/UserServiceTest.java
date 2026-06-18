@@ -26,7 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Collections;
 import java.util.List;
 
-@SuppressWarnings("DataFlowIssue")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = Application.class)
 @ActiveProfiles("test")
@@ -97,27 +96,16 @@ class UserServiceTest extends AbstractTest {
 
 	@Test
 	void shouldNotAllowDuplicateUsername() {
-		RegisterUserRequest request1 = RegisterUserRequest.builder()
-				.username("john")
-				.email("john.weak@test.com")
-				.password("password")
-				.confirmPassword("password")
-				.build();
+		Assertions.assertDoesNotThrow(() -> createUser("john", "john-weak@test.com"));
+		Assertions.assertThrows(UsernameTakenException.class, () -> createUser("john", "john-weak@test.com"),
+				"Creating a user with duplicate username should throw UsernameTakenException");
+	}
 
-		userService.createNewUser(request1);
-
-		RegisterUserRequest request2 = RegisterUserRequest.builder()
-				.username("john")
-				.email("john.weak@test.com")
-				.password("password")
-				.confirmPassword("password")
-				.build();
-
-		Assertions.assertThrows(
-				UsernameTakenException.class,
-				() -> userService.createNewUser(request2),
-				"Creating a user with duplicate username should throw UsernameTakenException"
-		);
+	@Test
+	void shouldNotAllowDuplicateEmail() {
+		Assertions.assertDoesNotThrow(() -> createUser("john", "john-weak@test.com"));
+		Assertions.assertThrows(UsernameTakenException.class, () -> createUser("michael", "john-weak@test.com"),
+				"Creating a user with duplicate username should throw UsernameTakenException");
 	}
 
 	@Test
@@ -155,6 +143,8 @@ class UserServiceTest extends AbstractTest {
 				"Portfolio after user deletion is not removed from database");
 		Assertions.assertTrue(transactionRepository.findById(transaction.getId()).isEmpty(),
 				"Transactions after user deletion is not removed from database");
+		Assertions.assertTrue(expenseRepository.findByUser(user.getId()).isEmpty(),
+				"Expenses after user deletion are not removed from database");
 		Assertions.assertTrue(categoryRepository.findByUser(user.getId()).isEmpty(),
 				"Categories after user deletion is not removed from database");
 		Assertions.assertTrue(tagRepository.findByUser(user.getId()).isEmpty(),

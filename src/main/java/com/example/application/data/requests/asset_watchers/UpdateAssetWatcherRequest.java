@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 public final class UpdateAssetWatcherRequest {
 
 	@NotNull
-	@Min(1)
+	@Min(value = 1, message = "Invalid id")
 	private final Long id;
 
 	@NotBlank

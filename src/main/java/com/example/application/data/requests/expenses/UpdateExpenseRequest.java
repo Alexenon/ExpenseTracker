@@ -2,10 +2,7 @@ package com.example.application.data.requests.expenses;
 
 import com.example.application.entities.expenses.ExpenseTimestamp;
 import jakarta.annotation.Nullable;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -16,6 +13,8 @@ import java.util.Set;
 @NoArgsConstructor
 public class UpdateExpenseRequest {
 
+	@NotNull
+	@Min(value = 1, message = "Invalid id")
 	private Long id;
 
 	@NotBlank
@@ -26,8 +25,10 @@ public class UpdateExpenseRequest {
 	@Size(max = 250, message = "Description should not exceed 250 characters")
 	private String description;
 
+	// TODO: [URGENT] Move to BigDecimal
+	@NotNull
 	@DecimalMin(value = "0.0", inclusive = false, message = "Amount must be greater than 0")
-	private double amount;
+	private Double amount;
 
 	@NotNull
 	private String category;

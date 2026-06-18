@@ -31,13 +31,15 @@ import com.example.application.entities.expenses.Expense;
 import com.example.application.entities.expenses.Tag;
 import com.example.application.services.SecurityService;
 import com.example.application.services.UserService;
-import com.example.application.services.expenses.*;
+import com.example.application.services.expenses.CategoryNameAlreadyExistsException;
+import com.example.application.services.expenses.CategoryService;
+import com.example.application.services.expenses.ExpenseService;
+import com.example.application.services.expenses.TagService;
 import com.example.application.utils.exceptions.InternalUnexpectedException;
 import com.example.application.utils.fetchers.crypto_compare.response.AssetMetadata;
 import com.example.application.views.components.custom.icons.MonoIcon;
 import com.example.application.views.components.custom.icons.PictogramIcon;
 import jakarta.annotation.Nonnull;
-import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -46,6 +48,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -71,8 +74,6 @@ public class InstrumentsFacadeService {
 	private final ExpenseService expenseService;
 	private final CategoryService categoryService;
 	private final TagService tagService;
-
-	private final EntityManager entityManager;
 
 	private final EntityValidator validator;
 
@@ -498,6 +499,7 @@ public class InstrumentsFacadeService {
 		return expenseService.findMonthlyExpensesByUser(getAuthenticatedUser().getUsername(), date);
 	}
 
+	@Validated
 	public Expense createExpense(@Valid CreateExpenseRequest request) {
 		User user = userService.findById(request.getUserId())
 				.orElseThrow(() -> new EntityNotFoundException("User not found: #" + request.getUserId()));
@@ -533,6 +535,7 @@ public class InstrumentsFacadeService {
 		Category category = categoryService.findByNameAndUser(categoryName, expense.getUser().getId())
 				.orElseThrow(() -> new EntityNotFoundException("Category '%s' does not exist.".formatted(categoryName)));
 
+		// TODO: [URGENT] If this is the right thing to do from UI
 		List<Tag> tags = request.getTags()
 				.stream()
 				.map(s -> tagService.findByNameAndUserOrCreate(categoryName, expense.getUser()))
@@ -590,9 +593,6 @@ public class InstrumentsFacadeService {
 		if (categoryService.isNameTaken(name, userId))
 			throw new CategoryNameAlreadyExistsException(name);
 
-		if (categoryService.isIconTaken(iconName, userId))
-			throw new CategoryIconAlreadyExistsException(iconName);
-
 		Category category = new Category();
 		category.setName(name);
 		category.setUser(user);
@@ -611,9 +611,6 @@ public class InstrumentsFacadeService {
 
 		if (!category.getName().equals(request.getName()) && categoryService.isNameTaken(request.getName(), userId))
 			throw new CategoryNameAlreadyExistsException(request.getIconName());
-
-		if (!category.getIconName().equals(request.getIconName()) && categoryService.isIconTaken(request.getIconName(), userId))
-			throw new CategoryIconAlreadyExistsException(request.getIconName());
 
 		category.setName(request.getName());
 		category.setIconName(request.getIconName());

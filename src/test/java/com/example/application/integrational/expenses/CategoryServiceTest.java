@@ -5,9 +5,9 @@ import com.example.application.data.dtos.expense.CategoryDTO;
 import com.example.application.data.requests.expenses.category.CreateCategoryRequest;
 import com.example.application.data.requests.expenses.category.UpdateCategoryRequest;
 import com.example.application.entities.User;
-import com.example.application.entities.expenses.Category;
 import com.example.application.integrational.AbstractTest;
 import com.example.application.services.UserService;
+import com.example.application.services.expenses.CategoryNameAlreadyExistsException;
 import com.example.application.services.expenses.CategoryService;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.*;
@@ -15,12 +15,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.util.Optional;
-
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = Application.class)
 @ActiveProfiles("test")
 class CategoryServiceTest extends AbstractTest {
+
+	private static final String DEFAULT_ICON_NAME = "DEFAULT_ICON_NAME";
 
 	private final UserService userService;
 	private final CategoryService categoryService;
@@ -45,15 +45,8 @@ class CategoryServiceTest extends AbstractTest {
 		categoryRepository.deleteAll();
 		userRepository.deleteAll();
 
-		Assertions.assertTrue(
-				userService.findById(user.getId()).isEmpty(),
-				"User was not deleted"
-		);
-
-		Assertions.assertTrue(
-				categoryService.findByUser(user.getId()).isEmpty(),
-				"Categories were not deleted"
-		);
+		Assertions.assertTrue(userService.findById(user.getId()).isEmpty(), "User was not deleted");
+		Assertions.assertTrue(categoryService.findByUser(user.getId()).isEmpty(), "Categories were not deleted");
 	}
 
 	@Test
@@ -63,8 +56,10 @@ class CategoryServiceTest extends AbstractTest {
 
 		Assertions.assertNotNull(saved.getId(), "Category ID should be generated");
 		Assertions.assertEquals("Food", saved.getName(), "Category name should match");
-		Assertions.assertEquals("DEFAULT_ICON_NAME", saved.getIconName(), "Icon name should match");
-		Assertions.assertEquals(user.getId(), saved.getUserId(), "Category should belong to user");
+		Assertions.assertEquals(DEFAULT_ICON_NAME, saved.getIconName(), "Icon name should match");
+		Assertions.assertEquals(user.getId(), saved.getUserId(), "User should match");
+		Assertions.assertTrue(categoryService.findByNameAndUser("Food", user.getId()).isPresent(),
+				"Cannot found created category");
 	}
 
 	@Test
@@ -83,37 +78,30 @@ class CategoryServiceTest extends AbstractTest {
 	}
 
 	@Test
-	void userShouldHaveCreatedCategory() {
-		CategoryDTO category = createCategory("Food");
-
-		Optional<Category> createdCategory = categoryService.findByNameAndUser("Food", user.getId());
-		Assertions.assertTrue(createdCategory.isPresent(), "Cannot found created category");
+	void duplicateCategoryNameForSameUser() {
+		Assertions.assertDoesNotThrow(() -> createCategory("Food"));
+		Assertions.assertThrows(CategoryNameAlreadyExistsException.class, () -> createCategory("Food"),
+				"Shouldn't allow creating category with existent name");
 	}
 
 	@Test
 	void deleteShouldRemoveCategory() {
 		CategoryDTO category = createCategory("Transport");
-
 		categoryService.delete(category.getId());
-
 		Assertions.assertTrue(categoryService.findById(category.getId()).isEmpty(),
 				"Category is still present in database after deletion");
 	}
 
 	@Test
 	void deleteCategoryDoesNotExist() {
-		Assertions.assertThrows(
-				EntityNotFoundException.class,
-				() -> categoryService.delete(999L),
-				"Deleting a non-existent category should throw"
-		);
+		Assertions.assertThrows(EntityNotFoundException.class, () -> categoryService.delete(999L),
+				"Deleting a non-existent category should throw exception");
 	}
 
 	@Test
 	void categoryUpdateTest() {
 		CategoryDTO originalCategory = createCategory("#Healthcare");
 
-		// TODO: Add cleaner way to do this -> builder I guess
 		UpdateCategoryRequest updateRequest = new UpdateCategoryRequest(
 				originalCategory.getId(),
 				"#Groceries",
@@ -133,10 +121,9 @@ class CategoryServiceTest extends AbstractTest {
 	private CreateCategoryRequest createCategoryRequest(String name) {
 		return CreateCategoryRequest.builder()
 				.name(name)
-				.iconName("DEFAULT_ICON_NAME")
+				.iconName(DEFAULT_ICON_NAME)
 				.userId(user.getId())
 				.build();
 	}
-
 	//</editor-fold>
 }

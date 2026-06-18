@@ -48,10 +48,6 @@ public class CategoryService {
 		return categoryRepository.findByNameAndUser(name, userId).isPresent();
 	}
 
-	public boolean isIconTaken(String iconName, Long userId) {
-		return categoryRepository.findByIconAndUser(iconName, userId).isPresent();
-	}
-
 	@Transactional
 	public Category save(@NotNull Category category) {
 		validator.validate(category);

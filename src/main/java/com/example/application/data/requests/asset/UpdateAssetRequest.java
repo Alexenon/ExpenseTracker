@@ -10,6 +10,7 @@ import java.math.BigInteger;
 public class UpdateAssetRequest {
 
 	@NotNull
+	@Min(value = 1, message = "Invalid id")
 	private Long assetId;
 
 	@NotBlank

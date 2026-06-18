@@ -18,6 +18,7 @@ import com.example.application.repositories.crypto.AssetRepository;
 import com.example.application.repositories.crypto.PortfolioRepository;
 import com.example.application.repositories.crypto.TransactionRepository;
 import com.example.application.repositories.expenses.CategoryRepository;
+import com.example.application.repositories.expenses.ExpenseRepository;
 import com.example.application.repositories.expenses.TagRepository;
 import com.example.application.services.crypto.AssetService;
 import com.example.application.services.crypto.InstrumentsFacadeService;
@@ -49,6 +50,8 @@ public abstract class AbstractTest {
 	/* --------------------------------------
 	 * 				EXPENSES
 	 * ------------------------------------ */
+	@Autowired
+	protected ExpenseRepository expenseRepository;
 	@Autowired
 	protected TagRepository tagRepository;
 	@Autowired

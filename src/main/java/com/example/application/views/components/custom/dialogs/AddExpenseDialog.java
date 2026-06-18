@@ -24,6 +24,7 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.validator.DoubleRangeValidator;
+import com.vaadin.flow.data.validator.StringLengthValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -136,10 +137,14 @@ public class AddExpenseDialog extends Dialog implements HasNotifications {
 				.withValidator(name -> name.length() >= 3, "Name must contain at least 3 characters")
 				.bind(CreateExpenseRequest::getName, CreateExpenseRequest::setName);
 
+		binder.forField(descriptionField)
+				.withValidator(new StringLengthValidator("Description can be up to 250 characters", 0, 250))
+				.bind(CreateExpenseRequest::getDescription, CreateExpenseRequest::setDescription);
+
 		binder.forField(amountField)
 				.asRequired("Please fill this field")
 				.withValidator(new DoubleRangeValidator("Invalid decimal value", 0.0, Double.MAX_VALUE))
-				.withValidator(amount -> amount >= 0, "Amount should be greater or equal to 0")
+				.withValidator(amount -> amount != null && amount > 0, "Amount should be greater than 0")
 				.bind(CreateExpenseRequest::getAmount, CreateExpenseRequest::setAmount);
 
 		binder.forField(categoryField)

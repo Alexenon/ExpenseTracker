@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Set;
 
 @Data
@@ -24,14 +25,15 @@ public class CreateExpenseRequest {
 	@Size(max = 250, message = "Description should not exceed 250 characters")
 	private String description;
 
+	@NotNull
 	@DecimalMin(value = "0.0", inclusive = false, message = "Amount must be greater than 0")
-	private double amount;
+	private Double amount;
 
 	@NotNull
 	private String category;
 
 	@NotNull
-	private Set<String> tags;
+	private Set<String> tags = new HashSet<>();
 
 	@NotNull
 	private ExpenseTimestamp timestamp;
