@@ -5,6 +5,7 @@ import com.example.application.data.requests.expenses.CreateExpenseRequest;
 import com.example.application.entities.expenses.ExpenseTimestamp;
 import com.example.application.entities.expenses.Tag;
 import com.example.application.services.crypto.InstrumentsFacadeService;
+import com.example.application.views.components.core.TagInput;
 import com.example.application.views.components.utils.HasNotifications;
 import com.example.application.views.pages.expenses.ExpensesView;
 import com.vaadin.flow.component.Component;
@@ -12,7 +13,6 @@ import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.combobox.MultiSelectComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Span;
@@ -48,7 +48,7 @@ public class AddExpenseDialog extends Dialog implements HasNotifications {
 	private final NumberField amountField = new NumberField("Amount");
 	private final Select<ExpenseTimestamp> timestampField = new Select<>();
 	private final ComboBox<String> categoryField = new ComboBox<>("Category");
-	private final MultiSelectComboBox<String> tagsField = new MultiSelectComboBox<>("Tags");
+	private final TagInput tagsField = new TagInput();
 	private final DatePicker startDateField = new DatePicker("Start Date");
 	private final DatePicker expireDateField = new DatePicker("Expire Date");
 	private final Button saveButton = new Button("Save");
@@ -72,6 +72,7 @@ public class AddExpenseDialog extends Dialog implements HasNotifications {
 	}
 
 	private VerticalLayout createDialogLayout() {
+
 		Component[] components = {nameField, descriptionField, amountField, categoryField, tagsField, timestampField, startDateField, expireDateField};
 		VerticalLayout dialogLayout = new VerticalLayout(components);
 		dialogLayout.setPadding(false);
@@ -131,10 +132,10 @@ public class AddExpenseDialog extends Dialog implements HasNotifications {
 
 	private void initBinder() {
 		binder = new Binder<>(CreateExpenseRequest.class);
-		binder.setBean(new CreateExpenseRequest());
+		binder.setBean(defaultRequest());
 		binder.forField(nameField)
 				.asRequired("Please fill this field")
-				.withValidator(name -> name.length() >= 3, "Name must contain at least 3 characters")
+				.withValidator(new StringLengthValidator("Name should be between 3 and 50 characters", 3, 50))
 				.bind(CreateExpenseRequest::getName, CreateExpenseRequest::setName);
 
 		binder.forField(descriptionField)
@@ -152,8 +153,10 @@ public class AddExpenseDialog extends Dialog implements HasNotifications {
 				.bind(CreateExpenseRequest::getCategory, CreateExpenseRequest::setCategory);
 
 		binder.forField(tagsField)
-				.asRequired("Please fill this field")
-				.bind(CreateExpenseRequest::getTags, CreateExpenseRequest::setTags);
+				.withValidator(tags -> tags.stream()
+								.allMatch(tag -> tag != null && tag.length() >= 4 && tag.length() <= 20),
+						"All tags should be between 4 and 20 characters long"
+				).bind(CreateExpenseRequest::getTags, CreateExpenseRequest::setTags);
 
 		binder.forField(timestampField)
 				.asRequired("Please fill this field")
@@ -225,5 +228,11 @@ public class AddExpenseDialog extends Dialog implements HasNotifications {
 	public void open() {
 		super.open();
 		logger.info("Opened `Add New Expense` form");
+	}
+
+	private CreateExpenseRequest defaultRequest() {
+		CreateExpenseRequest request = new CreateExpenseRequest();
+		request.setUserId(instrumentsFacadeService.getAuthenticatedUser().getId());
+		return request;
 	}
 }

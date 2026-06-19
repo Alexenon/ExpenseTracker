@@ -267,6 +267,37 @@ vaadin-date-time-picker > vaadin-date-picker {
     color: black;
 }
 
+/* Tag Input */
+
+.tag-badge {
+    display: flex;
+    align-items: center;
+    border-radius: 10px;
+	padding: 0 0 0 10px;
+    margin: 3px;
+    border: 1px solid var(--o20Color);
+}
+
+.tag-badge > span {
+    display: inline;
+    line-height: 1;
+    height: auto;
+    align-self: center;
+}
+
+.tag-badge .remove-tag-btn {
+    min-width: 24px !important;
+    width: 24px;
+    height: 24px;
+    border-radius: 70%;
+    background: transparent;
+}
+
+.tag-badge .remove-tag-btn vaadin-icon {
+    width: 14px;
+    height: 14px;
+}
+
 /*
     COMMON STYLES
 */

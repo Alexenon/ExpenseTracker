@@ -48,7 +48,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.annotation.Validated;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -117,6 +116,7 @@ public class InstrumentsFacadeService {
 	//</editor-fold>
 
 	//<editor-fold desc="ASSETS">
+	@Transactional(readOnly = true)
 	public List<AssetDTO> getAllAssets() {
 		return assetService.findAll()
 				.stream()
@@ -124,11 +124,13 @@ public class InstrumentsFacadeService {
 				.toList();
 	}
 
+	@Transactional(readOnly = true)
 	public Optional<AssetDTO> getAssetBySymbol(@NotNull String symbol) {
 		return assetService.findBySymbol(symbol)
 				.map(AssetDTO::mappedFrom);
 	}
 
+	@Transactional(readOnly = true)
 	public BigDecimal getAmountOfTokens(Long portfolioId, String assetSymbol) {
 		return getAssetBalanceByAsset(portfolioId, assetSymbol)
 				.map(AssetBalanceDTO::getAmount)
@@ -136,10 +138,12 @@ public class InstrumentsFacadeService {
 	}
 
 	@Nullable
+	@Transactional(readOnly = true)
 	public String getAssetComment(String assetSymbol) {
 		return userAssetService.getAssetComment(getAuthenticatedUser().getId(), assetSymbol);
 	}
 
+	@Transactional(readOnly = true)
 	public boolean isAssetMarkedAsFavorite(String assetSymbol) {
 		return userAssetService.isAssetMarkedAsFavorite(getAuthenticatedUser().getId(), assetSymbol);
 	}
@@ -154,6 +158,7 @@ public class InstrumentsFacadeService {
 		userAssetService.updateMarkAssetAsFavorite(getAuthenticatedUser().getId(), assetSymbol, isFavorite);
 	}
 
+	@Transactional(readOnly = true)
 	public List<AssetDTO> getAllAssetsEverBought(PortfolioDTO portfolio) {
 		return getTransactions(portfolio.getId())
 				.stream()
@@ -167,6 +172,7 @@ public class InstrumentsFacadeService {
 	//</editor-fold>
 
 	//<editor-fold desc="TRANSACTIONS">
+	@Transactional(readOnly = true)
 	public List<TransactionDTO> getTransactions(Long portfolioId) {
 		return transactionService.findBy(portfolioId)
 				.stream()
@@ -174,6 +180,7 @@ public class InstrumentsFacadeService {
 				.toList();
 	}
 
+	@Transactional(readOnly = true)
 	public List<TransactionDTO> getTransactions(Long portfolioId, LocalDate from, LocalDate to) {
 		return transactionService.findBy(portfolioId, from, to)
 				.stream()
@@ -181,6 +188,7 @@ public class InstrumentsFacadeService {
 				.toList();
 	}
 
+	@Transactional(readOnly = true)
 	public List<TransactionDTO> getTransactionsByAsset(Long portfolioId, String assetSymbol) {
 		return transactionService.findBy(portfolioId, assetSymbol)
 				.stream()
@@ -293,10 +301,12 @@ public class InstrumentsFacadeService {
 		return new AssetWatcherDTO(savedEntity);
 	}
 
+	@Transactional(readOnly = true)
 	public List<AssetWatcher> getAssetWatchersByAsset(Long portfolioId, String assetSymbol) {
 		return assetWatcherService.findByPortfolioAndAsset(portfolioId, assetSymbol);
 	}
 
+	@Transactional(readOnly = true)
 	public List<AssetWatcherDTO> getAssetWatchersByAssetAndActionType(Long portfolioId,
 																	  String assetSymbol,
 																	  TransactionType type)
@@ -307,6 +317,7 @@ public class InstrumentsFacadeService {
 				.toList();
 	}
 
+	@Transactional(readOnly = true)
 	public BigDecimal getClosestBuyWatcherPrice(Long portfolioId, String assetSymbol) {
 		return getAssetWatchersByAssetAndActionType(portfolioId, assetSymbol, TransactionType.BUY)
 				.stream()
@@ -316,6 +327,7 @@ public class InstrumentsFacadeService {
 				.orElse(BigDecimal.ZERO);
 	}
 
+	@Transactional(readOnly = true)
 	public BigDecimal getClosestSellWatcherPrice(Long portfolioId, String assetSymbol) {
 		return getAssetWatchersByAssetAndActionType(portfolioId, assetSymbol, TransactionType.SELL)
 				.stream()
@@ -327,6 +339,7 @@ public class InstrumentsFacadeService {
 	//</editor-fold>
 
 	//<editor-fold desc="ASSET BALANCES">
+	@Transactional(readOnly = true)
 	public List<AssetBalanceDTO> getPorfolioAssetBalances(Long portfolioId) {
 		return assetBalanceService.findByPortfolio(portfolioId)
 				.stream()
@@ -334,6 +347,7 @@ public class InstrumentsFacadeService {
 				.toList();
 	}
 
+	@Transactional(readOnly = true)
 	public Optional<AssetBalanceDTO> getAssetBalanceByAsset(Long portfolioId, String assetSymbol) {
 		return assetBalanceService
 				.findByPortfolioAndAsset(portfolioId, assetSymbol)
@@ -419,12 +433,14 @@ public class InstrumentsFacadeService {
 		log.info("Finished deleting all user portfolios in batch, for user: #{}", userId);
 	}
 
+	@Transactional(readOnly = true)
 	public Optional<PortfolioDTO> getPortfolioByName(String name) {
 		return portfolioService
 				.findByNameAndUser(name, getAuthenticatedUser().getId())
 				.map(PortfolioDTO::new);
 	}
 
+	@Transactional(readOnly = true)
 	public List<PortfolioDTO> getUserPortfolios() {
 		return portfolioService
 				.findByUser(getAuthenticatedUser().getId())
@@ -434,6 +450,7 @@ public class InstrumentsFacadeService {
 	}
 
 	@Nonnull
+	@Transactional(readOnly = true)
 	public PortfolioDTO getActivePortfolio() {
 		User user = userService.findById(getAuthenticatedUser().getId())
 				.orElseThrow(() -> new RuntimeException("User #" + getAuthenticatedUser().getId() + " not found"));
@@ -443,6 +460,7 @@ public class InstrumentsFacadeService {
 				.orElseThrow(() -> new InternalUnexpectedException(getAuthenticatedUser() + "doesn't have any active portfolio"));
 	}
 
+	@Transactional
 	public void setPortfolioAsActive(Long portfolioId) {
 		portfolioService.setPortfolioAsActive(portfolioId);
 	}
@@ -480,10 +498,12 @@ public class InstrumentsFacadeService {
 	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 	//<editor-fold desc="EXPENSES">
+	@Transactional(readOnly = true)
 	public List<ExpenseDTO> findAllUserExpenses() {
 		return findAllUserExpenses(getAuthenticatedUser().getId());
 	}
 
+	@Transactional(readOnly = true)
 	public List<ExpenseDTO> findAllUserExpenses(Long userId) {
 		return expenseService.findByUser(userId)
 				.stream()
@@ -491,15 +511,17 @@ public class InstrumentsFacadeService {
 				.toList();
 	}
 
+	@Transactional
 	public List<MonthlyExpensesProjection> getMonthlyUserExpenses() {
 		return getMonthlyUserExpenses(LocalDate.now());
 	}
 
+	@Transactional
 	public List<MonthlyExpensesProjection> getMonthlyUserExpenses(@NotNull LocalDate date) {
 		return expenseService.findMonthlyExpensesByUser(getAuthenticatedUser().getUsername(), date);
 	}
 
-	@Validated
+	@Transactional
 	public Expense createExpense(@Valid CreateExpenseRequest request) {
 		User user = userService.findById(request.getUserId())
 				.orElseThrow(() -> new EntityNotFoundException("User not found: #" + request.getUserId()));
@@ -527,6 +549,7 @@ public class InstrumentsFacadeService {
 		return expenseService.saveExpense(expense);
 	}
 
+	@Transactional
 	public Expense updateExpense(@Valid UpdateExpenseRequest request) {
 		Expense expense = expenseService.findById(request.getId())
 				.orElseThrow(() -> new EntityNotFoundException("User cannot be found"));
@@ -561,18 +584,22 @@ public class InstrumentsFacadeService {
 	//</editor-fold>
 
 	//<editor-fold desc="CATEGORIES">
+	@Transactional(readOnly = true)
 	public Optional<Category> findCategoryById(Long id) {
 		return categoryService.findById(id);
 	}
 
+	@Transactional(readOnly = true)
 	public Optional<Category> findCategoryByNameAndUser(String name, Long userId) {
 		return categoryService.findByNameAndUser(name, userId);
 	}
 
+	@Transactional(readOnly = true)
 	public List<Category> findUserCategories(Long userId) {
 		return categoryService.findByUser(userId);
 	}
 
+	@Transactional(readOnly = true)
 	public List<CategoryDTO> findUserCategories() {
 		return findUserCategories(getAuthenticatedUser().getId())
 				.stream()
@@ -580,6 +607,7 @@ public class InstrumentsFacadeService {
 				.toList();
 	}
 
+	@Transactional
 	public CategoryDTO createCategory(@Valid CreateCategoryRequest request) {
 		log.info("Creating category: {}", request);
 		Long userId = request.getUserId();
@@ -602,6 +630,7 @@ public class InstrumentsFacadeService {
 		return new CategoryDTO(savedCategory);
 	}
 
+	@Transactional
 	public CategoryDTO updateCategory(@Valid UpdateCategoryRequest request) {
 		log.info("Updating category: {}", request);
 		Category category = findCategoryById(request.getId())
@@ -619,6 +648,7 @@ public class InstrumentsFacadeService {
 		return new CategoryDTO(updatedCategory);
 	}
 
+	@Transactional
 	public void deleteCategory(Long categoryId) {
 		categoryService.delete(categoryId);
 	}
@@ -632,22 +662,27 @@ public class InstrumentsFacadeService {
 	//</editor-fold>
 
 	//<editor-fold desc="TAGS">
+	@Transactional(readOnly = true)
 	public Optional<Tag> findTagById(Long tagId) {
 		return tagService.findById(tagId);
 	}
 
+	@Transactional(readOnly = true)
 	public List<Tag> findUserTags() {
 		return findUserTags(getAuthenticatedUser().getId());
 	}
 
+	@Transactional(readOnly = true)
 	public List<Tag> findUserTags(Long userId) {
 		return tagService.findByUser(userId);
 	}
 
+	@Transactional(readOnly = true)
 	public List<Tag> findExpenseTags(Long expenseId) {
 		return tagService.findByExpense(expenseId);
 	}
 
+	@Transactional
 	public Tag createTag(@Valid CreateTagRequest request) {
 		User user = userService.findById(request.getUserId())
 				.orElseThrow(() -> new EntityNotFoundException("Cannot find user with id: #" + request.getUserId()));
@@ -659,6 +694,7 @@ public class InstrumentsFacadeService {
 		return tagService.save(tag);
 	}
 
+	@Transactional
 	public Tag updateTag(@Valid UpdateTagRequest request) {
 		Tag tag = tagService.findById(request.getId())
 				.orElseThrow(() -> new EntityNotFoundException("Cannot find tag with id: #" + request.getId()));
@@ -672,19 +708,23 @@ public class InstrumentsFacadeService {
 		return tagService.save(tag);
 	}
 
+	@Transactional
 	public void deleteTag(Long tagId) {
 		tagService.delete(tagId);
 	}
 	//</editor-fold>
 
+	@Transactional
 	private void addDefaultUserPortfolio(Long userId) {
 		createPortfolio(new CreatePortfolioRequest("Main", userId));
 	}
 
+	@Transactional
 	private void addDefaultUserTags(Long userId) {
 		// TODO: [URGENT] ...
 	}
 
+	@Transactional
 	private void addDefaultUserCategories(Long userId) {
 		for (Categories category : Categories.values()) {
 			CreateCategoryRequest categoryRequest = CreateCategoryRequest.builder()
@@ -698,6 +738,7 @@ public class InstrumentsFacadeService {
 	}
 
 	@Nonnull
+	@Transactional(readOnly = true)
 	public UserDTO getAuthenticatedUser() {
 		return new UserDTO(securityService.getAuthenticatedUser());
 	}

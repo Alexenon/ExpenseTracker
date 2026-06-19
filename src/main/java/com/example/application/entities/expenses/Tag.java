@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "tags")
 @NoArgsConstructor
+@EqualsAndHashCode(of = {"id"})
 public class Tag {
 
 	@Id
@@ -40,6 +42,11 @@ public class Tag {
 	public Tag(String name, User user) {
 		this.name = name;
 		this.user = user;
+	}
+
+	@Override
+	public String toString() {
+		return name;
 	}
 
 }

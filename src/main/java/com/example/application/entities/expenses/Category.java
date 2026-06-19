@@ -36,8 +36,6 @@ public class Category {
 		return new StringJoiner(", ", Category.class.getSimpleName() + "[", "]")
 				.add("id=" + id)
 				.add("name='" + name + "'")
-				.add("iconName='" + iconName + "'")
-				.add("user=" + user.getId())
 				.toString();
 	}
 }

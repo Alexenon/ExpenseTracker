@@ -18,7 +18,7 @@ public class UpdateExpenseRequest {
 	private Long id;
 
 	@NotBlank
-	@Size(min = 4, max = 20, message = "Expense name should be between 4 and 20 characters")
+	@Size(min = 4, max = 50, message = "Expense name should be between 4 and 50 characters")
 	private String name;
 
 	@Nullable
