@@ -1,5 +1,6 @@
 package com.example.application.data.models;
 
+import com.example.application.components.AssetUpdateScheduler;
 import com.example.application.data.enums.SymbolIndentifier;
 import com.example.application.utils.fetchers.BinanceFetcher;
 import com.example.application.utils.fetchers.crypto_compare.CryptoCompareFetcher;
@@ -18,6 +19,7 @@ import java.util.stream.Stream;
  *
  * @see BinanceFetcher
  * @see CryptoCompareFetcher
+ * @see AssetUpdateScheduler
  */
 @Slf4j
 @Service

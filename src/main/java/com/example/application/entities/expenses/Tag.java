@@ -9,6 +9,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.StringJoiner;
 
 @Data
 @Entity
@@ -47,6 +48,16 @@ public class Tag {
 	@Override
 	public String toString() {
 		return name;
+	}
+
+	public String toFullString() {
+		return new StringJoiner(", ", Tag.class.getSimpleName() + "[", "]")
+				.add("id=" + id)
+				.add("name='" + name + "'")
+				.add("user=" + user)
+				.add("lastTimeUpdated=" + lastTimeUpdated)
+				.add("timeCreatedAt=" + timeCreatedAt)
+				.toString();
 	}
 
 }

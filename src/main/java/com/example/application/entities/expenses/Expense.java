@@ -75,7 +75,7 @@ public class Expense {
 				.add("name='" + name + "'")
 				.add("amount=" + amount)
 				.add("description='" + description + "'")
-				.add("category=" + category)
+				.add("category='" + category.getName() + "'")
 				.add("tags=" + tags)
 				.add("timestamp=" + timestamp)
 				.add("startDate=" + (startDate == null ? "N/A" : CommonFormatters.DATE.format(startDate)))

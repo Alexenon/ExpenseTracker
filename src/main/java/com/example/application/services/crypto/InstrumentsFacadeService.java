@@ -53,6 +53,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -495,7 +496,7 @@ public class InstrumentsFacadeService {
 	}
 	//</editor-fold>
 
-	/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+	///////////////////////////////////////////////     EXPENSES     ///////////////////////////////////////////////////
 
 	//<editor-fold desc="EXPENSES">
 	@Transactional(readOnly = true)
@@ -523,6 +524,7 @@ public class InstrumentsFacadeService {
 
 	@Transactional
 	public Expense createExpense(@Valid CreateExpenseRequest request) {
+		log.info("Creating new expense: {}", request);
 		User user = userService.findById(request.getUserId())
 				.orElseThrow(() -> new EntityNotFoundException("User not found: #" + request.getUserId()));
 
@@ -551,6 +553,7 @@ public class InstrumentsFacadeService {
 
 	@Transactional
 	public Expense updateExpense(@Valid UpdateExpenseRequest request) {
+		log.info("Updating expense: {}", request);
 		Expense expense = expenseService.findById(request.getId())
 				.orElseThrow(() -> new EntityNotFoundException("User cannot be found"));
 
@@ -558,20 +561,19 @@ public class InstrumentsFacadeService {
 		Category category = categoryService.findByNameAndUser(categoryName, expense.getUser().getId())
 				.orElseThrow(() -> new EntityNotFoundException("Category '%s' does not exist.".formatted(categoryName)));
 
-		// TODO: [URGENT] If this is the right thing to do from UI
-		List<Tag> tags = request.getTags()
+		Set<Tag> tags = request.getTags()
 				.stream()
-				.map(s -> tagService.findByNameAndUserOrCreate(categoryName, expense.getUser()))
-				.toList();
+				.map(tagName -> tagService.findByNameAndUserOrCreate(tagName, expense.getUser()))
+				.collect(Collectors.toSet());
 
 		expense.setName(request.getName());
 		expense.setDescription(request.getDescription());
 		expense.setAmount(request.getAmount());
 		expense.setCategory(category);
+		expense.setTags(tags);
 		expense.setTimestamp(request.getTimestamp());
 		expense.setStartDate(request.getStartDate());
 		expense.setExpireDate(request.getExpireDate());
-		expense.getTags().addAll(tags);
 
 		return expenseService.saveExpense(expense);
 	}
@@ -713,6 +715,8 @@ public class InstrumentsFacadeService {
 		tagService.delete(tagId);
 	}
 	//</editor-fold>
+
+	///////////////////////////////////////////////     OTHERS     /////////////////////////////////////////////////////
 
 	@Transactional
 	private void addDefaultUserPortfolio(Long userId) {

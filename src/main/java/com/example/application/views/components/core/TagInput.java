@@ -17,7 +17,7 @@ import java.util.Set;
 
 public class TagInput extends CustomField<Set<String>> {
 
-	private final Set<String> selectedTags = new LinkedHashSet<>();
+	private final Set<String> selectedItems = new LinkedHashSet<>();
 
 	private final ListDataProvider<String> dataProvider;
 
@@ -26,12 +26,11 @@ public class TagInput extends CustomField<Set<String>> {
 	private final FlexLayout content = new FlexLayout();
 
 	public TagInput() {
-		this(Set.of());
+		this(Collections.emptySet());
 	}
 
 	public TagInput(Collection<String> tags) {
 		this.dataProvider = new ListDataProvider<>(new LinkedHashSet<>(tags));
-
 		initialize();
 	}
 
@@ -80,23 +79,19 @@ public class TagInput extends CustomField<Set<String>> {
 	}
 
 	private void addTag(String tag) {
-		if (StringUtils.isBlank(tag)) {
+		if (StringUtils.isBlank(tag))
 			return;
-		}
 
 		tag = tag.trim();
-
-		if (!selectedTags.add(tag)) {
+		if (!selectedItems.add(tag))
 			return;
-		}
 
 		tagsContainer.add(createBadge(tag));
-
 		updateValue();
 	}
 
 	private void removeTag(String tag) {
-		selectedTags.remove(tag);
+		selectedItems.remove(tag);
 
 		tagsContainer.getChildren()
 				.filter(component ->
@@ -106,6 +101,8 @@ public class TagInput extends CustomField<Set<String>> {
 				.findFirst()
 				.ifPresent(tagsContainer::remove);
 
+		dataProvider.getItems().remove(tag);
+		dataProvider.refreshAll();
 		updateValue();
 	}
 
@@ -114,23 +111,10 @@ public class TagInput extends CustomField<Set<String>> {
 
 		Button removeButton = new Button(VaadinIcon.CLOSE_SMALL.create(), e -> removeTag(tag));
 		removeButton.addClassName("remove-tag-btn");
-		// Removes the margin from the shadow-root of the vaadin-button-container
-		removeButton.getElement()
-				.executeJs("this.shadowRoot.querySelector('vaadin-button-container').style.height = 20px;");
-//		removeButton.getStyle()
-//				.set("min-width", "24px")
-//				.set("padding", "0");
 
 		Div badge = new Div(label, removeButton);
 		badge.setId("tag-" + tag);
 		badge.setClassName("tag-badge");
-//		badge.setSpacing(false);
-//		badge.getStyle()
-//				.set("align-items", "center")
-//				.set("border-radius", "999px")
-//				.set("padding", "4px 8px")
-//				.set("margin", "2px")
-//				.set("background", "var(--lumo-contrast-10pct)");
 
 		return badge;
 	}
@@ -138,27 +122,25 @@ public class TagInput extends CustomField<Set<String>> {
 	public void setItems(Collection<String> tags) {
 		dataProvider.getItems().clear();
 		dataProvider.getItems().addAll(tags);
-
 		dataProvider.refreshAll();
 	}
 
 	public Set<String> getItems() {
-		return Collections.unmodifiableSet(selectedTags);
+		return Collections.unmodifiableSet(selectedItems);
 	}
 
 	@Override
 	protected Set<String> generateModelValue() {
-		return Set.copyOf(selectedTags);
+		return Set.copyOf(selectedItems);
 	}
 
 	@Override
 	protected void setPresentationValue(Set<String> value) {
-		selectedTags.clear();
+		selectedItems.clear();
 		tagsContainer.removeAll();
 
-		if (value == null) {
+		if (value == null)
 			return;
-		}
 
 		value.forEach(this::addTag);
 	}

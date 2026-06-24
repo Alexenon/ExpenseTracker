@@ -91,7 +91,7 @@ public class ExpensesView extends DefaultPage {
 			button.setIcon(PictogramIcon.SQUARE_EDIT_OUTLINE.create("grid-action-btn"));
 			button.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_TERTIARY);
 			button.addClickListener(e -> {
-				logger.info("Clicked on Edit button for expense {}", expense.getName());
+				logger.info("Clicked on editButton for expense: #{}", expense.getId());
 				EditExpenseDialog dialog = new EditExpenseDialog(
 						expense,
 						instrumentsFacadeService,
@@ -125,9 +125,9 @@ public class ExpensesView extends DefaultPage {
 		grid.setItems(instrumentsFacadeService.findAllUserExpenses());
 	}
 
-	private ConfirmDialog getConfirmationDialog(String text) {
+	private ConfirmDialog getConfirmationDialog(String expenseName) {
 		ConfirmDialog dialog = new ConfirmDialog();
-		dialog.setHeader("Delete this expense '" + text + "`");
+		dialog.setHeader("Delete this expense '" + expenseName + "`");
 		dialog.setText("Are you sure you want to permanently delete this item?");
 
 		dialog.setCancelable(true);

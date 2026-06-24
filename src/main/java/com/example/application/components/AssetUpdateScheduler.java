@@ -20,7 +20,7 @@ public class AssetUpdateScheduler {
 	private PriceChangeNotifier priceChangeNotifier;
 
 	@Scheduled(fixedDelay = 5, timeUnit = TimeUnit.MINUTES)
-	public void updateAssets() {
+	public void updateAssetPrices() {
 		log.info("------------------- [Task] Starting updating asset data -------------------");
 		instrumentsFacadeService.updateAssetData();
 		priceChangeNotifier.updatePagePrices();

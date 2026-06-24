@@ -147,7 +147,7 @@ public class EditExpenseDialog extends Dialog implements HasNotifications {
 				.bind(UpdateExpenseRequest::getCategory, UpdateExpenseRequest::setCategory);
 
 		binder.forField(tagsField)
-				.withValidator(tags -> tags.stream()
+				.withValidator(tags -> tags != null && tags.stream()
 								.allMatch(tag -> tag != null && tag.length() >= 4 && tag.length() <= 20),
 						"All tags should be between 4 and 20 characters long"
 				).bind(UpdateExpenseRequest::getTags, UpdateExpenseRequest::setTags);
@@ -200,15 +200,14 @@ public class EditExpenseDialog extends Dialog implements HasNotifications {
 	}
 
 	private void defaultClickSaveBtnListener() {
-		logger.info("Clicked on Save button inside `Edit Expense` form");
+		logger.info("Clicked on saveBtn inside {}", this.getClass().getSimpleName());
 		if (binder.validate().isOk()) {
-			logger.info("Updated the expense using data provided inside `Edit Expense` form");
 			instrumentsFacadeService.updateExpense(binder.getBean());
 			showSuccessfulNotification("Expense submitted successfully!");
 			this.close();
 		} else {
-			logger.warn("Submitted `Edit Expense` form with validation errors");
-			showErrorNotification("An error occurred while submitting `Edit Expense` form");
+			logger.warn("Submitted {} form with validation errors", this.getClass().getSimpleName());
+			showErrorNotification("An error occurred while submitting form: invalid fields");
 		}
 	}
 

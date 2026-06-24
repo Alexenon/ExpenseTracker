@@ -120,7 +120,7 @@ public class AddExpenseDialog extends Dialog implements HasNotifications {
 
 		cancelButton.addClickShortcut(Key.ESCAPE);
 		cancelButton.addClickListener(e -> {
-			logger.info("Exited `Add New Expense` form");
+			logger.info("Closed {}", this.getClass().getSimpleName());
 			this.close();
 		});
 
@@ -194,14 +194,13 @@ public class AddExpenseDialog extends Dialog implements HasNotifications {
 	}
 
 	private void defaultClickSaveBtnListener() {
-		logger.info("Clicked on Save button inside `Add New Expense` form");
+		logger.info("Clicked on saveBtn inside {}", this.getClass().getSimpleName());
 		if (binder.validate().isOk()) {
-			logger.info("Saved expense using data provided inside `Add New Expense` form");
 			instrumentsFacadeService.createExpense(binder.getBean());
 			showSuccessfulNotification("Expense submitted successfully!");
 			this.close();
 		} else {
-			logger.warn("Submitting `Add New Expense` form with validation errors");
+			logger.warn("Submitting {} form with validation errors", this.getClass().getSimpleName());
 			showErrorNotification("An error occurred while submitting Add New Expense form");
 		}
 	}
@@ -227,11 +226,14 @@ public class AddExpenseDialog extends Dialog implements HasNotifications {
 	@Override
 	public void open() {
 		super.open();
-		logger.info("Opened `Add New Expense` form");
+		logger.info("Opened {}", this.getClass().getSimpleName());
 	}
 
 	private CreateExpenseRequest defaultRequest() {
 		CreateExpenseRequest request = new CreateExpenseRequest();
+		request.setTimestamp(ExpenseTimestamp.ONCE);
+		request.setStartDate(LocalDate.now());
+		request.setExpireDate(LocalDate.now().plusDays(1));
 		request.setUserId(instrumentsFacadeService.getAuthenticatedUser().getId());
 		return request;
 	}
