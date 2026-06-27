@@ -23,6 +23,7 @@
 @import 'styles/page-styles/blockchain-demo.css';
 
 @import 'styles/page-styles/home-page.css';
+@import 'styles/page-styles/settings-page.css';
 @import 'styles/page-styles/assets-page.css';
 @import 'styles/page-styles/asset-details-page.css';
 @import 'styles/page-styles/calculator-page.css';
@@ -301,6 +302,12 @@ vaadin-date-time-picker > vaadin-date-picker {
 /*
     COMMON STYLES
 */
+
+.centered-container {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
 
 .centered-text {
     text-align: center;

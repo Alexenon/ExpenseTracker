@@ -5,6 +5,7 @@ import com.example.application.views.layouts.MainLayout;
 import com.example.application.views.pages.DefaultPage;
 import com.example.application.views.pages.settings.tabs.CategoriesTab;
 import com.example.application.views.pages.settings.tabs.SettingsAbstractTab;
+import com.example.application.views.pages.settings.tabs.TagsTab;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -20,21 +21,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Route(value = "settings", layout = MainLayout.class)
 public class SettingsView extends DefaultPage {
 
-	private InstrumentsFacadeService instrumentsFacadeService;
-
 	private final Tab profile = new Tab(VaadinIcon.USER.create(), new Span("Profile"));
 	private final Tab categoriesTab;
-	private final Tab labels = new Tab(VaadinIcon.EYE.create(), new Span("Labels"));
+	private final Tab tagsTab;
 	private final VerticalLayout content = new VerticalLayout();
 
 	@Autowired
 	public SettingsView(InstrumentsFacadeService instrumentsFacadeService) {
-		this.instrumentsFacadeService = instrumentsFacadeService;
 		this.categoriesTab = new CategoriesTab(instrumentsFacadeService);
+		this.tagsTab = new TagsTab(instrumentsFacadeService);
+		initialize();
+	}
+
+	private void initialize() {
 		getStyle().set("margin-top", "150px");
 
-
-		Tabs tabs = new Tabs(profile, categoriesTab, labels);
+		Tabs tabs = new Tabs(profile, categoriesTab, tagsTab);
 		tabs.setOrientation(Tabs.Orientation.VERTICAL);
 		tabs.setHeight("240px");
 		tabs.setWidth("240px");

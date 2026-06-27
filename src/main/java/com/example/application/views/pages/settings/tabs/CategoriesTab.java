@@ -2,10 +2,14 @@ package com.example.application.views.pages.settings.tabs;
 
 import com.example.application.data.dtos.expense.CategoryDTO;
 import com.example.application.services.crypto.InstrumentsFacadeService;
+import com.example.application.utils.exceptions.DeleteCategoryWithExpensesException;
 import com.example.application.views.components.core.Container;
 import com.example.application.views.components.custom.dialogs.expenses.AddCategoryDialog;
+import com.example.application.views.components.custom.dialogs.expenses.EditCategoryDialog;
+import com.example.application.views.components.custom.icons.MonoIcon;
 import com.example.application.views.components.custom.icons.PictogramIcon;
 import com.example.application.views.components.utils.CommonButtons;
+import com.example.application.views.components.utils.HasNotifications;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.confirmdialog.ConfirmDialog;
@@ -13,11 +17,11 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 
-public class CategoriesTab extends SettingsAbstractTab {
+public class CategoriesTab extends SettingsAbstractTab implements HasNotifications {
 
 	private final InstrumentsFacadeService instrumentsFacadeService;
 
-	private final Grid<CategoryDTO> grid = new Grid<>();
+	private final Grid<CategoryDTO> grid = new Grid<>(CategoryDTO.class, false);
 	private final Button addCategoryBtn = CommonButtons.createAddButton("Add category");
 
 	public CategoriesTab(InstrumentsFacadeService instrumentsFacadeService) {
@@ -36,23 +40,34 @@ public class CategoriesTab extends SettingsAbstractTab {
 	}
 
 	private void initializeContent() {
-		addCategoryBtn.addClickListener(e -> {
-			new AddCategoryDialog(instrumentsFacadeService).open();
-		});
+		addCategoryBtn.addClickListener(e -> new AddCategoryDialog(instrumentsFacadeService).open());
 	}
 
 	private void initializeGrid() {
 		grid.setItems(instrumentsFacadeService.findUserCategories());
-		grid.addColumn(CategoryDTO::getName).setKey("Name").setHeader("Category name");
-		grid.addColumn(CategoryDTO::getIconName).setKey("Icon").setHeader("Category icon");
+		grid.addColumn(CategoryDTO::getName).setKey("Name").setHeader("Category name").setSortable(true);
+		grid.addColumn(columnCategoryIconRenderer()).setKey("Icon").setHeader("Category icon");
+		grid.addColumn(columnEditRenderer()).setHeader("Edit");
+		grid.addColumn(columnDeleteRenderer()).setHeader("Delete");
 
-		grid.getColumns().forEach(c -> {
-			c.setSortable(true);
-			c.setAutoWidth(true);
+		grid.setId("categories-grid");
+		grid.getColumns().forEach(c -> c.setAutoWidth(true));
+	}
+
+	private ComponentRenderer<Div, CategoryDTO> columnCategoryIconRenderer() {
+		return new ComponentRenderer<>(category -> {
+			Div div = new Div();
+			div.addClassName("centered-container");
+
+			PictogramIcon.findByName(category.getIconName())
+					.ifPresent(icon -> {
+						MonoIcon monoIcon = icon.create();
+						monoIcon.getStyle().set("cursor", "default");
+						div.add(monoIcon);
+					});
+
+			return div;
 		});
-		grid.setColumnReorderingAllowed(false);
-
-		grid.getElement().executeJs("this.shadowRoot.querySelector('table').style.overflow = 'hidden';");
 	}
 
 	private ComponentRenderer<Button, CategoryDTO> columnEditRenderer() {
@@ -60,12 +75,8 @@ public class CategoriesTab extends SettingsAbstractTab {
 			button.setIcon(PictogramIcon.SQUARE_EDIT_OUTLINE.create("grid-action-btn"));
 			button.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_TERTIARY);
 			button.addClickListener(e -> {
-//				EditExpenseDialog dialog = new EditExpenseDialog(
-//						category,
-//						instrumentsFacadeService,
-//						singleFormatI18n
-//				);
-//				dialog.open();
+				EditCategoryDialog dialog = new EditCategoryDialog(category, instrumentsFacadeService);
+				dialog.open();
 //				dialog.addSaveBtnClickListener(grid -> updateGrid());
 			});
 		});
@@ -75,11 +86,15 @@ public class CategoriesTab extends SettingsAbstractTab {
 		return new ComponentRenderer<>(Button::new, (button, category) -> {
 			button.setIcon(PictogramIcon.DELETE_OUTLINE.create("grid-action-btn"));
 			button.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_ERROR, ButtonVariant.LUMO_TERTIARY);
-			button.addClickListener(e -> {
+			button.addClickListener(btn -> {
 				ConfirmDialog dialog = getConfirmationDialog(category.getName());
 				dialog.open();
 				dialog.addConfirmListener(l -> {
-					instrumentsFacadeService.deleteCategory(category.getId());
+					try {
+						instrumentsFacadeService.deleteCategory(category.getId());
+					} catch (DeleteCategoryWithExpensesException e) {
+						showErrorNotification(e.getLocalizedMessage());
+					}
 					updateGrid();
 				});
 			});

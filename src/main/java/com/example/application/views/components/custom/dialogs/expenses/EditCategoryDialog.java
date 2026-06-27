@@ -1,8 +1,10 @@
 package com.example.application.views.components.custom.dialogs.expenses;
 
-import com.example.application.data.requests.expenses.category.CreateCategoryRequest;
+import com.example.application.data.dtos.expense.CategoryDTO;
+import com.example.application.data.requests.expenses.category.UpdateCategoryRequest;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.views.components.custom.icons.MonoIcon;
+import com.example.application.views.components.custom.icons.PictogramIcon;
 import com.example.application.views.components.utils.HasNotifications;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -14,8 +16,9 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.validator.StringLengthValidator;
 
-public class AddCategoryDialog extends Dialog implements HasNotifications {
+public class EditCategoryDialog extends Dialog implements HasNotifications {
 
+	private final CategoryDTO categoryDTO;
 	private final InstrumentsFacadeService instrumentsFacadeService;
 
 	private final TextField nameField = new TextField("Category Name");
@@ -23,26 +26,33 @@ public class AddCategoryDialog extends Dialog implements HasNotifications {
 	private final Button saveButton = new Button("Save");
 	private final Button cancelButton = new Button("Cancel", e -> this.close());
 
-	private final Binder<CreateCategoryRequest> binder = new Binder<>(CreateCategoryRequest.class);
+	private final Binder<UpdateCategoryRequest> binder = new Binder<>(UpdateCategoryRequest.class);
 
-	public AddCategoryDialog(InstrumentsFacadeService instrumentsFacadeService) {
+	public EditCategoryDialog(CategoryDTO categoryDTO, InstrumentsFacadeService instrumentsFacadeService) {
+		this.categoryDTO = categoryDTO;
 		this.instrumentsFacadeService = instrumentsFacadeService;
-		setHeaderTitle("Add new category");
+		setHeaderTitle("Edit '%s' category".formatted(categoryDTO.getName()));
 		initializeFields();
+		initializeFieldValues();
 		initializeBinder();
+	}
+
+	private void initializeFieldValues() {
+		nameField.setValue(categoryDTO.getName());
+		iconSelector.setItems(instrumentsFacadeService.getCategoryIcons());
+		PictogramIcon.findByName(categoryDTO.getIconName())
+				.ifPresent(icon -> iconSelector.setValue(icon.create()));
 	}
 
 	private void initializeFields() {
 		iconSelector.setLabel("Icon");
-
-		iconSelector.setItems(instrumentsFacadeService.getCategoryIcons());
 		iconSelector.setRenderer(createIconRenderer());
 
 		saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
 		saveButton.addClickListener(e -> {
 			if (binder.validate().isOk()) {
-				instrumentsFacadeService.createCategory(createRequest());
-				showSuccessfulNotification("Category saved successfully!");
+				instrumentsFacadeService.updateCategory(createRequest());
+				showSuccessfulNotification("Category updated successfully!");
 				this.close();
 			} else {
 				showErrorNotification("An error occurred while submitting form");
@@ -53,6 +63,7 @@ public class AddCategoryDialog extends Dialog implements HasNotifications {
 		add(nameField, iconSelector);
 		this.getFooter().add(cancelButton, saveButton);
 	}
+
 
 	private void initializeBinder() {
 		binder.forField(nameField)
@@ -74,12 +85,11 @@ public class AddCategoryDialog extends Dialog implements HasNotifications {
 		});
 	}
 
-	private CreateCategoryRequest createRequest() {
-		return CreateCategoryRequest.builder()
-				.name(nameField.getValue())
-				.iconName(iconSelector.getValue().getRawIcon().name())
-				.userId(instrumentsFacadeService.getAuthenticatedUser().getId())
-				.build();
+	private UpdateCategoryRequest createRequest() {
+		Long id = categoryDTO.getId();
+		String name = nameField.getValue();
+		String iconName = iconSelector.getValue().getRawIcon().name();
+		return new UpdateCategoryRequest(id, name, iconName);
 	}
 
 }

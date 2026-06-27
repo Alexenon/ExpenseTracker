@@ -65,7 +65,7 @@ public class AddExpenseDialog extends Dialog implements HasNotifications {
 		this.instrumentsFacadeService = instrumentsFacadeService;
 		this.singleFormatI18n = singleFormatI18n;
 
-		setHeaderTitle("Add New Expense");
+		setHeaderTitle("Add new expense");
 		initFields();
 		initBinder();
 		add(createDialogLayout());

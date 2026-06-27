@@ -67,7 +67,7 @@ public class EditExpenseDialog extends Dialog implements HasNotifications {
 		this.instrumentsFacadeService = instrumentsFacadeService;
 		this.singleFormatI18n = singleFormatI18n;
 
-		setHeaderTitle("Edit Expense");
+		setHeaderTitle("Edit '%s' expense".formatted(expenseDTO.getName()));
 		initFields();
 		initBinder();
 		fillFieldsWithValues();

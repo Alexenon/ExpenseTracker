@@ -51,19 +51,23 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
 	List<Expense> findExpensesPerYear(@Param("year") int year);
 
 	@Query(value = """
-			SELECT E.id, E.name, E.amount, C.name AS 'Category',
-			    E.description, E.timestamp, E.start_date
-			FROM expenses E
-			INNER JOIN categories C ON C.id = E.category_id
-			WHERE C.name LIKE CONCAT('%', :categoryName, '%')
-			""", nativeQuery = true)
-	List<Expense> findByCategory(@Param("categoryName") String categoryName);
-
-	@Query(value = """
 			SELECT * FROM expenses
 			WHERE user_id = :userId
 			""", nativeQuery = true)
 	List<Expense> findByUser(@Param("userId") Long userId);
+
+	@Query(value = """
+			SELECT * FROM expenses
+			WHERE category_id = :categoryId
+			""", nativeQuery = true)
+	List<Expense> findByCategory(@Param("categoryId") Long categoryId);
+
+	@Query(value = """
+			SELECT * FROM expenses E
+			INNER JOIN expense_tags ET ON ET.expense_id = E.id
+			WHERE ET.tag_id = :tagId
+			""", nativeQuery = true)
+	List<Expense> findByTag(@Param("tagId") Long tagId);
 
 	@Query(value = """
 			SELECT C.name, SUM(

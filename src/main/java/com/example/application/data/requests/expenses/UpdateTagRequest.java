@@ -14,7 +14,7 @@ public class UpdateTagRequest {
 	private final Long id;
 
 	@NotBlank
-	@Size(min = 4, max = 20, message = "Name should be between 4 and 20 characters")
+	@Size(min = 3, max = 20, message = "Name should be between 3 and 20 characters")
 	private final String name;
 
 }

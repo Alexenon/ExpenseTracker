@@ -4,11 +4,13 @@ import com.example.application.components.EntityValidator;
 import com.example.application.data.models.projections.MonthlyExpensesProjection;
 import com.example.application.entities.expenses.Expense;
 import com.example.application.entities.expenses.ExpenseTimestamp;
+import com.example.application.entities.expenses.Tag;
 import com.example.application.repositories.expenses.ExpenseRepository;
 import com.example.application.utils.common.lang.DateUtils;
 import jakarta.annotation.Nonnull;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +19,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ExpenseService {
@@ -35,8 +38,12 @@ public class ExpenseService {
 		return expenseRepository.findByUser(userId);
 	}
 
-	public List<Expense> getExpensesByCategory(String categoryName) {
-		return expenseRepository.findByCategory(categoryName);
+	public List<Expense> findByCategory(Long categoryId) {
+		return expenseRepository.findByCategory(categoryId);
+	}
+
+	public List<Expense> findByTag(Long tagId) {
+		return expenseRepository.findByTag(tagId);
 	}
 
 	public List<Expense> getExpensesByMonth(int month) {
@@ -94,13 +101,21 @@ public class ExpenseService {
 		expense.setExpireDate(startDate.plusDays(1));
 	}
 
+	@Transactional
 	public void deleteExpenseById(long expenseId) {
 		expenseRepository.deleteById(expenseId);
 	}
 
+	@Transactional
 	public void deleteAllExpanses() {
 		expenseRepository.deleteAll();
 	}
 
+	@Transactional
+	public void removeExpenseTag(Expense expense, Tag tag) {
+		log.info("Removing tag='{}' from {}", tag.getName(), expense);
+		expense.getTags().remove(tag);
+		saveExpense(expense);
+	}
 
 }

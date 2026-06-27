@@ -5,6 +5,7 @@ import com.example.application.data.convertors.AssetConvertor;
 import com.example.application.data.dtos.*;
 import com.example.application.data.dtos.expense.CategoryDTO;
 import com.example.application.data.dtos.expense.ExpenseDTO;
+import com.example.application.data.dtos.expense.TagDTO;
 import com.example.application.data.enums.Categories;
 import com.example.application.data.enums.SymbolIndentifier;
 import com.example.application.data.models.InstrumentsProvider;
@@ -35,6 +36,7 @@ import com.example.application.services.expenses.CategoryNameAlreadyExistsExcept
 import com.example.application.services.expenses.CategoryService;
 import com.example.application.services.expenses.ExpenseService;
 import com.example.application.services.expenses.TagService;
+import com.example.application.utils.exceptions.DeleteCategoryWithExpensesException;
 import com.example.application.utils.exceptions.InternalUnexpectedException;
 import com.example.application.utils.fetchers.crypto_compare.response.AssetMetadata;
 import com.example.application.views.components.custom.icons.MonoIcon;
@@ -100,7 +102,7 @@ public class InstrumentsFacadeService {
 		// Removing user's active portfolio constraint & deleting all entities related with this user
 		user.resetActivePortfolio();
 		deleteUserPortfolios(userId);
-		findUserCategories(userId).forEach(category -> deleteCategory(category.getId()));
+		findUserCategories(userId).forEach(category -> categoryService.delete(category.getId()));
 		findUserTags(userId).forEach(tag -> deleteTag(tag.getId()));
 
 		userService.delete(userId);
@@ -651,7 +653,10 @@ public class InstrumentsFacadeService {
 	}
 
 	@Transactional
-	public void deleteCategory(Long categoryId) {
+	public void deleteCategory(Long categoryId) throws DeleteCategoryWithExpensesException {
+		if (!expenseService.findByCategory(categoryId).isEmpty())
+			throw new DeleteCategoryWithExpensesException("Cannot delete category, because it's used in other expenses");
+
 		categoryService.delete(categoryId);
 	}
 
@@ -665,27 +670,34 @@ public class InstrumentsFacadeService {
 
 	//<editor-fold desc="TAGS">
 	@Transactional(readOnly = true)
-	public Optional<Tag> findTagById(Long tagId) {
-		return tagService.findById(tagId);
+	public Optional<TagDTO> findTagById(Long tagId) {
+		return tagService.findById(tagId)
+				.map(TagDTO::new);
 	}
 
 	@Transactional(readOnly = true)
-	public List<Tag> findUserTags() {
+	public List<TagDTO> findUserTags() {
 		return findUserTags(getAuthenticatedUser().getId());
 	}
 
 	@Transactional(readOnly = true)
-	public List<Tag> findUserTags(Long userId) {
-		return tagService.findByUser(userId);
+	public List<TagDTO> findUserTags(Long userId) {
+		return tagService.findByUser(userId)
+				.stream()
+				.map(TagDTO::new)
+				.toList();
 	}
 
 	@Transactional(readOnly = true)
-	public List<Tag> findExpenseTags(Long expenseId) {
-		return tagService.findByExpense(expenseId);
+	public List<TagDTO> findExpenseTags(Long expenseId) {
+		return tagService.findByExpense(expenseId)
+				.stream()
+				.map(TagDTO::new)
+				.toList();
 	}
 
 	@Transactional
-	public Tag createTag(@Valid CreateTagRequest request) {
+	public TagDTO createTag(@Valid CreateTagRequest request) {
 		User user = userService.findById(request.getUserId())
 				.orElseThrow(() -> new EntityNotFoundException("Cannot find user with id: #" + request.getUserId()));
 
@@ -693,11 +705,12 @@ public class InstrumentsFacadeService {
 			throw new CategoryNameAlreadyExistsException(request.getName());
 
 		Tag tag = new Tag(request.getName(), user);
-		return tagService.save(tag);
+		Tag createdTag = tagService.save(tag);
+		return new TagDTO(createdTag);
 	}
 
 	@Transactional
-	public Tag updateTag(@Valid UpdateTagRequest request) {
+	public TagDTO updateTag(@Valid UpdateTagRequest request) {
 		Tag tag = tagService.findById(request.getId())
 				.orElseThrow(() -> new EntityNotFoundException("Cannot find tag with id: #" + request.getId()));
 
@@ -707,11 +720,19 @@ public class InstrumentsFacadeService {
 			throw new CategoryNameAlreadyExistsException(request.getName());
 
 		tag.setName(request.getName());
-		return tagService.save(tag);
+		Tag updatedTag = tagService.save(tag);
+		return new TagDTO(updatedTag);
 	}
 
 	@Transactional
 	public void deleteTag(Long tagId) {
+		List<Expense> expensesWithTag = expenseService.findByTag(tagId);
+
+		Tag tag = tagService.findById(tagId)
+				.orElseThrow(() -> new EntityNotFoundException("Couldn't find tag: #" + tagId));
+
+		expensesWithTag.forEach(e -> expenseService.removeExpenseTag(e, tag));
+
 		tagService.delete(tagId);
 	}
 	//</editor-fold>
