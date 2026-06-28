@@ -2,9 +2,9 @@ package com.example.application.views.components.custom.dialogs;
 
 import com.example.application.data.dtos.expense.CategoryDTO;
 import com.example.application.data.dtos.expense.ExpenseDTO;
+import com.example.application.data.dtos.expense.TagDTO;
 import com.example.application.data.requests.expenses.UpdateExpenseRequest;
 import com.example.application.entities.expenses.ExpenseTimestamp;
-import com.example.application.entities.expenses.Tag;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.views.components.core.TagInput;
 import com.example.application.views.components.utils.HasNotifications;
@@ -228,7 +228,7 @@ public class EditExpenseDialog extends Dialog implements HasNotifications {
 	private List<String> getUserTags() {
 		return instrumentsFacadeService.findUserTags()
 				.stream()
-				.map(Tag::getName)
+				.map(TagDTO::getName)
 				.toList();
 	}
 

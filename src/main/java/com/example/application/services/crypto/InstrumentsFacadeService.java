@@ -32,10 +32,7 @@ import com.example.application.entities.expenses.Expense;
 import com.example.application.entities.expenses.Tag;
 import com.example.application.services.SecurityService;
 import com.example.application.services.UserService;
-import com.example.application.services.expenses.CategoryNameAlreadyExistsException;
-import com.example.application.services.expenses.CategoryService;
-import com.example.application.services.expenses.ExpenseService;
-import com.example.application.services.expenses.TagService;
+import com.example.application.services.expenses.*;
 import com.example.application.utils.exceptions.DeleteCategoryWithExpensesException;
 import com.example.application.utils.exceptions.InternalUnexpectedException;
 import com.example.application.utils.fetchers.crypto_compare.response.AssetMetadata;
@@ -715,11 +712,13 @@ public class InstrumentsFacadeService {
 				.orElseThrow(() -> new EntityNotFoundException("Cannot find tag with id: #" + request.getId()));
 
 		Long userId = tag.getUser().getId();
+		String oldTagName = tag.getName();
+		String newTagName = request.getName();
 
-		if (!tag.getName().equals(request.getName()) && tagService.isNameTaken(request.getName(), userId))
-			throw new CategoryNameAlreadyExistsException(request.getName());
+		if (!oldTagName.equals(newTagName) && tagService.isNameTaken(newTagName, userId))
+			throw new TagNameAlreadyExistsException(newTagName);
 
-		tag.setName(request.getName());
+		tag.setName(newTagName);
 		Tag updatedTag = tagService.save(tag);
 		return new TagDTO(updatedTag);
 	}
@@ -734,6 +733,11 @@ public class InstrumentsFacadeService {
 		expensesWithTag.forEach(e -> expenseService.removeExpenseTag(e, tag));
 
 		tagService.delete(tagId);
+	}
+
+	@Transactional(readOnly = true)
+	public boolean isTagNameAvailable(String tagName) {
+		return !tagService.isNameTaken(tagName, getAuthenticatedUser().getId());
 	}
 	//</editor-fold>
 

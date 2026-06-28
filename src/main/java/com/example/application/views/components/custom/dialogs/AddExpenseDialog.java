@@ -1,9 +1,9 @@
 package com.example.application.views.components.custom.dialogs;
 
 import com.example.application.data.dtos.expense.CategoryDTO;
+import com.example.application.data.dtos.expense.TagDTO;
 import com.example.application.data.requests.expenses.CreateExpenseRequest;
 import com.example.application.entities.expenses.ExpenseTimestamp;
-import com.example.application.entities.expenses.Tag;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.views.components.core.TagInput;
 import com.example.application.views.components.utils.HasNotifications;
@@ -104,7 +104,7 @@ public class AddExpenseDialog extends Dialog implements HasNotifications {
 		categoryField.setItems(getUserCategories());
 		categoryField.setHelperText("Select the category which fits this expense");
 
-		tagsField.setItems(getUserTags());
+		tagsField.setItems(instrumentsFacadeService.findUserTags().stream().map(TagDTO::getName).toList());
 		tagsField.setHelperText("Add tags related with this expenses in case there are");
 		amountField.setSuffixComponent(new Span("MDL"));
 
@@ -213,13 +213,6 @@ public class AddExpenseDialog extends Dialog implements HasNotifications {
 		return instrumentsFacadeService.findUserCategories()
 				.stream()
 				.map(CategoryDTO::getName)
-				.toList();
-	}
-
-	private List<String> getUserTags() {
-		return instrumentsFacadeService.findUserTags()
-				.stream()
-				.map(Tag::getName)
 				.toList();
 	}
 

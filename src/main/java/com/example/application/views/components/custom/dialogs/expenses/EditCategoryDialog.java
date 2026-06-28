@@ -51,7 +51,7 @@ public class EditCategoryDialog extends Dialog implements HasNotifications {
 		saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
 		saveButton.addClickListener(e -> {
 			if (binder.validate().isOk()) {
-				instrumentsFacadeService.updateCategory(createRequest());
+				instrumentsFacadeService.updateCategory(getRequest());
 				showSuccessfulNotification("Category updated successfully!");
 				this.close();
 			} else {
@@ -85,7 +85,7 @@ public class EditCategoryDialog extends Dialog implements HasNotifications {
 		});
 	}
 
-	private UpdateCategoryRequest createRequest() {
+	private UpdateCategoryRequest getRequest() {
 		Long id = categoryDTO.getId();
 		String name = nameField.getValue();
 		String iconName = iconSelector.getValue().getRawIcon().name();

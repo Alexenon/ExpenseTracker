@@ -41,7 +41,7 @@ public class AddCategoryDialog extends Dialog implements HasNotifications {
 		saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
 		saveButton.addClickListener(e -> {
 			if (binder.validate().isOk()) {
-				instrumentsFacadeService.createCategory(createRequest());
+				instrumentsFacadeService.createCategory(getRequest());
 				showSuccessfulNotification("Category saved successfully!");
 				this.close();
 			} else {
@@ -74,7 +74,7 @@ public class AddCategoryDialog extends Dialog implements HasNotifications {
 		});
 	}
 
-	private CreateCategoryRequest createRequest() {
+	private CreateCategoryRequest getRequest() {
 		return CreateCategoryRequest.builder()
 				.name(nameField.getValue())
 				.iconName(iconSelector.getValue().getRawIcon().name())

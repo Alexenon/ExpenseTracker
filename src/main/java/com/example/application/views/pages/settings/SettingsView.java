@@ -1,6 +1,7 @@
 package com.example.application.views.pages.settings;
 
 import com.example.application.services.crypto.InstrumentsFacadeService;
+import com.example.application.views.components.core.Container;
 import com.example.application.views.layouts.MainLayout;
 import com.example.application.views.pages.DefaultPage;
 import com.example.application.views.pages.settings.tabs.CategoriesTab;
@@ -43,7 +44,12 @@ public class SettingsView extends DefaultPage {
 
 		tabs.addSelectedChangeListener(event -> setContent(event.getSelectedTab()));
 
-		add(tabs, content);
+		Container pageContent = Container.builder("settings-page-container")
+				.addComponent(tabs)
+				.addComponent(content)
+				.build();
+
+		add(pageContent);
 	}
 
 	private void setContent(Tab tab) {

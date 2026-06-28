@@ -24,7 +24,7 @@ public class Tag {
 
 	@NotNull
 	@Column(name = "name")
-	@Size(min = 4, max = 20, message = "Tag name should be between 4 and 20 characters")
+	@Size(min = 3, max = 20, message = "Tag name should be between 3 and 20 characters")
 	private String name;
 
 	@NotNull
