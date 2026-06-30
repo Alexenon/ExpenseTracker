@@ -10,6 +10,7 @@ public class CommonButtons {
 
 	public static Button createAddButton(String text) {
 		Button button = new Button(text);
+		button.addClassName("add-entity-btn");
 		button.setIcon(LumoIcon.PLUS.create());
 		button.setIconAfterText(true);
 		return button;
