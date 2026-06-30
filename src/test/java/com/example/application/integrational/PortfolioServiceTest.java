@@ -13,7 +13,10 @@ import com.example.application.services.UserService;
 import com.example.application.services.crypto.*;
 import com.example.application.utils.exceptions.InvalidDataException;
 import jakarta.persistence.EntityNotFoundException;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -32,6 +35,7 @@ class PortfolioServiceTest extends AbstractTest {
 	private final PortfolioService portfolioService;
 	private final TransactionService transactionService;
 	private final AssetBalanceService assetBalanceService;
+	private final AssetWatcherService assetWatcherService;
 
 	private User user;
 
@@ -41,13 +45,15 @@ class PortfolioServiceTest extends AbstractTest {
 								PortfolioService portfolioService,
 								TransactionService transactionService,
 								AssetBalanceService assetBalanceService,
-								AssetService assetService)
+								AssetService assetService,
+								AssetWatcherService assetWatcherService)
 	{
 		this.instrumentsFacadeService = instrumentsFacadeService;
 		this.userService = userService;
 		this.transactionService = transactionService;
 		this.assetBalanceService = assetBalanceService;
 		this.portfolioService = portfolioService;
+		this.assetWatcherService = assetWatcherService;
 	}
 
 	@BeforeEach
@@ -55,15 +61,6 @@ class PortfolioServiceTest extends AbstractTest {
 		this.user = createUser("john", "john@test.com");
 		Assertions.assertTrue(portfolioService.findByNameAndUser("Main", user.getId()).isPresent(),
 				"Created user doesn't have default portfolio attached");
-	}
-
-	@AfterEach
-	void removeUser() {
-		portfolioRepository.deleteAll();
-		transactionRepository.deleteAll();
-		assetBalanceRepository.deleteAll();
-		assetRepository.deleteAll();
-		userRepository.deleteAll();
 	}
 
 	@Test
@@ -104,7 +101,7 @@ class PortfolioServiceTest extends AbstractTest {
 				.build();
 
 		PortfolioDTO saved = instrumentsFacadeService.createPortfolio(request);
-		List<Portfolio> portfolios = portfolioService.findByUserId(user.getId());
+		List<Portfolio> portfolios = portfolioService.findByUser(user.getId());
 		Assertions.assertFalse(portfolios.isEmpty(), "User should have portfolios");
 		Assertions.assertEquals(2, portfolios.size(), "User should have default + new portfolio");
 	}
@@ -154,14 +151,14 @@ class PortfolioServiceTest extends AbstractTest {
 		PortfolioDTO newPortfolio = instrumentsFacadeService.createPortfolio(request);
 		instrumentsFacadeService.deletePortfolio(newPortfolio.getId());
 
-		List<Portfolio> portfolios = portfolioService.findByUserId(user.getId());
+		List<Portfolio> portfolios = portfolioService.findByUser(user.getId());
 
 		Assertions.assertEquals(1, portfolios.size(), "Only default portfolio should remain");
 	}
 
 	@Test
 	void deleteShouldFailWhenDeletingLastPortfolio() {
-		List<Portfolio> portfolios = portfolioService.findByUserId(user.getId());
+		List<Portfolio> portfolios = portfolioService.findByUser(user.getId());
 		Portfolio defaultPortfolio = portfolios.getFirst();
 		Assertions.assertThrows(
 				InvalidDataException.class,

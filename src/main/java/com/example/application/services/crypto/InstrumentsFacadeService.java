@@ -3,8 +3,13 @@ package com.example.application.services.crypto;
 import com.example.application.components.EntityValidator;
 import com.example.application.data.convertors.AssetConvertor;
 import com.example.application.data.dtos.*;
+import com.example.application.data.dtos.expense.CategoryDTO;
+import com.example.application.data.dtos.expense.ExpenseDTO;
+import com.example.application.data.dtos.expense.TagDTO;
+import com.example.application.data.enums.Categories;
 import com.example.application.data.enums.SymbolIndentifier;
 import com.example.application.data.models.InstrumentsProvider;
+import com.example.application.data.models.projections.MonthlyExpensesProjection;
 import com.example.application.data.requests.CreateTransactionRequest;
 import com.example.application.data.requests.RegisterUserRequest;
 import com.example.application.data.requests.UpdateTransactionRequest;
@@ -12,19 +17,33 @@ import com.example.application.data.requests.asset.CreateAssetRequest;
 import com.example.application.data.requests.asset.UpdateAssetRequest;
 import com.example.application.data.requests.asset_watchers.CreateAssetWatcherRequest;
 import com.example.application.data.requests.asset_watchers.UpdateAssetWatcherRequest;
+import com.example.application.data.requests.expenses.CreateExpenseRequest;
+import com.example.application.data.requests.expenses.CreateTagRequest;
+import com.example.application.data.requests.expenses.UpdateExpenseRequest;
+import com.example.application.data.requests.expenses.UpdateTagRequest;
+import com.example.application.data.requests.expenses.category.CreateCategoryRequest;
+import com.example.application.data.requests.expenses.category.UpdateCategoryRequest;
 import com.example.application.data.requests.portfolio.CreatePortfolioRequest;
 import com.example.application.entities.User;
 import com.example.application.entities.common.TransactionType;
 import com.example.application.entities.crypto.*;
+import com.example.application.entities.expenses.Category;
+import com.example.application.entities.expenses.Expense;
+import com.example.application.entities.expenses.Tag;
 import com.example.application.services.SecurityService;
 import com.example.application.services.UserService;
+import com.example.application.services.expenses.*;
+import com.example.application.utils.exceptions.DeleteCategoryWithExpensesException;
 import com.example.application.utils.exceptions.InternalUnexpectedException;
 import com.example.application.utils.fetchers.crypto_compare.response.AssetMetadata;
+import com.example.application.views.components.custom.icons.MonoIcon;
+import com.example.application.views.components.custom.icons.PictogramIcon;
 import jakarta.annotation.Nonnull;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,13 +51,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class InstrumentsFacadeService {
 
 	private final SecurityService securityService;
@@ -52,67 +70,53 @@ public class InstrumentsFacadeService {
 	private final AssetWatcherService assetWatcherService;
 	private final AssetBalanceService assetBalanceService;
 
-	private final EntityValidator validator;
+	private final ExpenseService expenseService;
+	private final CategoryService categoryService;
+	private final TagService tagService;
 
-	@Autowired
-	public InstrumentsFacadeService(
-			SecurityService securityService,
-			InstrumentsProvider instrumentsProvider,
-			UserService userService,
-			PortfolioService portfolioService,
-			AssetService assetService,
-			UserAssetService userAssetService,
-			TransactionService transactionService,
-			AssetWatcherService assetWatcherService,
-			AssetBalanceService assetBalanceService,
-			EntityValidator entityValidator
-	)
-	{
-		this.securityService = securityService;
-		this.instrumentsProvider = instrumentsProvider;
-		this.userService = userService;
-		this.portfolioService = portfolioService;
-		this.assetService = assetService;
-		this.userAssetService = userAssetService;
-		this.transactionService = transactionService;
-		this.assetWatcherService = assetWatcherService;
-		this.assetBalanceService = assetBalanceService;
-		this.validator = entityValidator;
-	}
+	private final EntityValidator validator;
 
 	//<editor-fold desc="USERS">
 	@Transactional(rollbackFor = Exception.class)
 	public UserDTO createNewUser(@Valid RegisterUserRequest request) {
 		User userEntity = userService.createNewUser(request);
+		Long userId = userEntity.getId();
 
-		CreatePortfolioRequest defaultPortfolio = CreatePortfolioRequest.builder()
-				.portfolioName("Main")
-				.userId(userEntity.getId())
-				.build();
+		addDefaultUserPortfolio(userId);
+		addDefaultUserCategories(userId);
+		addDefaultUserTags(userId);
 
-		createPortfolio(defaultPortfolio);
-
-		return UserDTO.mappedFrom(userEntity);
+		return new UserDTO(userEntity);
 	}
 
 	@Transactional
 	public void deleteUser(Long userId) {
 		log.info("Starting deleting user #{} in batch", userId);
-		deletePortfolios(portfolioService.findByUserId(userId));
+
+		User user = userService.findById(userId)
+				.orElseThrow(() -> new EntityNotFoundException("User not found: #" + userId));
+
+		// Removing user's active portfolio constraint & deleting all entities related with this user
+		user.resetActivePortfolio();
+		deleteUserPortfolios(userId);
+		findUserCategories(userId).forEach(category -> categoryService.delete(category.getId()));
+		findUserTags(userId).forEach(tag -> deleteTag(tag.getId()));
+
 		userService.delete(userId);
 		log.info("Finished deleting user #{} in batch", userId);
 	}
 
-	public boolean isUsernameTaken(String username) {
-		return userService.isUsernameTaken(username);
+	public boolean isUsernameAvailable(String username) {
+		return !userService.isUsernameTaken(username);
 	}
 
-	public boolean isEmailTaken(String email) {
-		return userService.isEmailTaken(email);
+	public boolean isEmailAvailable(String email) {
+		return !userService.isEmailTaken(email);
 	}
 	//</editor-fold>
 
 	//<editor-fold desc="ASSETS">
+	@Transactional(readOnly = true)
 	public List<AssetDTO> getAllAssets() {
 		return assetService.findAll()
 				.stream()
@@ -120,11 +124,13 @@ public class InstrumentsFacadeService {
 				.toList();
 	}
 
+	@Transactional(readOnly = true)
 	public Optional<AssetDTO> getAssetBySymbol(@NotNull String symbol) {
 		return assetService.findBySymbol(symbol)
 				.map(AssetDTO::mappedFrom);
 	}
 
+	@Transactional(readOnly = true)
 	public BigDecimal getAmountOfTokens(Long portfolioId, String assetSymbol) {
 		return getAssetBalanceByAsset(portfolioId, assetSymbol)
 				.map(AssetBalanceDTO::getAmount)
@@ -132,10 +138,12 @@ public class InstrumentsFacadeService {
 	}
 
 	@Nullable
+	@Transactional(readOnly = true)
 	public String getAssetComment(String assetSymbol) {
 		return userAssetService.getAssetComment(getAuthenticatedUser().getId(), assetSymbol);
 	}
 
+	@Transactional(readOnly = true)
 	public boolean isAssetMarkedAsFavorite(String assetSymbol) {
 		return userAssetService.isAssetMarkedAsFavorite(getAuthenticatedUser().getId(), assetSymbol);
 	}
@@ -150,6 +158,7 @@ public class InstrumentsFacadeService {
 		userAssetService.updateMarkAssetAsFavorite(getAuthenticatedUser().getId(), assetSymbol, isFavorite);
 	}
 
+	@Transactional(readOnly = true)
 	public List<AssetDTO> getAllAssetsEverBought(PortfolioDTO portfolio) {
 		return getTransactions(portfolio.getId())
 				.stream()
@@ -163,6 +172,7 @@ public class InstrumentsFacadeService {
 	//</editor-fold>
 
 	//<editor-fold desc="TRANSACTIONS">
+	@Transactional(readOnly = true)
 	public List<TransactionDTO> getTransactions(Long portfolioId) {
 		return transactionService.findBy(portfolioId)
 				.stream()
@@ -170,6 +180,7 @@ public class InstrumentsFacadeService {
 				.toList();
 	}
 
+	@Transactional(readOnly = true)
 	public List<TransactionDTO> getTransactions(Long portfolioId, LocalDate from, LocalDate to) {
 		return transactionService.findBy(portfolioId, from, to)
 				.stream()
@@ -177,6 +188,7 @@ public class InstrumentsFacadeService {
 				.toList();
 	}
 
+	@Transactional(readOnly = true)
 	public List<TransactionDTO> getTransactionsByAsset(Long portfolioId, String assetSymbol) {
 		return transactionService.findBy(portfolioId, assetSymbol)
 				.stream()
@@ -197,7 +209,7 @@ public class InstrumentsFacadeService {
 	@Transactional
 	public TransactionDTO transferTransaction(Long transactionId, Long portfolioId, boolean replace) {
 		Portfolio portfolio = portfolioService.findById(portfolioId)
-				.orElseThrow(() -> new IllegalArgumentException("There is no such portfolio with id: #" + transactionId));
+				.orElseThrow(() -> new EntityNotFoundException("There is no such portfolio with id: #" + transactionId));
 
 		return new TransactionDTO(transactionService.transfer(transactionId, portfolio, replace));
 	}
@@ -208,10 +220,10 @@ public class InstrumentsFacadeService {
 		Transaction transaction = new Transaction();
 
 		Asset asset = assetService.findBySymbol(request.getAssetSymbol())
-				.orElseThrow(() -> new IllegalArgumentException("Cannot find asset: " + request.getAssetSymbol()));
+				.orElseThrow(() -> new EntityNotFoundException("Cannot find asset: " + request.getAssetSymbol()));
 
 		Portfolio portfolio = portfolioService.findById(request.getPortfolioId())
-				.orElseThrow(() -> new IllegalArgumentException("Cannot find portfolio with id: #" + request.getPortfolioId()));
+				.orElseThrow(() -> new EntityNotFoundException("Cannot find portfolio with id: #" + request.getPortfolioId()));
 
 		transaction.setAsset(asset);
 		transaction.setPortfolio(portfolio);
@@ -231,10 +243,10 @@ public class InstrumentsFacadeService {
 	public TransactionDTO updateTransaction(@Valid UpdateTransactionRequest request) {
 		log.info("Updating transaction: {}", request);
 		Transaction transaction = transactionService.findById(request.getId())
-				.orElseThrow(() -> new IllegalArgumentException("Cannot find transaction with id: #" + request.getId()));
+				.orElseThrow(() -> new EntityNotFoundException("Cannot find transaction with id: #" + request.getId()));
 
 		Asset asset = assetService.findBySymbol(request.getAssetSymbol())
-				.orElseThrow(() -> new IllegalArgumentException("Cannot find asset: " + request.getAssetSymbol()));
+				.orElseThrow(() -> new EntityNotFoundException("Cannot find asset: " + request.getAssetSymbol()));
 
 		transaction.setAsset(asset);
 		transaction.setMarketPrice(request.getMarketPrice());
@@ -254,10 +266,10 @@ public class InstrumentsFacadeService {
 	@Transactional
 	public AssetWatcherDTO createAssetWatcher(@Valid CreateAssetWatcherRequest request) {
 		Asset asset = assetService.findBySymbol(request.getAssetSymbol())
-				.orElseThrow(() -> new IllegalArgumentException("Cannot find asset: " + request.getAssetSymbol()));
+				.orElseThrow(() -> new EntityNotFoundException("Cannot find asset: " + request.getAssetSymbol()));
 
 		Portfolio portfolio = portfolioService.findById(request.getPortfolioId())
-				.orElseThrow(() -> new IllegalArgumentException("Cannot find portfolio with id: #" + request.getPortfolioId()));
+				.orElseThrow(() -> new EntityNotFoundException("Cannot find portfolio with id: #" + request.getPortfolioId()));
 
 		AssetWatcher newEntity = new AssetWatcher();
 		newEntity.setAsset(asset);
@@ -274,10 +286,10 @@ public class InstrumentsFacadeService {
 	@Transactional
 	public AssetWatcherDTO updateAssetWatcher(@Valid UpdateAssetWatcherRequest request) {
 		AssetWatcher entity = assetWatcherService.findById(request.getId())
-				.orElseThrow(() -> new IllegalArgumentException("Cannot find assetWatcher: #" + request.getId() + " (deleted ?)"));
+				.orElseThrow(() -> new EntityNotFoundException("Cannot find assetWatcher: #" + request.getId() + " (deleted ?)"));
 
 		Asset asset = assetService.findBySymbol(request.getAssetSymbol())
-				.orElseThrow(() -> new IllegalArgumentException("Cannot find asset: " + request.getAssetSymbol()));
+				.orElseThrow(() -> new EntityNotFoundException("Cannot find asset: " + request.getAssetSymbol()));
 
 		entity.setAsset(asset);
 		entity.setTargetPrice(request.getTargetPrice());
@@ -289,20 +301,23 @@ public class InstrumentsFacadeService {
 		return new AssetWatcherDTO(savedEntity);
 	}
 
+	@Transactional(readOnly = true)
 	public List<AssetWatcher> getAssetWatchersByAsset(Long portfolioId, String assetSymbol) {
-		return assetWatcherService.findBy(portfolioId, assetSymbol);
+		return assetWatcherService.findByPortfolioAndAsset(portfolioId, assetSymbol);
 	}
 
+	@Transactional(readOnly = true)
 	public List<AssetWatcherDTO> getAssetWatchersByAssetAndActionType(Long portfolioId,
 																	  String assetSymbol,
 																	  TransactionType type)
 	{
-		return assetWatcherService.findBy(portfolioId, assetSymbol, type)
+		return assetWatcherService.findByPortfolioAndAssetAndTransactionType(portfolioId, assetSymbol, type)
 				.stream()
 				.map(AssetWatcherDTO::new)
 				.toList();
 	}
 
+	@Transactional(readOnly = true)
 	public BigDecimal getClosestBuyWatcherPrice(Long portfolioId, String assetSymbol) {
 		return getAssetWatchersByAssetAndActionType(portfolioId, assetSymbol, TransactionType.BUY)
 				.stream()
@@ -312,6 +327,7 @@ public class InstrumentsFacadeService {
 				.orElse(BigDecimal.ZERO);
 	}
 
+	@Transactional(readOnly = true)
 	public BigDecimal getClosestSellWatcherPrice(Long portfolioId, String assetSymbol) {
 		return getAssetWatchersByAssetAndActionType(portfolioId, assetSymbol, TransactionType.SELL)
 				.stream()
@@ -323,6 +339,7 @@ public class InstrumentsFacadeService {
 	//</editor-fold>
 
 	//<editor-fold desc="ASSET BALANCES">
+	@Transactional(readOnly = true)
 	public List<AssetBalanceDTO> getPorfolioAssetBalances(Long portfolioId) {
 		return assetBalanceService.findByPortfolio(portfolioId)
 				.stream()
@@ -330,6 +347,7 @@ public class InstrumentsFacadeService {
 				.toList();
 	}
 
+	@Transactional(readOnly = true)
 	public Optional<AssetBalanceDTO> getAssetBalanceByAsset(Long portfolioId, String assetSymbol) {
 		return assetBalanceService
 				.findByPortfolioAndAsset(portfolioId, assetSymbol)
@@ -342,10 +360,10 @@ public class InstrumentsFacadeService {
 		Long portfolioId = transaction.getPortfolio().getId();
 
 		Portfolio portfolio = portfolioService.findById(portfolioId)
-				.orElseThrow(() -> new IllegalArgumentException("Cannot find portfolio: #" + portfolioId));
+				.orElseThrow(() -> new EntityNotFoundException("Cannot find portfolio: #" + portfolioId));
 
 		Asset asset = assetService.findById(assetId)
-				.orElseThrow(() -> new IllegalArgumentException("Cannot find asset: #" + assetId));
+				.orElseThrow(() -> new EntityNotFoundException("Cannot find asset: #" + assetId));
 
 		AssetBalance assetBalance = assetBalanceService.findByPortfolioAndAsset(portfolio.getId(), asset.getSymbol())
 				.orElseGet(() -> createAssetBalance(portfolio, asset));
@@ -378,9 +396,10 @@ public class InstrumentsFacadeService {
 	@Nonnull
 	@Transactional
 	public PortfolioDTO createPortfolio(@Valid CreatePortfolioRequest request) {
+		log.info("Creating new portfolio: {}", request);
 		validator.validate(request);
 		User user = userService.findById(request.getUserId())
-				.orElseThrow(() -> new IllegalArgumentException("User #" + request.getUserId() + " not found. (deleted ?)"));
+				.orElseThrow(() -> new EntityNotFoundException("User #" + request.getUserId() + " not found. (deleted ?)"));
 
 		Portfolio portfolio = portfolioService.createPortfolio(request, user);
 		userService.setPortfolioAsActive(user.getId(), portfolio);
@@ -392,40 +411,46 @@ public class InstrumentsFacadeService {
 	public void deletePortfolio(Long portfolioId) {
 		log.info("Starting deleting portfolio #{} in batch", portfolioId);
 		transactionService.deleteAllPorfolioTransactions(portfolioId);
-		List<AssetBalance> assetBalances = assetBalanceService.findByPortfolio(portfolioId);
-		assetBalanceService.deleteAll(assetBalances);
+		assetBalanceService.deleteAllForPortfolio(portfolioId);
+		assetWatcherService.deleteAllForPortfolio(portfolioId);
 		portfolioService.delete(portfolioId);
 		log.info("Finished deleting portfolio #{} in batch", portfolioId);
 	}
 
 	@Transactional
-	public void deletePortfolios(List<Portfolio> portfolios) {
-		int size = portfolios.size();
-		log.info("Starting deleting all portfolios #{} in batch", size);
+	public void deleteUserPortfolios(Long userId) {
+		List<Portfolio> userPortfolios = portfolioService.findByUser(userId);
+		log.info("Starting deleting all {} user portfolios in batch, for user: #{}", userPortfolios.size(), userId);
 
-		for (Portfolio portfolio : portfolios) {
-			transactionService.deleteAllPorfolioTransactions(portfolio.getId());
+		for (Portfolio portfolio : userPortfolios) {
+			Long portfolioId = portfolio.getId();
+			transactionService.deleteAllPorfolioTransactions(portfolioId);
+			assetBalanceService.deleteAllForPortfolio(portfolioId);
+			assetWatcherService.deleteAllForPortfolio(portfolioId);
 		}
 
-		portfolioService.deleteAll(portfolios);
-		log.info("Finished deleting all portfolios #{} in batch", size);
+		portfolioService.deleteAllUserPortfolios(userId);
+		log.info("Finished deleting all user portfolios in batch, for user: #{}", userId);
 	}
 
+	@Transactional(readOnly = true)
 	public Optional<PortfolioDTO> getPortfolioByName(String name) {
 		return portfolioService
 				.findByNameAndUser(name, getAuthenticatedUser().getId())
 				.map(PortfolioDTO::new);
 	}
 
+	@Transactional(readOnly = true)
 	public List<PortfolioDTO> getUserPortfolios() {
 		return portfolioService
-				.findByUserId(getAuthenticatedUser().getId())
+				.findByUser(getAuthenticatedUser().getId())
 				.stream()
 				.map(PortfolioDTO::new)
 				.toList();
 	}
 
 	@Nonnull
+	@Transactional(readOnly = true)
 	public PortfolioDTO getActivePortfolio() {
 		User user = userService.findById(getAuthenticatedUser().getId())
 				.orElseThrow(() -> new RuntimeException("User #" + getAuthenticatedUser().getId() + " not found"));
@@ -435,6 +460,7 @@ public class InstrumentsFacadeService {
 				.orElseThrow(() -> new InternalUnexpectedException(getAuthenticatedUser() + "doesn't have any active portfolio"));
 	}
 
+	@Transactional
 	public void setPortfolioAsActive(Long portfolioId) {
 		portfolioService.setPortfolioAsActive(portfolioId);
 	}
@@ -469,8 +495,280 @@ public class InstrumentsFacadeService {
 	}
 	//</editor-fold>
 
+	///////////////////////////////////////////////     EXPENSES     ///////////////////////////////////////////////////
+
+	//<editor-fold desc="EXPENSES">
+	@Transactional(readOnly = true)
+	public List<ExpenseDTO> findAllUserExpenses() {
+		return findAllUserExpenses(getAuthenticatedUser().getId());
+	}
+
+	@Transactional(readOnly = true)
+	public List<ExpenseDTO> findAllUserExpenses(Long userId) {
+		return expenseService.findByUser(userId)
+				.stream()
+				.map(ExpenseDTO::new)
+				.toList();
+	}
+
+	@Transactional
+	public List<MonthlyExpensesProjection> getMonthlyUserExpenses() {
+		return getMonthlyUserExpenses(LocalDate.now());
+	}
+
+	@Transactional
+	public List<MonthlyExpensesProjection> getMonthlyUserExpenses(@NotNull LocalDate date) {
+		return expenseService.findMonthlyExpensesByUser(getAuthenticatedUser().getUsername(), date);
+	}
+
+	@Transactional
+	public Expense createExpense(@Valid CreateExpenseRequest request) {
+		log.info("Creating new expense: {}", request);
+		User user = userService.findById(request.getUserId())
+				.orElseThrow(() -> new EntityNotFoundException("User not found: #" + request.getUserId()));
+
+		String categoryName = request.getCategory();
+		Category category = categoryService.findByNameAndUser(categoryName, request.getUserId())
+				.orElseThrow(() -> new EntityNotFoundException("Category '%s' does not exist.".formatted(categoryName)));
+
+		List<Tag> tags = request.getTags()
+				.stream()
+				.map(s -> tagService.findByNameAndUserOrCreate(categoryName, user))
+				.toList();
+
+		Expense expense = new Expense();
+		expense.setName(request.getName());
+		expense.setDescription(request.getDescription());
+		expense.setAmount(request.getAmount());
+		expense.setCategory(category);
+		expense.setTimestamp(request.getTimestamp());
+		expense.setStartDate(request.getStartDate());
+		expense.setExpireDate(request.getExpireDate());
+		expense.setUser(user);
+		expense.getTags().addAll(tags);
+
+		return expenseService.saveExpense(expense);
+	}
+
+	@Transactional
+	public Expense updateExpense(@Valid UpdateExpenseRequest request) {
+		log.info("Updating expense: {}", request);
+		Expense expense = expenseService.findById(request.getId())
+				.orElseThrow(() -> new EntityNotFoundException("User cannot be found"));
+
+		String categoryName = request.getCategory();
+		Category category = categoryService.findByNameAndUser(categoryName, expense.getUser().getId())
+				.orElseThrow(() -> new EntityNotFoundException("Category '%s' does not exist.".formatted(categoryName)));
+
+		Set<Tag> tags = request.getTags()
+				.stream()
+				.map(tagName -> tagService.findByNameAndUserOrCreate(tagName, expense.getUser()))
+				.collect(Collectors.toSet());
+
+		expense.setName(request.getName());
+		expense.setDescription(request.getDescription());
+		expense.setAmount(request.getAmount());
+		expense.setCategory(category);
+		expense.setTags(tags);
+		expense.setTimestamp(request.getTimestamp());
+		expense.setStartDate(request.getStartDate());
+		expense.setExpireDate(request.getExpireDate());
+
+		return expenseService.saveExpense(expense);
+	}
+
+	@Transactional
+	public void deleteExpense(Long expenseId) {
+		expenseService.deleteExpenseById(expenseId);
+	}
+
+	//</editor-fold>
+
+	//<editor-fold desc="CATEGORIES">
+	@Transactional(readOnly = true)
+	public Optional<Category> findCategoryById(Long id) {
+		return categoryService.findById(id);
+	}
+
+	@Transactional(readOnly = true)
+	public Optional<Category> findCategoryByNameAndUser(String name, Long userId) {
+		return categoryService.findByNameAndUser(name, userId);
+	}
+
+	@Transactional(readOnly = true)
+	public List<Category> findUserCategories(Long userId) {
+		return categoryService.findByUser(userId);
+	}
+
+	@Transactional(readOnly = true)
+	public List<CategoryDTO> findUserCategories() {
+		return findUserCategories(getAuthenticatedUser().getId())
+				.stream()
+				.map(CategoryDTO::new)
+				.toList();
+	}
+
+	@Transactional
+	public CategoryDTO createCategory(@Valid CreateCategoryRequest request) {
+		log.info("Creating category: {}", request);
+		Long userId = request.getUserId();
+
+		User user = userService.findById(userId)
+				.orElseThrow(() -> new EntityNotFoundException("Couldn't find user with id: #" + userId));
+
+		String name = request.getName();
+		String iconName = request.getIconName();
+
+		if (categoryService.isNameTaken(name, userId))
+			throw new CategoryNameAlreadyExistsException(name);
+
+		Category category = new Category();
+		category.setName(name);
+		category.setUser(user);
+		category.setIconName(iconName);
+
+		Category savedCategory = categoryService.save(category);
+		return new CategoryDTO(savedCategory);
+	}
+
+	@Transactional
+	public CategoryDTO updateCategory(@Valid UpdateCategoryRequest request) {
+		log.info("Updating category: {}", request);
+		Category category = findCategoryById(request.getId())
+				.orElseThrow(() -> new EntityNotFoundException("Couldn't find category with id: #" + request.getId()));
+
+		Long userId = category.getUser().getId();
+
+		if (!category.getName().equals(request.getName()) && categoryService.isNameTaken(request.getName(), userId))
+			throw new CategoryNameAlreadyExistsException(request.getIconName());
+
+		category.setName(request.getName());
+		category.setIconName(request.getIconName());
+
+		Category updatedCategory = categoryService.save(category);
+		return new CategoryDTO(updatedCategory);
+	}
+
+	@Transactional
+	public void deleteCategory(Long categoryId) throws DeleteCategoryWithExpensesException {
+		if (!expenseService.findByCategory(categoryId).isEmpty())
+			throw new DeleteCategoryWithExpensesException("Cannot delete category, because it's used in other expenses");
+
+		categoryService.delete(categoryId);
+	}
+
+	public List<MonoIcon> getCategoryIcons() {
+		return Arrays.stream(PictogramIcon.values())
+				.map(PictogramIcon::create)
+				.toList();
+	}
+
+	//</editor-fold>
+
+	//<editor-fold desc="TAGS">
+	@Transactional(readOnly = true)
+	public Optional<TagDTO> findTagById(Long tagId) {
+		return tagService.findById(tagId)
+				.map(TagDTO::new);
+	}
+
+	@Transactional(readOnly = true)
+	public List<TagDTO> findUserTags() {
+		return findUserTags(getAuthenticatedUser().getId());
+	}
+
+	@Transactional(readOnly = true)
+	public List<TagDTO> findUserTags(Long userId) {
+		return tagService.findByUser(userId)
+				.stream()
+				.map(TagDTO::new)
+				.toList();
+	}
+
+	@Transactional(readOnly = true)
+	public List<TagDTO> findExpenseTags(Long expenseId) {
+		return tagService.findByExpense(expenseId)
+				.stream()
+				.map(TagDTO::new)
+				.toList();
+	}
+
+	@Transactional
+	public TagDTO createTag(@Valid CreateTagRequest request) {
+		User user = userService.findById(request.getUserId())
+				.orElseThrow(() -> new EntityNotFoundException("Cannot find user with id: #" + request.getUserId()));
+
+		if (tagService.isNameTaken(request.getName(), user.getId()))
+			throw new CategoryNameAlreadyExistsException(request.getName());
+
+		Tag tag = new Tag(request.getName(), user);
+		Tag createdTag = tagService.save(tag);
+		return new TagDTO(createdTag);
+	}
+
+	@Transactional
+	public TagDTO updateTag(@Valid UpdateTagRequest request) {
+		Tag tag = tagService.findById(request.getId())
+				.orElseThrow(() -> new EntityNotFoundException("Cannot find tag with id: #" + request.getId()));
+
+		Long userId = tag.getUser().getId();
+		String oldTagName = tag.getName();
+		String newTagName = request.getName();
+
+		if (!oldTagName.equals(newTagName) && tagService.isNameTaken(newTagName, userId))
+			throw new TagNameAlreadyExistsException(newTagName);
+
+		tag.setName(newTagName);
+		Tag updatedTag = tagService.save(tag);
+		return new TagDTO(updatedTag);
+	}
+
+	@Transactional
+	public void deleteTag(Long tagId) {
+		List<Expense> expensesWithTag = expenseService.findByTag(tagId);
+
+		Tag tag = tagService.findById(tagId)
+				.orElseThrow(() -> new EntityNotFoundException("Couldn't find tag: #" + tagId));
+
+		expensesWithTag.forEach(e -> expenseService.removeExpenseTag(e, tag));
+
+		tagService.delete(tagId);
+	}
+
+	@Transactional(readOnly = true)
+	public boolean isTagNameAvailable(String tagName) {
+		return !tagService.isNameTaken(tagName, getAuthenticatedUser().getId());
+	}
+	//</editor-fold>
+
+	///////////////////////////////////////////////     OTHERS     /////////////////////////////////////////////////////
+
+	@Transactional
+	private void addDefaultUserPortfolio(Long userId) {
+		createPortfolio(new CreatePortfolioRequest("Main", userId));
+	}
+
+	@Transactional
+	private void addDefaultUserTags(Long userId) {
+		// TODO: [URGENT] ...
+	}
+
+	@Transactional
+	private void addDefaultUserCategories(Long userId) {
+		for (Categories category : Categories.values()) {
+			CreateCategoryRequest categoryRequest = CreateCategoryRequest.builder()
+					.name(category.getDisplayName())
+					.iconName(category.getIconName())
+					.userId(userId)
+					.build();
+
+			createCategory(categoryRequest);
+		}
+	}
+
 	@Nonnull
+	@Transactional(readOnly = true)
 	public UserDTO getAuthenticatedUser() {
-		return UserDTO.mappedFrom(securityService.getAuthenticatedUser());
+		return new UserDTO(securityService.getAuthenticatedUser());
 	}
 }

@@ -15,6 +15,7 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @AnonymousAllowed
 @PageTitle("Test")
@@ -29,6 +30,8 @@ public class TestView extends AbstractPage implements PriceUpdatable, BeforeEnte
     private final NumberField counter = new NumberField();
     private final Paragraph text = new Paragraph("Last time updated:");
     private final Span lastTimeUpdated = new Span();
+
+	private final Paragraph someText = new Paragraph("Some text");
 
     public TestView() {
         initializePage();
@@ -58,7 +61,8 @@ public class TestView extends AbstractPage implements PriceUpdatable, BeforeEnte
 
         add(
                 new HorizontalLayout(title, counter),
-                new HorizontalLayout(text, lastTimeUpdated)
+                new HorizontalLayout(text, lastTimeUpdated),
+				new HorizontalLayout(someText)
 //                ,new HorizontalLayout(downloadButton)
         );
     }
@@ -66,7 +70,7 @@ public class TestView extends AbstractPage implements PriceUpdatable, BeforeEnte
     @Override
     public void update() {
         String formatedDateTime = CommonFormatters.TIME.format(LocalDateTime.now());
-        double value = counter.getValue();
+        double value = Optional.ofNullable(counter.getValue()).orElse(Double.NaN);
         counter.setValue(value + 1);
         lastTimeUpdated.setText(formatedDateTime);
         System.out.println("Counter updated with " + counter.getValue());

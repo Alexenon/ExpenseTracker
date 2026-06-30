@@ -1,63 +1,72 @@
 package com.example.application.utils.investment;
 
-import lombok.Builder;
+import com.example.application.utils.investment.models.BankTransfer;
+import com.example.application.utils.investment.models.P2P_Transfer;
 
-@Builder
 public class FeeCalculator {
 
-    public static FeeCalculator NONE = FeeCalculator.builder().build();
+	public static void main(String[] args) {
+		double sumToTransferMDL = 1500;
 
-    public static FeeCalculator MOLDINCOMBANK = FeeCalculator.builder()
-            .feePercentage(0)
-            .feeAmount(0)
-            .build();
+		P2P_Transfer first = P2P_Transfer.builder()
+				.transferAmount(sumToTransferMDL)
+				.rate(17.50)
+				.bank(BankTransfer.MIA)
+				.build();
 
-    public static FeeCalculator NON_MOLDINCOMBANK_INTERNAL = FeeCalculator.builder()
-            .feePercentage(1)
-            .feeAmount(20)
-            .build();
+		P2P_Transfer second = P2P_Transfer.builder()
+				.transferAmount(sumToTransferMDL)
+				.rate(17.05)
+				.bank(BankTransfer.DIFFERENT_INTERNAL_CARD)
+				.build();
 
-    public static FeeCalculator NON_MOLDINCOMBANK_EXTERNAL = FeeCalculator.builder()
-            .feePercentage(1.5)
-            .feeAmount(20)
-            .build();
+		compare(first, second);
+	}
 
-    private double transferAmount;
-    private double feePercentage;
-    private double feeAmount;
+	private static void compare(P2P_Transfer first, P2P_Transfer second) {
+		double firstTransferAmount = first.getTransferAmount();
+		double firstFee = first.getBank().calculateFee(firstTransferAmount);
+		double firstRate = first.getRate();
 
-    public static void main(String[] args) {
-        double sumToTransfer = 4956;      // MDL
+		double secondTransferAmount = second.getTransferAmount();
+		double secondFee = second.getBank().calculateFee(secondTransferAmount);
+		double secondRate = second.getRate();
 
-        // MOLDINCOMBANK
-        double rateForSameCard = 17;
-        double feeMoldincombank = MOLDINCOMBANK.calculateFee(sumToTransfer);
+		double boughtAmount1 = printResults(first.getBank().getName(), firstTransferAmount, firstRate, firstFee);
+		double boughtAmount2 = printResults(second.getBank().getName(), secondTransferAmount, secondRate, secondFee);
 
-        // VICTORIABANK
-        double rateForOtherCard = 16.80;
-        double feeOtherCard = NON_MOLDINCOMBANK_INTERNAL.calculateFee(sumToTransfer);
+		System.out.println();
+		System.out.printf("""
+						Results:
+							-> For rate %.2f (fee: %.2f MDL) = %.2f USDT
+							-> For rate %.2f (fee: %.2f MDL) = %.2f USDT
+							-------------------------------------------
+							Difference: %.2f USDT
+						""",
+				firstRate, firstFee, boughtAmount1,
+				secondRate, secondFee, boughtAmount2,
+				Math.abs(boughtAmount1 - boughtAmount2)
+		);
+	}
 
-        printResults(sumToTransfer, rateForOtherCard, feeOtherCard);
-        printResults(sumToTransfer, rateForSameCard, feeMoldincombank);
-    }
 
-    private static void printResults(double transferAmount, double rate, double feeAmount) {
-        transferAmount -= feeAmount;
-        double boughtAmountUSDT = transferAmount / rate;
-        double feeInUsd = feeAmount / rate;
+	private static double printResults(String name, double transferAmount, double rate, double feeAmount) {
+		transferAmount -= feeAmount;
+		double boughtAmountUSDT = transferAmount / rate;
+		double feeInUsd = feeAmount / rate;
+		double amountWithoutFee = boughtAmountUSDT + feeInUsd;
 
-        System.out.printf("""
-                Buying with %.2f at price of %.2f per USDT
-                    -> fee: %.2f MDL ~ $%.2f
-                    -> bought: %.2f USDT
-                    _______________________________________
-                    -> without fee: %.2f USDT
-                """, transferAmount, rate, feeAmount, feeInUsd, boughtAmountUSDT, boughtAmountUSDT + feeInUsd);
-        System.out.println();
-    }
+		System.out.printf("""
+				Buying with %.2f MDL at %s
+					-> price: %.2f per USDT
+				    -> fee: %.2f MDL ~ $%.2f
+				    -> without fee: %.2f USDT
+				    _______________________________________
+				    -> bought: %.2f USDT
+				""", transferAmount, name, rate, feeAmount, feeInUsd, amountWithoutFee, boughtAmountUSDT);
+		System.out.println();
 
-    public double calculateFee(double transferAmount) {
-        return transferAmount * feePercentage / 100 + feeAmount;
-    }
+		return boughtAmountUSDT;
+	}
 
 }

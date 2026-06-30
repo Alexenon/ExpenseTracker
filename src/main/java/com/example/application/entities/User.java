@@ -20,7 +20,6 @@ import java.util.*;
 @Entity(name = "users")
 public class User {
 
-	@Nullable
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
@@ -52,8 +51,7 @@ public class User {
 
 	@OneToMany(
 			mappedBy = "user",
-			cascade = CascadeType.ALL,
-			orphanRemoval = true
+			cascade = CascadeType.ALL
 	)
 	private List<Portfolio> portfolios = new ArrayList<>();
 
@@ -106,6 +104,11 @@ public class User {
 	}
 
 	@Transactional
+	public void resetActivePortfolio() {
+		this.activePortfolio = null;
+	}
+
+	@Transactional
 	public void setActivePortfolio(@NotNull Portfolio portfolio) {
 		Objects.requireNonNull(portfolio, "portfolio");
 
@@ -117,7 +120,7 @@ public class User {
 
 	@Override
 	public String toString() {
-		return "User{username='%s', email='%s', roles=%s, id=%d}".formatted(username, email, roles, id);
+		return "User{username='%s', email='%s', id=%d}".formatted(username, email, id);
 	}
 
 	public String toFullString() {

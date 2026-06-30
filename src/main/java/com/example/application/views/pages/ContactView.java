@@ -90,7 +90,7 @@ public class ContactView extends DefaultPage {
 				.asRequired("Please fill this field")
 				.withValidator(s -> s.length() >= 4, "Name must contain at least 4 characters")
 				.withValidator(s -> s.length() <= 255, "Name must not exceed 255 characters")
-				.withValidator(s -> !instrumentsFacadeService.isUsernameTaken(s), "Username already exists")
+				.withValidator(s -> instrumentsFacadeService.isUsernameAvailable(s), "Username already exists")
 				.bind(RegisterUserRequest::getUsername, RegisterUserRequest::setUsername);
 
 		binder.forField(contactUsForm.getMessage())
@@ -101,7 +101,7 @@ public class ContactView extends DefaultPage {
 		binder.forField(contactUsForm.getEmail())
 				.asRequired("Please fill this field")
 				.withValidator(new EmailValidator("Please enter a valid email address"))
-				.withValidator(s -> !instrumentsFacadeService.isEmailTaken(s), "This email is already used")
+				.withValidator(s -> instrumentsFacadeService.isEmailAvailable(s), "This email is already used")
 				.withValidator(s -> s.length() <= 320, "Email must must not exceed 320 characters")
 				.bind(RegisterUserRequest::getEmail, RegisterUserRequest::setEmail);
 	}

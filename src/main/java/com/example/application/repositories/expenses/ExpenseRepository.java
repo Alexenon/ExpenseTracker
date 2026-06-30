@@ -1,0 +1,102 @@
+package com.example.application.repositories.expenses;
+
+import com.example.application.data.models.projections.MonthlyExpensesProjection;
+import com.example.application.entities.expenses.Expense;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.query.Procedure;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import java.time.LocalDate;
+import java.util.List;
+
+@Repository
+public interface ExpenseRepository extends JpaRepository<Expense, Long> {
+
+	@Query(value = """
+			SELECT E.id, E.name, E.amount, C.name as 'Category',
+			    E.description, E.timestamp, E.start_date
+			FROM expenses E
+			INNER JOIN categories C ON C.id = E.category_id
+			""", nativeQuery = true)
+	List<Expense> findAll();
+
+	@Query(value = """
+			SELECT E.id, E.name, E.amount, C.name as 'Category',
+			    E.description, E.timestamp, E.start_date as 'startDate', E.expire_date as 'expireDate'
+			FROM expenses E
+			    INNER JOIN users U ON U.id = E.user_id
+			    INNER JOIN categories C ON C.id = E.category_id
+			WHERE U.username = :userEmailOrUsername OR U.email = :userEmailOrUsername
+			""", nativeQuery = true)
+	List<Expense> findAll(@Param("userEmailOrUsername") String userEmailOrUsername);
+
+	@Query(value = """
+			SELECT E.id, E.name, E.amount, C.name AS 'Category',
+			    E.description, E.timestamp, E.start_date
+			FROM expenses E
+			INNER JOIN categories C ON C.id = E.category_id
+			WHERE MONTH(E.start_date) = :month
+			""", nativeQuery = true)
+	List<Expense> findExpensesPerMonth(@Param("month") int month);
+
+	@Query(value = """
+			SELECT E.id, E.name, E.amount, C.name AS 'Category',
+			    E.description, E.timestamp, E.start_date
+			FROM expenses E
+			INNER JOIN categories C ON C.id = E.category_id
+			WHERE YEAR(E.start_date) = :year
+			""", nativeQuery = true)
+	List<Expense> findExpensesPerYear(@Param("year") int year);
+
+	@Query(value = """
+			SELECT * FROM expenses
+			WHERE user_id = :userId
+			""", nativeQuery = true)
+	List<Expense> findByUser(@Param("userId") Long userId);
+
+	@Query(value = """
+			SELECT * FROM expenses
+			WHERE category_id = :categoryId
+			""", nativeQuery = true)
+	List<Expense> findByCategory(@Param("categoryId") Long categoryId);
+
+	@Query(value = """
+			SELECT * FROM expenses E
+			INNER JOIN expense_tags ET ON ET.expense_id = E.id
+			WHERE ET.tag_id = :tagId
+			""", nativeQuery = true)
+	List<Expense> findByTag(@Param("tagId") Long tagId);
+
+	@Query(value = """
+			SELECT C.name, SUM(
+			    CASE
+			        WHEN E.timestamp = 'DAILY' THEN E.amount * DAYOFYEAR(LAST_DAY(year_date))
+			        WHEN E.timestamp = 'WEEKLY' THEN E.amount * FLOOR(DAYOFYEAR(LAST_DAY(year_date)) / 7)
+			        WHEN E.timestamp = 'MONTHLY' THEN E.amount * 12
+			        WHEN E.timestamp = 'YEARLY' THEN E.amount
+			        ELSE E.amount
+			    END
+			) as totalSpent
+			FROM (
+			    SELECT E.*, DATE_FORMAT(CONCAT(?2, '-01-01'), '%Y-%m-%d') AS year_date
+			    FROM expenses E
+			    WHERE YEAR(E.start_date) = ?2
+			) AS EF
+			    INNER JOIN users U ON U.id = E.user_id
+			    INNER JOIN categories C ON C.id = E.category_id
+			WHERE (E.expire_date IS NULL OR E.expire_date > year_date)
+			    AND (U.username = ?1 OR U.email = ?1)
+			GROUP BY C.name
+			""", nativeQuery = true)
+	List<Object[]> findYearlyCategoriesTotalSum(String userEmailOrUsername, int year);
+
+	@Procedure(procedureName = "GetMonthlyExpenses")
+	List<MonthlyExpensesProjection> findMonthlyExpenses(
+			@Param("username") String username,
+			@Param("date") LocalDate date
+	);
+
+}
+

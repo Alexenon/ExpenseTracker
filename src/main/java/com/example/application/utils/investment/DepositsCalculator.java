@@ -1,5 +1,6 @@
 package com.example.application.utils.investment;
 
+import com.example.application.utils.investment.models.BankTransfer;
 import lombok.Builder;
 import lombok.Data;
 
@@ -13,17 +14,17 @@ public class DepositsCalculator {
     public static void main(String[] args) {
         // Here you place deposits from same day, but with different P2P amount and fees
         List<Deposit> deposits = List.of(
-                create(942, 16.33, FeeCalculator.NON_MOLDINCOMBANK_INTERNAL),
-                create(236, 16.99, FeeCalculator.NONE)
+                create(942, 16.33, BankTransfer.SAME_BANK),
+                create(236, 16.99, BankTransfer.MIA)
         );
         printAverage(deposits);
     }
 
-    private static Deposit create(double usdAmount, double buyPrice, FeeCalculator feeCalculator) {
+    private static Deposit create(double amount, double buyPrice, BankTransfer bankTransfer) {
         return Deposit.builder()
                 .amount(usdAmount)
                 .buyPrice(buyPrice)
-                .fee(feeCalculator.calculateFee(usdAmount * buyPrice))
+                .fee(bankTransfer.calculateFee(amount * buyPrice))
                 .build();
     }
 

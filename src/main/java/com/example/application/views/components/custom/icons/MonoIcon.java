@@ -18,11 +18,14 @@ import java.util.Objects;
 @JavaScript("//code.iconify.design/1/1.0.6/iconify.min.js")
 public class MonoIcon extends AbstractIcon<MonoIcon> implements HasComponents {
 
+	private final PictogramIcon icon;
+
     public MonoIcon(PictogramIcon icon) {
         this(icon, null);
     }
 
     public MonoIcon(PictogramIcon icon, String className) {
+		this.icon = icon;
         Svg svg = new Svg();
         svg.addClassName("iconify");
         svg.addClassName("mdi-flip-v");
@@ -34,7 +37,7 @@ public class MonoIcon extends AbstractIcon<MonoIcon> implements HasComponents {
         setClassName(className);
     }
 
-    @Override
+	@Override
     public String getColor() {
         return this.getStyle().get("color");
     }
@@ -66,5 +69,9 @@ public class MonoIcon extends AbstractIcon<MonoIcon> implements HasComponents {
             this.setSize(size + unit.toString());
         }
     }
+
+	public PictogramIcon getRawIcon() {
+		return icon;
+	}
 
 }

@@ -124,6 +124,9 @@ public class TransactionService {
 
 	@Transactional
 	public void deleteAll(@NotNull List<Transaction> transactions) {
+		if (transactions.isEmpty())
+			return;
+
 		int numberOfTransactions = transactions.size();
 		log.info("Deleting {} transactions", numberOfTransactions);
 		try {

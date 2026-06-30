@@ -1,11 +1,12 @@
 package com.example.application.views.components.custom.dialogs;
 
-import com.example.application.data.dtos.ExpenseDTO;
-import com.example.application.data.requests.ExpenseRequest;
-import com.example.application.entities.Expense;
-import com.example.application.entities.ExpenseTimestamp;
-import com.example.application.services.CategoryService;
-import com.example.application.services.ExpenseService;
+import com.example.application.data.dtos.expense.CategoryDTO;
+import com.example.application.data.dtos.expense.ExpenseDTO;
+import com.example.application.data.dtos.expense.TagDTO;
+import com.example.application.data.requests.expenses.UpdateExpenseRequest;
+import com.example.application.entities.expenses.ExpenseTimestamp;
+import com.example.application.services.crypto.InstrumentsFacadeService;
+import com.example.application.views.components.core.TagInput;
 import com.example.application.views.components.utils.HasNotifications;
 import com.example.application.views.pages.expenses.ExpensesView;
 import com.vaadin.flow.component.Component;
@@ -24,11 +25,13 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.validator.DoubleRangeValidator;
+import com.vaadin.flow.data.validator.StringLengthValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.Consumer;
 
 import static java.time.temporal.ChronoUnit.DAYS;
@@ -36,181 +39,197 @@ import static java.time.temporal.ChronoUnit.MONTHS;
 
 public class EditExpenseDialog extends Dialog implements HasNotifications {
 
-    private static final Logger logger = LoggerFactory.getLogger(EditExpenseDialog.class);
+	private static final Logger logger = LoggerFactory.getLogger(EditExpenseDialog.class);
 
-    private final ExpenseDTO expenseDTO;
-    private final ExpenseService expenseService;
-    private final CategoryService categoryService;
-    private final DatePicker.DatePickerI18n singleFormatI18n;
+	private final ExpenseDTO expenseDTO;
+	private final InstrumentsFacadeService instrumentsFacadeService;
+	private final DatePicker.DatePickerI18n singleFormatI18n;
 
-    private final TextField nameField = new TextField("Expense Name");
-    private final TextArea descriptionField = new TextArea("Description");
-    private final NumberField amountField = new NumberField("Amount");
-    private final Select<ExpenseTimestamp> timestampField = new Select<>();
-    private final ComboBox<String> categoryField = new ComboBox<>("Category");
-    private final DatePicker startDateField = new DatePicker("Start Date");
-    private final DatePicker expireDateField = new DatePicker("Expire Date");
-    private final Button saveButton = new Button("Save");
-    private final Button cancelButton = new Button("Cancel");
+	private final TextField nameField = new TextField("Expense Name");
+	private final TextArea descriptionField = new TextArea("Description");
+	private final NumberField amountField = new NumberField("Amount");
+	private final Select<ExpenseTimestamp> timestampField = new Select<>();
+	private final ComboBox<String> categoryField = new ComboBox<>("Category");
+	private final TagInput tagsField = new TagInput();
+	private final DatePicker startDateField = new DatePicker("Start Date");
+	private final DatePicker expireDateField = new DatePicker("Expire Date");
+	private final Button saveButton = new Button("Save");
+	private final Button cancelButton = new Button("Cancel");
 
-    private Binder<ExpenseRequest> binder;
+	private Binder<UpdateExpenseRequest> binder;
 
-    @Autowired
-    public EditExpenseDialog(ExpenseDTO expenseDTO,
-                             ExpenseService expenseService,
-                             CategoryService categoryService,
-                             DatePicker.DatePickerI18n singleFormatI18n) {
-        this.expenseDTO = expenseDTO;
-        this.expenseService = expenseService;
-        this.categoryService = categoryService;
-        this.singleFormatI18n = singleFormatI18n;
+	@Autowired
+	public EditExpenseDialog(ExpenseDTO expenseDTO,
+							 InstrumentsFacadeService instrumentsFacadeService,
+							 DatePicker.DatePickerI18n singleFormatI18n)
+	{
+		this.expenseDTO = expenseDTO;
+		this.instrumentsFacadeService = instrumentsFacadeService;
+		this.singleFormatI18n = singleFormatI18n;
 
-        setHeaderTitle("Edit Expense");
-        initFields();
-        initBinder();
-        fillFieldsWithValues();
-        add(createDialogLayout());
-    }
+		setHeaderTitle("Edit '%s' expense".formatted(expenseDTO.getName()));
+		initFields();
+		initBinder();
+		fillFieldsWithValues();
+		add(createDialogLayout());
+	}
 
-    private VerticalLayout createDialogLayout() {
-        Component[] components = {nameField, descriptionField, amountField, categoryField, timestampField, startDateField, expireDateField};
-        VerticalLayout dialogLayout = new VerticalLayout(components);
-        dialogLayout.setPadding(false);
-        dialogLayout.setSpacing(false);
-        dialogLayout.setAlignItems(FlexComponent.Alignment.STRETCH);
-        dialogLayout.getStyle().set("width", "22rem").set("max-width", "100%");
-        Arrays.stream(components).forEach(e -> e.getStyle().set("margin-bottom", "1rem"));
+	private VerticalLayout createDialogLayout() {
+		Component[] components = {nameField, descriptionField, amountField, categoryField, tagsField, timestampField, startDateField, expireDateField};
+		VerticalLayout dialogLayout = new VerticalLayout(components);
+		dialogLayout.setPadding(false);
+		dialogLayout.setSpacing(false);
+		dialogLayout.setAlignItems(FlexComponent.Alignment.STRETCH);
+		dialogLayout.getStyle().set("width", "22rem").set("max-width", "100%");
+		Arrays.stream(components).forEach(e -> e.getStyle().set("margin-bottom", "1rem"));
 
-        return dialogLayout;
-    }
+		return dialogLayout;
+	}
 
-    private void initFields() {
-        timestampField.setLabel("Interval");
-        timestampField.setItems(ExpenseTimestamp.values());
-        timestampField.setHelperText("Select how often this expense will be triggered");
-        timestampField.addValueChangeListener(timestamp -> {
-            boolean timestampIsOnce = timestamp.getValue().equals(ExpenseTimestamp.ONCE);
+	private void initFields() {
+		timestampField.setLabel("Interval");
+		timestampField.setItems(ExpenseTimestamp.values());
+		timestampField.setHelperText("Select how often this expense will be triggered");
+		timestampField.addValueChangeListener(timestamp -> {
+			boolean timestampIsOnce = timestamp.getValue().equals(ExpenseTimestamp.ONCE);
 
-            if (timestampIsOnce)
-                expireDateField.setValue(null);
+			if (timestampIsOnce)
+				expireDateField.setValue(null);
 
-            expireDateField.setVisible(!timestampIsOnce);
-        });
+			expireDateField.setVisible(!timestampIsOnce);
+		});
 
-        categoryField.setItems(categoryService.getAllCategoryNames());
-        categoryField.setHelperText("Select the category which fits this expense");
-        amountField.setSuffixComponent(new Span("MDL"));
+		categoryField.setItems(getUserCategories());
+		categoryField.setHelperText("Select the category which fits this expense");
+		amountField.setSuffixComponent(new Span("MDL"));
 
-        startDateField.setI18n(singleFormatI18n);
-        startDateField.setHelperText("Format: YYYY-MM-DD");
+		startDateField.setI18n(singleFormatI18n);
+		startDateField.setHelperText("Format: YYYY-MM-DD");
 
-        expireDateField.setVisible(expenseDTO.getExpireDate() != null); // Expire date field initial is disabled
-        expireDateField.setI18n(singleFormatI18n);
-        expireDateField.setTooltipText("Select expire date");
-        expireDateField.setPlaceholder("Optional: Choose expire date");
-        expireDateField.setHelperText("Format: YYYY-MM-DD");
+		expireDateField.setVisible(expenseDTO.getExpireDate() != null); // Expire date field initial is disabled
+		expireDateField.setI18n(singleFormatI18n);
+		expireDateField.setTooltipText("Select expire date");
+		expireDateField.setPlaceholder("Optional: Choose expire date");
+		expireDateField.setHelperText("Format: YYYY-MM-DD");
 
-        cancelButton.addClickShortcut(Key.ESCAPE);
-        cancelButton.addClickListener(e -> {
-            logger.info("Exited `Edit Expense` form");
-            this.close();
-        });
+		cancelButton.addClickShortcut(Key.ESCAPE);
+		cancelButton.addClickListener(e -> {
+			logger.info("Exited `Edit Expense` form");
+			this.close();
+		});
 
-        saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
-        saveButton.addClickListener(e -> defaultClickSaveBtnListener());
+		saveButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
+		saveButton.addClickListener(e -> defaultClickSaveBtnListener());
 
-        this.getFooter().add(cancelButton, saveButton);
-    }
+		this.getFooter().add(cancelButton, saveButton);
+	}
 
-    private void initBinder() {
-        binder = new Binder<>(ExpenseRequest.class);
-        binder.setBean(new ExpenseRequest());
-        binder.forField(nameField)
-                .asRequired("Please fill this field")
-                .withValidator(name -> name.length() >= 3, "Name must contain at least 3 characters")
-                .bind(ExpenseRequest::getName, ExpenseRequest::setName);
+	private void initBinder() {
+		binder = new Binder<>(UpdateExpenseRequest.class);
+		binder.setBean(initBean());
+		binder.forField(nameField)
+				.asRequired("Please fill this field")
+				.withValidator(new StringLengthValidator("Name should be between 3 and 50 characters", 3, 50))
+				.bind(UpdateExpenseRequest::getName, UpdateExpenseRequest::setName);
 
-        binder.forField(amountField)
-                .asRequired("Please fill this field")
-                .withValidator(new DoubleRangeValidator("Invalid decimal value", 0.0, Double.MAX_VALUE))
-                .withValidator(amount -> amount >= 0, "Amount should be greater or equal to 0")
-                .bind(ExpenseRequest::getAmount, ExpenseRequest::setAmount);
+		binder.forField(descriptionField)
+				.withValidator(new StringLengthValidator("Description can be up to 250 characters", 0, 250))
+				.bind(UpdateExpenseRequest::getDescription, UpdateExpenseRequest::setDescription);
 
-        binder.forField(categoryField)
-                .asRequired("Please fill this field")
-                .bind(ExpenseRequest::getCategoryName, ExpenseRequest::setCategoryName);
+		binder.forField(amountField)
+				.asRequired("Please fill this field")
+				.withValidator(new DoubleRangeValidator("Invalid decimal value", 0.0, Double.MAX_VALUE))
+				.withValidator(amount -> amount != null && amount > 0, "Amount should be greater than 0")
+				.bind(UpdateExpenseRequest::getAmount, UpdateExpenseRequest::setAmount);
 
-        binder.forField(timestampField)
-                .asRequired("Please fill this field")
-                .bind(ExpenseRequest::getTimestamp, ExpenseRequest::setTimestamp);
+		binder.forField(categoryField)
+				.asRequired("Please fill this field")
+				.bind(UpdateExpenseRequest::getCategory, UpdateExpenseRequest::setCategory);
 
-        binder.forField(startDateField)
-                .asRequired("Please fill this field")
-                .bind(ExpenseRequest::getStartDate, ExpenseRequest::setStartDate);
+		binder.forField(tagsField)
+				.withValidator(tags -> tags != null && tags.stream()
+								.allMatch(tag -> tag != null && tag.length() >= 4 && tag.length() <= 20),
+						"All tags should be between 4 and 20 characters long"
+				).bind(UpdateExpenseRequest::getTags, UpdateExpenseRequest::setTags);
 
-        binder.forField(expireDateField)
-                .withValidator(
-                        expireDate -> expireDate == null || startDateField.getValue() == null
-                                      || expireDate.isAfter(startDateField.getValue()),
-                        "Expire date should be after start date")
-                .withValidator(
-                        expireDate -> {
-                            if (expireDate == null || startDateField.getValue() == null) return true;
+		binder.forField(timestampField)
+				.asRequired("Please fill this field")
+				.bind(UpdateExpenseRequest::getTimestamp, UpdateExpenseRequest::setTimestamp);
 
-                            return !timestampField.getValue().equals(ExpenseTimestamp.WEEKLY)
-                                   || DAYS.between(startDateField.getValue(), expireDate) >= 7;
-                        }, "Should pass at least 7 days to end subscription"
-                )
-                .withValidator(
-                        expireDate -> {
-                            if (expireDate == null || startDateField.getValue() == null)
-                                return true;
+		binder.forField(startDateField)
+				.asRequired("Please fill this field")
+				.bind(UpdateExpenseRequest::getStartDate, UpdateExpenseRequest::setStartDate);
 
-                            return !timestampField.getValue().equals(ExpenseTimestamp.MONTHLY)
-                                   || MONTHS.between(startDateField.getValue(), expireDate) >= 1;
-                        }, "Should pass at least 1 month to end subscription"
-                )
-                .bind(ExpenseRequest::getExpireDate, ExpenseRequest::setExpireDate);
+		binder.forField(expireDateField)
+				.withValidator(
+						expireDate -> expireDate == null || startDateField.getValue() == null
+									  || expireDate.isAfter(startDateField.getValue()),
+						"Expire date should be after start date")
+				.withValidator(
+						expireDate -> {
+							if (expireDate == null || startDateField.getValue() == null) return true;
 
-        binder.bind(descriptionField, ExpenseRequest::getDescription, ExpenseRequest::setDescription);
-    }
+							return !timestampField.getValue().equals(ExpenseTimestamp.WEEKLY)
+								   || DAYS.between(startDateField.getValue(), expireDate) >= 7;
+						}, "Should pass at least 7 days to end subscription"
+				)
+				.withValidator(
+						expireDate -> {
+							if (expireDate == null || startDateField.getValue() == null)
+								return true;
 
-    private void fillFieldsWithValues() {
-        nameField.setValue(expenseDTO.getName());
-        descriptionField.setValue(expenseDTO.getDescription());
-        amountField.setValue(expenseDTO.getAmount());
-        categoryField.setValue(expenseDTO.getCategory());
-        startDateField.setValue(expenseDTO.getStartDate());
-        timestampField.setValue(expenseDTO.getTimestamp());
-        expireDateField.setValue(expenseDTO.getExpireDate());
-    }
+							return !timestampField.getValue().equals(ExpenseTimestamp.MONTHLY)
+								   || MONTHS.between(startDateField.getValue(), expireDate) >= 1;
+						}, "Should pass at least 1 month to end subscription"
+				)
+				.bind(UpdateExpenseRequest::getExpireDate, UpdateExpenseRequest::setExpireDate);
 
-    private void defaultClickSaveBtnListener() {
-        logger.info("Clicked on Save button inside `Edit Expense` form");
-        if (binder.validate().isOk()) {
-            logger.info("Updated the expense using data provided inside `Edit Expense` form");
-            expenseService.saveExpense(getExpenseFromBinder());
-            showSuccessfulNotification("Expense submitted successfully!");
-            this.close();
-        } else {
-            logger.warn("Submitted `Edit Expense` form with validation errors");
-            showErrorNotification("An error occurred while submitting `Edit Expense` form");
-        }
-    }
+		binder.bind(descriptionField, UpdateExpenseRequest::getDescription, UpdateExpenseRequest::setDescription);
+	}
 
-    public void addSaveBtnClickListener(Consumer<ExpensesView> listener) {
-        saveButton.addClickListener(e -> listener.accept(null));
-    }
+	private void fillFieldsWithValues() {
+		nameField.setValue(expenseDTO.getName());
+		descriptionField.setValue(expenseDTO.getDescription());
+		amountField.setValue(expenseDTO.getAmount());
+		categoryField.setValue(expenseDTO.getCategory());
+		tagsField.setItems(getUserTags());
+		tagsField.setValue(expenseDTO.getTags());
+		startDateField.setValue(expenseDTO.getStartDate());
+		timestampField.setValue(expenseDTO.getTimestamp());
+		expireDateField.setValue(expenseDTO.getExpireDate());
+	}
 
-    private Expense getExpenseFromBinder() {
-        Expense expense = expenseService.convertToExpense(binder.getBean());
-        expense.setId(expenseDTO.getId()); // ID is set for replacing existing expense with this one
-        return expense;
-    }
+	private void defaultClickSaveBtnListener() {
+		logger.info("Clicked on saveBtn inside {}", this.getClass().getSimpleName());
+		if (binder.validate().isOk()) {
+			instrumentsFacadeService.updateExpense(binder.getBean());
+			showSuccessfulNotification("Expense submitted successfully!");
+			this.close();
+		} else {
+			logger.warn("Submitted {} form with validation errors", this.getClass().getSimpleName());
+			showErrorNotification("An error occurred while submitting form: invalid fields");
+		}
+	}
 
-    @Override
-    public void open() {
-        super.open();
-        logger.info("Opened `Edit Expense` form");
-    }
+	public void addSaveBtnClickListener(Consumer<ExpensesView> listener) {
+		saveButton.addClickListener(e -> listener.accept(null));
+	}
+
+	private List<String> getUserCategories() {
+		return instrumentsFacadeService.findUserCategories().stream().map(CategoryDTO::getName).toList();
+	}
+
+	private UpdateExpenseRequest initBean() {
+		UpdateExpenseRequest updateExpenseRequest = new UpdateExpenseRequest();
+		updateExpenseRequest.setId(expenseDTO.getId());
+		return updateExpenseRequest;
+	}
+
+	private List<String> getUserTags() {
+		return instrumentsFacadeService.findUserTags()
+				.stream()
+				.map(TagDTO::getName)
+				.toList();
+	}
+
 }

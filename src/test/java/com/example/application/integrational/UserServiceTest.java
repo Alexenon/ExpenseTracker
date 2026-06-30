@@ -1,16 +1,18 @@
 package com.example.application.integrational;
 
 import com.example.application.Application;
-import com.example.application.data.dtos.UserDTO;
+import com.example.application.data.enums.Categories;
 import com.example.application.data.requests.RegisterUserRequest;
 import com.example.application.entities.User;
 import com.example.application.entities.crypto.Asset;
 import com.example.application.entities.crypto.Portfolio;
 import com.example.application.entities.crypto.Transaction;
+import com.example.application.entities.expenses.Category;
 import com.example.application.repositories.UserRepository;
 import com.example.application.services.UserService;
 import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.services.crypto.PortfolioService;
+import com.example.application.services.expenses.CategoryService;
 import com.example.application.utils.exceptions.auth.UsernameTakenException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,9 +23,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 
-@SuppressWarnings("DataFlowIssue")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = Application.class)
 @ActiveProfiles("test")
@@ -33,16 +35,19 @@ class UserServiceTest extends AbstractTest {
 	private final UserService userService;
 	private final UserRepository userRepository;
 	private final PortfolioService portfolioService;
+	private final CategoryService categoryService;
 
 	@Autowired
 	public UserServiceTest(UserService userService,
 						   InstrumentsFacadeService instrumentsFacadeService,
 						   UserRepository userRepository,
-						   PortfolioService portfolioService)
+						   PortfolioService portfolioService,
+						   CategoryService categoryService)
 	{
 		this.userService = userService;
 		this.userRepository = userRepository;
 		this.portfolioService = portfolioService;
+		this.categoryService = categoryService;
 	}
 
 	@BeforeEach
@@ -74,7 +79,7 @@ class UserServiceTest extends AbstractTest {
 	}
 
 	@Test
-	void userIsCreatedWithPortfolioSuccessfully() {
+	void userIsCreatedWithDefaultItemsSuccessfully() {
 		RegisterUserRequest request = RegisterUserRequest.builder()
 				.username("john")
 				.email("john.weak@test.com")
@@ -82,39 +87,25 @@ class UserServiceTest extends AbstractTest {
 				.confirmPassword("password")
 				.build();
 
-		UserDTO createdUser = instrumentsFacadeService.createNewUser(request);
+		Long createdUserId = createUser("john", "john.weak@test.com").getId();
 
-		List<Portfolio> userPortfolios = portfolioService.findByUserId(createdUser.getId());
-
-		Assertions.assertEquals(1, userPortfolios.size(),
-				"User should have exactly one portfolio");
-		Assertions.assertEquals("Main", userPortfolios.getFirst().getName(),
-				"Default portfolio name should be 'Main'");
+		validateDefaultUserPortfolio(createdUserId);
+		validateDefaultUserCategories(createdUserId);
+		validateDefaultUserTags(createdUserId);
 	}
 
 	@Test
 	void shouldNotAllowDuplicateUsername() {
-		RegisterUserRequest request1 = RegisterUserRequest.builder()
-				.username("john")
-				.email("john.weak@test.com")
-				.password("password")
-				.confirmPassword("password")
-				.build();
+		Assertions.assertDoesNotThrow(() -> createUser("john", "john-weak@test.com"));
+		Assertions.assertThrows(UsernameTakenException.class, () -> createUser("john", "john-weak@test.com"),
+				"Creating a user with duplicate username should throw UsernameTakenException");
+	}
 
-		userService.createNewUser(request1);
-
-		RegisterUserRequest request2 = RegisterUserRequest.builder()
-				.username("john")
-				.email("john.weak@test.com")
-				.password("password")
-				.confirmPassword("password")
-				.build();
-
-		Assertions.assertThrows(
-				UsernameTakenException.class,
-				() -> userService.createNewUser(request2),
-				"Creating a user with duplicate username should throw UsernameTakenException"
-		);
+	@Test
+	void shouldNotAllowDuplicateEmail() {
+		Assertions.assertDoesNotThrow(() -> createUser("john", "john-weak@test.com"));
+		Assertions.assertThrows(UsernameTakenException.class, () -> createUser("michael", "john-weak@test.com"),
+				"Creating a user with duplicate username should throw UsernameTakenException");
 	}
 
 	@Test
@@ -140,19 +131,6 @@ class UserServiceTest extends AbstractTest {
 	@Test
 	void deleteUserTest() {
 		User user = createUser("test", "test-email@domain.com");
-		Long defaultUserPortfolioId = user.getActivePortfolio().getId();
-
-		instrumentsFacadeService.deleteUser(user.getId());
-
-		Assertions.assertTrue(userRepository.findById(user.getId()).isEmpty(),
-				"User after deletion is not removed from database");
-		Assertions.assertTrue(portfolioRepository.findById(defaultUserPortfolioId).isEmpty(),
-				"User portfolio is not removed from database");
-	}
-
-	@Test
-	void deleteUserWithPortfolioAndTransactionsTest() {
-		User user = createUser("test", "test-email@domain.com");
 
 		Portfolio secondPortfolio = createPortfolio("Second Portfolio", user.getId());
 		Asset asset = createAsset("BTC", 100_000);
@@ -161,10 +139,36 @@ class UserServiceTest extends AbstractTest {
 		instrumentsFacadeService.deleteUser(user.getId());
 		Assertions.assertTrue(userRepository.findById(user.getId()).isEmpty(),
 				"User after deletion is not removed from database");
-		Assertions.assertTrue(portfolioRepository.findById(secondPortfolio.getId()).isEmpty(),
-				"User portfolio after user deletion is not removed from database");
+		Assertions.assertIterableEquals(Collections.emptyList(), portfolioRepository.findByUser(user.getId()),
+				"Portfolio after user deletion is not removed from database");
 		Assertions.assertTrue(transactionRepository.findById(transaction.getId()).isEmpty(),
-				"User transaction after user deletion is not removed from database");
+				"Transactions after user deletion is not removed from database");
+		Assertions.assertTrue(expenseRepository.findByUser(user.getId()).isEmpty(),
+				"Expenses after user deletion are not removed from database");
+		Assertions.assertTrue(categoryRepository.findByUser(user.getId()).isEmpty(),
+				"Categories after user deletion is not removed from database");
+		Assertions.assertTrue(tagRepository.findByUser(user.getId()).isEmpty(),
+				"Tags after user deletion is not removed from database");
+	}
+
+	private void validateDefaultUserPortfolio(Long userId) {
+		List<Portfolio> userPortfolios = portfolioService.findByUser(userId);
+		Assertions.assertEquals(1, userPortfolios.size(), "New user should have exactly one portfolio");
+		Assertions.assertEquals("Main", userPortfolios.getFirst().getName(), "Invalid portfolio name");
+	}
+
+	private void validateDefaultUserCategories(Long userId) {
+		List<String> userCategories = categoryService.findByUser(userId)
+				.stream()
+				.map(Category::getName)
+				.toList();
+
+		Assertions.assertIterableEquals(Categories.getAllCategoryNames(), userCategories,
+				"New user's categories doesn't match");
+	}
+
+	private void validateDefaultUserTags(Long userId) {
+		// TODO: [URGENT]
 	}
 
 }

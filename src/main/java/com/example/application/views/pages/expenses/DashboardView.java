@@ -1,7 +1,7 @@
 package com.example.application.views.pages.expenses;
 
 import com.example.application.data.models.projections.MonthlyExpensesProjection;
-import com.example.application.services.ExpenseService;
+import com.example.application.services.crypto.InstrumentsFacadeService;
 import com.example.application.views.layouts.MainLayout;
 import com.example.application.views.pages.DefaultPage;
 import com.vaadin.flow.component.dependency.JavaScript;
@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 @JavaScript("https://fastly.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js")
 public class DashboardView extends DefaultPage {
 
-    private final ExpenseService expenseService;
+	private final InstrumentsFacadeService instrumentsFacadeService;
 
     private final Div chartPie = new Div();
     private final Grid<MonthlyExpensesProjection> grid = new Grid<>();
@@ -45,8 +45,8 @@ public class DashboardView extends DefaultPage {
     private final AtomicReference<List<String>> legendHiddenCategories = new AtomicReference<>();
 
     @Autowired
-    public DashboardView(ExpenseService expenseService) {
-        this.expenseService = expenseService;
+    public DashboardView(InstrumentsFacadeService instrumentsFacadeService) {
+        this.instrumentsFacadeService = instrumentsFacadeService;
         initialize();
         initializeGrid();
         initializeChart();
@@ -61,7 +61,7 @@ public class DashboardView extends DefaultPage {
     }
 
     private void initializeChart() {
-        Map<String, Double> totalMonthlyExpensesGroupedByCategory = expenseService.getMonthlyExpensesByUser(LocalDate.now())
+        Map<String, Double> totalMonthlyExpensesGroupedByCategory = instrumentsFacadeService.getMonthlyUserExpenses()
                 .stream()
                 .collect(Collectors.groupingBy(
                         MonthlyExpensesProjection::getCategoryName,
@@ -85,7 +85,7 @@ public class DashboardView extends DefaultPage {
     private void initializeGrid() {
         chartPie.setId("chart-pie");
 
-        grid.setItems(expenseService.getMonthlyExpensesByUser(LocalDate.now()));
+        grid.setItems(instrumentsFacadeService.getMonthlyUserExpenses(LocalDate.now()));
         grid.addColumn(MonthlyExpensesProjection::getName).setKey("Expense Name").setHeader("Expense Name");
         grid.addColumn(MonthlyExpensesProjection::getCategoryName).setKey("Category Name").setHeader("Category Name");
         grid.addColumn(MonthlyExpensesProjection::getTimestamp).setKey("Interval").setHeader("Interval");
@@ -156,6 +156,5 @@ public class DashboardView extends DefaultPage {
                 .replace("\"", "")
                 .split(","));
     }
-
 
 }

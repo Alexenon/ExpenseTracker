@@ -5,6 +5,7 @@ import com.example.application.data.dtos.TransactionDTO;
 import com.example.application.data.dtos.UserDTO;
 import com.example.application.data.requests.CreateTransactionRequest;
 import com.example.application.data.requests.RegisterUserRequest;
+import com.example.application.data.requests.asset.CreateAssetRequest;
 import com.example.application.data.requests.portfolio.CreatePortfolioRequest;
 import com.example.application.entities.User;
 import com.example.application.entities.common.TransactionType;
@@ -16,15 +17,19 @@ import com.example.application.repositories.crypto.AssetBalanceRepository;
 import com.example.application.repositories.crypto.AssetRepository;
 import com.example.application.repositories.crypto.PortfolioRepository;
 import com.example.application.repositories.crypto.TransactionRepository;
+import com.example.application.repositories.expenses.CategoryRepository;
+import com.example.application.repositories.expenses.ExpenseRepository;
+import com.example.application.repositories.expenses.TagRepository;
 import com.example.application.services.crypto.AssetService;
 import com.example.application.services.crypto.InstrumentsFacadeService;
+import com.example.application.utils.exceptions.InternalUnexpectedException;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Objects;
 
 public abstract class AbstractTest {
 
@@ -42,6 +47,30 @@ public abstract class AbstractTest {
 	protected InstrumentsFacadeService instrumentsFacadeService;
 	@Autowired
 	protected AssetService assetService;
+	/* --------------------------------------
+	 * 				EXPENSES
+	 * ------------------------------------ */
+	@Autowired
+	protected ExpenseRepository expenseRepository;
+	@Autowired
+	protected TagRepository tagRepository;
+	@Autowired
+	protected CategoryRepository categoryRepository;
+
+	@BeforeEach
+	protected void beforeTest() {
+		try {
+			assetBalanceRepository.deleteAll();
+			transactionRepository.deleteAll();
+			portfolioRepository.deleteAll();
+			categoryRepository.deleteAll();
+			tagRepository.deleteAll();
+			assetRepository.deleteAll();
+			userRepository.deleteAll();
+		} catch (Exception e) {
+			throw new InternalUnexpectedException("Couldn't clear database properly", e);
+		}
+	}
 
 	protected User createUser(String username, String email) {
 		RegisterUserRequest request = RegisterUserRequest.builder()
@@ -61,14 +90,19 @@ public abstract class AbstractTest {
 	}
 
 	protected Asset createAsset(String symbol, double price) {
-		Asset asset = new Asset();
-		asset.setSymbol(symbol);
-		asset.setMarketPrice(BigDecimal.valueOf(price));
-		asset.setFullName("Some full name");
-		asset.setTotalMarketCap(BigInteger.ZERO);
-		asset.setTotalSupply(BigInteger.ZERO);
+		CreateAssetRequest request = new CreateAssetRequest();
+		request.setSymbol(symbol);
+		request.setMarketPrice(BigDecimal.valueOf(price));
+		request.setFullName("Some full name");
+		request.setSummaryDescription("Some summary description");
+		request.setImageUrl("https://test-url.com");
+		request.setTotalMarketCap(BigInteger.ZERO);
+		request.setTotalSupply(BigInteger.ZERO);
+		request.setTodayVolume(BigInteger.ZERO);
+		request.setChangePercentage(BigDecimal.ZERO);
+		request.setCirculationSupply(BigInteger.ZERO);
 
-		return Objects.requireNonNull(assetService.save(asset), "Asset was not created");
+		return assetService.createNewAsset(request);
 	}
 
 	protected Transaction createTransaction(Asset asset, TransactionType type, double marketPrice, double orderQuantity, long portfolioId) {
@@ -103,7 +137,6 @@ public abstract class AbstractTest {
 		return portfolioRepository.findById(dto.getId())
 				.orElseThrow(() -> new EntityNotFoundException("Portfolio was not created"));
 	}
-
 
 	protected void assertBigDecimalEquals(BigDecimal expected, BigDecimal actual, String field) {
 		Assertions.assertEquals(

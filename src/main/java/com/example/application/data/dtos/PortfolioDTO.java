@@ -7,12 +7,8 @@ import lombok.Data;
 public class PortfolioDTO {
 
 	private final Long id;
-	private String name;
-	private Long userId;
-
-	public PortfolioDTO() {
-		this.id = null;
-	}
+	private final String name;
+	private final Long userId;
 
 	public PortfolioDTO(Portfolio portfolio) {
 		this.id = portfolio.getId();

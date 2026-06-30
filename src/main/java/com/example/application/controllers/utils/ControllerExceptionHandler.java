@@ -1,4 +1,4 @@
-package com.example.application.controllers;
+package com.example.application.controllers.utils;
 
 import com.example.application.utils.exceptions.auth.UsernameTakenException;
 import org.springframework.http.HttpStatus;

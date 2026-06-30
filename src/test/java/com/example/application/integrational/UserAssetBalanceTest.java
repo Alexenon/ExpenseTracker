@@ -52,7 +52,7 @@ public class UserAssetBalanceTest extends AbstractTest {
 	void removeUser() {
 		userService.delete(user.getId());
 		Assertions.assertTrue(userService.findById(user.getId()).isEmpty(), "User was not deleted");
-		Assertions.assertTrue(portfolioService.findByUserId(user.getId()).isEmpty(), "Portfolios are not deleted");
+		Assertions.assertTrue(portfolioService.findByUser(user.getId()).isEmpty(), "Portfolios are not deleted");
 	}
 
 }

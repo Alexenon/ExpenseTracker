@@ -36,6 +36,10 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 
+/*
+	TODO:
+	 - Add: vaadin accordion component
+*/
 public class ProfitSellTab extends BaseCalculatorTab implements HasNotifications, BeforeEnterObserver {
 
 	private final PortfolioDTO portfolio;
