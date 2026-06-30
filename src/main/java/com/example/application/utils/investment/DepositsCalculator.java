@@ -22,7 +22,7 @@ public class DepositsCalculator {
 
     private static Deposit create(double amount, double buyPrice, BankTransfer bankTransfer) {
         return Deposit.builder()
-                .amount(usdAmount)
+                .amount(amount)
                 .buyPrice(buyPrice)
                 .fee(bankTransfer.calculateFee(amount * buyPrice))
                 .build();

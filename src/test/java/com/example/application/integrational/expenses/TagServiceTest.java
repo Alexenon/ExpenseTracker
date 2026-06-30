@@ -1,6 +1,7 @@
 package com.example.application.integrational.expenses;
 
 import com.example.application.Application;
+import com.example.application.data.dtos.expense.TagDTO;
 import com.example.application.data.requests.expenses.CreateTagRequest;
 import com.example.application.data.requests.expenses.UpdateTagRequest;
 import com.example.application.entities.User;
@@ -40,8 +41,8 @@ class TagServiceTest extends AbstractTest {
 
 	@Test
 	void saveTagSuccessfully() {
-		Tag saved = createTag("Food");
-		Tag found = instrumentsFacadeService.findTagById(saved.getId()).orElseThrow();
+		TagDTO saved = createTag("Food");
+		Tag found = tagService.findById(saved.getId()).orElseThrow();
 
 		Assertions.assertNotNull(found.getId(), "Tag ID should be generated");
 		Assertions.assertEquals("Food", found.getName(), "Tag name should match");
@@ -65,7 +66,7 @@ class TagServiceTest extends AbstractTest {
 	void newlyCreatedUserShouldHaveDefaultTags() {
 		CreateTagRequest request = createTagRequest("Food");
 
-		Tag saved = instrumentsFacadeService.createTag(request);
+		TagDTO saved = instrumentsFacadeService.createTag(request);
 
 		List<Tag> tags = tagService.findByUser(user.getId());
 
@@ -76,7 +77,7 @@ class TagServiceTest extends AbstractTest {
 
 	@Test
 	void deleteShouldRemoveTag() {
-		Tag tag = instrumentsFacadeService.createTag(createTagRequest("Food"));
+		TagDTO tag = instrumentsFacadeService.createTag(createTagRequest("Food"));
 
 		tagService.delete(tag.getId());
 		Assertions.assertTrue(tagService.findById(tag.getId()).isEmpty(), "Tag is still present in database");
@@ -93,7 +94,7 @@ class TagServiceTest extends AbstractTest {
 
 	@Test
 	void singleTagModifyTest() {
-		Tag originalTag = createTag("Test-Name");
+		TagDTO originalTag = createTag("Test-Name");
 
 		LocalDateTime timeCreated = tagService.findById(originalTag.getId())
 				.orElseThrow()
@@ -102,7 +103,7 @@ class TagServiceTest extends AbstractTest {
 		String newTagName = "Groceries";
 		UpdateTagRequest updateRequest = new UpdateTagRequest(originalTag.getId(), newTagName);
 
-		Tag updatedTag = instrumentsFacadeService.updateTag(updateRequest);
+		TagDTO updatedTag = instrumentsFacadeService.updateTag(updateRequest);
 
 		LocalDateTime timeUpdated = tagService.findById(originalTag.getId())
 				.orElseThrow()
@@ -119,7 +120,7 @@ class TagServiceTest extends AbstractTest {
 	}
 
 	//<editor-fold desc="Utils">
-	private Tag createTag(String name) {
+	private TagDTO createTag(String name) {
 		return instrumentsFacadeService.createTag(createTagRequest(name));
 	}
 
