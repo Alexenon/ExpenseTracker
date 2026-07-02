@@ -1,6 +1,6 @@
 package com.example.application.data.models.crypto.common;
 
-import com.example.application.entities.common.TransactionType;
+import com.example.application.transaction.TransactionType;
 import lombok.Data;
 
 import java.math.BigDecimal;

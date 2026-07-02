@@ -1,7 +1,7 @@
 package com.example.application.views.components.custom.display;
 
-import com.example.application.utils.common.formatters.number.DecimalFormatter;
-import com.example.application.utils.common.formatters.number.PercentageFormatter;
+import com.example.application.utils.PercentageFormatter;
+import com.example.application.utils.formatters.DecimalFormatter;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;

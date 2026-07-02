@@ -1,8 +1,8 @@
 package com.example.application.views.components.custom.dialogs.expenses;
 
-import com.example.application.data.dtos.expense.TagDTO;
-import com.example.application.data.requests.expenses.UpdateTagRequest;
-import com.example.application.services.crypto.InstrumentsFacadeService;
+import com.example.application.InstrumentsFacadeService;
+import com.example.application.tag.TagDTO;
+import com.example.application.tag.UpdateTagRequest;
 import com.example.application.views.components.utils.HasNotifications;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;

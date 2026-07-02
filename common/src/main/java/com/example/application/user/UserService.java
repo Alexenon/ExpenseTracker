@@ -1,6 +1,6 @@
 package com.example.application.user;
 
-import com.example.application.EntityValidator;
+import com.example.application.utils.EntityValidator;
 import com.example.application.InternalUnexpectedException;
 import com.example.application.portfolio.Portfolio;
 import com.example.application.user.domain.RegisterUserRequest;

@@ -1,7 +1,7 @@
 package com.example.application.views.pages.crypto;
 
-
-import com.example.application.services.crypto.InstrumentsFacadeService;
+import com.example.application.InstrumentsFacadeService;
+import com.example.application.portfolio.Portfolio;
 import com.example.application.views.components.TransactionsGrid;
 import com.example.application.views.layouts.MainLayout;
 import com.example.application.views.pages.DefaultPage;

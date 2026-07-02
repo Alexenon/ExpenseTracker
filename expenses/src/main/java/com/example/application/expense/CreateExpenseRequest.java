@@ -1,6 +1,5 @@
 package com.example.application.expense;
 
-import com.example.application.entities.expenses.ExpenseTimestamp;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;

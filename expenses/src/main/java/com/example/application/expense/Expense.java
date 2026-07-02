@@ -1,9 +1,11 @@
 package com.example.application.expense;
 
 import com.example.application.category.Category;
-import com.example.application.tags.Tag;
-import com.example.application.utils.common.formatters.CommonFormatters;
+import com.example.application.tag.Tag;
+import com.example.application.user.User;
+import com.example.application.utils.CommonFormatters;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Size;
 import lombok.Data;

@@ -1,10 +1,10 @@
 package com.example.application.views.components.portfolio;
 
-import com.example.application.data.dtos.AssetBalanceDTO;
-import com.example.application.data.dtos.AssetDTO;
-import com.example.application.data.dtos.PortfolioDTO;
-import com.example.application.services.crypto.InstrumentsFacadeService;
-import com.example.application.services.crypto.PortfolioPerformanceTracker;
+import com.example.application.InstrumentsFacadeService;
+import com.example.application.PortfolioPerformanceTracker;
+import com.example.application.asset.AssetDTO;
+import com.example.application.asset_balance.AssetBalanceDTO;
+import com.example.application.portfolio.PortfolioDTO;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.select.Select;
 import elemental.json.Json;

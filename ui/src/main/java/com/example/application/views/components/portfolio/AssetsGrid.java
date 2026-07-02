@@ -1,11 +1,11 @@
 package com.example.application.views.components.portfolio;
 
-import com.example.application.data.dtos.AssetDTO;
-import com.example.application.data.dtos.PortfolioDTO;
-import com.example.application.finance.FinancialConstants;
-import com.example.application.services.crypto.InstrumentsFacadeService;
-import com.example.application.services.crypto.PortfolioPerformanceTracker;
-import com.example.application.utils.common.formatters.CommonFormatters;
+import com.example.application.InstrumentsFacadeService;
+import com.example.application.PortfolioPerformanceTracker;
+import com.example.application.asset.AssetDTO;
+import com.example.application.portfolio.PortfolioDTO;
+import com.example.application.utils.FinancialConstants;
+import com.example.application.utils.formatters.CommonFormatters;
 import com.example.application.views.components.core.Container;
 import com.example.application.views.components.custom.dialogs.transactions.AddTransactionDialog;
 import com.example.application.views.components.custom.display.PercentageBadge;

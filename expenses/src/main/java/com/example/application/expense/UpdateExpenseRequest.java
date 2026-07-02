@@ -1,7 +1,7 @@
 package com.example.application.expense;
 
-import com.example.application.entities.expenses.ExpenseTimestamp;
 import jakarta.annotation.Nullable;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

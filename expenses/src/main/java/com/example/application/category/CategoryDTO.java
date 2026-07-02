@@ -1,6 +1,5 @@
 package com.example.application.category;
 
-import com.example.application.entities.expenses.Category;
 import lombok.Data;
 
 @Data

@@ -1,7 +1,7 @@
 package com.example.application.views.components.custom.fields;
 
-import com.example.application.data.dtos.AssetDTO;
-import com.example.application.services.crypto.InstrumentsFacadeService;
+import com.example.application.InstrumentsFacadeService;
+import com.example.application.asset.AssetDTO;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import org.springframework.beans.factory.annotation.Autowired;

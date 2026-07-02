@@ -1,6 +1,6 @@
 package com.example.application.views.pages;
 
-import com.example.application.utils.common.formatters.CommonFormatters;
+import com.example.application.utils.formatters.CommonFormatters;
 import com.example.application.views.components.PriceChangeNotifier;
 import com.example.application.views.components.PriceUpdatable;
 import com.example.application.views.layouts.MainLayout;

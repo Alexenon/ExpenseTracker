@@ -1,8 +1,6 @@
 package com.example.application.expense;
 
-import com.example.application.entities.expenses.Expense;
-import com.example.application.entities.expenses.ExpenseTimestamp;
-import com.example.application.entities.expenses.Tag;
+import com.example.application.tag.Tag;
 import lombok.Data;
 
 import java.time.LocalDate;

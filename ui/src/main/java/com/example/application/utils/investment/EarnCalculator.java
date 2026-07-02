@@ -1,8 +1,9 @@
 package com.example.application.utils.investment;
 
 
-import com.example.application.finance.FinancialConstants;
-import com.example.application.utils.common.formatters.number.*;
+import com.example.application.utils.FinancialConstants;
+import com.example.application.utils.PercentageFormatter;
+import com.example.application.utils.formatters.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

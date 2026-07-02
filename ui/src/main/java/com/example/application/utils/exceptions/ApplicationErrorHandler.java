@@ -1,5 +1,6 @@
 package com.example.application.utils.exceptions;
 
+import com.example.application.InternalUnexpectedException;
 import com.example.application.views.components.utils.HasNotifications;
 import com.vaadin.flow.server.DefaultErrorHandler;
 import com.vaadin.flow.server.ErrorEvent;

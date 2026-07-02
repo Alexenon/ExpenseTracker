@@ -1,6 +1,6 @@
 package com.example.application.configs.security;
 
-import com.example.application.services.UserService;
+import com.example.application.user.UserService;
 import com.example.application.views.pages.LoginView;
 import com.vaadin.flow.spring.security.VaadinWebSecurity;
 import org.springframework.beans.factory.annotation.Autowired;

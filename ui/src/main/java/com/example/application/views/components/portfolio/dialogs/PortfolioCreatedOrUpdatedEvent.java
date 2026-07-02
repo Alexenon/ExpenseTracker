@@ -1,6 +1,6 @@
 package com.example.application.views.components.portfolio.dialogs;
 
-import com.example.application.data.dtos.PortfolioDTO;
+import com.example.application.portfolio.PortfolioDTO;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.dialog.Dialog;
 

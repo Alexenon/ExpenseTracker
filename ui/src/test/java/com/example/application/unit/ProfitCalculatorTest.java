@@ -1,7 +1,7 @@
 package com.example.application.unit;
 
-import com.example.application.data.dtos.TransactionDTO;
-import com.example.application.entities.common.TransactionType;
+import com.example.application.transaction.TransactionDTO;
+import com.example.application.transaction.TransactionType;
 import com.example.application.utils.investment.ProfitCalculator;
 import org.junit.jupiter.api.Test;
 

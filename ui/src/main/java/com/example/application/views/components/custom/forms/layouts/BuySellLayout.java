@@ -1,6 +1,6 @@
 package com.example.application.views.components.custom.forms.layouts;
 
-import com.example.application.finance.FinancialConstants;
+import com.example.application.utils.FinancialConstants;
 import com.example.application.views.components.custom.fields.AmountField;
 import com.example.application.views.components.custom.fields.MoneyField;
 import com.vaadin.flow.component.html.Div;

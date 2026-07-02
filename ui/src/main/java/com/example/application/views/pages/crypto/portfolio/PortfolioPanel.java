@@ -1,10 +1,10 @@
 package com.example.application.views.pages.crypto.portfolio;
 
-import com.example.application.data.dtos.AssetDTO;
-import com.example.application.data.dtos.PortfolioDTO;
-import com.example.application.services.crypto.InstrumentsFacadeService;
-import com.example.application.services.crypto.PortfolioPerformanceTracker;
-import com.example.application.utils.common.formatters.CommonFormatters;
+import com.example.application.InstrumentsFacadeService;
+import com.example.application.PortfolioPerformanceTracker;
+import com.example.application.asset.AssetDTO;
+import com.example.application.portfolio.PortfolioDTO;
+import com.example.application.utils.formatters.CommonFormatters;
 import com.example.application.views.components.PriceChangeNotifier;
 import com.example.application.views.components.PriceUpdatable;
 import com.example.application.views.components.TransactionsGrid;

@@ -1,7 +1,7 @@
 package com.example.application.views.components.custom.dialogs.expenses;
 
-import com.example.application.data.requests.expenses.category.CreateCategoryRequest;
-import com.example.application.services.crypto.InstrumentsFacadeService;
+import com.example.application.InstrumentsFacadeService;
+import com.example.application.category.CreateCategoryRequest;
 import com.example.application.views.components.custom.icons.MonoIcon;
 import com.example.application.views.components.utils.HasNotifications;
 import com.vaadin.flow.component.button.Button;

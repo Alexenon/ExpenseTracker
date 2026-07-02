@@ -1,12 +1,12 @@
 package com.example.application.views.pages.crypto.calculator.tabs;
 
-import com.example.application.data.dtos.AssetDTO;
-import com.example.application.data.dtos.PortfolioDTO;
-import com.example.application.data.requests.CreateTransactionRequest;
-import com.example.application.finance.FinancialConstants;
-import com.example.application.services.crypto.InstrumentsFacadeService;
-import com.example.application.services.crypto.PortfolioPerformanceTracker;
-import com.example.application.utils.common.formatters.number.PercentageFormatter;
+import com.example.application.InstrumentsFacadeService;
+import com.example.application.PortfolioPerformanceTracker;
+import com.example.application.asset.AssetDTO;
+import com.example.application.portfolio.PortfolioDTO;
+import com.example.application.transaction.CreateTransactionRequest;
+import com.example.application.utils.FinancialConstants;
+import com.example.application.utils.PercentageFormatter;
 import com.example.application.utils.investment.ProfitUtils;
 import com.example.application.views.components.core.Container;
 import com.example.application.views.components.custom.display.NumericValueParagraph;

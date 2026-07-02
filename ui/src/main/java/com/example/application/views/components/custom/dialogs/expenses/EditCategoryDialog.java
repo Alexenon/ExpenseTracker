@@ -1,8 +1,8 @@
 package com.example.application.views.components.custom.dialogs.expenses;
 
-import com.example.application.data.dtos.expense.CategoryDTO;
-import com.example.application.data.requests.expenses.category.UpdateCategoryRequest;
-import com.example.application.services.crypto.InstrumentsFacadeService;
+import com.example.application.InstrumentsFacadeService;
+import com.example.application.category.CategoryDTO;
+import com.example.application.category.UpdateCategoryRequest;
 import com.example.application.views.components.custom.icons.MonoIcon;
 import com.example.application.views.components.custom.icons.PictogramIcon;
 import com.example.application.views.components.utils.HasNotifications;

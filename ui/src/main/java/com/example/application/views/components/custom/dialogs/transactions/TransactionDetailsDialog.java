@@ -1,10 +1,10 @@
 package com.example.application.views.components.custom.dialogs.transactions;
 
-import com.example.application.data.dtos.AssetDTO;
-import com.example.application.data.dtos.TransactionDTO;
-import com.example.application.services.crypto.InstrumentsFacadeService;
-import com.example.application.utils.common.formatters.number.AmountFormatter;
-import com.example.application.utils.common.formatters.number.CurrencyFormatter;
+import com.example.application.asset.AssetDTO;
+import com.example.application.transaction.TransactionDTO;
+import com.example.application.InstrumentsFacadeService;
+import com.example.application.utils.formatters.AmountFormatter;
+import com.example.application.utils.formatters.CurrencyFormatter;
 import com.example.application.utils.investment.ProfitUtils;
 import com.example.application.views.components.core.Container;
 import com.example.application.views.components.custom.dialogs.transactions.transfer.TransferTransactionDialog;

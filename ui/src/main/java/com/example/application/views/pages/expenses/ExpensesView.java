@@ -1,7 +1,7 @@
 package com.example.application.views.pages.expenses;
 
-import com.example.application.data.dtos.expense.ExpenseDTO;
-import com.example.application.services.crypto.InstrumentsFacadeService;
+import com.example.application.InstrumentsFacadeService;
+import com.example.application.expense.ExpenseDTO;
 import com.example.application.views.components.custom.dialogs.AddExpenseDialog;
 import com.example.application.views.components.custom.dialogs.EditExpenseDialog;
 import com.example.application.views.components.custom.icons.PictogramIcon;

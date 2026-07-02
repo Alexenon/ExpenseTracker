@@ -1,13 +1,16 @@
 package com.example.application.integrational;
 
 import com.example.application.Application;
-import com.example.application.data.requests.CreateTransactionRequest;
-import com.example.application.entities.common.TransactionType;
-import com.example.application.entities.crypto.Asset;
-import com.example.application.entities.crypto.AssetBalance;
-import com.example.application.services.UserService;
-import com.example.application.services.crypto.AssetBalanceService;
-import com.example.application.services.crypto.PortfolioService;
+import com.example.application.InternalUnexpectedException;
+import com.example.application.asset.Asset;
+import com.example.application.asset_balance.AssetBalance;
+import com.example.application.asset_balance.AssetBalanceService;
+import com.example.application.portfolio.Portfolio;
+import com.example.application.portfolio.PortfolioService;
+import com.example.application.transaction.CreateTransactionRequest;
+import com.example.application.transaction.TransactionType;
+import com.example.application.user.User;
+import com.example.application.user.UserService;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

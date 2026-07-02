@@ -1,10 +1,10 @@
 package com.example.application.views.pages.crypto.calculator.tabs;
 
-import com.example.application.data.dtos.PortfolioDTO;
-import com.example.application.finance.FinancialConstants;
-import com.example.application.services.crypto.InstrumentsFacadeService;
-import com.example.application.utils.common.formatters.number.AmountFormatter;
-import com.example.application.utils.common.formatters.number.CurrencyFormatter;
+import com.example.application.InstrumentsFacadeService;
+import com.example.application.portfolio.PortfolioDTO;
+import com.example.application.utils.FinancialConstants;
+import com.example.application.utils.formatters.AmountFormatter;
+import com.example.application.utils.formatters.CurrencyFormatter;
 import com.example.application.views.components.custom.fields.AmountField;
 import com.example.application.views.components.custom.fields.AssetComboBox;
 import com.example.application.views.components.custom.fields.MoneyField;

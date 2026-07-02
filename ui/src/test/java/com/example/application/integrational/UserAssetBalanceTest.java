@@ -1,10 +1,11 @@
 package com.example.application.integrational;
 
 import com.example.application.Application;
-import com.example.application.data.requests.RegisterUserRequest;
-import com.example.application.services.UserService;
-import com.example.application.services.crypto.InstrumentsFacadeService;
-import com.example.application.services.crypto.PortfolioService;
+import com.example.application.user.User;
+import com.example.application.user.domain.RegisterUserRequest;
+import com.example.application.user.UserService;
+import com.example.application.InstrumentsFacadeService;
+import com.example.application.portfolio.PortfolioService;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;

@@ -1,13 +1,10 @@
 package com.example.application.integrational.expenses;
 
 import com.example.application.Application;
-import com.example.application.data.dtos.expense.CategoryDTO;
-import com.example.application.data.requests.expenses.category.CreateCategoryRequest;
-import com.example.application.data.requests.expenses.category.UpdateCategoryRequest;
+import com.example.application.category.*;
 import com.example.application.integrational.AbstractTest;
-import com.example.application.services.UserService;
-import com.example.application.services.expenses.CategoryNameAlreadyExistsException;
-import com.example.application.services.expenses.CategoryService;
+import com.example.application.user.User;
+import com.example.application.user.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;

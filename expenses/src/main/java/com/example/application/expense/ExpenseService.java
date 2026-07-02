@@ -1,12 +1,9 @@
 package com.example.application.expense;
 
-
-import com.example.application.data.models.projections.MonthlyExpensesProjection;
-import com.example.application.entities.expenses.Expense;
-import com.example.application.entities.expenses.ExpenseTimestamp;
-import com.example.application.entities.expenses.Tag;
-import com.example.application.repositories.expenses.ExpenseRepository;
-import com.example.application.utils.common.lang.DateUtils;
+import com.example.application.expense.projections.MonthlyExpensesProjection;
+import com.example.application.tag.Tag;
+import com.example.application.utils.EntityValidator;
+import com.example.application.utils.lang.DateUtils;
 import jakarta.annotation.Nonnull;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;

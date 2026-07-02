@@ -1,11 +1,12 @@
 package com.example.application.integrational.expenses;
 
 import com.example.application.Application;
-import com.example.application.data.requests.expenses.CreateExpenseRequest;
-import com.example.application.entities.expenses.Category;
-import com.example.application.entities.expenses.Expense;
-import com.example.application.entities.expenses.ExpenseTimestamp;
+import com.example.application.category.Category;
+import com.example.application.expense.CreateExpenseRequest;
+import com.example.application.expense.Expense;
+import com.example.application.expense.ExpenseTimestamp;
 import com.example.application.integrational.AbstractTest;
+import com.example.application.user.User;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Assertions;

@@ -1,12 +1,9 @@
 package com.example.application.integrational.expenses;
 
 import com.example.application.Application;
-import com.example.application.data.dtos.expense.TagDTO;
-import com.example.application.data.requests.expenses.CreateTagRequest;
-import com.example.application.data.requests.expenses.UpdateTagRequest;
-import com.example.application.entities.expenses.Tag;
 import com.example.application.integrational.AbstractTest;
-import com.example.application.services.expenses.TagService;
+import com.example.application.tag.*;
+import com.example.application.user.User;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;

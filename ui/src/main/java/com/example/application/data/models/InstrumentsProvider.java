@@ -1,11 +1,11 @@
 package com.example.application.data.models;
 
+import com.example.application.asset.SymbolIndentifier;
 import com.example.application.components.AssetUpdateScheduler;
-import com.example.application.data.enums.SymbolIndentifier;
-import com.example.application.utils.fetchers.BinanceFetcher;
-import com.example.application.utils.fetchers.crypto_compare.CryptoCompareFetcher;
-import com.example.application.utils.fetchers.crypto_compare.response.AssetMetaDataApiResp;
-import com.example.application.utils.fetchers.crypto_compare.response.AssetMetadata;
+import com.example.application.fetchers.binance.BinanceFetcher;
+import com.example.application.fetchers.crypto_compare.CryptoCompareFetcher;
+import com.example.application.fetchers.crypto_compare.response.AssetMetaDataApiResp;
+import com.example.application.fetchers.crypto_compare.response.AssetMetadata;
 import jakarta.annotation.Nonnull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

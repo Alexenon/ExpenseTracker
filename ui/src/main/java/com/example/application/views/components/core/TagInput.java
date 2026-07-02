@@ -1,6 +1,6 @@
 package com.example.application.views.components.core;
 
-import com.example.application.utils.common.lang.StringUtils;
+import com.example.application.utils.lang.StringUtils;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.customfield.CustomField;

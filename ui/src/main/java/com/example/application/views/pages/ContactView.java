@@ -1,7 +1,7 @@
 package com.example.application.views.pages;
 
-import com.example.application.data.requests.RegisterUserRequest;
-import com.example.application.services.crypto.InstrumentsFacadeService;
+import com.example.application.InstrumentsFacadeService;
+import com.example.application.user.domain.RegisterUserRequest;
 import com.example.application.views.components.custom.forms.ContactUsForm;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;

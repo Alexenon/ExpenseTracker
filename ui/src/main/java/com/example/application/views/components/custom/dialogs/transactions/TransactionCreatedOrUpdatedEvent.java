@@ -1,6 +1,6 @@
 package com.example.application.views.components.custom.dialogs.transactions;
 
-import com.example.application.data.dtos.TransactionDTO;
+import com.example.application.transaction.TransactionDTO;
 import com.vaadin.flow.component.ComponentEvent;
 import com.vaadin.flow.component.dialog.Dialog;
 

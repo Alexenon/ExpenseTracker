@@ -1,6 +1,6 @@
 package com.example.application.views.pages.exception_pages;
 
-import com.example.application.utils.exceptions.auth.UnauthenticatedUserException;
+import com.example.application.user.exceptions.UnauthenticatedUserException;
 import com.example.application.views.pages.LoginView;
 import com.example.application.views.pages.RegistrationView;
 import com.vaadin.flow.component.button.Button;

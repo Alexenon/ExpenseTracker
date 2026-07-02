@@ -1,6 +1,6 @@
 package com.example.application.views.components.custom.icons;
 
-import com.example.application.utils.common.lang.StringUtils;
+import com.example.application.utils.lang.StringUtils;
 
 import java.util.Arrays;
 import java.util.Optional;

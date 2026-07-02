@@ -1,8 +1,8 @@
 package com.example.application.views.pages.settings.tabs;
 
-import com.example.application.data.dtos.expense.CategoryDTO;
-import com.example.application.services.crypto.InstrumentsFacadeService;
-import com.example.application.utils.exceptions.DeleteCategoryWithExpensesException;
+import com.example.application.InstrumentsFacadeService;
+import com.example.application.category.CategoryDTO;
+import com.example.application.category.DeleteCategoryWithExpensesException;
 import com.example.application.views.components.core.Container;
 import com.example.application.views.components.custom.dialogs.expenses.AddCategoryDialog;
 import com.example.application.views.components.custom.dialogs.expenses.EditCategoryDialog;

@@ -1,6 +1,6 @@
 package com.example.application.views.pages;
 
-import com.example.application.services.crypto.InstrumentsFacadeService;
+import com.example.application.InstrumentsFacadeService;
 import com.example.application.views.components.core.ComponentBuilder;
 import com.example.application.views.components.core.Container;
 import com.example.application.views.components.custom.icons.MonoIcon;

@@ -1,7 +1,7 @@
 package com.example.application.data.models.crypto.migration;
 
-import com.example.application.data.dtos.TransactionDTO;
-import com.example.application.entities.common.TransactionType;
+import com.example.application.transaction.TransactionDTO;
+import com.example.application.transaction.TransactionType;
 import com.fasterxml.jackson.annotation.*;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;

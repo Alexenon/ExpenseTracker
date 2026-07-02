@@ -1,12 +1,12 @@
 package com.example.application.views.components.custom.dialogs.transactions.export;
 
-import com.example.application.data.dtos.PortfolioDTO;
-import com.example.application.data.dtos.TransactionDTO;
+import com.example.application.InstrumentsFacadeService;
 import com.example.application.data.models.crypto.migration.TransactionModel;
-import com.example.application.services.crypto.InstrumentsFacadeService;
-import com.example.application.utils.common.parsers.CSVParser;
+import com.example.application.portfolio.PortfolioDTO;
+import com.example.application.transaction.TransactionDTO;
 import com.example.application.views.components.core.Container;
 import com.example.application.views.components.core.buttons.Download;
+import com.example.application.views.components.utils.CSVParser;
 import com.example.application.views.components.utils.HasNotifications;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.datepicker.DatePicker;

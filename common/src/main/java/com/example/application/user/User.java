@@ -3,6 +3,7 @@ package com.example.application.user;
 import com.example.application.InternalUnexpectedException;
 import com.example.application.portfolio.Portfolio;
 import jakarta.annotation.Nullable;
+import jakarta.persistence.*;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

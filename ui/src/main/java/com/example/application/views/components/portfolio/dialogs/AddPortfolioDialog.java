@@ -1,7 +1,8 @@
 package com.example.application.views.components.portfolio.dialogs;
 
-import com.example.application.data.dtos.PortfolioDTO;
-import com.example.application.services.crypto.InstrumentsFacadeService;
+import com.example.application.InstrumentsFacadeService;
+import com.example.application.portfolio.CreatePortfolioRequest;
+import com.example.application.portfolio.PortfolioDTO;
 import com.example.application.views.components.utils.HasNotifications;
 import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.Key;

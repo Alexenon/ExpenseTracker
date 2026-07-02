@@ -1,7 +1,7 @@
 package com.example.application.views.pages.settings.tabs;
 
-import com.example.application.data.dtos.expense.TagDTO;
-import com.example.application.services.crypto.InstrumentsFacadeService;
+import com.example.application.tag.TagDTO;
+import com.example.application.InstrumentsFacadeService;
 import com.example.application.views.components.core.Container;
 import com.example.application.views.components.custom.dialogs.expenses.AddTagDialog;
 import com.example.application.views.components.custom.dialogs.expenses.EditTagDialog;

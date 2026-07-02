@@ -1,13 +1,13 @@
 package com.example.application.views.components;
 
-import com.example.application.data.dtos.AssetDTO;
-import com.example.application.data.dtos.AssetWatcherDTO;
-import com.example.application.data.dtos.PortfolioDTO;
-import com.example.application.data.requests.asset_watchers.CreateAssetWatcherRequest;
-import com.example.application.data.requests.asset_watchers.UpdateAssetWatcherRequest;
-import com.example.application.entities.common.TransactionType;
-import com.example.application.services.crypto.InstrumentsFacadeService;
-import com.example.application.utils.common.lang.StringUtils;
+import com.example.application.InstrumentsFacadeService;
+import com.example.application.asset.AssetDTO;
+import com.example.application.asset_watcher.AssetWatcherDTO;
+import com.example.application.asset_watcher.CreateAssetWatcherRequest;
+import com.example.application.asset_watcher.UpdateAssetWatcherRequest;
+import com.example.application.portfolio.PortfolioDTO;
+import com.example.application.transaction.TransactionType;
+import com.example.application.utils.lang.StringUtils;
 import com.example.application.views.components.core.Container;
 import com.example.application.views.components.custom.fields.MoneyField;
 import com.example.application.views.components.utils.HasNotifications;

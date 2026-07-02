@@ -1,7 +1,6 @@
 package com.example.application.expense;
 
-import com.example.application.data.models.projections.MonthlyExpensesProjection;
-import com.example.application.entities.expenses.Expense;
+import com.example.application.expense.projections.MonthlyExpensesProjection;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.query.Procedure;

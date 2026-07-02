@@ -1,7 +1,7 @@
 package com.example.application.controllers;
 
-import com.example.application.data.requests.RegisterUserRequest;
-import com.example.application.services.UserService;
+import com.example.application.user.domain.RegisterUserRequest;
+import com.example.application.user.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

@@ -1,6 +1,6 @@
 package com.example.application.views.components.utils.convertors;
 
-import com.example.application.utils.common.lang.NumberUtils;
+import com.example.application.utils.lang.NumberUtils;
 import com.vaadin.flow.data.binder.Result;
 import com.vaadin.flow.data.binder.ValueContext;
 import com.vaadin.flow.data.converter.Converter;

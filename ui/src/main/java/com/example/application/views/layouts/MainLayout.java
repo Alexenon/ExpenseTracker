@@ -1,6 +1,6 @@
 package com.example.application.views.layouts;
 
-import com.example.application.services.SecurityService;
+import com.example.application.SecurityService;
 import com.example.application.views.components.custom.NavigationBar;
 import com.example.application.views.components.custom.icons.MonoIcon;
 import com.example.application.views.components.custom.icons.PictogramIcon;

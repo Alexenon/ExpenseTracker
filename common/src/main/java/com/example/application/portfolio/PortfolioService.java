@@ -1,9 +1,9 @@
 package com.example.application.portfolio;
 
-import com.example.application.EntityValidator;
 import com.example.application.InternalUnexpectedException;
 import com.example.application.InvalidDataException;
 import com.example.application.user.User;
+import com.example.application.utils.EntityValidator;
 import jakarta.annotation.Nonnull;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;

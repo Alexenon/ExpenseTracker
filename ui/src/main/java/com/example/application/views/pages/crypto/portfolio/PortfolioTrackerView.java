@@ -1,8 +1,8 @@
 package com.example.application.views.pages.crypto.portfolio;
 
-import com.example.application.data.dtos.PortfolioDTO;
-import com.example.application.services.crypto.InstrumentsFacadeService;
-import com.example.application.services.crypto.PortfolioPerformanceTracker;
+import com.example.application.InstrumentsFacadeService;
+import com.example.application.PortfolioPerformanceTracker;
+import com.example.application.portfolio.PortfolioDTO;
 import com.example.application.views.components.PriceChangeNotifier;
 import com.example.application.views.components.portfolio.dialogs.AddPortfolioDialog;
 import com.example.application.views.components.portfolio.dialogs.PortfolioCreatedOrUpdatedEvent;

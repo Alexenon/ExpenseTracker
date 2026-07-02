@@ -1,8 +1,8 @@
 package com.example.application.views.components.custom.dialogs.transactions.transfer;
 
-import com.example.application.data.dtos.PortfolioDTO;
-import com.example.application.data.dtos.TransactionDTO;
-import com.example.application.services.crypto.InstrumentsFacadeService;
+import com.example.application.portfolio.PortfolioDTO;
+import com.example.application.transaction.TransactionDTO;
+import com.example.application.InstrumentsFacadeService;
 import com.example.application.views.components.custom.dialogs.transactions.TransactionDeletedEvent;
 import com.example.application.views.components.utils.HasNotifications;
 import com.vaadin.flow.component.ComponentUtil;

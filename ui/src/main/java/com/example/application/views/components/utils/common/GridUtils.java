@@ -1,6 +1,6 @@
 package com.example.application.views.components.utils.common;
 
-import com.example.application.utils.common.formatters.CommonFormatters;
+import com.example.application.utils.formatters.CommonFormatters;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.function.ValueProvider;
 import org.springframework.lang.Nullable;

@@ -1,8 +1,7 @@
 package com.example.application.category;
 
-
-import com.example.application.entities.expenses.Category;
-import com.example.application.repositories.expenses.CategoryRepository;
+import com.example.application.InternalUnexpectedException;
+import com.example.application.utils.EntityValidator;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;

@@ -1,10 +1,10 @@
 package com.example.application.views.pages.crypto.calculator.tabs;
 
-import com.example.application.services.crypto.InstrumentsFacadeService;
-import com.example.application.utils.common.formatters.number.AmountFormatter;
-import com.example.application.utils.common.formatters.number.CompactFormatter;
-import com.example.application.utils.common.formatters.number.CurrencyFormatter;
-import com.example.application.utils.common.formatters.number.PercentageFormatter;
+import com.example.application.InstrumentsFacadeService;
+import com.example.application.utils.PercentageFormatter;
+import com.example.application.utils.formatters.AmountFormatter;
+import com.example.application.utils.formatters.CompactFormatter;
+import com.example.application.utils.formatters.CurrencyFormatter;
 import com.example.application.views.components.core.Container;
 import com.example.application.views.components.custom.icons.MonoIcon;
 import com.example.application.views.components.custom.icons.PictogramIcon;

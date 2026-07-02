@@ -1,6 +1,6 @@
 package com.example.application.controllers.utils;
 
-import com.example.application.utils.exceptions.auth.UsernameTakenException;
+import com.example.application.user.exceptions.UsernameTakenException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
