@@ -1,8 +1,7 @@
-package com.example.application;
+package com.example.application.utils;
 
 import com.example.application.user.User;
 import com.example.application.user.UserService;
-import com.example.application.utils.JwtTokenUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

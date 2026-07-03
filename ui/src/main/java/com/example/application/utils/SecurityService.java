@@ -1,4 +1,4 @@
-package com.example.application;
+package com.example.application.utils;
 
 import com.example.application.user.User;
 import com.example.application.user.UserService;

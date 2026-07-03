@@ -22,6 +22,7 @@ import com.example.application.user.domain.RegisterUserRequest;
 import com.example.application.user.domain.UserDTO;
 import com.example.application.user_asset.UserAssetService;
 import com.example.application.utils.EntityValidator;
+import com.example.application.utils.SecurityService;
 import com.example.application.views.components.custom.icons.MonoIcon;
 import com.example.application.views.components.custom.icons.PictogramIcon;
 import jakarta.annotation.Nonnull;

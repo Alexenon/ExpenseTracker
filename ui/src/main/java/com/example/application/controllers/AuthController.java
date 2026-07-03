@@ -1,7 +1,7 @@
 package com.example.application.controllers;
 
-import com.example.application.AuthRequest;
-import com.example.application.AuthService;
+import com.example.application.utils.AuthRequest;
+import com.example.application.utils.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
