@@ -10,12 +10,10 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import java.time.LocalDateTime;
 import java.util.*;
 
-@EqualsAndHashCode(of = {"id", "username", "email"})
 @Data
 @Entity(name = "users")
 public class User {
@@ -119,6 +117,19 @@ public class User {
 	}
 
 	@Override
+	public final boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof User user)) return false;
+
+		return id != null && id.equals(user.id);
+	}
+
+	@Override
+	public int hashCode() {
+		return getClass().hashCode();
+	}
+
+	@Override
 	public String toString() {
 		return "User{username='%s', email='%s', id=%d}".formatted(username, email, id);
 	}
@@ -137,4 +148,5 @@ public class User {
 				.toString();
 	}
 	//</editor-fold>
+
 }

@@ -7,7 +7,6 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
@@ -24,7 +23,6 @@ import java.util.Objects;
 
 @Data
 @Entity(name = "transactions")
-@EqualsAndHashCode(of = {"id", "portfolio", "asset"})
 @NoArgsConstructor
 public class Transaction {
 
@@ -112,4 +110,18 @@ public class Transaction {
 			   ", dateTime=" + dateTime +
 			   '}';
 	}
+
+	@Override
+	public final boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof Transaction transaction)) return false;
+
+		return id != null && id.equals(transaction.id);
+	}
+
+	@Override
+	public int hashCode() {
+		return getClass().hashCode();
+	}
+
 }

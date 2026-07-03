@@ -85,4 +85,18 @@ public class Asset {
 				.add("imageUrl='" + imageUrl + "'")
 				.toString();
 	}
+
+	@Override
+	public final boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof Asset asset)) return false;
+
+		return id != null && id.equals(asset.id);
+	}
+
+	@Override
+	public int hashCode() {
+		return getClass().hashCode();
+	}
+
 }

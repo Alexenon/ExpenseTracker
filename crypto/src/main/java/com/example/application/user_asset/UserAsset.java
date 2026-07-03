@@ -7,7 +7,6 @@ import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
@@ -16,7 +15,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity(name = "user_assets")
-@EqualsAndHashCode(of = "id")
 public class UserAsset {
 
 	@Id
@@ -40,5 +38,18 @@ public class UserAsset {
 
 	@Column(name = "last_time_updated", nullable = false)
 	private LocalDateTime lastTimeUpdated = LocalDateTime.now();
+
+	@Override
+	public final boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof UserAsset userAsset)) return false;
+
+		return id != null && id.equals(userAsset.id);
+	}
+
+	@Override
+	public int hashCode() {
+		return getClass().hashCode();
+	}
 
 }

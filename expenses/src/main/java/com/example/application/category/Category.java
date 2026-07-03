@@ -38,4 +38,18 @@ public class Category {
 				.add("name='" + name + "'")
 				.toString();
 	}
+
+	@Override
+	public final boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof Category category)) return false;
+
+		return id != null && id.equals(category.getId());
+	}
+
+	@Override
+	public int hashCode() {
+		return getClass().hashCode();
+	}
+
 }

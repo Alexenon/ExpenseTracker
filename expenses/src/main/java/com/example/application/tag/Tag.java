@@ -6,17 +6,14 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.StringJoiner;
 
 @Data
-@Entity
-@Table(name = "tags")
+@Entity(name = "tags")
 @NoArgsConstructor
-@EqualsAndHashCode(of = {"id"})
 public class Tag {
 
 	@Id
@@ -59,6 +56,19 @@ public class Tag {
 				.add("lastTimeUpdated=" + lastTimeUpdated)
 				.add("timeCreatedAt=" + timeCreatedAt)
 				.toString();
+	}
+
+	@Override
+	public final boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof Tag tag)) return false;
+
+		return id != null && id.equals(tag.id);
+	}
+
+	@Override
+	public int hashCode() {
+		return getClass().hashCode();
 	}
 
 }

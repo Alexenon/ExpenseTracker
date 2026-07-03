@@ -9,7 +9,6 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -23,7 +22,6 @@ import java.util.StringJoiner;
 
 @Data
 @Entity(name = "expenses")
-@EqualsAndHashCode(of = "id")
 public class Expense {
 
 	@Id
@@ -84,6 +82,19 @@ public class Expense {
 				.add("expireDate=" + (expireDate == null ? "N/A" : CommonFormatters.DATE.format(expireDate)))
 				.add("user=" + user)
 				.toString();
+	}
+
+	@Override
+	public final boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof Expense expense)) return false;
+
+		return id != null && id.equals(expense.id);
+	}
+
+	@Override
+	public int hashCode() {
+		return getClass().hashCode();
 	}
 
 }
