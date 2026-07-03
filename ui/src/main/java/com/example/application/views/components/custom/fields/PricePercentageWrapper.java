@@ -1,0 +1,38 @@
+package com.example.application.views.components.custom.fields;
+
+import com.example.application.utils.formatters.CurrencyFormatter;
+import com.example.application.utils.formatters.DecimalFormatter;
+import com.example.application.views.components.custom.display.NumericValueParagraph;
+import com.example.application.views.components.custom.display.PercentageBadge;
+import com.vaadin.flow.component.html.Div;
+
+import java.math.BigDecimal;
+
+/**
+ * Component to display both Price and Percentage values using a single component
+ */
+public class PricePercentageWrapper extends Div {
+
+	private final NumericValueParagraph price;
+	private final PercentageBadge percentage;
+
+	public PricePercentageWrapper(BigDecimal priceValue, BigDecimal percentageValue) {
+		price = new NumericValueParagraph(priceValue, CurrencyFormatter.withDefaults(), true);
+		percentage = new PercentageBadge(percentageValue);
+		add(price, percentage);
+		addClassName("price-profit-wrapper");
+	}
+
+	public void setPercentageBadgeBackground(boolean shouldBeColored) {
+		percentage.setHasBackground(shouldBeColored);
+	}
+
+	public void setPriceFormatter(DecimalFormatter formatter) {
+		price.setFormatter(formatter);
+	}
+
+	public void setPercentageFormatter(DecimalFormatter formatter) {
+		percentage.setFormatter(formatter);
+	}
+
+}
