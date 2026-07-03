@@ -42,17 +42,15 @@ public class Portfolio {
 		this.name = name;
 	}
 
-	//<editor-fold desc="UTILS">
+
+	// HELPERS
+
 	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
+	public final boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof Portfolio portfolio)) return false;
 
-		if (!(o instanceof Portfolio other))
-			return false;
-
-		return id != null && id.equals(other.getId())
-			   && this.name.equals(other.getName());
+		return id != null && id.equals(portfolio.id);
 	}
 
 	@Override
@@ -65,6 +63,5 @@ public class Portfolio {
 		return "Portfolio{id=%d, name='%s', user='%s'}"
 				.formatted(id, name, user.getId());
 	}
-	//</editor-fold>
 
 }

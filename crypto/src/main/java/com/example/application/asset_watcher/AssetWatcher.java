@@ -65,4 +65,17 @@ public class AssetWatcher {
 	@Column(name = "is_completed", nullable = false)
 	private boolean isCompleted;
 
+	@Override
+	public final boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof AssetWatcher assetWatcher)) return false;
+
+		return id != null && id.equals(assetWatcher.id);
+	}
+
+	@Override
+	public int hashCode() {
+		return getClass().hashCode();
+	}
+
 }

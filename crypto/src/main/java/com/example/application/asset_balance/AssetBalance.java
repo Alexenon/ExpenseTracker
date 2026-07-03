@@ -5,7 +5,6 @@ import com.example.application.portfolio.Portfolio;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
@@ -13,7 +12,6 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity(name = "asset_balances")
-@EqualsAndHashCode(of = {"id", "portfolio", "asset"})
 @NoArgsConstructor
 public class AssetBalance {
 
@@ -91,5 +89,18 @@ public class AssetBalance {
 
 	@Column(name = "time_created_at", nullable = false, updatable = false)
 	private final LocalDateTime timeCreatedAt = LocalDateTime.now();
+
+	@Override
+	public final boolean equals(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof AssetBalance assetBalance)) return false;
+
+		return id != null && id.equals(assetBalance.id);
+	}
+
+	@Override
+	public int hashCode() {
+		return getClass().hashCode();
+	}
 
 }
