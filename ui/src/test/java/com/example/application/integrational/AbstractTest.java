@@ -76,7 +76,7 @@ public abstract class AbstractTest {
 				.confirmPassword("password")
 				.build();
 
-		UserDTO dto = instrumentsFacadeService.createNewUser(request);
+		UserDTO dto = instrumentsFacadeService.createUser(request);
 		return userRepository.findById(dto.getId())
 				.orElseThrow(() -> new EntityNotFoundException("User was not created"));
 	}

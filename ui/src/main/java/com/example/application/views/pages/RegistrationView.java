@@ -56,7 +56,7 @@ public class RegistrationView extends DefaultPage implements HasNotifications {
 		registerForm.getSubmitBtn().addClickListener(l -> {
 			if (binder.validate().isOk()) {
 				RegisterUserRequest request = binder.getBean();
-				instrumentsFacadeService.createNewUser(request);
+				instrumentsFacadeService.createUser(request);
 				log.info("User '{}' created successfully", request.getUsername());
 				showSuccessfulNotification("User created successfully!");
 				getUI().ifPresent(ui -> ui.navigate(LoginView.class));

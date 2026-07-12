@@ -1,10 +1,14 @@
 package com.example.application.user;
 
-import com.example.application.utils.EntityValidator;
 import com.example.application.InternalUnexpectedException;
 import com.example.application.portfolio.Portfolio;
 import com.example.application.user.domain.RegisterUserRequest;
+import com.example.application.user.domain.UpdateUserPasswordRequest;
+import com.example.application.user.domain.UpdateUserRequest;
+import com.example.application.user.exceptions.EmailTakenException;
 import com.example.application.user.exceptions.UsernameTakenException;
+import com.example.application.utils.EntityValidator;
+import com.example.application.utils.lang.StringUtils;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -62,6 +66,16 @@ public class UserService implements UserDetailsService {
 		return userRepository.findByEmailIgnoreCase(email).isPresent();
 	}
 
+	public boolean isPasswordCorrect(String password, Long userId) {
+		if (StringUtils.isBlank(password))
+			return false;
+
+		User user = findById(userId)
+				.orElseThrow(() -> new EntityNotFoundException("User #%s not found".formatted(userId)));
+
+		return passwordEncoder.encode(password).equals(user.getPassword());
+	}
+
 	@Nonnull
 	@Override
 	public UserDetails loadUserByUsername(String usernameOrEmail) {
@@ -84,12 +98,38 @@ public class UserService implements UserDetailsService {
 		if (!request.getPassword().equals(request.getConfirmPassword()))
 			throw new IllegalArgumentException("User register passwords does not match");
 
+		if (isUsernameTaken(request.getUsername()))
+			throw new UsernameTakenException("There is already a user with this username");
+
+		if (isEmailTaken(request.getEmail()))
+			throw new EmailTakenException("There is already a user with this email");
+
 		User user = new User();
 		user.setUsername(request.getUsername().trim().toLowerCase());
 		user.setEmail(request.getEmail().trim().toLowerCase());
 		user.setPassword(passwordEncoder.encode(request.getPassword()));
 		user.getRoles().add(UserRole.USER_ROLE);
 
+		return save(user);
+	}
+
+	@Nonnull
+	@Transactional
+	public User updateUser(@Validated @NotNull UpdateUserRequest request) {
+		log.info("Updating user: {}", request);
+
+		validator.validate(request);
+		User user = findById(request.getUserId())
+				.orElseThrow(() -> new EntityNotFoundException("User not found: #" + request.getUserId()));
+
+		if (!user.getUsername().equals(request.getUsername()) && isUsernameTaken(request.getUsername()))
+			throw new UsernameTakenException("There is already a user with this username");
+
+		if (!user.getEmail().equals(request.getEmail()) && isEmailTaken(request.getEmail()))
+			throw new EmailTakenException("There is already a user with this email");
+
+		user.setUsername(request.getUsername());
+		user.setEmail(request.getEmail());
 		return save(user);
 	}
 
@@ -123,17 +163,33 @@ public class UserService implements UserDetailsService {
 		log.info("Portfolio '{}' is marked as active for user: #{}", portfolio.getName(), userId);
 	}
 
+	/**
+	 * @return true if passsword was updated with a new one, false in case it's the same
+	 */
+	@Transactional
+	public boolean changePassword(UpdateUserPasswordRequest request) {
+		validator.validate(request);
+
+		Long userId = request.getUserId();
+		User user = findById(userId)
+				.orElseThrow(() -> new UsernameNotFoundException("User #" + userId + " not found."));
+
+		String oldEncodedPassword = user.getPassword();
+		String newEncodedPassword = passwordEncoder.encode(request.getPassword());
+
+		if (oldEncodedPassword.equals(newEncodedPassword))
+			return false;
+
+		user.setPassword(newEncodedPassword);
+		save(user);
+		return true;
+	}
+
 	@NotNull
 	@Transactional
 	public User save(@NotNull User user) {
 		log.info("Saving {}", user);
 		validator.validate(user);
-
-		if (isUsernameTaken(user.getUsername()))
-			throw new UsernameTakenException("There is already a user with this username");
-
-		if (isEmailTaken(user.getEmail()))
-			throw new UsernameTakenException("There is already a user with this email");
 
 		try {
 			user.setLastTimeUpdated(LocalDateTime.now());

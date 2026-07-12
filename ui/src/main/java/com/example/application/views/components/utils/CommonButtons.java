@@ -1,6 +1,7 @@
 package com.example.application.views.components.utils;
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.theme.lumo.LumoIcon;
 
 public class CommonButtons {
@@ -15,5 +16,18 @@ public class CommonButtons {
 		button.setIconAfterText(true);
 		return button;
 	}
+
+	public static Button createSaveButton(String text) {
+		Button button = new Button(text);
+		button.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
+		return button;
+	}
+
+	public static Button createCancelButton(String text) {
+		Button button = new Button(text);
+		button.addThemeVariants(ButtonVariant.LUMO_ICON, ButtonVariant.LUMO_TERTIARY);
+		return button;
+	}
+
 
 }

@@ -1,11 +1,11 @@
 package com.example.application.integrational;
 
 import com.example.application.Application;
-import com.example.application.user.User;
-import com.example.application.user.domain.RegisterUserRequest;
-import com.example.application.user.UserService;
 import com.example.application.InstrumentsFacadeService;
 import com.example.application.portfolio.PortfolioService;
+import com.example.application.user.User;
+import com.example.application.user.UserService;
+import com.example.application.user.domain.RegisterUserRequest;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -41,7 +41,7 @@ public class UserAssetBalanceTest extends AbstractTest {
 				.confirmPassword("password")
 				.build();
 
-		Long userId = instrumentsFacadeService.createNewUser(request).getId();
+		Long userId = instrumentsFacadeService.createUser(request).getId();
 		user = userService.findById(userId).orElseThrow(() -> new EntityNotFoundException("No such user"));
 		Assertions.assertTrue(userService.findById(user.getId()).isPresent(), "User was not created");
 		Assertions.assertTrue(portfolioService.findByNameAndUser("Main", user.getId()).isPresent(),

@@ -1,18 +1,22 @@
 package com.example.application.integrational;
 
 import com.example.application.Application;
+import com.example.application.InstrumentsFacadeService;
+import com.example.application.asset.Asset;
 import com.example.application.category.Categories;
 import com.example.application.category.Category;
 import com.example.application.category.CategoryService;
 import com.example.application.portfolio.Portfolio;
+import com.example.application.portfolio.PortfolioService;
 import com.example.application.transaction.Transaction;
 import com.example.application.user.User;
 import com.example.application.user.UserRepository;
-import com.example.application.user.domain.RegisterUserRequest;
-import com.example.application.asset.Asset;
 import com.example.application.user.UserService;
-import com.example.application.InstrumentsFacadeService;
-import com.example.application.portfolio.PortfolioService;
+import com.example.application.user.domain.RegisterUserRequest;
+import com.example.application.user.domain.UpdateUserPasswordRequest;
+import com.example.application.user.domain.UpdateUserRequest;
+import com.example.application.user.domain.UserDTO;
+import com.example.application.user.exceptions.EmailTakenException;
 import com.example.application.user.exceptions.UsernameTakenException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -95,17 +99,30 @@ class UserServiceTest extends AbstractTest {
 	}
 
 	@Test
-	void shouldNotAllowDuplicateUsername() {
+	void createUserShouldNotAllowDuplicateUsername() {
 		Assertions.assertDoesNotThrow(() -> createUser("john", "john-weak@test.com"));
 		Assertions.assertThrows(UsernameTakenException.class, () -> createUser("john", "john-weak@test.com"),
-				"Creating a user with duplicate username should throw UsernameTakenException");
+				"Creating user with duplicate username should throw UsernameTakenException");
+
+		// Updating user's username with an existing username
+		User secondUser = createUser("brain", "brian@test.com");
+		UpdateUserRequest updateUserRequest = new UpdateUserRequest(new UserDTO(secondUser));
+		updateUserRequest.setUsername("john");
+		Assertions.assertThrows(UsernameTakenException.class, () -> instrumentsFacadeService.updateUser(updateUserRequest),
+				"Updating user with an existing username should throw exception");
 	}
 
 	@Test
-	void shouldNotAllowDuplicateEmail() {
+	void createUserShouldNotAllowDuplicateEmail() {
 		Assertions.assertDoesNotThrow(() -> createUser("john", "john-weak@test.com"));
-		Assertions.assertThrows(UsernameTakenException.class, () -> createUser("michael", "john-weak@test.com"),
+		Assertions.assertThrows(EmailTakenException.class, () -> createUser("michael", "john-weak@test.com"),
 				"Creating a user with duplicate username should throw UsernameTakenException");
+
+		User secondUser = createUser("brain", "brian@test.com");
+		UpdateUserRequest updateUserRequest = new UpdateUserRequest(new UserDTO(secondUser));
+		updateUserRequest.setEmail("john-weak@test.com");
+		Assertions.assertThrows(EmailTakenException.class, () -> instrumentsFacadeService.updateUser(updateUserRequest),
+				"Updating user with an existing email should throw exception");
 	}
 
 	@Test
@@ -119,7 +136,7 @@ class UserServiceTest extends AbstractTest {
 
 		Assertions.assertThrows(
 				IllegalArgumentException.class,
-				() -> instrumentsFacadeService.createNewUser(request),
+				() -> instrumentsFacadeService.createUser(request),
 				"Mismatched passwords should throw IllegalArgumentException"
 		);
 		Assertions.assertTrue(userRepository.findByUsernameIgnoreCase("john").isEmpty(),
@@ -127,6 +144,71 @@ class UserServiceTest extends AbstractTest {
 		Assertions.assertEquals(0, portfolioRepository.count(),
 				"No portfolio should be created, because user was not created");
 	}
+
+	//<editor-fold desc="UPDATE">
+	@Test
+	void updateUserSuccessfully() {
+		RegisterUserRequest request = RegisterUserRequest.builder()
+				.username("john")
+				.email("john.weak@test.com")
+				.password("password")
+				.confirmPassword("password")
+				.build();
+
+		UserDTO user = instrumentsFacadeService.createUser(request);
+		UpdateUserRequest updateUserRequest = new UpdateUserRequest(user);
+		updateUserRequest.setUsername("brian");
+		updateUserRequest.setEmail("brian@test.com");
+		Assertions.assertDoesNotThrow(() -> instrumentsFacadeService.updateUser(updateUserRequest),
+				"Updating user shouldn't throw any exceptions");
+
+		User updatedUser = userService.findById(user.getId()).orElseThrow();
+		Assertions.assertEquals("brian", updatedUser.getUsername());
+		Assertions.assertEquals("brian@test.com", updatedUser.getEmail());
+	}
+
+	@Test
+	void updateUserShouldNotAllowDuplicateUsername() {
+		User firstUser = createUser("john", "john-weak@test.com");
+		User secondUser = createUser("brain", "brian@test.com");
+		UpdateUserRequest updateUserRequest = new UpdateUserRequest(new UserDTO(secondUser));
+		updateUserRequest.setUsername("john");
+		Assertions.assertThrows(UsernameTakenException.class, () -> instrumentsFacadeService.updateUser(updateUserRequest),
+				"Updating user with an existing username should throw exception");
+	}
+
+	@Test
+	void updateUserShouldNotAllowDuplicateEmail() {
+		User firstUser = createUser("john", "john-weak@test.com");
+		User secondUser = createUser("brain", "brian@test.com");
+		UpdateUserRequest updateUserRequest = new UpdateUserRequest(new UserDTO(secondUser));
+		updateUserRequest.setEmail("john-weak@test.com");
+		Assertions.assertThrows(EmailTakenException.class, () -> instrumentsFacadeService.updateUser(updateUserRequest),
+				"Updating user with an existing email should throw exception");
+	}
+
+	@Test
+	void updatePasswordSuccessfully() {
+		RegisterUserRequest request = RegisterUserRequest.builder()
+				.username("john")
+				.email("john.weak@test.com")
+				.password("password")
+				.confirmPassword("password")
+				.build();
+
+		UserDTO user = instrumentsFacadeService.createUser(request);
+		User foundUser = userService.findById(user.getId()).orElseThrow();
+		String oldPassword = foundUser.getPassword();
+
+		UpdateUserPasswordRequest updateUserPasswordRequest = new UpdateUserPasswordRequest(user.getId(), "newPassword");
+		instrumentsFacadeService.changeUserPassword(updateUserPasswordRequest);
+		foundUser = userService.findById(user.getId()).orElseThrow();
+		String newPassword = foundUser.getPassword();
+
+		Assertions.assertNotEquals(oldPassword, newPassword, "Password after update should be changed");
+		Assertions.assertNotEquals(newPassword, "newPassword", "Password after update should be hashed");
+	}
+	//</editor-fold>
 
 	@Test
 	void deleteUserTest() {

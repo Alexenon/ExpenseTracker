@@ -19,6 +19,8 @@ import com.example.application.transaction.*;
 import com.example.application.user.User;
 import com.example.application.user.UserService;
 import com.example.application.user.domain.RegisterUserRequest;
+import com.example.application.user.domain.UpdateUserPasswordRequest;
+import com.example.application.user.domain.UpdateUserRequest;
 import com.example.application.user.domain.UserDTO;
 import com.example.application.user_asset.UserAssetService;
 import com.example.application.utils.EntityValidator;
@@ -64,8 +66,18 @@ public class InstrumentsFacadeService {
 	private final EntityValidator validator;
 
 	//<editor-fold desc="USERS">
+	@Transactional(readOnly = true)
+	public boolean isPasswordCorrect(String password) {
+		return userService.isPasswordCorrect(password, getAuthenticatedUser().getId());
+	}
+
+	@Transactional
+	public boolean changeUserPassword(UpdateUserPasswordRequest updateUserPasswordRequest) {
+		return userService.changePassword(updateUserPasswordRequest);
+	}
+
 	@Transactional(rollbackFor = Exception.class)
-	public UserDTO createNewUser(@Valid RegisterUserRequest request) {
+	public UserDTO createUser(@Valid RegisterUserRequest request) {
 		User userEntity = userService.createNewUser(request);
 		Long userId = userEntity.getId();
 
@@ -74,6 +86,10 @@ public class InstrumentsFacadeService {
 		addDefaultUserTags(userId);
 
 		return new UserDTO(userEntity);
+	}
+
+	public UserDTO updateUser(@Valid UpdateUserRequest request) {
+		return new UserDTO(userService.updateUser(request));
 	}
 
 	@Transactional

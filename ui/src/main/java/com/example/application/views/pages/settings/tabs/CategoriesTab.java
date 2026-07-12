@@ -17,7 +17,7 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 
-public class CategoriesTab extends SettingsAbstractTab implements HasNotifications {
+public class CategoriesTab extends AbstractSettingsTab implements HasNotifications {
 
 	private final InstrumentsFacadeService instrumentsFacadeService;
 

@@ -1,7 +1,7 @@
 package com.example.application.views.pages.settings.tabs;
 
-import com.example.application.tag.TagDTO;
 import com.example.application.InstrumentsFacadeService;
+import com.example.application.tag.TagDTO;
 import com.example.application.views.components.core.Container;
 import com.example.application.views.components.custom.dialogs.expenses.AddTagDialog;
 import com.example.application.views.components.custom.dialogs.expenses.EditTagDialog;
@@ -15,7 +15,7 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 
-public class TagsTab extends SettingsAbstractTab implements HasNotifications {
+public class TagsTab extends AbstractSettingsTab implements HasNotifications {
 
 	private final InstrumentsFacadeService instrumentsFacadeService;
 

@@ -61,7 +61,7 @@ public class ContactView extends DefaultPage {
 		contactUsForm.getSendBtn().addClickListener(l -> {
 			if (binder.validate().isOk()) {
 				RegisterUserRequest request = binder.getBean();
-				instrumentsFacadeService.createNewUser(request);
+				instrumentsFacadeService.createUser(request);
 				showSuccessfulNotification("User created successfully!");
 				getUI().ifPresent(ui -> ui.navigate(LoginView.class));
 			} else {
