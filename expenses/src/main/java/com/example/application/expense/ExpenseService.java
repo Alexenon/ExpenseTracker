@@ -9,7 +9,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -60,7 +59,7 @@ public class ExpenseService {
 	 *              </ul>
 	 */
 	@Nonnull
-	@Transactional
+
 	public List<MonthlyExpensesProjection> findMonthlyExpensesByUser(@NotNull String username, @NotNull LocalDate date) {
 		Objects.requireNonNull(username, "username");
 		Objects.requireNonNull(date, "date");
@@ -75,7 +74,7 @@ public class ExpenseService {
 	}
 	//</editor-fold>
 
-	@Transactional
+
 	public Expense saveExpense(@NotNull Expense expense) {
 		Objects.requireNonNull(expense, "expense");
 		validator.validate(expense);
@@ -98,17 +97,17 @@ public class ExpenseService {
 		expense.setExpireDate(startDate.plusDays(1));
 	}
 
-	@Transactional
+
 	public void deleteExpenseById(long expenseId) {
 		expenseRepository.deleteById(expenseId);
 	}
 
-	@Transactional
+
 	public void deleteAllExpanses() {
 		expenseRepository.deleteAll();
 	}
 
-	@Transactional
+
 	public void removeExpenseTag(Expense expense, Tag tag) {
 		log.info("Removing tag='{}' from {}", tag.getName(), expense);
 		expense.getTags().remove(tag);

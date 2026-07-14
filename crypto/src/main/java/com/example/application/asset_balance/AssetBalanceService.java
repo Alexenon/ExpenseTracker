@@ -14,7 +14,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -56,7 +55,7 @@ public class AssetBalanceService {
 		return assetBalanceRepository.findByPortfolioAndAsset(portfolioId, assetId);
 	}
 
-	@Transactional
+
 	public AssetBalance createNew(@NotNull Portfolio portfolio, @NotNull Asset asset) {
 		AssetBalance assetBalance = new AssetBalance();
 		assetBalance.setPortfolio(portfolio);
@@ -64,7 +63,7 @@ public class AssetBalanceService {
 		return save(assetBalance);
 	}
 
-	@Transactional
+
 	public AssetBalance update(@NotNull AssetBalance assetBalance, @NotNull Transaction transaction) {
 		assetBalance.setTotalBuyCost(calculateTotalBuyCost(assetBalance, transaction));
 		assetBalance.setTotalSellValue(calculateTotalSellValue(assetBalance, transaction));
@@ -79,7 +78,7 @@ public class AssetBalanceService {
 		return save(assetBalance);
 	}
 
-	@Transactional
+
 	public AssetBalance save(@NotNull AssetBalance assetBalance) {
 		assetBalance.setLastTimeUpdated(LocalDateTime.now());
 		validator.validate(assetBalance);
@@ -90,7 +89,7 @@ public class AssetBalanceService {
 		}
 	}
 
-	@Transactional
+
 	public void delete(@NotNull Long assetBalanceId) {
 		AssetBalance assetBalance = findById(assetBalanceId)
 				.orElseThrow(() -> new EntityNotFoundException("Cannot delete an unexistent assetBalace: #" + assetBalanceId));
@@ -104,7 +103,7 @@ public class AssetBalanceService {
 		}
 	}
 
-	@Transactional
+
 	public void deleteAllForPortfolio(Long portfolioId) {
 		List<AssetBalance> balances = findByPortfolio(portfolioId);
 		log.info("Deleting all asset balances for portfolio: #{}", portfolioId);

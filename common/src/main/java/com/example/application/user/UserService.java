@@ -11,7 +11,6 @@ import com.example.application.utils.EntityValidator;
 import com.example.application.utils.lang.StringUtils;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -91,7 +90,6 @@ public class UserService implements UserDetailsService {
 	//</editor-fold>
 
 	@Nonnull
-	@Transactional
 	public User createNewUser(@Validated @NotNull RegisterUserRequest request) {
 		log.info("Creating new user: {}", request);
 
@@ -114,7 +112,6 @@ public class UserService implements UserDetailsService {
 	}
 
 	@Nonnull
-	@Transactional
 	public User updateUser(@Validated @NotNull UpdateUserRequest request) {
 		log.info("Updating user: {}", request);
 
@@ -133,7 +130,6 @@ public class UserService implements UserDetailsService {
 		return save(user);
 	}
 
-	@Transactional
 	public void addPortfolio(@NotNull Long userId, @NotNull Portfolio portfolio) {
 		log.info("Adding portfolio '{}' to user: #{}", portfolio.getName(), userId);
 		User user = findById(userId)
@@ -143,7 +139,6 @@ public class UserService implements UserDetailsService {
 		log.info("Portfolio '{}' is added for user: #{}", portfolio.getName(), userId);
 	}
 
-	@Transactional
 	public void removePortfolio(@NotNull Long userId, @NotNull Portfolio portfolio) {
 		log.info("Removing portfolio '{}' from user: #{}", portfolio.getName(), userId);
 		User user = findById(userId)
@@ -153,7 +148,6 @@ public class UserService implements UserDetailsService {
 		log.info("Portfolio '{}' is removed from user: #{}", portfolio.getName(), userId);
 	}
 
-	@Transactional
 	public void setPortfolioAsActive(@NotNull Long userId, @NotNull Portfolio portfolio) {
 		log.info("Setting portfolio '{}' as active for user: #{}", portfolio.getName(), userId);
 		User user = findById(userId)
@@ -166,8 +160,8 @@ public class UserService implements UserDetailsService {
 	/**
 	 * @return true if passsword was updated with a new one, false in case it's the same
 	 */
-	@Transactional
 	public boolean changePassword(UpdateUserPasswordRequest request) {
+		log.info("Changing password for user: #{}", request.getUserId());
 		validator.validate(request);
 
 		Long userId = request.getUserId();
@@ -177,16 +171,17 @@ public class UserService implements UserDetailsService {
 		String oldEncodedPassword = user.getPassword();
 		String newEncodedPassword = passwordEncoder.encode(request.getPassword());
 
-		if (oldEncodedPassword.equals(newEncodedPassword))
+		if (passwordEncoder.matches(request.getPassword(), oldEncodedPassword)) {
+			log.info("Password change skipped for user: #{}, the new password matches the current password.", userId);
 			return false;
+		}
 
 		user.setPassword(newEncodedPassword);
 		save(user);
+		log.info("Updated successfully password for user: #{}", request.getUserId());
 		return true;
 	}
 
-	@NotNull
-	@Transactional
 	public User save(@NotNull User user) {
 		log.info("Saving {}", user);
 		validator.validate(user);
@@ -202,7 +197,6 @@ public class UserService implements UserDetailsService {
 		}
 	}
 
-	@Transactional
 	public void delete(@NotNull Long userId) {
 		log.info("Deleting user :#{}", userId);
 		User user = findById(userId)
@@ -217,7 +211,6 @@ public class UserService implements UserDetailsService {
 		}
 	}
 
-	@Transactional
 	public void deleteAll(@NotNull List<User> users) {
 		int numberOfTransactions = users.size();
 		try {

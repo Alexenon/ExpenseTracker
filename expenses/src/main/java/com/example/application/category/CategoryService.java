@@ -7,7 +7,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
@@ -46,7 +45,7 @@ public class CategoryService {
 		return categoryRepository.findByNameAndUser(name, userId).isPresent();
 	}
 
-	@Transactional
+
 	public Category save(@NotNull Category category) {
 		validator.validate(category);
 
@@ -60,7 +59,7 @@ public class CategoryService {
 		}
 	}
 
-	@Transactional
+
 	public void delete(@NotNull Long categoryId) {
 		log.info("Deleting category: #{}", categoryId);
 		Category category = categoryRepository.findById(categoryId)

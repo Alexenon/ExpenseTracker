@@ -4,7 +4,6 @@ import com.example.application.InternalUnexpectedException;
 import com.example.application.portfolio.Portfolio;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
-import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -101,12 +100,12 @@ public class User {
 		}
 	}
 
-	@Transactional
+
 	public void resetActivePortfolio() {
 		this.activePortfolio = null;
 	}
 
-	@Transactional
+
 	public void setActivePortfolio(@NotNull Portfolio portfolio) {
 		Objects.requireNonNull(portfolio, "portfolio");
 

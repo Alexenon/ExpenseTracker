@@ -9,7 +9,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,38 +25,32 @@ public class TagService {
 	private final EntityValidator validator;
 
 	//<editor-fold desc="SEARCH">
-	@Transactional(readOnly = true)
 	public Optional<Tag> findById(@NotNull Long tagId) {
 		Objects.requireNonNull(tagId, "tagId");
 		return tagRepository.findById(tagId);
 	}
 
-	@Transactional(readOnly = true)
 	public List<Tag> findByExpense(@NotNull Long expenseId) {
 		Objects.requireNonNull(expenseId, "expenseId");
 		return tagRepository.findByExpense(expenseId);
 	}
 
-	@Transactional(readOnly = true)
 	public List<Tag> findByName(@NotNull String name) {
 		Objects.requireNonNull(name, "name");
 		return tagRepository.findByName(name);
 	}
 
-	@Transactional(readOnly = true)
 	public List<Tag> findByUser(@NotNull Long userId) {
 		Objects.requireNonNull(userId, "userId");
 		return tagRepository.findByUser(userId);
 	}
 
-	@Transactional(readOnly = true)
 	public Optional<Tag> findByNameAndUser(@NotNull String name, @NotNull Long userId) {
 		Objects.requireNonNull(name, "name");
 		Objects.requireNonNull(userId, "userId");
 		return tagRepository.findByNameAndUser(name, userId);
 	}
 
-	@Transactional(readOnly = true)
 	public Tag findByNameAndUserOrCreate(@NotNull String name, @NotNull User user) {
 		Objects.requireNonNull(name, "name");
 		Objects.requireNonNull(user, "user");
@@ -65,13 +58,11 @@ public class TagService {
 				.orElseGet(() -> save(new Tag(name, user)));
 	}
 
-	@Transactional(readOnly = true)
 	public boolean isNameTaken(String tagName, Long userId) {
 		return findByNameAndUser(tagName, userId).isPresent();
 	}
 	//</editor-fold>
 
-	@Transactional
 	public Tag save(@NotNull Tag tag) {
 		log.info("Saving: {}", tag.toFullString());
 		validator.validate(tag);
@@ -83,12 +74,10 @@ public class TagService {
 		}
 	}
 
-	@Transactional
 	public void delete(@NotNull Long tagId) {
 		Tag tag = findById(tagId)
 				.orElseThrow(() -> new EntityNotFoundException("Cannot delete an unexistent tag: #" + tagId));
-		log.info("Deleting: {}", tag.toFullString());
-
+		log.info("Deleting tag :#{}", tagId);
 		try {
 			tagRepository.delete(tag);
 		} catch (Exception e) {

@@ -9,7 +9,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -67,7 +66,7 @@ public class TransactionService {
 	//</editor-fold>
 
 	@NotNull
-	@Transactional
+
 	public Transaction transfer(@NotNull Long transactionId, @NotNull Portfolio portfolio, boolean replace) {
 		Transaction oldTransaction = findById(transactionId)
 				.orElseThrow(() -> new IllegalArgumentException("There is no such transaction with id: #" + transactionId));
@@ -85,13 +84,13 @@ public class TransactionService {
 		return save(newTransaction);
 	}
 
-	@Transactional
+
 	public void saveAll(@NotNull List<Transaction> transactions) {
 		transactions.forEach(this::save);
 	}
 
 	@NotNull
-	@Transactional
+
 	public Transaction save(@NotNull Transaction transaction) {
 		log.info("Saving {}", transaction);
 		validator.validate(transaction);
@@ -108,7 +107,7 @@ public class TransactionService {
 		}
 	}
 
-	@Transactional
+
 	public void delete(@NotNull Long transactionId) {
 		try {
 			log.info("Deleting transaction :#{}", transactionId);
@@ -120,7 +119,7 @@ public class TransactionService {
 		}
 	}
 
-	@Transactional
+
 	public void deleteAll(@NotNull List<Transaction> transactions) {
 		if (transactions.isEmpty())
 			return;
@@ -136,7 +135,7 @@ public class TransactionService {
 		log.info("Deleted successfully {} transactions", numberOfTransactions);
 	}
 
-	@Transactional
+
 	public void deleteAllPorfolioTransactions(@NotNull Long portfolioId) {
 		log.info("Deleting all transactions for poftfolio #{}", portfolioId);
 		deleteAll(findBy(portfolioId));

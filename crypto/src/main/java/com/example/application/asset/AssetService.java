@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -49,7 +48,6 @@ public class AssetService {
 	 * @throws InvalidDataException        when validating an invalid asset that comes from external resources
 	 * @throws InternalUnexpectedException when there is any issue related to save the entity to the database
 	 */
-	@Transactional
 	public Asset createNewAsset(CreateAssetRequest request) {
 		log.info("Creating new asset: {}", request);
 		validator.validate(request);
@@ -57,7 +55,6 @@ public class AssetService {
 		return save(asset);
 	}
 
-	@Transactional
 	public Asset updateAsset(UpdateAssetRequest request) {
 		log.info("Updating asset: {}", request);
 
@@ -97,7 +94,6 @@ public class AssetService {
 		}
 	}
 
-	@Transactional
 	public void delete(Long assetId) {
 		try {
 			assetRepository.deleteById(assetId);

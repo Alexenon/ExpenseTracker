@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -37,7 +36,7 @@ public class UserAssetService {
 		return userAssetRepository.findByUserAndAsset(userId, assetSymbol);
 	}
 
-	@Transactional
+
 	public void updateAssetComment(@NotNull Long userId, @NotNull String assetSymbol, @Nullable String comment) {
 		UserAsset userAsset = findByUserAndAsset(userId, assetSymbol)
 				.orElse(new UserAsset());
@@ -46,7 +45,7 @@ public class UserAssetService {
 		update(userAsset);
 	}
 
-	@Transactional
+
 	public void updateMarkAssetAsFavorite(@NotNull Long userId, @NotNull String assetSymbol, boolean markAsFavorite) {
 		UserAsset userAsset = findByUserAndAsset(userId, assetSymbol)
 				.orElse(new UserAsset());
@@ -68,7 +67,7 @@ public class UserAssetService {
 				.orElse(false);
 	}
 
-	@Transactional
+
 	private void update(@NotNull UserAsset userAsset) {
 		validator.validate(userAsset);
 
@@ -79,7 +78,7 @@ public class UserAssetService {
 		}
 	}
 
-	@Transactional
+
 	private UserAsset save(@NotNull UserAsset userAsset) {
 		validator.validate(userAsset);
 		try {
@@ -93,7 +92,7 @@ public class UserAssetService {
 		}
 	}
 
-	@Transactional
+
 	public void delete(@NotNull Long userAssetId) {
 		UserAsset userAsset = findById(userAssetId)
 				.orElseThrow(() -> new EntityNotFoundException("Cannot find user asset by id: #" + userAssetId));

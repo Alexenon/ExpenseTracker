@@ -9,7 +9,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -40,7 +39,6 @@ public class PortfolioService {
 	}
 	//</editor-fold>
 
-	@Transactional
 	public void setPortfolioAsActive(Long portfolioId) {
 		Portfolio portfolio = findById(portfolioId)
 				.orElseThrow(() -> new IllegalArgumentException("Invalid portfolio: #%d".formatted(portfolioId)));
@@ -68,7 +66,6 @@ public class PortfolioService {
 	}
 
 	@Nonnull
-	@Transactional
 	public Portfolio createPortfolio(@NotNull CreatePortfolioRequest request, User user) {
 		log.info("Creating new portfolio: {}", request);
 		Objects.requireNonNull(request, "request");
@@ -83,7 +80,6 @@ public class PortfolioService {
 		return save(portfolio);
 	}
 
-	@Transactional
 	public Portfolio save(@NotNull Portfolio portfolio) {
 		validator.validate(portfolio);
 
@@ -98,7 +94,6 @@ public class PortfolioService {
 		}
 	}
 
-	@Transactional
 	public void delete(Long portfolioId) {
 		log.info("Deleting portfolio: #{}", portfolioId);
 		Portfolio portfolio = findById(portfolioId)
@@ -123,7 +118,7 @@ public class PortfolioService {
 		}
 	}
 
-	@Transactional
+
 	public void deleteAll(@NotNull List<Portfolio> portfolios) {
 		int size = portfolios.size();
 		log.info("Deleting {} portfolios", size);
@@ -136,7 +131,7 @@ public class PortfolioService {
 		log.info("Deleted successfully {} portfolios", size);
 	}
 
-	@Transactional
+
 	public void deleteAllUserPortfolios(Long userId) {
 		deleteAll(findByUser(userId));
 	}

@@ -25,6 +25,13 @@ public class PasswordTab extends AbstractSettingsTab implements HasNotifications
 	public PasswordTab(InstrumentsFacadeService instrumentsFacadeService) {
 		super("Password", VaadinIcon.PASSWORD.create());
 		this.instrumentsFacadeService = instrumentsFacadeService;
+		initBinder();
+		initListeners();
+	}
+
+	@Override
+	public Div getContent() {
+		return new Div(currentPasswordField, newPasswordField, confirmPasswordField, saveBtn);
 	}
 
 	private void initBinder() {
@@ -41,12 +48,7 @@ public class PasswordTab extends AbstractSettingsTab implements HasNotifications
 				.withValidator(s -> s.equals(newPasswordField.getValue()), "Both password should be the same");
 	}
 
-	@Override
-	public Div getContent() {
-		return new Div(currentPasswordField, newPasswordField, confirmPasswordField, saveBtn);
-	}
-
-	private void init() {
+	private void initListeners() {
 		saveBtn.addClickListener(e -> {
 			if (binder.validate().isOk()) {
 				boolean isPasswordUpdated = instrumentsFacadeService.changeUserPassword(getRequest());

@@ -66,7 +66,7 @@ public class InstrumentsFacadeService {
 	private final EntityValidator validator;
 
 	//<editor-fold desc="USERS">
-	@Transactional(readOnly = true)
+	@Transactional
 	public boolean isPasswordCorrect(String password) {
 		return userService.isPasswordCorrect(password, getAuthenticatedUser().getId());
 	}
@@ -76,7 +76,7 @@ public class InstrumentsFacadeService {
 		return userService.changePassword(updateUserPasswordRequest);
 	}
 
-	@Transactional(rollbackFor = Exception.class)
+	@Transactional
 	public UserDTO createUser(@Valid RegisterUserRequest request) {
 		User userEntity = userService.createNewUser(request);
 		Long userId = userEntity.getId();
@@ -746,17 +746,14 @@ public class InstrumentsFacadeService {
 
 	///////////////////////////////////////////////     OTHERS     /////////////////////////////////////////////////////
 
-	@Transactional
 	private void addDefaultUserPortfolio(Long userId) {
 		createPortfolio(new CreatePortfolioRequest("Main", userId));
 	}
 
-	@Transactional
 	private void addDefaultUserTags(Long userId) {
 		// TODO: [URGENT] ...
 	}
 
-	@Transactional
 	private void addDefaultUserCategories(Long userId) {
 		for (Categories category : Categories.values()) {
 			CreateCategoryRequest categoryRequest = CreateCategoryRequest.builder()

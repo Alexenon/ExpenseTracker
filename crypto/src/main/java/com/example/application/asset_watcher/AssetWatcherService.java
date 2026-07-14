@@ -9,7 +9,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
@@ -56,7 +55,7 @@ public class AssetWatcherService {
 	}
 	//</editor-fold>
 
-	@Transactional
+
 	public AssetWatcher save(@NotNull AssetWatcher assetWatcher) {
 		validator.validate(assetWatcher);
 		try {
@@ -66,7 +65,7 @@ public class AssetWatcherService {
 		}
 	}
 
-	@Transactional
+
 	public void delete(@NotNull Long assetWatcherId) {
 		log.info("Deleting asset watcher: #{}", assetWatcherId);
 		AssetWatcher assetWatcher = findById(assetWatcherId)
@@ -79,7 +78,7 @@ public class AssetWatcherService {
 		log.info("Succesfully deleted asset watcher: #{}", assetWatcherId);
 	}
 
-	@Transactional
+
 	public void deleteAllForPortfolio(Long portfolioId) {
 		List<AssetWatcher> assetWatcherList = findByPortfolio(portfolioId);
 		log.info("Deleting all asset watchers for portfolio: #{}", portfolioId);
