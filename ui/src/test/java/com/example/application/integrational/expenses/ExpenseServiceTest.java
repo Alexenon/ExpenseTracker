@@ -17,6 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.HashSet;
@@ -50,7 +51,7 @@ class ExpenseServiceTest extends AbstractTest {
 
 		Assertions.assertNotNull(expense.getId());
 		Assertions.assertEquals("Netflix", expense.getName());
-		Assertions.assertEquals(1000.0, expense.getAmount());
+		assertBigDecimalEquals(new BigDecimal("1000.0"), expense.getAmount(), "amount");
 		Assertions.assertEquals(user.getId(), expense.getUser().getId());
 		Assertions.assertTrue(expenseRepository.findById(expense.getId()).isPresent());
 	}
@@ -71,7 +72,7 @@ class ExpenseServiceTest extends AbstractTest {
 	void createInvalidExpenseWithInvalidCategory() {
 		CreateExpenseRequest request = new CreateExpenseRequest();
 		request.setName("Name");
-		request.setAmount(1000.0);
+		request.setAmount(new BigDecimal("1000.0"));
 		request.setCategory("INVALID CATEGORY");
 		request.setTags(new HashSet<>());
 		request.setUserId(user.getId());
@@ -86,7 +87,7 @@ class ExpenseServiceTest extends AbstractTest {
 	void createInvalidExpenseWithInvalidUser() {
 		CreateExpenseRequest request = new CreateExpenseRequest();
 		request.setName("Name");
-		request.setAmount(1000.0);
+		request.setAmount(new BigDecimal("1000.0"));
 		request.setCategory(category.getName());
 		request.setTags(new HashSet<>());
 		request.setUserId(200L);
@@ -109,7 +110,7 @@ class ExpenseServiceTest extends AbstractTest {
 	private CreateExpenseRequest createExpenseRequest(String name, Set<String> tags) {
 		CreateExpenseRequest request = new CreateExpenseRequest();
 		request.setName(name);
-		request.setAmount(1000.0);
+		request.setAmount(new BigDecimal("1000.0"));
 		request.setCategory(category.getName());
 		request.setTags(tags);
 		request.setUserId(user.getId());

@@ -10,13 +10,14 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.StringJoiner;
 
 /*
-	TODO: Add field that says that the expense is either 'Must Have' or 'Wants'
+	TODO: Add checkbox that says that the expense is either 'Must Have' or 'Wants'
 		so user can filter out what expenses he could avoid next time
 * */
 
@@ -38,7 +39,7 @@ public class Expense {
 
 	@Column(name = "amount", nullable = false)
 	@DecimalMin(value = "0.0", inclusive = false, message = "Amount must be greater than 0")
-	private double amount;
+	private BigDecimal amount;
 
 	@ManyToOne
 	@JoinColumn(name = "category_id", nullable = false)

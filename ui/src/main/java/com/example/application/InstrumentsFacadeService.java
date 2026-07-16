@@ -66,7 +66,7 @@ public class InstrumentsFacadeService {
 	private final EntityValidator validator;
 
 	//<editor-fold desc="USERS">
-	@Transactional
+	@Transactional(readOnly = true)
 	public boolean isPasswordCorrect(String password) {
 		return userService.isPasswordCorrect(password, getAuthenticatedUser().getId());
 	}
@@ -88,6 +88,7 @@ public class InstrumentsFacadeService {
 		return new UserDTO(userEntity);
 	}
 
+	@Transactional
 	public UserDTO updateUser(@Valid UpdateUserRequest request) {
 		return new UserDTO(userService.updateUser(request));
 	}
@@ -109,10 +110,12 @@ public class InstrumentsFacadeService {
 		log.info("Finished deleting user #{} in batch", userId);
 	}
 
+	@Transactional(readOnly = true)
 	public boolean isUsernameAvailable(String username) {
 		return !userService.isUsernameTaken(username);
 	}
 
+	@Transactional(readOnly = true)
 	public boolean isEmailAvailable(String email) {
 		return !userService.isEmailTaken(email);
 	}

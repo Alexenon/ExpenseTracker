@@ -5,6 +5,7 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Set;
 
@@ -27,7 +28,7 @@ public class UpdateExpenseRequest {
 	// TODO: [URGENT] Move to BigDecimal
 	@NotNull
 	@DecimalMin(value = "0.0", inclusive = false, message = "Amount must be greater than 0")
-	private Double amount;
+	private BigDecimal amount;
 
 	@NotNull
 	private String category;

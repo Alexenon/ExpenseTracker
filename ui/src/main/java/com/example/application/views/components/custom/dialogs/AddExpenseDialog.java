@@ -6,7 +6,9 @@ import com.example.application.expense.CreateExpenseRequest;
 import com.example.application.expense.ExpenseTimestamp;
 import com.example.application.tag.TagDTO;
 import com.example.application.views.components.core.TagInput;
+import com.example.application.views.components.custom.fields.MoneyField;
 import com.example.application.views.components.utils.HasNotifications;
+import com.example.application.views.components.utils.convertors.FlexiblePriceConvertor;
 import com.example.application.views.pages.expenses.ExpensesView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
@@ -19,16 +21,16 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
-import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.data.validator.DoubleRangeValidator;
+import com.vaadin.flow.data.validator.BigDecimalRangeValidator;
 import com.vaadin.flow.data.validator.StringLengthValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.function.Consumer;
@@ -45,7 +47,7 @@ public class AddExpenseDialog extends Dialog implements HasNotifications {
 
 	private final TextField nameField = new TextField("Expense Name");
 	private final TextArea descriptionField = new TextArea("Description");
-	private final NumberField amountField = new NumberField("Amount");
+	private final MoneyField amountField = new MoneyField("Amount");
 	private final Select<ExpenseTimestamp> timestampField = new Select<>();
 	private final ComboBox<String> categoryField = new ComboBox<>("Category");
 	private final TagInput tagsField = new TagInput();
@@ -144,8 +146,8 @@ public class AddExpenseDialog extends Dialog implements HasNotifications {
 
 		binder.forField(amountField)
 				.asRequired("Please fill this field")
-				.withValidator(new DoubleRangeValidator("Invalid decimal value", 0.0, Double.MAX_VALUE))
-				.withValidator(amount -> amount != null && amount > 0, "Amount should be greater than 0")
+				.withConverter(new FlexiblePriceConvertor())
+				.withValidator(new BigDecimalRangeValidator("Invalid decimal value", BigDecimal.ZERO, BigDecimal.valueOf(Integer.MAX_VALUE)))
 				.bind(CreateExpenseRequest::getAmount, CreateExpenseRequest::setAmount);
 
 		binder.forField(categoryField)

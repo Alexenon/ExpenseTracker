@@ -3,6 +3,7 @@ package com.example.application.expense;
 import com.example.application.tag.Tag;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -13,7 +14,7 @@ public class ExpenseDTO {
 	private final Long id;
 	private final String name;
 	private final String description;
-	private final double amount;
+	private final BigDecimal amount;
 	private final String category;
 	private final Set<String> tags;
 	private final ExpenseTimestamp timestamp;
