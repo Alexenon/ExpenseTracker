@@ -45,7 +45,7 @@ public class AssetsChart extends Div {
 		options.setLabel("Group by");
 		options.setItems(ChartOptions.values());
 		options.setValue(ChartOptions.WORTH);
-		options.addValueChangeListener(e -> updateChartItems());
+		options.addValueChangeListener(_ -> updateChartItems());
 		add(
 				options,
 				createChart()
@@ -55,7 +55,7 @@ public class AssetsChart extends Div {
 
 	private Div createChart() {
 		Div chart = new Div();
-		chart.setId("assets-diverstity-chart");
+		chart.setId("assets-diversity-chart");
 		return chart;
 	}
 
@@ -75,11 +75,11 @@ public class AssetsChart extends Div {
 	}
 
 	private Map<String, BigDecimal> getChartItems() {
-		return instrumentsFacadeService.getPorfolioAssetBalances(portfolio.getId())
+		return instrumentsFacadeService.getPortfolioAssetBalances(portfolio.getId())
 				.stream()
 				.map(AssetBalanceDTO::getAssetSymbol)
 				.map(s -> instrumentsFacadeService.getAssetBySymbol(s).orElseThrow())
-				.collect(Collectors.toMap(AssetDTO::getSymbol, chartMapper(), (a, b) -> b));
+				.collect(Collectors.toMap(AssetDTO::getSymbol, chartMapper(), (_, b) -> b));
 	}
 
 	private Function<AssetDTO, BigDecimal> chartMapper() {

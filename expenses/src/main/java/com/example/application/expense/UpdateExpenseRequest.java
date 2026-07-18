@@ -25,7 +25,6 @@ public class UpdateExpenseRequest {
 	@Size(max = 250, message = "Description should not exceed 250 characters")
 	private String description;
 
-	// TODO: [URGENT] Move to BigDecimal
 	@NotNull
 	@DecimalMin(value = "0.0", inclusive = false, message = "Amount must be greater than 0")
 	private BigDecimal amount;

@@ -108,7 +108,7 @@ https://tinyurl.com/pie-chart-4
 */
 window.fillAssetsDiversityChart = function fillAssetsDiversityChart(jsonDataString) {
     const jsonDataObject = JSON.parse(jsonDataString);
-    const element = document.getElementById('assets-diverstity-chart');
+    const element = document.getElementById('assets-diversity-chart');
     const chart = echarts.init(element);
 
     var option = {

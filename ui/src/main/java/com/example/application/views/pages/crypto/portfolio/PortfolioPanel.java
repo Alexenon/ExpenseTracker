@@ -94,7 +94,7 @@ public class PortfolioPanel extends Div implements BeforeEnterObserver, BeforeLe
 
 	private void initialize() {
 		initializeGrids();
-		ComponentUtil.addListener(UI.getCurrent(), TransactionCreatedOrUpdatedEvent.class, event -> rebuild());
+		ComponentUtil.addListener(UI.getCurrent(), TransactionCreatedOrUpdatedEvent.class, _ -> rebuild());
 	}
 
 	private void build() {
@@ -121,7 +121,7 @@ public class PortfolioPanel extends Div implements BeforeEnterObserver, BeforeLe
 	}
 
 	private void updateGridItems() {
-		List<AssetDTO> assets = instrumentsFacadeService.getPorfolioAssetBalances(portfolio.getId())
+		List<AssetDTO> assets = instrumentsFacadeService.getPortfolioAssetBalances(portfolio.getId())
 				.stream()
 				.map(assetBalanceDTO -> instrumentsFacadeService.getAssetBySymbol(assetBalanceDTO.getAssetSymbol()).orElseThrow())
 				.toList();
@@ -150,17 +150,17 @@ public class PortfolioPanel extends Div implements BeforeEnterObserver, BeforeLe
 		Button addTransactionBtn = new Button("Add Transaction", LumoIcon.PLUS.create());
 		addTransactionBtn.addClassName("add-entity-btn");
 		addTransactionBtn.setIconAfterText(false);
-		addTransactionBtn.addClickListener(e -> new AddTransactionDialog(portfolio, instrumentsFacadeService).open());
+		addTransactionBtn.addClickListener(_ -> new AddTransactionDialog(portfolio, instrumentsFacadeService).open());
 
 		Button importBtn = new Button("Import", LumoIcon.UPLOAD.create());
 		importBtn.addClassName("add-entity-btn");
 		importBtn.setIconAfterText(false);
-		importBtn.addClickListener(e -> new ImportTransactionsDialog(portfolio, instrumentsFacadeService).open());
+		importBtn.addClickListener(_ -> new ImportTransactionsDialog(portfolio, instrumentsFacadeService).open());
 
 		Button exportBtn = new Button("Export", LumoIcon.DOWNLOAD.create());
 		exportBtn.addClassName("add-entity-btn");
 		exportBtn.setIconAfterText(false);
-		exportBtn.addClickListener(e -> new ExportTransactionDialog(portfolio, instrumentsFacadeService).open());
+		exportBtn.addClickListener(_ -> new ExportTransactionDialog(portfolio, instrumentsFacadeService).open());
 
 		section.add(
 				portfolioHeader,
@@ -185,7 +185,7 @@ public class PortfolioPanel extends Div implements BeforeEnterObserver, BeforeLe
 		title.setClassName("section-title");
 
 		BigDecimal totalProfit = portfolioPerformanceTracker.getPortfolioTotalProfit(portfolio);
-		String nrOfAssets = String.valueOf(instrumentsFacadeService.getPorfolioAssetBalances(portfolio.getId()).size());
+		String nrOfAssets = String.valueOf(instrumentsFacadeService.getPortfolioAssetBalances(portfolio.getId()).size());
 		String realized = CommonFormatters.CURRENCY.format(portfolioPerformanceTracker.getPortfolioRealizedProfit(portfolio));
 		String unrealized = CommonFormatters.CURRENCY.format(portfolioPerformanceTracker.getPortfolioUnrealizedProfit(portfolio));
 		String avgTimeHolding = String.format("%.1f days", portfolioPerformanceTracker.getPortfolioAverageHoldingDays(portfolio));
@@ -260,12 +260,12 @@ public class PortfolioPanel extends Div implements BeforeEnterObserver, BeforeLe
 	}
 
 	private Map<AssetDTO, BigDecimal> getMostProfitableAssetsByProfit() {
-		return instrumentsFacadeService.getPorfolioAssetBalances(portfolio.getId())
+		return instrumentsFacadeService.getPortfolioAssetBalances(portfolio.getId())
 				.stream()
 				.map(assetBalance -> instrumentsFacadeService.getAssetBySymbol(assetBalance.getAssetSymbol()).orElseThrow())
 				.collect(Collectors.toMap(asset -> asset,
 						asset -> portfolioPerformanceTracker.getAssetTotalProfit(portfolio, asset),
-						(a, b) -> b));
+						(_, b) -> b));
 	}
 
 	private Div createPerformanceItem(String labelText, AssetDTO asset) {
@@ -291,7 +291,7 @@ public class PortfolioPanel extends Div implements BeforeEnterObserver, BeforeLe
 				.build();
 
 		container.add(assetImage, performanceDetails);
-		container.addClickListener(e ->
+		container.addClickListener(_ ->
 				getUI().ifPresent(ui -> ui.navigate(AssetDetailsView.class, asset.getSymbol()))
 		);
 

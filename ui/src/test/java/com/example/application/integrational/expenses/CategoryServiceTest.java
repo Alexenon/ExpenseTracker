@@ -38,6 +38,7 @@ class CategoryServiceTest extends AbstractTest {
 
 	@AfterEach
 	void cleanup() {
+		tagRepository.deleteAll();
 		categoryRepository.deleteAll();
 		userRepository.deleteAll();
 

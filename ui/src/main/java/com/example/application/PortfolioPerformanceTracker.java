@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 
 /*
 	TODO: [CRITICAL] EXTREME
-		- After updating a transaction, totalCost doesnt display value right
+		- After updating a transaction, totalCost doesn't display value right
 */
 
 @Service
@@ -40,25 +40,25 @@ public class PortfolioPerformanceTracker {
 
 	public Optional<BigDecimal> getAverageBuyPrice(PortfolioDTO portfolio, AssetDTO asset) {
 		return Optional.ofNullable(asset)
-				.flatMap(a -> instrumentsFacadeService.getAssetBalanceByAsset(portfolio.getId(), asset.getSymbol()))
+				.flatMap(_ -> instrumentsFacadeService.getAssetBalanceByAsset(portfolio.getId(), asset.getSymbol()))
 				.map(AssetBalanceDTO::getAvgBuyPrice);
 	}
 
 	public Optional<BigDecimal> getAverageSellPrice(PortfolioDTO portfolio, AssetDTO asset) {
 		return Optional.ofNullable(asset)
-				.flatMap(a -> instrumentsFacadeService.getAssetBalanceByAsset(portfolio.getId(), asset.getSymbol()))
+				.flatMap(_ -> instrumentsFacadeService.getAssetBalanceByAsset(portfolio.getId(), asset.getSymbol()))
 				.map(AssetBalanceDTO::getAvgSellPrice);
 	}
 
 	public Optional<BigDecimal> getAssetRemainingTokensCost(PortfolioDTO portfolio, AssetDTO asset) {
 		return Optional.ofNullable(asset)
-				.flatMap(a -> instrumentsFacadeService.getAssetBalanceByAsset(portfolio.getId(), asset.getSymbol()))
+				.flatMap(_ -> instrumentsFacadeService.getAssetBalanceByAsset(portfolio.getId(), asset.getSymbol()))
 				.map(AssetBalanceDTO::getCost);
 	}
 
 	public Optional<BigDecimal> getAssetRealizedProfit(PortfolioDTO portfolio, AssetDTO asset) {
 		return Optional.ofNullable(asset)
-				.flatMap(a -> instrumentsFacadeService.getAssetBalanceByAsset(portfolio.getId(), asset.getSymbol()))
+				.flatMap(_ -> instrumentsFacadeService.getAssetBalanceByAsset(portfolio.getId(), asset.getSymbol()))
 				.map(AssetBalanceDTO::getTotalRealizedProfit);
 	}
 
@@ -118,7 +118,7 @@ public class PortfolioPerformanceTracker {
 	 * How much was invested in all holding assets at this moment
 	 */
 	public BigDecimal getPortfolioCost(PortfolioDTO portfolio) {
-		return instrumentsFacadeService.getPorfolioAssetBalances(portfolio.getId())
+		return instrumentsFacadeService.getPortfolioAssetBalances(portfolio.getId())
 				.stream()
 				.map(AssetBalanceDTO::getCost)
 				.reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -128,7 +128,7 @@ public class PortfolioPerformanceTracker {
 	 * How much is estimated the worth of all holding assets (Overall Unrealized profit)
 	 */
 	public BigDecimal getPortfolioWorth(PortfolioDTO portfolio) {
-		return instrumentsFacadeService.getPorfolioAssetBalances(portfolio.getId())
+		return instrumentsFacadeService.getPortfolioAssetBalances(portfolio.getId())
 				.stream()
 				.map(balance -> {
 					BigDecimal assetCurrentPrice = instrumentsFacadeService.getAssetBySymbol(balance.getAssetSymbol())
@@ -145,7 +145,7 @@ public class PortfolioPerformanceTracker {
 	}
 
 	public BigDecimal getPortfolioRealizedProfit(PortfolioDTO portfolio) {
-		return instrumentsFacadeService.getPorfolioAssetBalances(portfolio.getId())
+		return instrumentsFacadeService.getPortfolioAssetBalances(portfolio.getId())
 				.stream()
 				.map(AssetBalanceDTO::getTotalRealizedProfit)
 				.reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -187,14 +187,15 @@ public class PortfolioPerformanceTracker {
 		return ProfitCalculator.buySellRatio(instrumentsFacadeService.getTransactions(portfolio.getId()));
 	}
 
+	@SuppressWarnings("unused")
 	public Map<AssetDTO, BigDecimal> getMostProfitableAssetsByProfit(PortfolioDTO portfolio) {
-		return instrumentsFacadeService.getPorfolioAssetBalances(portfolio.getId())
+		return instrumentsFacadeService.getPortfolioAssetBalances(portfolio.getId())
 				.stream()
 				.map(AssetBalanceDTO::getAssetSymbol)
 				.map(s -> instrumentsFacadeService.getAssetBySymbol(s).orElseThrow())
 				.collect(Collectors.toMap(asset -> asset,
 						asset -> getAssetTotalProfit(portfolio, asset),
-						(a, b) -> b));
+						(_, b) -> b));
 	}
 	//endregion
 

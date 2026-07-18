@@ -1,13 +1,15 @@
 package com.example.application.integrational;
 
 import com.example.application.Application;
-import com.example.application.InstrumentsFacadeService;
 import com.example.application.asset.Asset;
-import com.example.application.category.Categories;
 import com.example.application.category.Category;
 import com.example.application.category.CategoryService;
+import com.example.application.category.DefaultCategories;
 import com.example.application.portfolio.Portfolio;
 import com.example.application.portfolio.PortfolioService;
+import com.example.application.tag.DefaultTags;
+import com.example.application.tag.Tag;
+import com.example.application.tag.TagService;
 import com.example.application.transaction.Transaction;
 import com.example.application.user.User;
 import com.example.application.user.UserRepository;
@@ -40,18 +42,20 @@ class UserServiceTest extends AbstractTest {
 	private final UserRepository userRepository;
 	private final PortfolioService portfolioService;
 	private final CategoryService categoryService;
+	private final TagService tagService;
 
 	@Autowired
 	public UserServiceTest(UserService userService,
-						   InstrumentsFacadeService instrumentsFacadeService,
 						   UserRepository userRepository,
 						   PortfolioService portfolioService,
-						   CategoryService categoryService)
+						   CategoryService categoryService,
+						   TagService tagService)
 	{
 		this.userService = userService;
 		this.userRepository = userRepository;
 		this.portfolioService = portfolioService;
 		this.categoryService = categoryService;
+		this.tagService = tagService;
 	}
 
 	@BeforeEach
@@ -91,7 +95,7 @@ class UserServiceTest extends AbstractTest {
 				.confirmPassword("password")
 				.build();
 
-		Long createdUserId = createUser("john", "john.weak@test.com").getId();
+		Long createdUserId = instrumentsFacadeService.createUser(request).getId();
 
 		validateDefaultUserPortfolio(createdUserId);
 		validateDefaultUserCategories(createdUserId);
@@ -169,7 +173,7 @@ class UserServiceTest extends AbstractTest {
 
 	@Test
 	void updateUserShouldNotAllowDuplicateUsername() {
-		User firstUser = createUser("john", "john-weak@test.com");
+		createUser("john", "john-weak@test.com");
 		User secondUser = createUser("brain", "brian@test.com");
 		UpdateUserRequest updateUserRequest = new UpdateUserRequest(new UserDTO(secondUser));
 		updateUserRequest.setUsername("john");
@@ -179,7 +183,7 @@ class UserServiceTest extends AbstractTest {
 
 	@Test
 	void updateUserShouldNotAllowDuplicateEmail() {
-		User firstUser = createUser("john", "john-weak@test.com");
+		createUser("john", "john-weak@test.com");
 		User secondUser = createUser("brain", "brian@test.com");
 		UpdateUserRequest updateUserRequest = new UpdateUserRequest(new UserDTO(secondUser));
 		updateUserRequest.setEmail("john-weak@test.com");
@@ -245,12 +249,18 @@ class UserServiceTest extends AbstractTest {
 				.map(Category::getName)
 				.toList();
 
-		Assertions.assertIterableEquals(Categories.getAllCategoryNames(), userCategories,
-				"New user's categories doesn't match");
+		Assertions.assertIterableEquals(DefaultCategories.getAllCategoryNames(), userCategories,
+				"Created user doesn't have default categories");
 	}
 
 	private void validateDefaultUserTags(Long userId) {
-		// TODO: [URGENT]
+		List<String> userTagNames = tagService.findByUser(userId)
+				.stream()
+				.map(Tag::getName)
+				.toList();
+
+		Assertions.assertIterableEquals(DefaultTags.getAllTagNames(), userTagNames,
+				"Created user doesn't have default tags");
 	}
 
 }

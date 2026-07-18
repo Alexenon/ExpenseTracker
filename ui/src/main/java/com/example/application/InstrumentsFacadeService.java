@@ -203,11 +203,6 @@ public class InstrumentsFacadeService {
 	}
 
 	@Transactional
-	public void deleteTransaction(Long transactionId) {
-		transactionService.delete(transactionId);
-	}
-
-	@Transactional
 	public TransactionDTO transferTransaction(Long transactionId, Long portfolioId) {
 		return transferTransaction(transactionId, portfolioId, false);
 	}
@@ -308,11 +303,6 @@ public class InstrumentsFacadeService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<AssetWatcher> getAssetWatchersByAsset(Long portfolioId, String assetSymbol) {
-		return assetWatcherService.findByPortfolioAndAsset(portfolioId, assetSymbol);
-	}
-
-	@Transactional(readOnly = true)
 	public List<AssetWatcherDTO> getAssetWatchersByAssetAndActionType(Long portfolioId,
 																	  String assetSymbol,
 																	  TransactionType type)
@@ -346,7 +336,7 @@ public class InstrumentsFacadeService {
 
 	//<editor-fold desc="ASSET BALANCES">
 	@Transactional(readOnly = true)
-	public List<AssetBalanceDTO> getPorfolioAssetBalances(Long portfolioId) {
+	public List<AssetBalanceDTO> getPortfolioAssetBalances(Long portfolioId) {
 		return assetBalanceService.findByPortfolio(portfolioId)
 				.stream()
 				.map(AssetBalanceDTO::mappedFrom)
@@ -539,7 +529,7 @@ public class InstrumentsFacadeService {
 
 		List<Tag> tags = request.getTags()
 				.stream()
-				.map(s -> tagService.findByNameAndUserOrCreate(categoryName, user))
+				.map(_ -> tagService.findByNameAndUserOrCreate(categoryName, user))
 				.toList();
 
 		Expense expense = new Expense();
@@ -594,11 +584,6 @@ public class InstrumentsFacadeService {
 	@Transactional(readOnly = true)
 	public Optional<Category> findCategoryById(Long id) {
 		return categoryService.findById(id);
-	}
-
-	@Transactional(readOnly = true)
-	public Optional<Category> findCategoryByNameAndUser(String name, Long userId) {
-		return categoryService.findByNameAndUser(name, userId);
 	}
 
 	@Transactional(readOnly = true)
@@ -673,12 +658,6 @@ public class InstrumentsFacadeService {
 
 	//<editor-fold desc="TAGS">
 	@Transactional(readOnly = true)
-	public Optional<TagDTO> findTagById(Long tagId) {
-		return tagService.findById(tagId)
-				.map(TagDTO::new);
-	}
-
-	@Transactional(readOnly = true)
 	public List<TagDTO> findUserTags() {
 		return findUserTags(getAuthenticatedUser().getId());
 	}
@@ -686,14 +665,6 @@ public class InstrumentsFacadeService {
 	@Transactional(readOnly = true)
 	public List<TagDTO> findUserTags(Long userId) {
 		return tagService.findByUser(userId)
-				.stream()
-				.map(TagDTO::new)
-				.toList();
-	}
-
-	@Transactional(readOnly = true)
-	public List<TagDTO> findExpenseTags(Long expenseId) {
-		return tagService.findByExpense(expenseId)
 				.stream()
 				.map(TagDTO::new)
 				.toList();
@@ -754,18 +725,21 @@ public class InstrumentsFacadeService {
 	}
 
 	private void addDefaultUserTags(Long userId) {
-		// TODO: [URGENT] ...
+		for (DefaultTags tag : DefaultTags.values()) {
+			CreateTagRequest createTagRequest = new CreateTagRequest(tag.getDisplayName(), userId);
+			createTag(createTagRequest);
+		}
 	}
 
 	private void addDefaultUserCategories(Long userId) {
-		for (Categories category : Categories.values()) {
-			CreateCategoryRequest categoryRequest = CreateCategoryRequest.builder()
+		for (DefaultCategories category : DefaultCategories.values()) {
+			CreateCategoryRequest createCategoryRequest = CreateCategoryRequest.builder()
 					.name(category.getDisplayName())
 					.iconName(category.getIconName())
 					.userId(userId)
 					.build();
 
-			createCategory(categoryRequest);
+			createCategory(createCategoryRequest);
 		}
 	}
 

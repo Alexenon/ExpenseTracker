@@ -52,7 +52,7 @@ public class Tag {
 		return new StringJoiner(", ", Tag.class.getSimpleName() + "[", "]")
 				.add("id=" + id)
 				.add("name='" + name + "'")
-				.add("user=" + user)
+				.add("user=#" + user.getId())
 				.add("lastTimeUpdated=" + lastTimeUpdated)
 				.add("timeCreatedAt=" + timeCreatedAt)
 				.toString();

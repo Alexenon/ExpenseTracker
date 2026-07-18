@@ -14,7 +14,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(classes = Application.class)
@@ -59,19 +58,6 @@ class TagServiceTest extends AbstractTest {
 	}
 
 	@Test
-	void newlyCreatedUserShouldHaveDefaultTags() {
-		CreateTagRequest request = createTagRequest("Food");
-
-		TagDTO saved = instrumentsFacadeService.createTag(request);
-
-		List<Tag> tags = tagService.findByUser(user.getId());
-
-		Assertions.assertFalse(tags.isEmpty(), "User should have tags");
-		Assertions.assertEquals(1, tags.size(), "User should have exactly one tag");
-		Assertions.assertEquals(saved.getId(), tags.getFirst().getId());
-	}
-
-	@Test
 	void deleteShouldRemoveTag() {
 		TagDTO tag = instrumentsFacadeService.createTag(createTagRequest("Food"));
 
@@ -89,9 +75,8 @@ class TagServiceTest extends AbstractTest {
 	}
 
 	@Test
-	void singleTagModifyTest() {
+	void updateTagSuccessfully() {
 		TagDTO originalTag = createTag("Test-Name");
-
 		LocalDateTime timeCreated = tagService.findById(originalTag.getId())
 				.orElseThrow()
 				.getLastTimeUpdated();
@@ -100,19 +85,13 @@ class TagServiceTest extends AbstractTest {
 		UpdateTagRequest updateRequest = new UpdateTagRequest(originalTag.getId(), newTagName);
 
 		TagDTO updatedTag = instrumentsFacadeService.updateTag(updateRequest);
-
 		LocalDateTime timeUpdated = tagService.findById(originalTag.getId())
 				.orElseThrow()
 				.getLastTimeUpdated();
 
-		Assertions.assertEquals(
-				newTagName,
-				updatedTag.getName(),
-				"Tag name was not updated"
-		);
-
+		Assertions.assertEquals(newTagName, updatedTag.getName(), "Tag name was not updated");
 		Assertions.assertTrue(!timeCreated.equals(timeUpdated) && timeUpdated.isAfter(timeCreated),
-				"lastTimeUpdated is not correct");
+				"lastTimeUpdated was not updated correctly");
 	}
 
 	//<editor-fold desc="Utils">
