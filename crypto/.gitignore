@@ -1,6 +1,2 @@
-/target/
-.idea/
-.vscode/
-.settings
-.project
-.classpath
+# Maven
+**/target/
